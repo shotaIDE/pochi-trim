@@ -4,10 +4,10 @@ import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 
 // 完了済みワークログの一覧を提供するプロバイダー
-final completedWorkLogsProvider = FutureProvider<List<WorkLog>>((ref) async {
+final completedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
   final houseId = ref.watch(currentHouseIdProvider);
-  return await workLogRepository.getCompletedWorkLogs(houseId);
+  return workLogRepository.getCompletedWorkLogs(houseId);
 });
 
 // タイトルでワークログを検索するプロバイダー
@@ -30,7 +30,10 @@ final undoDeleteTimerProvider = StateProvider<int?>((ref) => null);
 final workLogDeletionProvider = Provider((ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
 
-  return WorkLogDeletionNotifier(workLogRepository: workLogRepository, ref: ref);
+  return WorkLogDeletionNotifier(
+    workLogRepository: workLogRepository,
+    ref: ref,
+  );
 });
 
 class WorkLogDeletionNotifier {
