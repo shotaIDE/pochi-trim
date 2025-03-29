@@ -86,13 +86,14 @@ class WorkLogRepository {
     return querySnapshot.docs.map((doc) => WorkLog.fromFirestore(doc)).toList();
   }
 
-  Future<List<WorkLog>> getCompletedWorkLogs(String houseId) async {
-    QuerySnapshot querySnapshot =
-        await _getWorkLogsCollection(
-          houseId,
-        ).orderBy('createdAt', descending: true).get();
-
-    return querySnapshot.docs.map((doc) => WorkLog.fromFirestore(doc)).toList();
+  Stream<List<WorkLog>> getCompletedWorkLogs(String houseId) {
+    return _getWorkLogsCollection(houseId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => WorkLog.fromFirestore(doc)).toList(),
+        );
   }
 
   Future<List<WorkLog>> getWorkLogsByUser(String houseId, String userId) async {
