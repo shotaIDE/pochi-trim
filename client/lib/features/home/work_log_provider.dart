@@ -48,8 +48,8 @@ final frequentlyCompletedWorkLogsProvider = FutureProvider<List<WorkLog>>((
       await workLogRepository.getCompletedWorkLogs(houseId).first;
 
   // タイトルごとに集計して、頻度の高い順にソート
-  final Map<String, int> titleFrequency = {};
-  final Map<String, WorkLog> latestLogByTitle = {};
+  final titleFrequency = <String, int>{};
+  final latestLogByTitle = <String, WorkLog>{};
 
   for (final log in completedLogs) {
     titleFrequency[log.title] = (titleFrequency[log.title] ?? 0) + 1;
@@ -57,8 +57,8 @@ final frequentlyCompletedWorkLogsProvider = FutureProvider<List<WorkLog>>((
     // 各タイトルの最新のログを保持
     final existingLog = latestLogByTitle[log.title];
     // completedAtがnullの場合を考慮
-    final DateTime? logCompletedAt = log.completedAt;
-    final DateTime? existingLogCompletedAt = existingLog?.completedAt;
+    final logCompletedAt = log.completedAt;
+    final existingLogCompletedAt = existingLog?.completedAt;
 
     if (existingLog == null ||
         (logCompletedAt != null &&

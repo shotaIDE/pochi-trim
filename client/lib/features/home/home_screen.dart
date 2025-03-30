@@ -137,9 +137,6 @@ class HomeScreen extends ConsumerWidget {
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withValues(
-                    red: null,
-                    green: null,
-                    blue: null,
                     alpha: 77, // 0.3 * 255 = 約77
                   ),
                   spreadRadius: 1,
@@ -154,7 +151,7 @@ class HomeScreen extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final workLog = frequentWorkLogs[index];
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: InkWell(
                     onTap: () {
                       // 選択された家事ログを元に新しい家事ログを登録する画面に遷移
@@ -180,7 +177,7 @@ class HomeScreen extends ConsumerWidget {
                     },
                     child: Container(
                       width: 80,
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
