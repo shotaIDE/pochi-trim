@@ -66,6 +66,14 @@ iOS、Android ともに、flutter_launcher_icons ライブラリを利用して�
 
 https://pub.dev/packages/flutter_launcher_icons#2-run-the-package
 
+### Google Play へのデプロイ
+
+以下を参考にして、デプロイ用のサービスアカウントキー(JSON)を用意し、[client/android/fastlane/google-play-service-account-key.json](client/android/fastlane/google-play-service-account-key.json) に配置してください。
+
+https://docs.fastlane.tools/actions/upload_to_play_store/
+
+fastlane からアップロードするには、1 度手動で Google Play に aab ファイルをアップロードしておく必要があります。
+
 ##### Emulator 環境の設定
 
 ```shell
