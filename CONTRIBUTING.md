@@ -66,6 +66,25 @@ iOS、Android ともに、flutter_launcher_icons ライブラリを利用して�
 
 https://pub.dev/packages/flutter_launcher_icons#2-run-the-package
 
+### App Store へのデプロイ
+
+App Store Connect でアプリを作成します。
+
+また、Apple Developer Console で Bundle Identifier とプロビジョニングプロファイルを登録しておきます。
+Xcode で一旦 Automatically Signing により App Store ビルドを Export することで、各種 Capability が付与された Bundle Identifier が自動で登録されるので、それを利用すると少し楽です。
+プロビジョニングプロファイルは手動で登録します。
+
+:::message
+配布するアプリを Automatically Signing でビルドすると機能が有効化されていないなどのトラブルに見舞われることが多いので、Manual Signing を採用します。
+:::
+
+Manual Signing で Export した際に出力された plist を [client/ios/ExportOptions.plist](client/ios/ExportOptions.plist) に配置してください。
+
+最後に App Store Connect API キーを発行します。
+以下を参考にしてください。
+
+https://docs.fastlane.tools/app-store-connect-api/
+
 ### Google Play へのデプロイ
 
 以下を参考にして、デプロイ用のサービスアカウントキー(JSON)を用意し、[client/android/fastlane/google-play-service-account-key.json](client/android/fastlane/google-play-service-account-key.json) に配置してください。
