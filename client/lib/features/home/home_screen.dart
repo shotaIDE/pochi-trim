@@ -134,7 +134,8 @@ class HomeScreen extends ConsumerWidget {
           }
 
           return Container(
-            height: 60,
+            // TODO(ide): 高さを固定せず、内容に合わせて自動調整したい
+            height: 90,
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
@@ -177,11 +178,10 @@ class HomeScreen extends ConsumerWidget {
                             }
                           });
                     },
-                    child: Container(
-                      width: 80,
+                    child: Padding(
                       padding: const EdgeInsets.all(8),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min, // 内容に合わせてサイズを最小化
                         children: [
                           Text(
                             workLog.icon,
