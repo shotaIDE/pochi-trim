@@ -72,7 +72,7 @@ https://pub.dev/packages/flutter_launcher_icons#2-run-the-package
 
 https://docs.fastlane.tools/actions/upload_to_play_store/
 
-fastlane からアップロードするには、1 度手動で Google Play に aab ファイルをアップロードしておく必要があります。
+fastlane からアップロードするには、1 度手動で Google Play に aab ファイルをアップロードし、内部テスターに公開しておく必要があります。
 
 ##### Emulator 環境の設定
 
