@@ -1,4 +1,6 @@
 - Always check the problems by compiler and linter, and fix them if possible.
 
 # Flutter best practices
+
 - When building your UI, break it down into small, local widgets. This will result in shallower nesting and improved readability. It will also allow for easier optimization of your UI rebuild cycles, improving performance.
+- Prioritize the policy of automatically settings the size to the size of the inner elements to over the policy of specifying a fixed size for the UI.
