@@ -42,10 +42,10 @@ Flutterの依存関係をインストールします。
 
 Dev環境向けアプリ(App Bundle)をビルドします。
 
-### android deploy_dev_to_google_play
+### android deploy_dev
 
 ```sh
-[bundle exec] fastlane android deploy_dev_to_google_play
+[bundle exec] fastlane android deploy_dev
 ```
 
 Dev環境向けアプリをGoogle Playにデプロイします。
