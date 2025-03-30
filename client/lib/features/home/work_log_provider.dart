@@ -36,6 +36,48 @@ final Provider<WorkLogDeletionNotifier> workLogDeletionProvider = Provider((
   );
 });
 
+// よく完了されている家事ログを取得するプロバイダー
+final frequentlyCompletedWorkLogsProvider = FutureProvider<List<WorkLog>>((
+  ref,
+) async {
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
+  final houseId = ref.watch(currentHouseIdProvider);
+
+  // 完了済みの家事ログを取得
+  final completedLogs =
+      await workLogRepository.getCompletedWorkLogs(houseId).first;
+
+  // タイトルごとに集計して、頻度の高い順にソート
+  final titleFrequency = <String, int>{};
+  final latestLogByTitle = <String, WorkLog>{};
+
+  for (final log in completedLogs) {
+    titleFrequency[log.title] = (titleFrequency[log.title] ?? 0) + 1;
+
+    // 各タイトルの最新のログを保持
+    final existingLog = latestLogByTitle[log.title];
+    // completedAtがnullの場合を考慮
+    final logCompletedAt = log.completedAt;
+    final existingLogCompletedAt = existingLog?.completedAt;
+
+    if (existingLog == null ||
+        (logCompletedAt != null &&
+            (existingLogCompletedAt == null ||
+                logCompletedAt.isAfter(existingLogCompletedAt)))) {
+      latestLogByTitle[log.title] = log;
+    }
+  }
+
+  // 頻度順にソートされたタイトルのリスト
+  final sortedTitles =
+      titleFrequency.keys.toList()
+        ..sort((a, b) => titleFrequency[b]!.compareTo(titleFrequency[a]!));
+
+  // 上位5件のログを返す（または全件数が5未満の場合はすべて）
+  final topTitles = sortedTitles.take(5).toList();
+  return topTitles.map((title) => latestLogByTitle[title]!).toList();
+});
+
 class WorkLogDeletionNotifier {
   WorkLogDeletionNotifier({required this.workLogRepository, required this.ref});
   final WorkLogRepository workLogRepository;

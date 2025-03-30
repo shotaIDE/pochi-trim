@@ -14,6 +14,10 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // 完了済みワークログを取得
     final completedWorkLogsAsync = ref.watch(completedWorkLogsProvider);
+    // よく完了されている家事ログを取得
+    final frequentWorkLogsAsync = ref.watch(
+      frequentlyCompletedWorkLogsProvider,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -66,7 +70,9 @@ class HomeScreen extends ConsumerWidget {
                 return RefreshIndicator(
                   onRefresh: () async {
                     // プロバイダーを更新して最新のデータを取得
-                    ref.invalidate(completedWorkLogsProvider);
+                    ref
+                      ..invalidate(completedWorkLogsProvider)
+                      ..invalidate(frequentlyCompletedWorkLogsProvider);
                   },
                   child: ListView.builder(
                     itemCount: workLogs.length,
@@ -113,11 +119,93 @@ class HomeScreen extends ConsumerWidget {
               .then((updated) {
                 // 家事ログが追加された場合（updatedがtrue）、データを更新
                 if (updated ?? false) {
-                  ref.invalidate(completedWorkLogsProvider);
+                  ref
+                    ..invalidate(completedWorkLogsProvider)
+                    ..invalidate(frequentlyCompletedWorkLogsProvider);
                 }
               });
         },
         child: const Icon(Icons.add),
+      ),
+      bottomNavigationBar: frequentWorkLogsAsync.when(
+        data: (frequentWorkLogs) {
+          if (frequentWorkLogs.isEmpty) {
+            return const SizedBox.shrink(); // 家事ログがない場合は表示しない
+          }
+
+          return Container(
+            // TODO(ide): 高さを固定せず、内容に合わせて自動調整したい
+            height: 90,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                  offset: const Offset(0, -1),
+                ),
+              ],
+            ),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: frequentWorkLogs.length,
+              itemBuilder: (context, index) {
+                final workLog = frequentWorkLogs[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: InkWell(
+                    onTap: () {
+                      // 選択された家事ログを元に新しい家事ログを登録する画面に遷移
+                      Navigator.of(context)
+                          .push(
+                            MaterialPageRoute<bool?>(
+                              builder:
+                                  (context) =>
+                                      WorkLogAddScreen.fromExistingWorkLog(
+                                        workLog,
+                                      ),
+                            ),
+                          )
+                          .then((updated) {
+                            // 家事ログが追加された場合（updatedがtrue）、データを更新
+                            if (updated == true) {
+                              ref
+                                ..invalidate(completedWorkLogsProvider)
+                                ..invalidate(
+                                  frequentlyCompletedWorkLogsProvider,
+                                );
+                            }
+                          });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min, // 内容に合わせてサイズを最小化
+                        children: [
+                          Text(
+                            workLog.icon,
+                            style: const TextStyle(fontSize: 24),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            workLog.title,
+                            style: const TextStyle(fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+        loading: () => const SizedBox.shrink(),
+        error: (_, _) => const SizedBox.shrink(),
       ),
     );
   }
