@@ -13,29 +13,28 @@ import 'package:url_launcher/url_launcher.dart';
 final _logger = Logger('SettingsScreen');
 
 // 現在のユーザー情報を取得するプロバイダー
-final currentUserProvider = FutureProvider.autoDispose<app_user.User?>((
-  ref,
-) async {
-  final authService = ref.watch(authServiceProvider);
-  final userRepository = ref.watch(userRepositoryProvider);
+final AutoDisposeFutureProvider<app_user.User?> currentUserProvider =
+    FutureProvider.autoDispose<app_user.User?>((ref) async {
+      final authService = ref.watch(authServiceProvider);
+      final userRepository = ref.watch(userRepositoryProvider);
 
-  final currentUser = authService.currentUser;
-  if (currentUser != null) {
-    try {
-      final user = await userRepository.getUserByUid(currentUser.uid);
-      _logger.info('ユーザー情報を取得しました: ${user?.name}');
-      return user;
-    } catch (e) {
-      _logger.warning('ユーザー情報の取得に失敗しました: $e');
+      final currentUser = authService.currentUser;
+      if (currentUser != null) {
+        try {
+          final user = await userRepository.getUserByUid(currentUser.uid);
+          _logger.info('ユーザー情報を取得しました: ${user?.name}');
+          return user;
+        } on Exception catch (e) {
+          _logger.warning('ユーザー情報の取得に失敗しました: $e');
+          return null;
+        }
+      }
       return null;
-    }
-  }
-  return null;
-});
+    });
 
 // アプリのバージョン情報を取得するプロバイダー
-final packageInfoProvider = FutureProvider<PackageInfo>((ref) async {
-  return await PackageInfo.fromPlatform();
+final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
+  return PackageInfo.fromPlatform();
 });
 
 class SettingsScreen extends ConsumerWidget {
@@ -333,7 +332,7 @@ class SettingsScreen extends ConsumerWidget {
     return packageInfoAsync.when(
       data: (packageInfo) {
         return Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Center(
             child: Text(
               'バージョン: ${packageInfo.version} (${packageInfo.buildNumber})',
@@ -343,7 +342,7 @@ class SettingsScreen extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: Text('バージョン情報を読み込み中...')),
-      error: (_, __) => const Center(child: Text('バージョン情報を取得できませんでした')),
+      error: (_, _) => const Center(child: Text('バージョン情報を取得できませんでした')),
     );
   }
 
@@ -373,11 +372,9 @@ class SettingsScreen extends ConsumerWidget {
     app_user.User user,
     WidgetRef ref,
   ) {
-    final TextEditingController nameController = TextEditingController(
-      text: user.name,
-    );
+    final nameController = TextEditingController(text: user.name);
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(
@@ -422,7 +419,7 @@ class SettingsScreen extends ConsumerWidget {
                           const SnackBar(content: Text('ユーザー名を更新しました')),
                         );
                       }
-                    } catch (e) {
+                    } on Exception catch (e) {
                       if (context.mounted) {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -441,7 +438,7 @@ class SettingsScreen extends ConsumerWidget {
 
   // 匿名ユーザー情報ダイアログ
   void _showAnonymousUserInfoDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(
@@ -471,7 +468,7 @@ class SettingsScreen extends ConsumerWidget {
 
   // ログアウト確認ダイアログ
   void _showLogoutConfirmDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(
@@ -490,7 +487,7 @@ class SettingsScreen extends ConsumerWidget {
                       Navigator.pop(context); // ダイアログを閉じる
                       Navigator.pop(context); // 設定画面を閉じる
                     }
-                  } catch (e) {
+                  } on Exception catch (e) {
                     if (context.mounted) {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -512,7 +509,7 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     app_user.User user,
   ) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(
@@ -541,7 +538,7 @@ class SettingsScreen extends ConsumerWidget {
                         const SnackBar(content: Text('アカウントを削除しました')),
                       );
                     }
-                  } catch (e) {
+                  } on Exception catch (e) {
                     if (context.mounted) {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(

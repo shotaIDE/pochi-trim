@@ -23,7 +23,9 @@ class HomeScreen extends ConsumerWidget {
             icon: const Icon(Icons.settings),
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                MaterialPageRoute<void>(
+                  builder: (context) => const SettingsScreen(),
+                ),
               );
             },
           ),
@@ -75,7 +77,7 @@ class HomeScreen extends ConsumerWidget {
                         onTap: () {
                           // 家事ダッシュボード画面に遷移
                           Navigator.of(context).push(
-                            MaterialPageRoute(
+                            MaterialPageRoute<void>(
                               builder:
                                   (context) =>
                                       WorkLogDashboardScreen(workLog: workLog),
@@ -89,8 +91,12 @@ class HomeScreen extends ConsumerWidget {
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error:
-                  (error, stackTrace) =>
-                      Center(child: Text('エラーが発生しました: $error')),
+                  (error, stackTrace) => Center(
+                    child: Text(
+                      'エラーが発生しました: $error',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
             ),
           ),
         ],
@@ -100,13 +106,13 @@ class HomeScreen extends ConsumerWidget {
           // ワークログ追加画面に遷移
           Navigator.of(context)
               .push(
-                MaterialPageRoute(
+                MaterialPageRoute<bool?>(
                   builder: (context) => const WorkLogAddScreen(),
                 ),
               )
               .then((updated) {
                 // 家事ログが追加された場合（updatedがtrue）、データを更新
-                if (updated == true) {
+                if (updated ?? false) {
                   ref.invalidate(completedWorkLogsProvider);
                 }
               });

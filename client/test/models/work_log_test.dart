@@ -10,19 +10,19 @@ import 'work_log_test.mocks.dart';
 void main() {
   group('WorkLog Model Tests', () {
     // テスト用のデータ
-    final testId = 'test-id';
-    final testTitle = 'テスト作業';
-    final testDescription = 'これはテスト用の作業です';
-    final testIcon = '🧹';
-    final testCreatedAt = DateTime(2023, 1, 1);
+    const testId = 'test-id';
+    const testTitle = 'テスト作業';
+    const testDescription = 'これはテスト用の作業です';
+    const testIcon = '🧹';
+    final testCreatedAt = DateTime(2023);
     final testCompletedAt = DateTime(2023, 1, 2);
-    final testCreatedBy = 'user-1';
-    final testCompletedBy = 'user-2';
-    final testIsShared = true;
-    final testIsRecurring = true;
-    final testRecurringIntervalMs = 86400000; // 1日
-    final testIsCompleted = true;
-    final testPriority = 2;
+    const testCreatedBy = 'user-1';
+    const testCompletedBy = 'user-2';
+    const testIsShared = true;
+    const testIsRecurring = true;
+    const testRecurringIntervalMs = 86400000; // 1日
+    const testIsCompleted = true;
+    const testPriority = 2;
 
     test('WorkLogモデルが正しく作成されること', () {
       final workLog = WorkLog(
@@ -85,7 +85,7 @@ void main() {
 
       expect(
         workLog.recurringInterval,
-        equals(Duration(milliseconds: testRecurringIntervalMs)),
+        equals(const Duration(milliseconds: testRecurringIntervalMs)),
       );
 
       final workLogWithoutInterval = WorkLog(

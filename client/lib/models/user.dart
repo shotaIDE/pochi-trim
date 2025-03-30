@@ -5,8 +5,6 @@ part 'user.freezed.dart';
 
 @freezed
 abstract class User with _$User {
-  const User._();
-
   const factory User({
     required String id,
     required String uid,
@@ -16,18 +14,23 @@ abstract class User with _$User {
     required DateTime createdAt,
     @Default(false) bool isPremium,
   }) = _User;
+  const User._();
 
   // Firestoreからのデータ変換
   factory User.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    final data = doc.data()! as Map<String, dynamic>;
     return User(
       id: doc.id,
-      uid: data['uid'] ?? '',
-      name: data['name'] ?? '',
-      email: data['email'] ?? '',
-      householdIds: List<String>.from(data['householdIds'] ?? []),
+      uid: data['uid']?.toString() ?? '',
+      name: data['name']?.toString() ?? '',
+      email: data['email']?.toString() ?? '',
+      householdIds:
+          (data['householdIds'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
-      isPremium: data['isPremium'] ?? false,
+      isPremium: data['isPremium'] as bool? ?? false,
     );
   }
 

@@ -37,21 +37,16 @@ void _setupLogging() {
   _logger.info('ロギングシステムを初期化しました');
 }
 
-// Firebase Emulatorの設定を読み込むためのプロバイダー
-final emulatorConfigProvider = Provider<Map<String, dynamic>>(
-  (ref) => throw UnimplementedError(),
-);
-
 // Firebase Emulatorのホスト情報を取得する関数
 String getEmulatorHost() {
   try {
     // dart-define-from-fileから設定を読み込む
-    final String emulatorHost = const String.fromEnvironment(
+    const emulatorHost = String.fromEnvironment(
       'EMULATOR_HOST',
       defaultValue: '127.0.0.1',
     );
     return emulatorHost;
-  } catch (e) {
+  } on Exception catch (e) {
     _logger.warning('エミュレーター設定の読み込みに失敗しました', e);
     // デフォルト値を返す
     return '127.0.0.1';
@@ -70,7 +65,7 @@ void setupFirebaseEmulators(String host) {
 void setupFlavorConfig() {
   // Flutterのビルド設定から自動的にflavorを取得
   // Flutterのビルドシステムで設定されたFLAVOR環境変数を使用
-  final flavorName = const String.fromEnvironment(
+  const flavorName = String.fromEnvironment(
     'FLUTTER_APP_FLAVOR',
     defaultValue: 'emulator',
   );
@@ -84,9 +79,7 @@ void setupFlavorConfig() {
         name: 'PROD',
         color: Colors.blue,
         firebaseOptions: prod.DefaultFirebaseOptions.currentPlatform,
-        useFirebaseEmulator: false,
       );
-      break;
     case 'emulator':
       FlavorConfig(
         flavor: Flavor.emulator,
@@ -94,7 +87,6 @@ void setupFlavorConfig() {
         color: Colors.purple,
         useFirebaseEmulator: true,
       );
-      break;
     case 'dev':
     default:
       FlavorConfig(
@@ -102,9 +94,7 @@ void setupFlavorConfig() {
         name: 'DEV',
         color: Colors.green,
         firebaseOptions: dev.DefaultFirebaseOptions.currentPlatform,
-        useFirebaseEmulator: false,
       );
-      break;
   }
 
   _logger.info('アプリケーション環境: ${FlavorConfig.instance.name}');
@@ -123,7 +113,7 @@ void main() async {
     // Firebase初期化
     if (FlavorConfig.instance.firebaseOptions != null) {
       await Firebase.initializeApp(
-        options: FlavorConfig.instance.firebaseOptions!,
+        options: FlavorConfig.instance.firebaseOptions,
       );
     } else {
       await Firebase.initializeApp();
@@ -144,12 +134,12 @@ void main() async {
     // 既存ユーザーのログイン状態を確認してUIDをログ出力
     final container = ProviderContainer();
     container.read(authServiceProvider).checkCurrentUser();
-  } catch (e) {
+  } on Exception catch (e) {
     _logger.severe('Failed to initialize Firebase', e);
     // Firebase が初期化できなくても、アプリを続行する
   }
 
-  runApp(ProviderScope(child: const HouseWorkerApp()));
+  runApp(const ProviderScope(child: HouseWorkerApp()));
 }
 
 class HouseWorkerApp extends StatelessWidget {
@@ -159,8 +149,8 @@ class HouseWorkerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'House Worker ${FlavorConfig.instance.name}',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: getLightTheme(),
+      darkTheme: getDarkTheme(),
       home: const AuthWrapper(),
       debugShowCheckedModeBanner: !FlavorConfig.isProd,
       builder: (context, child) {
@@ -170,7 +160,7 @@ class HouseWorkerApp extends StatelessWidget {
             message: FlavorConfig.instance.name,
             location: BannerLocation.topEnd,
             color: FlavorConfig.instance.color,
-            child: child!,
+            child: child,
           );
         }
         return child!;

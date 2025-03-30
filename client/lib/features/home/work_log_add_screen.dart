@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/work_log.dart';
@@ -8,7 +9,7 @@ import 'package:house_worker/services/auth_service.dart';
 import 'package:intl/intl.dart';
 
 // ランダムな絵文字を生成するためのリスト
-const List<String> _emojiList = [
+const _emojiList = <String>[
   '🧹',
   '🧼',
   '🧽',
@@ -75,14 +76,13 @@ final currentHouseIdProvider = Provider<String>((ref) {
 });
 
 class WorkLogAddScreen extends ConsumerStatefulWidget {
-  final WorkLog? existingWorkLog;
-
   const WorkLogAddScreen({super.key, this.existingWorkLog});
 
   // 既存のワークログから新しいワークログを作成するためのファクトリコンストラクタ
   factory WorkLogAddScreen.fromExistingWorkLog(WorkLog workLog) {
     return WorkLogAddScreen(existingWorkLog: workLog);
   }
+  final WorkLog? existingWorkLog;
 
   @override
   ConsumerState<WorkLogAddScreen> createState() => _WorkLogAddScreenState();
@@ -103,7 +103,9 @@ class _WorkLogAddScreenState extends ConsumerState<WorkLogAddScreen> {
       _titleController = TextEditingController(
         text: widget.existingWorkLog!.title,
       );
-      _iconController = TextEditingController(text: widget.existingWorkLog!.icon);
+      _iconController = TextEditingController(
+        text: widget.existingWorkLog!.icon,
+      );
       _completedAt = DateTime.now(); // 現在時刻を設定
     } else {
       _titleController = TextEditingController();
@@ -132,7 +134,7 @@ class _WorkLogAddScreenState extends ConsumerState<WorkLogAddScreen> {
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -209,7 +211,7 @@ class _WorkLogAddScreenState extends ConsumerState<WorkLogAddScreen> {
   }
 
   Future<void> _selectDateTime(BuildContext context) async {
-    final DateTime? pickedDate = await showDatePicker(
+    final pickedDate = await showDatePicker(
       context: context,
       initialDate: _completedAt,
       firstDate: DateTime(2020),
@@ -218,7 +220,7 @@ class _WorkLogAddScreenState extends ConsumerState<WorkLogAddScreen> {
 
     if (pickedDate != null && mounted) {
       // BuildContextをローカル変数に保存して、マウント状態を確認した後に使用
-      final TimeOfDay? pickedTime = await showTimePicker(
+      final pickedTime = await showTimePicker(
         context: mounted ? context : throw StateError('Widget is not mounted'),
         initialTime: TimeOfDay.fromDateTime(_completedAt),
       );
@@ -277,12 +279,12 @@ class _WorkLogAddScreenState extends ConsumerState<WorkLogAddScreen> {
           // 一覧画面に戻る（更新フラグをtrueにして渡す）
           Navigator.of(context).pop(true);
         }
-      } catch (e) {
+      } on FirebaseException catch (e) {
         // エラー時の処理
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('エラーが発生しました: ${e.toString()}')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('エラーが発生しました: $e')));
         }
       }
     }

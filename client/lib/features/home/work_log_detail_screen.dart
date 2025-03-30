@@ -4,9 +4,8 @@ import 'package:house_worker/models/work_log.dart';
 import 'package:intl/intl.dart';
 
 class WorkLogDetailScreen extends ConsumerWidget {
-  final WorkLog workLog;
-
   const WorkLogDetailScreen({super.key, required this.workLog});
+  final WorkLog workLog;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -16,14 +15,14 @@ class WorkLogDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('家事ログ詳細')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Card(
               elevation: 4,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -76,7 +75,8 @@ class WorkLogDetailScreen extends ConsumerWidget {
                           : '-',
                     ),
                     _buildInfoRow('実行者', workLog.completedBy ?? '-'),
-                    if (workLog.isRecurring && workLog.recurringInterval != null)
+                    if (workLog.isRecurring &&
+                        workLog.recurringInterval != null)
                       _buildInfoRow(
                         '繰り返し間隔',
                         _formatDuration(workLog.recurringInterval!),
@@ -93,7 +93,7 @@ class WorkLogDetailScreen extends ConsumerWidget {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
