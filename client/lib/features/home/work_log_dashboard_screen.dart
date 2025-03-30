@@ -5,22 +5,20 @@ import 'package:house_worker/models/work_log.dart';
 import 'package:intl/intl.dart';
 
 class WorkLogDashboardScreen extends ConsumerWidget {
-  final WorkLog workLog;
-
   const WorkLogDashboardScreen({super.key, required this.workLog});
+  final WorkLog workLog;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 日付フォーマッター
-    final dateFormat = DateFormat('yyyy/MM/dd HH:mm');
-
     // この家事に関連するログを取得
-    final workLogsAsyncValue = ref.watch(workLogsByTitleProvider(workLog.title));
+    final workLogsAsyncValue = ref.watch(
+      workLogsByTitleProvider(workLog.title),
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text('${workLog.title}のダッシュボード')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -28,7 +26,7 @@ class WorkLogDashboardScreen extends ConsumerWidget {
             Card(
               elevation: 4,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -90,7 +88,7 @@ class WorkLogDashboardScreen extends ConsumerWidget {
                       logs.isEmpty
                           ? const Center(
                             child: Padding(
-                              padding: EdgeInsets.all(16.0),
+                              padding: EdgeInsets.all(16),
                               child: Text('完了ログはありません'),
                             ),
                           )
@@ -103,11 +101,8 @@ class WorkLogDashboardScreen extends ConsumerWidget {
                               return Card(
                                 margin: const EdgeInsets.symmetric(vertical: 4),
                                 child: ListTile(
-                                  title: Text(
-                                    '完了: ${dateFormat.format(log.completedAt ?? DateTime.now())}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  title: _CompletedDateText(
+                                    completedAt: log.completedAt,
                                   ),
                                   subtitle: Text(
                                     '実行者: ${log.completedBy ?? "不明"}',
@@ -143,6 +138,21 @@ class WorkLogDashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CompletedDateText extends StatelessWidget {
+  const _CompletedDateText({required this.completedAt});
+
+  final DateTime? completedAt;
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('yyyy/MM/dd HH:mm');
+    return Text(
+      '完了: ${dateFormat.format(completedAt ?? DateTime.now())}',
+      style: const TextStyle(fontWeight: FontWeight.bold),
     );
   }
 }

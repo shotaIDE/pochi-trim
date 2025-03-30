@@ -22,9 +22,7 @@ class WorkLogRepository {
 
     if (workLog.id.isEmpty) {
       // 新規ワークログの場合
-      DocumentReference docRef = await workLogsCollection.add(
-        workLog.toFirestore(),
-      );
+      final docRef = await workLogsCollection.add(workLog.toFirestore());
       return docRef.id;
     } else {
       // 既存ワークログの更新
@@ -34,16 +32,16 @@ class WorkLogRepository {
   }
 
   Future<List<String>> saveAll(String houseId, List<WorkLog> workLogs) async {
-    List<String> ids = [];
-    for (var workLog in workLogs) {
-      String id = await save(houseId, workLog);
+    final ids = <String>[];
+    for (final workLog in workLogs) {
+      final id = await save(houseId, workLog);
       ids.add(id);
     }
     return ids;
   }
 
   Future<WorkLog?> getById(String houseId, String id) async {
-    DocumentSnapshot doc = await _getWorkLogsCollection(houseId).doc(id).get();
+    final doc = await _getWorkLogsCollection(houseId).doc(id).get();
     if (doc.exists) {
       return WorkLog.fromFirestore(doc);
     }
@@ -51,25 +49,25 @@ class WorkLogRepository {
   }
 
   Future<List<WorkLog>> getAll(String houseId) async {
-    QuerySnapshot querySnapshot = await _getWorkLogsCollection(houseId).get();
-    return querySnapshot.docs.map((doc) => WorkLog.fromFirestore(doc)).toList();
+    final querySnapshot = await _getWorkLogsCollection(houseId).get();
+    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
   Future<bool> delete(String houseId, String id) async {
     try {
       await _getWorkLogsCollection(houseId).doc(id).delete();
       return true;
-    } catch (e) {
+    } on FirebaseException catch (e) {
       _logger.warning('ワークログ削除エラー', e);
       return false;
     }
   }
 
   Future<void> deleteAll(String houseId) async {
-    QuerySnapshot querySnapshot = await _getWorkLogsCollection(houseId).get();
-    WriteBatch batch = _firestore.batch();
+    final querySnapshot = await _getWorkLogsCollection(houseId).get();
+    final batch = _firestore.batch();
 
-    for (var doc in querySnapshot.docs) {
+    for (final doc in querySnapshot.docs) {
       batch.delete(doc.reference);
     }
 
@@ -77,49 +75,46 @@ class WorkLogRepository {
   }
 
   Future<List<WorkLog>> getIncompleteWorkLogs(String houseId) async {
-    QuerySnapshot querySnapshot =
+    final querySnapshot =
         await _getWorkLogsCollection(houseId)
             .where('isCompleted', isEqualTo: false)
             .orderBy('priority', descending: true)
             .get();
 
-    return querySnapshot.docs.map((doc) => WorkLog.fromFirestore(doc)).toList();
+    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
   Stream<List<WorkLog>> getCompletedWorkLogs(String houseId) {
     return _getWorkLogsCollection(houseId)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs.map((doc) => WorkLog.fromFirestore(doc)).toList(),
-        );
+        .map((snapshot) => snapshot.docs.map(WorkLog.fromFirestore).toList());
   }
 
   Future<List<WorkLog>> getWorkLogsByUser(String houseId, String userId) async {
     // createdByまたはcompletedByがuserIdに一致するワークログを取得
-    QuerySnapshot createdBySnapshot =
+    final createdBySnapshot =
         await _getWorkLogsCollection(
           houseId,
         ).where('createdBy', isEqualTo: userId).get();
 
-    QuerySnapshot completedBySnapshot =
+    final completedBySnapshot =
         await _getWorkLogsCollection(
           houseId,
         ).where('completedBy', isEqualTo: userId).get();
 
     // 結果をマージして重複を排除
-    Set<String> processedIds = {};
-    List<WorkLog> workLogs = [];
+    final processedIds = <String>{};
+    final workLogs = <WorkLog>[];
 
-    for (var doc in createdBySnapshot.docs) {
+    for (final doc in createdBySnapshot.docs) {
       if (!processedIds.contains(doc.id)) {
         workLogs.add(WorkLog.fromFirestore(doc));
         processedIds.add(doc.id);
       }
     }
 
-    for (var doc in completedBySnapshot.docs) {
+    for (final doc in completedBySnapshot.docs) {
       if (!processedIds.contains(doc.id)) {
         workLogs.add(WorkLog.fromFirestore(doc));
         processedIds.add(doc.id);
@@ -130,23 +125,23 @@ class WorkLogRepository {
   }
 
   Future<List<WorkLog>> getSharedWorkLogs(String houseId) async {
-    QuerySnapshot querySnapshot =
+    final querySnapshot =
         await _getWorkLogsCollection(houseId)
             .where('isShared', isEqualTo: true)
             .orderBy('priority', descending: true)
             .get();
 
-    return querySnapshot.docs.map((doc) => WorkLog.fromFirestore(doc)).toList();
+    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
   Future<List<WorkLog>> getRecurringWorkLogs(String houseId) async {
-    QuerySnapshot querySnapshot =
+    final querySnapshot =
         await _getWorkLogsCollection(houseId)
             .where('isRecurring', isEqualTo: true)
             .orderBy('priority', descending: true)
             .get();
 
-    return querySnapshot.docs.map((doc) => WorkLog.fromFirestore(doc)).toList();
+    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
   Future<void> completeWorkLog(
@@ -167,18 +162,18 @@ class WorkLogRepository {
   }
 
   Future<List<WorkLog>> getWorkLogsByTitle(String houseId, String title) async {
-    QuerySnapshot querySnapshot =
+    final querySnapshot =
         await _getWorkLogsCollection(houseId)
             .where('title', isEqualTo: title)
             .orderBy('createdAt', descending: true)
             .get();
 
-    return querySnapshot.docs.map((doc) => WorkLog.fromFirestore(doc)).toList();
+    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
   // 権限チェック用のメソッド
   Future<bool> hasPermission(String houseId, String userId) async {
-    DocumentSnapshot permissionDoc =
+    final DocumentSnapshot permissionDoc =
         await _firestore
             .collection('permissions')
             .doc(houseId)

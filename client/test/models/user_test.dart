@@ -10,13 +10,13 @@ import 'user_test.mocks.dart';
 void main() {
   group('User Model Tests', () {
     // テスト用のデータ
-    final testId = 'test-id';
-    final testUid = 'test-uid';
-    final testName = 'テストユーザー';
-    final testEmail = 'test@example.com';
+    const testId = 'test-id';
+    const testUid = 'test-uid';
+    const testName = 'テストユーザー';
+    const testEmail = 'test@example.com';
     final testHouseholdIds = ['household-1', 'household-2'];
-    final testCreatedAt = DateTime(2023, 1, 1);
-    final testIsPremium = true;
+    final testCreatedAt = DateTime(2023);
+    const testIsPremium = true;
 
     test('Userモデルが正しく作成されること', () {
       final user = User(

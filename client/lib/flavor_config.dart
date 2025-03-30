@@ -1,21 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-enum Flavor {
-  emulator,
-  dev,
-  prod,
-}
+enum Flavor { emulator, dev, prod }
 
 class FlavorConfig {
-  final Flavor flavor;
-  final String name;
-  final Color color;
-  final FirebaseOptions? firebaseOptions;
-  final bool useFirebaseEmulator;
-
-  static FlavorConfig? _instance;
-
   factory FlavorConfig({
     required Flavor flavor,
     required String name,
@@ -40,6 +28,13 @@ class FlavorConfig {
     this.firebaseOptions,
     required this.useFirebaseEmulator,
   });
+  final Flavor flavor;
+  final String name;
+  final Color color;
+  final FirebaseOptions? firebaseOptions;
+  final bool useFirebaseEmulator;
+
+  static FlavorConfig? _instance;
 
   static FlavorConfig get instance {
     if (_instance == null) {

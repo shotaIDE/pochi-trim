@@ -5,8 +5,6 @@ part 'work_log.freezed.dart';
 
 @freezed
 abstract class WorkLog with _$WorkLog {
-  const WorkLog._();
-
   const factory WorkLog({
     required String id,
     required String title,
@@ -23,33 +21,35 @@ abstract class WorkLog with _$WorkLog {
     @Default(0) int priority,
   }) = _WorkLog;
 
-  Duration? get recurringInterval =>
-      recurringIntervalMs != null
-          ? Duration(milliseconds: recurringIntervalMs!)
-          : null;
-
   // Firestoreからのデータ変換
   factory WorkLog.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    final data = doc.data()! as Map<String, dynamic>;
     return WorkLog(
       id: doc.id,
-      title: data['title'] ?? '',
-      description: data['description'],
-      icon: data['icon'] ?? '🏠', // デフォルトアイコンを家の絵文字に設定
+      title: data['title']?.toString() ?? '',
+      description: data['description']?.toString(),
+      icon: data['icon']?.toString() ?? '🏠', // デフォルトアイコンを家の絵文字に設定
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       completedAt:
           data['completedAt'] != null
               ? (data['completedAt'] as Timestamp).toDate()
               : null,
-      createdBy: data['createdBy'] ?? '',
-      completedBy: data['completedBy'],
-      isShared: data['isShared'] ?? false,
-      isRecurring: data['isRecurring'] ?? false,
-      recurringIntervalMs: data['recurringIntervalMs'],
-      isCompleted: data['isCompleted'] ?? false,
-      priority: data['priority'] ?? 0, // デフォルト優先度
+      createdBy: data['createdBy']?.toString() ?? '',
+      completedBy: data['completedBy']?.toString(),
+      isShared: data['isShared'] as bool? ?? false,
+      isRecurring: data['isRecurring'] as bool? ?? false,
+      recurringIntervalMs: data['recurringIntervalMs'] as int?,
+      isCompleted: data['isCompleted'] as bool? ?? false,
+      priority: data['priority'] as int? ?? 0, // デフォルト優先度
     );
   }
+
+  const WorkLog._();
+
+  Duration? get recurringInterval =>
+      recurringIntervalMs != null
+          ? Duration(milliseconds: recurringIntervalMs!)
+          : null;
 
   // FirestoreへのデータマッピングのためのMap
   Map<String, dynamic> toFirestore() {

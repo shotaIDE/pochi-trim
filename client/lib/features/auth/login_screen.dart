@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/services/auth_service.dart';
@@ -17,20 +18,17 @@ class LoginScreen extends ConsumerWidget {
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            const Text(
-              '家事を簡単に記録・管理できるアプリ',
-              style: TextStyle(fontSize: 16),
-            ),
+            const Text('家事を簡単に記録・管理できるアプリ', style: TextStyle(fontSize: 16)),
             const SizedBox(height: 60),
             ElevatedButton(
               onPressed: () async {
                 try {
                   await ref.read(authServiceProvider).signInAnonymously();
-                } catch (e) {
+                } on FirebaseAuthException catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('ログインに失敗しました: $e')),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('ログインに失敗しました: $e')));
                   }
                 }
               },
