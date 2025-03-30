@@ -70,7 +70,9 @@ class HomeScreen extends ConsumerWidget {
                 return RefreshIndicator(
                   onRefresh: () async {
                     // プロバイダーを更新して最新のデータを取得
-                    ref.invalidate(completedWorkLogsProvider);
+                    ref
+                      ..invalidate(completedWorkLogsProvider)
+                      ..invalidate(frequentlyCompletedWorkLogsProvider);
                   },
                   child: ListView.builder(
                     itemCount: workLogs.length,
@@ -117,8 +119,9 @@ class HomeScreen extends ConsumerWidget {
               .then((updated) {
                 // 家事ログが追加された場合（updatedがtrue）、データを更新
                 if (updated ?? false) {
-                  ref.invalidate(completedWorkLogsProvider);
-                  ref.invalidate(frequentlyCompletedWorkLogsProvider);
+                  ref
+                    ..invalidate(completedWorkLogsProvider)
+                    ..invalidate(frequentlyCompletedWorkLogsProvider);
                 }
               });
         },
@@ -136,9 +139,7 @@ class HomeScreen extends ConsumerWidget {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withValues(
-                    alpha: 77, // 0.3 * 255 = 約77
-                  ),
+                  color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
                   spreadRadius: 1,
                   blurRadius: 5,
                   offset: const Offset(0, -1),
@@ -157,7 +158,7 @@ class HomeScreen extends ConsumerWidget {
                       // 選択された家事ログを元に新しい家事ログを登録する画面に遷移
                       Navigator.of(context)
                           .push(
-                            MaterialPageRoute(
+                            MaterialPageRoute<bool?>(
                               builder:
                                   (context) =>
                                       WorkLogAddScreen.fromExistingWorkLog(
@@ -168,10 +169,11 @@ class HomeScreen extends ConsumerWidget {
                           .then((updated) {
                             // 家事ログが追加された場合（updatedがtrue）、データを更新
                             if (updated == true) {
-                              ref.invalidate(completedWorkLogsProvider);
-                              ref.invalidate(
-                                frequentlyCompletedWorkLogsProvider,
-                              );
+                              ref
+                                ..invalidate(completedWorkLogsProvider)
+                                ..invalidate(
+                                  frequentlyCompletedWorkLogsProvider,
+                                );
                             }
                           });
                     },
@@ -202,7 +204,7 @@ class HomeScreen extends ConsumerWidget {
           );
         },
         loading: () => const SizedBox.shrink(),
-        error: (_, __) => const SizedBox.shrink(),
+        error: (_, _) => const SizedBox.shrink(),
       ),
     );
   }
