@@ -80,7 +80,7 @@ Xcode で一旦 Automatically Signing により App Store ビルドを Export �
 
 Manual Signing で Export した際に出力された plist を [client/ios/ExportOptions.plist](client/ios/ExportOptions.plist) に配置してください。
 
-最後に App Store Connect API キーを発行します。
+最後に App Store Connect API キーを発行し、[client/ios/fastlane/app-store-connect-api-key.p8](client/ios/fastlane/app-store-connect-api-key.p8) に配置してください。
 以下を参考にしてください。
 
 https://docs.fastlane.tools/app-store-connect-api/

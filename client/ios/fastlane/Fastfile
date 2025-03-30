@@ -31,7 +31,7 @@ platform :ios do
       )
     end
 
-    lane_context[SharedValues::IPA_OUTPUT_PATH] = '../build/ios/ipa/HouseWorker.ipa'
+    lane_context[SharedValues::IPA_OUTPUT_PATH] = '../build/ios/ipa/house_worker.ipa'
   end
 
   desc 'Dev環境向けアプリを電子署名なしにビルドします。'
