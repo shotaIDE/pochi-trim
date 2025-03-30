@@ -4,6 +4,7 @@
 google-services.json
 GoogleService-Info.plist
 
+/android/fastlane/google-play-service-account-key.json
 /android/fastlane/report.xml
 /emulator-config.json
 /flutter-test-results.log

@@ -13,4 +13,21 @@ platform :android do
 
     lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH] = '../build/app/outputs/bundle/devRelease/app-dev-release.aab'
   end
+
+  desc 'Dev環境向けアプリをGoogle Playにデプロイします。'
+  lane :deploy_dev_to_google_play do
+    package_name = 'ide.shota.colomney.HouseWorker.dev'
+    # action で利用するパスなので、fastlane コマンドを実行するディレクトリからの相対パスで指定
+    google_play_json_key_path = 'fastlane/google-play-service-account-key.json'
+
+    build_dev
+
+    upload_to_play_store(
+      package_name:,
+      release_status: 'completed',
+      track: 'internal',
+      json_key: google_play_json_key_path,
+      skip_upload_changelogs: false
+    )
+  end
 end

@@ -42,6 +42,14 @@ Flutterの依存関係をインストールします。
 
 Dev環境向けアプリ(App Bundle)をビルドします。
 
+### android deploy_dev_to_google_play
+
+```sh
+[bundle exec] fastlane android deploy_dev_to_google_play
+```
+
+Dev環境向けアプリをGoogle Playにデプロイします。
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
