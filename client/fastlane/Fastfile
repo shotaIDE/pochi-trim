@@ -74,7 +74,7 @@ end
 
 private_lane :generate_release_notes do
   previous_tag_name = Dir.chdir('../../') do
-    sh("git describe --tags --abbrev=0 $(git rev-list --tags='beta/*' --max-count=2 | tail -n 1)")
+    sh("git describe --tags --abbrev=0 $(git rev-list --tags='client/beta/*' --max-count=2 | tail -n 1)")
   end
 
   UI.success "Found the beta tag earlier than the latest: #{previous_tag_name}"
