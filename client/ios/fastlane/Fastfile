@@ -62,10 +62,10 @@ platform :ios do
     # action で利用するパスなので、fastlane コマンドを実行するディレクトリからの相対パスで指定
     app_store_connect_api_key_path = 'fastlane/app-store-connect-api-key.p8'
 
-    # TODO: リリースノートを生成する
-    release_notes = 'テストリリースです。'
+    release_notes = generate_release_notes
 
-    build_dev
+    lane_context[SharedValues::IPA_OUTPUT_PATH] = '../build/ios/ipa/house_worker.ipa'
+    # build_dev
 
     api_key = app_store_connect_api_key(
       key_id: apple_api_key_id,
