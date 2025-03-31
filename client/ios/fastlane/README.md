@@ -50,6 +50,14 @@ Dev環境向けアプリをビルドします。
 
 Dev環境向けアプリを電子署名なしにビルドします。
 
+### ios deploy_dev
+
+```sh
+[bundle exec] fastlane ios deploy_dev
+```
+
+Dev環境向けアプリをApp Storeにデプロイします。
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

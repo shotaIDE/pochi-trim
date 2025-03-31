@@ -8,6 +8,8 @@ GoogleService-Info.plist
 /android/fastlane/report.xml
 /emulator-config.json
 /flutter-test-results.log
+/ios/fastlane/.env
+/ios/fastlane/app-store-connect-api-key.p8
 /ios/fastlane/report.xml
 /lib/firebase_options*.dart
 
