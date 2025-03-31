@@ -85,6 +85,8 @@ Manual Signing で Export した際に出力された plist を [client/ios/Expo
 
 https://docs.fastlane.tools/app-store-connect-api/
 
+fastlane からアップロードして外部テスト公開まで行うには、1 度外部テストに審査を実施して公開しておく必要があります。
+
 ### Google Play へのデプロイ
 
 以下を参考にして、デプロイ用のサービスアカウントキー(JSON)を用意し、[client/android/fastlane/google-play-service-account-key.json](client/android/fastlane/google-play-service-account-key.json) に配置してください。
