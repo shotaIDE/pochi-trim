@@ -6,10 +6,16 @@ import 'package:house_worker/models/work_log.dart';
 import 'package:intl/intl.dart';
 
 class WorkLogItem extends ConsumerWidget {
-  const WorkLogItem({super.key, required this.workLog, required this.onTap});
+  const WorkLogItem({
+    super.key,
+    required this.workLog,
+    required this.onTap,
+    this.onComplete,
+  });
 
   final WorkLog workLog;
   final VoidCallback onTap;
+  final VoidCallback? onComplete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -104,6 +110,14 @@ class WorkLogItem extends ConsumerWidget {
                         );
                       },
                     ),
+                    // 完了ボタンを追加（onCompleteが提供されている場合のみ表示）
+                    if (onComplete != null && !workLog.isCompleted)
+                      IconButton(
+                        icon: const Icon(Icons.check_circle_outline),
+                        tooltip: 'この家事を完了としてマーク',
+                        onPressed: onComplete,
+                        color: Colors.green,
+                      ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -111,14 +125,26 @@ class WorkLogItem extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(
-                      child: _CompletedDateText(
-                        completedAt: workLog.completedAt,
-                      ),
+                      child:
+                          workLog.isCompleted
+                              ? _CompletedDateText(
+                                completedAt: workLog.completedAt,
+                              )
+                              : const Text(
+                                '未完了',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                     ),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
-                        '実行者: ${workLog.completedBy ?? "不明"}',
+                        workLog.isCompleted
+                            ? '実行者: ${workLog.completedBy ?? "不明"}'
+                            : '作成者: ${workLog.createdBy}',
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.grey,
