@@ -1,0 +1,14 @@
+inputs:
+  env-base64:
+    required: true
+  working-directory:
+    required: false
+    default: ./ios
+
+runs:
+  using: "composite"
+  steps:
+    - name: Generate .env file
+      run: echo "${{ inputs.env-base64 }}" | base64 -d > fastlane/.env
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash

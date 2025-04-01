@@ -19,6 +19,8 @@ defaults:
 jobs:
   trigger-cd-develop:
     name: Trigger CD develop
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -51,3 +53,105 @@ jobs:
         run: |
           latest_tag_name="$(git describe --tags --abbrev=0)"
           git push origin "${latest_tag_name}"
+
+  deploy-ios-dev-app:
+    name: Deploy iOS app
+    permissions:
+      contents: read
+    needs:
+      - trigger-cd-develop
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+      - name: Setup Flutter
+        uses: ./.github/actions/setup-flutter
+        with:
+          working-directory: ./client
+      - name: Setup Xcode
+        uses: ./.github/actions/setup-xcode
+        with:
+          working-directory: ./client
+      - name: Setup Swift Package Manager
+        uses: ./.github/actions/setup-spm
+      - name: Setup Ruby
+        uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: ./client/ios
+      - name: Generate uncommitted Flutter files
+        uses: ./.github/actions/generate-uncommitted-flutter-files
+        with:
+          firebase-options-dart-base64-emulator: ${{ secrets.FIREBASE_OPTIONS_DART_BASE64_EMULATOR }}
+          firebase-options-dart-base64-dev: ${{ secrets.FIREBASE_OPTIONS_DART_BASE64_DEV }}
+          firebase-options-dart-base64-prod: ${{ secrets.FIREBASE_OPTIONS_DART_BASE64_PROD }}
+          working-parent-directory: ./client
+          working-child-directory: ios
+      - name: Generate uncommitted iOS files for dev
+        uses: ./.github/actions/generate-uncommitted-ios-files-dev
+        with:
+          google-service-plist-base64-dev: ${{ secrets.GOOGLE_SERVICE_PLIST_BASE64_DEV }}
+          working-directory: ./client
+      - name: Generate env file
+        uses: ./.github/actions/generate-env-file
+        with:
+          env-base64: ${{ secrets.ENV_BASE64 }}
+          working-directory: ./client/ios
+      - name: Generate App Store Connect API key file
+        run: echo "${{ secrets.APP_STORE_CONNECT_API_KEY_P8_BASE64 }}" | base64 -d > fastlane/app-store-connect-api-key.p8
+        working-directory: ./client/ios
+      - name: Set full version name from latest tag
+        run: bundle exec fastlane set_full_version_name_from_latest_tag
+        working-directory: ./client/ios
+      - name: Deploy iOS dev app to Test Flight
+        run: bundle exec fastlane ios deploy_dev
+        working-directory: ./client/ios
+
+  deploy-android-dev-app:
+    name: Deploy Android app
+    permissions:
+      contents: read
+    needs:
+      - trigger-cd-develop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+      - name: Setup Flutter
+        uses: ./.github/actions/setup-flutter
+        with:
+          working-directory: ./client
+      - name: Setup Gradle
+        uses: ./.github/actions/setup-gradle
+      - name: Setup Ruby
+        uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: ./client/android
+      - name: Generate uncommitted Flutter files
+        uses: ./.github/actions/generate-uncommitted-flutter-files
+        with:
+          firebase-options-dart-base64-emulator: ${{ secrets.FIREBASE_OPTIONS_DART_BASE64_EMULATOR }}
+          firebase-options-dart-base64-dev: ${{ secrets.FIREBASE_OPTIONS_DART_BASE64_DEV }}
+          firebase-options-dart-base64-prod: ${{ secrets.FIREBASE_OPTIONS_DART_BASE64_PROD }}
+          working-parent-directory: ./client
+          working-child-directory: android
+      - name: Generate uncommitted Android files for dev
+        uses: ./.github/actions/generate-uncommitted-android-files-dev
+        with:
+          google-service-json-base64-dev: ${{ secrets.GOOGLE_SERVICE_JSON_BASE64_DEV }}
+          working-directory: ./client
+      - name: Generate key store
+        uses: ./.github/actions/generate-key-store
+        with:
+          keystore-jks-base64: ${{ secrets.KEYSTORE_JKS_BASE64 }}
+          store-password: ${{ secrets.KEYSTORE_STORE_PASSWORD }}
+          key-password: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+          key-alias: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+          working-directory: ./client
+      - name: Set full version name from latest tag
+        run: bundle exec fastlane set_full_version_name_from_latest_tag
+        working-directory: ./client/android
+      - name: Deploy Android dev app to Firebase App Distribution
+        run: bundle exec fastlane android deploy_dev
+        working-directory: ./client/android
