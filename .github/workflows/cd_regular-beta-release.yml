@@ -22,6 +22,8 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
+    outputs:
+      version-bumped: ${{ steps.bump-version.outputs.VERSION_BUMPED }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -44,12 +46,20 @@ jobs:
         run: bundle exec fastlane set_full_version_name_from_latest_tag
         working-directory: ./client/ios
       - name: Bump version
-        run: bundle exec fastlane bump_version
+        id: bump-version
+        run: |
+          if bundle exec fastlane bump_version; then
+            echo "VERSION_BUMPED=true" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION_BUMPED=false" >> $GITHUB_OUTPUT
+          fi
         working-directory: ./client/ios
       - name: Add tag
+        if: steps.bump-version.outputs.VERSION_BUMPED == 'true'
         run: bundle exec fastlane add_beta_tag
         working-directory: ./client/ios
       - name: Push back tag
+        if: steps.bump-version.outputs.VERSION_BUMPED == 'true'
         run: |
           latest_tag_name="$(git describe --tags --abbrev=0)"
           git push origin "${latest_tag_name}"
@@ -60,6 +70,7 @@ jobs:
       contents: read
     needs:
       - trigger-cd-develop
+    if: needs.trigger-cd-develop.outputs.version-bumped == 'true'
     runs-on: macos-14
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -123,6 +134,7 @@ jobs:
       contents: read
     needs:
       - trigger-cd-develop
+    if: needs.trigger-cd-develop.outputs.version-bumped == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4

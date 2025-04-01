@@ -34,9 +34,15 @@ lane :bump_version do
   UI.success "Found latest version: #{full_version_name}"
   UI.success "The Build number is #{build_number}"
 
-  analyze_commits_for_semantic_release(CLIENT_BETA_TAG_PATTERN)
-  new_version_name = lane_context[SharedValues::RELEASE_NEXT_VERSION]
+  is_releasable = analyze_commits_for_semantic_release(CLIENT_BETA_TAG_PATTERN)
+  if is_releasable
+    UI.success "Releasable. Because there are valid differences from the previous release."
+  else
+    raise "No release is necessary. Because there are no valid differences from the previous release."
+  end
 
+  new_version_name = lane_context[SharedValues::RELEASE_NEXT_VERSION]
+  
   Dir.chdir('../../') do
     sh("dart run cider version \"#{new_version_name}+#{build_number}\"")
     sh('dart run cider bump build')
