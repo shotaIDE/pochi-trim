@@ -17,13 +17,13 @@ defaults:
     working-directory: ./client
 
 jobs:
-  trigger-cd-develop:
-    name: Trigger CD develop
+  trigger-cd-dev:
+    name: Trigger CD dev
     permissions:
       contents: write
     runs-on: ubuntu-latest
     outputs:
-      version-bumped: ${{ steps.bump-version.outputs.VERSION_BUMPED }}
+      new-tag-generated: ${{ steps.bump-version.outputs.VERSION_BUMPED }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -69,8 +69,8 @@ jobs:
     permissions:
       contents: read
     needs:
-      - trigger-cd-develop
-    if: needs.trigger-cd-develop.outputs.version-bumped == 'true'
+      - trigger-cd-dev
+    if: needs.trigger-cd-dev.outputs.new-tag-generated == 'true'
     runs-on: macos-14
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -133,8 +133,8 @@ jobs:
     permissions:
       contents: read
     needs:
-      - trigger-cd-develop
-    if: needs.trigger-cd-develop.outputs.version-bumped == 'true'
+      - trigger-cd-dev
+    if: needs.trigger-cd-dev.outputs.new-tag-generated == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
