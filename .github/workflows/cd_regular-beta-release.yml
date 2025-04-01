@@ -1,0 +1,53 @@
+name: CD / Regular beta release
+
+on:
+  schedule:
+    - cron: "0 19 * * *" # 毎日04:00(JST)
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - "main"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: ./client
+
+jobs:
+  trigger-cd-develop:
+    name: Trigger CD develop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Setup Git
+        uses: ./.github/actions/setup-git
+      - name: Setup Flutter
+        uses: ./.github/actions/setup-flutter
+        with:
+          working-directory: ./client
+      - name: Setup Ruby
+        uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: ./client/ios
+      - name: Install Flutter dependencies
+        run: bundle exec fastlane install_flutter_dependencies
+        working-directory: ./client/ios
+      - name: Set full version name from tag
+        run: bundle exec fastlane set_full_version_name_from_latest_tag
+        working-directory: ./client/ios
+      - name: Bump version
+        run: bundle exec fastlane bump_version
+        working-directory: ./client/ios
+      - name: Add tag
+        run: bundle exec fastlane add_beta_tag
+        working-directory: ./client/ios
+      - name: Push back tag
+        run: |
+          latest_tag_name="$(git describe --tags --abbrev=0)"
+          git push origin "${latest_tag_name}"

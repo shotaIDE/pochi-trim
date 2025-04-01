@@ -3,6 +3,9 @@
 # このファイルは、ios/fastlane/Fastfile と android/fastlane/Fastfile からインポートされ、呼び出される想定です。
 # そのため、カレントディレクトリが ios/fastlane または android/fastlane となっている前提で処理しています。
 
+CLIENT_BETA_TAG_GROUP = 'client/beta'
+CLIENT_BETA_TAG_PATTERN = "#{CLIENT_BETA_TAG_GROUP}/*"
+
 desc 'Flutterの依存関係をインストールします。'
 lane :install_flutter_dependencies do
   Dir.chdir('../../') do
@@ -31,7 +34,7 @@ lane :bump_version do
   UI.success "Found latest version: #{full_version_name}"
   UI.success "The Build number is #{build_number}"
 
-  analyze_commits_for_semantic_release(full_version_name)
+  analyze_commits_for_semantic_release(CLIENT_BETA_TAG_PATTERN)
   new_version_name = lane_context[SharedValues::RELEASE_NEXT_VERSION]
 
   Dir.chdir('../../') do
@@ -47,7 +50,7 @@ lane :add_beta_tag do
   full_version_name = get_full_version_name
 
   add_git_tag(
-    grouping: 'beta',
+    grouping: CLIENT_BETA_TAG_GROUP,
     includes_lane: false,
     build_number: full_version_name
   )
@@ -56,7 +59,7 @@ end
 desc '最新のタグに一致するようにバージョン名を変更します。'
 lane :set_full_version_name_from_latest_tag do
   latest_tag_name = Dir.chdir('../../') do
-    sh("git describe --tags --abbrev=0 --match='beta/*'")
+    sh("git describe --tags --abbrev=0 --match='#{CLIENT_BETA_TAG_PATTERN}'")
   end
 
   full_version_name = extract_version_name_from_tag(latest_tag_name)
@@ -74,7 +77,7 @@ end
 
 private_lane :generate_release_notes do
   previous_tag_name = Dir.chdir('../../') do
-    sh("git describe --tags --abbrev=0 $(git rev-list --tags='client/beta/*' --max-count=2 | tail -n 1)")
+    sh("git describe --tags --abbrev=0 $(git rev-list --tags='#{CLIENT_BETA_TAG_PATTERN}' --max-count=2 | tail -n 1)")
   end
 
   UI.success "Found the beta tag earlier than the latest: #{previous_tag_name}"
@@ -106,7 +109,7 @@ end
 
 def latest_beta_tag
   Dir.chdir('../../') do
-    sh("git describe --tags --abbrev=0 --match='beta/*'")
+    sh("git describe --tags --abbrev=0 --match='#{CLIENT_BETA_TAG_PREFIX}'")
   end
 end
 
