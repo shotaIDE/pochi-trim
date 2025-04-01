@@ -109,7 +109,7 @@ end
 
 def latest_beta_tag
   Dir.chdir('../../') do
-    sh("git describe --tags --abbrev=0 --match='#{CLIENT_BETA_TAG_PREFIX}'")
+    sh("git describe --tags --abbrev=0 --match='#{CLIENT_BETA_TAG_PATTERN}'")
   end
 end
 
