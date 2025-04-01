@@ -19,15 +19,36 @@ platform :android do
     package_name = 'ide.shota.colomney.HouseWorker.dev'
     # action で利用するパスなので、fastlane コマンドを実行するディレクトリからの相対パスで指定
     google_play_json_key_path = 'fastlane/google-play-service-account-key.json'
+    release_notes_path = 'metadata/android/ja-JP/changelogs/default.txt'
+    backup_release_notes_path = "#{release_notes_path}.bak"
 
-    build_dev
+    # リリースノートファイルが存在する場合はバックアップを作成
+    if File.exist?(release_notes_path)
+      FileUtils.cp(release_notes_path, backup_release_notes_path)
+      UI.message("Backed up the committed release notes: #{backup_release_notes_path}")
+    end
 
-    upload_to_play_store(
-      package_name:,
-      release_status: 'completed',
-      track: 'internal',
-      json_key: google_play_json_key_path,
-      skip_upload_changelogs: false
-    )
+    begin
+      release_notes = generate_release_notes
+
+      File.write(release_notes_path, release_notes)
+
+      build_dev
+
+      upload_to_play_store(
+        package_name:,
+        release_status: 'completed',
+        track: 'internal',
+        json_key: google_play_json_key_path,
+        skip_upload_changelogs: false
+      )
+    ensure
+      # 処理が終了したら、バックアップがある場合は元に戻す
+      if File.exist?(backup_release_notes_path)
+        FileUtils.cp(backup_release_notes_path, release_notes_path)
+        FileUtils.rm(backup_release_notes_path)
+        UI.message("Reverted the committed release notes to the original state: #{release_notes_path}")
+      end
+    end
   end
 end
