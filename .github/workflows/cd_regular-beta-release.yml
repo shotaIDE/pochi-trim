@@ -64,6 +64,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
@@ -92,6 +93,15 @@ jobs:
         with:
           google-service-plist-base64-dev: ${{ secrets.GOOGLE_SERVICE_PLIST_BASE64_DEV }}
           working-directory: ./client
+      - name: Import Code-Signing Certificates
+        uses: Apple-Actions/import-codesign-certs@63fff01cd422d4b7b855d40ca1e9d34d2de9427d # v3
+        with:
+          p12-file-base64: ${{ secrets.APPLE_DISTRIBUTION_P12_BASE64 }}
+          p12-password: ${{ secrets.APPLE_DISTRIBUTION_P12_PASSWORD }}
+      - name: Import Provisioning Profile
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "${{ secrets.PROVISIONING_PROFILE_APP_STORE_BASE64_DEV }}" | base64 -d > ~/Library/MobileDevice/Provisioning\ Profiles/dev_app-store.mobileprovision
       - name: Generate env file
         uses: ./.github/actions/generate-env-file
         with:
@@ -117,6 +127,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
@@ -149,9 +160,12 @@ jobs:
           key-password: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
           key-alias: ${{ secrets.KEYSTORE_KEY_ALIAS }}
           working-directory: ./client
+      - name: Generate Google Play service account key file
+        run: echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY_JSON_BASE64 }}" | base64 -d > fastlane/google-play-service-account-key.json
+        working-directory: ./client/android
       - name: Set full version name from latest tag
         run: bundle exec fastlane set_full_version_name_from_latest_tag
         working-directory: ./client/android
-      - name: Deploy Android dev app to Firebase App Distribution
+      - name: Deploy Android dev app to Google Play
         run: bundle exec fastlane android deploy_dev
         working-directory: ./client/android
