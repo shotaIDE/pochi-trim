@@ -7,7 +7,9 @@ part 'house_work.g.dart';
 /// 家事モデル
 /// 家事の基本情報を表現する
 @freezed
-class HouseWork with _$HouseWork {
+abstract class HouseWork with _$HouseWork {
+  // プライベートコンストラクタを追加
+
   const factory HouseWork({
     required String id,
     required String title,

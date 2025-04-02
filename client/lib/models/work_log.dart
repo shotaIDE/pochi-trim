@@ -7,7 +7,7 @@ part 'work_log.g.dart';
 /// 家事ログモデル
 /// 家事の実行記録を表現する
 @freezed
-class WorkLog with _$WorkLog {
+abstract class WorkLog with _$WorkLog {
   const factory WorkLog({
     required String id,
     required String houseWorkId, // 関連する家事のID

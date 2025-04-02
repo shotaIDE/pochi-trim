@@ -160,7 +160,11 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
           if (_selectedHouseWork == null && _selectedHouseWorkId != null) {
             _selectedHouseWork = houseWorks.firstWhere(
               (hw) => hw.id == _selectedHouseWorkId,
-              orElse: () => houseWorks.isNotEmpty ? houseWorks.first : null,
+              orElse:
+                  () =>
+                      houseWorks.isNotEmpty
+                          ? houseWorks.first
+                          : throw StateError('家事データが見つかりません'),
             );
           }
 
@@ -196,7 +200,11 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
                         _selectedHouseWorkId = value;
                         _selectedHouseWork = houseWorks.firstWhere(
                           (hw) => hw.id == value,
-                          orElse: () => houseWorks.first,
+                          orElse:
+                              () =>
+                                  houseWorks.isNotEmpty
+                                      ? houseWorks.first
+                                      : throw StateError('家事データが見つかりません'),
                         );
                       });
                     },
