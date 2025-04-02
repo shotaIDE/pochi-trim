@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/features/home/work_log_add_dialog.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
@@ -73,7 +74,7 @@ class HomeScreen extends ConsumerWidget {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            // ワークログ追加画面に遷移
+            // 家事ログ追加画面に直接遷移
             Navigator.of(context)
                 .push(
                   MaterialPageRoute<bool?>(
@@ -131,26 +132,20 @@ class HomeScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: InkWell(
                   onTap: () {
-                    // 選択された家事ログを元に新しい家事ログを登録する画面に遷移
-                    Navigator.of(context)
-                        .push(
-                          MaterialPageRoute<bool?>(
-                            builder:
-                                (context) =>
-                                    WorkLogAddScreen.fromExistingWorkLog(
-                                      workLog,
-                                    ),
-                          ),
-                        )
-                        .then((updated) {
-                          // 家事ログが追加された場合（updatedがtrue）、データを更新
-                          if (updated == true) {
-                            ref
-                              ..invalidate(completedWorkLogsProvider)
-                              ..invalidate(frequentlyCompletedWorkLogsProvider)
-                              ..invalidate(plannedWorkLogsProvider);
-                          }
-                        });
+                    // 家事ログ追加ダイアログを直接表示
+                    showWorkLogAddDialog(
+                      context,
+                      ref,
+                      existingWorkLog: workLog,
+                    ).then((updated) {
+                      // 家事ログが追加された場合（updatedがtrue）、データを更新
+                      if (updated == true) {
+                        ref
+                          ..invalidate(completedWorkLogsProvider)
+                          ..invalidate(frequentlyCompletedWorkLogsProvider)
+                          ..invalidate(plannedWorkLogsProvider);
+                      }
+                    });
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(8),
