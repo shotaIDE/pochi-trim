@@ -9,6 +9,7 @@ pubspec.yaml @shotaIDE
 
 /.github/ @shotaIDE
 /.vscode/ @shotaIDE
+/client/emulator-config.json @shotaIDE
 /client/lib/models/ @shotaIDE
 /client/test/ @shotaIDE
 /docs/ @shotaIDE
