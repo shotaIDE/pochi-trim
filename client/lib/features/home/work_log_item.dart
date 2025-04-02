@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/home/work_log_add_screen.dart';
+import 'package:house_worker/features/home/work_log_add_dialog.dart';
 import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:intl/intl.dart';
@@ -98,16 +98,19 @@ class WorkLogItem extends ConsumerWidget {
                       icon: const Icon(Icons.add_circle_outline),
                       tooltip: 'この家事を記録する',
                       onPressed: () {
-                        // 家事ログ追加画面に遷移し、ワークログ情報を渡す
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder:
-                                (context) =>
-                                    WorkLogAddScreen.fromExistingWorkLog(
-                                      workLog,
-                                    ),
-                          ),
-                        );
+                        // 家事ログ追加ダイアログを表示
+                        showWorkLogAddDialog(
+                          context,
+                          ref,
+                          existingWorkLog: workLog,
+                        ).then((updated) {
+                          // 家事ログが追加された場合（updatedがtrue）、データを更新
+                          if (updated == true) {
+                            ref
+                              ..invalidate(completedWorkLogsProvider)
+                              ..invalidate(frequentlyCompletedWorkLogsProvider);
+                          }
+                        });
                       },
                     ),
                     // 完了ボタンを追加（onCompleteが提供されている場合のみ表示）
