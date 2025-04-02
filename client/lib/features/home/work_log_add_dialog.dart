@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
+import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
+import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:intl/intl.dart';
@@ -71,6 +73,13 @@ String getRandomEmoji() {
 
 // ハウスIDを提供するプロバイダーはwork_log_add_screenからインポート
 
+// 家事一覧を取得するプロバイダー
+final FutureProviderFamily<List<HouseWork>, String> dialogHouseWorksProvider =
+    FutureProvider.family<List<HouseWork>, String>((ref, houseId) {
+      final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
+      return houseWorkRepository.getAll(houseId);
+    });
+
 /// 家事ログ追加ダイアログを表示する関数
 ///
 /// [context] - ビルドコンテキスト
@@ -104,9 +113,10 @@ class WorkLogAddDialog extends ConsumerStatefulWidget {
 
 class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _titleController;
-  late final TextEditingController _iconController;
+  late final TextEditingController _noteController;
 
+  String? _selectedHouseWorkId;
+  HouseWork? _selectedHouseWork;
   late DateTime _completedAt;
 
   @override
@@ -114,25 +124,18 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
     super.initState();
     // 既存のワークログがある場合は、そのデータを初期値として設定
     if (widget.existingWorkLog != null) {
-      _titleController = TextEditingController(
-        text: widget.existingWorkLog!.title,
-      );
-      _iconController = TextEditingController(
-        text: widget.existingWorkLog!.icon,
-      );
-      _completedAt = DateTime.now(); // 現在時刻を設定
+      _noteController = TextEditingController();
+      _selectedHouseWorkId = widget.existingWorkLog!.houseWorkId;
+      _completedAt = widget.existingWorkLog!.completedAt;
     } else {
-      _titleController = TextEditingController();
-      // 新規作成時はランダムな絵文字を初期値として設定
-      _iconController = TextEditingController(text: getRandomEmoji());
+      _noteController = TextEditingController();
       _completedAt = DateTime.now();
     }
   }
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _iconController.dispose();
+    _noteController.dispose();
     super.dispose();
   }
 
@@ -140,95 +143,127 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
   Widget build(BuildContext context) {
     final currentUser = ref.watch(authServiceProvider).currentUser;
     final dateFormat = DateFormat('yyyy/MM/dd HH:mm');
+    final houseId = ref.watch(currentHouseIdProvider);
+    final houseWorksAsync = ref.watch(dialogHouseWorksProvider(houseId));
 
     return AlertDialog(
       title: Text(widget.existingWorkLog != null ? '家事ログを記録' : '家事ログ追加'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 家事の名前表示
-              if (widget.existingWorkLog != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Row(
-                    children: [
-                      Text(
-                        widget.existingWorkLog!.icon,
+      content: houseWorksAsync.when(
+        data: (houseWorks) {
+          // 家事が選択されていない場合、最初の家事を選択
+          if (_selectedHouseWorkId == null && houseWorks.isNotEmpty) {
+            _selectedHouseWorkId = houseWorks.first.id;
+            _selectedHouseWork = houseWorks.first;
+          }
+
+          // 選択された家事を特定
+          if (_selectedHouseWork == null && _selectedHouseWorkId != null) {
+            _selectedHouseWork = houseWorks.firstWhere(
+              (hw) => hw.id == _selectedHouseWorkId,
+              orElse: () => houseWorks.isNotEmpty ? houseWorks.first : null,
+            );
+          }
+
+          return Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 家事選択ドロップダウン
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(
+                      labelText: '家事を選択',
+                      border: OutlineInputBorder(),
+                    ),
+                    value: _selectedHouseWorkId,
+                    items:
+                        houseWorks.map((houseWork) {
+                          return DropdownMenuItem<String>(
+                            value: houseWork.id,
+                            child: Row(
+                              children: [
+                                Text(houseWork.icon),
+                                const SizedBox(width: 8),
+                                Text(houseWork.title),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedHouseWorkId = value;
+                        _selectedHouseWork = houseWorks.firstWhere(
+                          (hw) => hw.id == value,
+                          orElse: () => houseWorks.first,
+                        );
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '家事を選択してください';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 選択された家事の詳細表示
+                  if (_selectedHouseWork != null) ...[
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Text(
+                        _selectedHouseWork!.icon,
                         style: const TextStyle(fontSize: 24),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          widget.existingWorkLog!.title,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                // 家事ログの名前入力欄
-                TextFormField(
-                  controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: '家事ログの名前',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '家事ログの名前を入力してください';
-                    }
-                    return null;
-                  },
-                ),
-              const SizedBox(height: 16),
+                      title: Text(_selectedHouseWork!.title),
+                      subtitle:
+                          _selectedHouseWork!.description != null
+                              ? Text(_selectedHouseWork!.description!)
+                              : null,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
-              // 家事ログのアイコン入力欄
-              if (widget.existingWorkLog == null)
-                TextFormField(
-                  controller: _iconController,
-                  decoration: const InputDecoration(
-                    labelText: '家事ログのアイコン',
-                    border: OutlineInputBorder(),
-                    hintText: '絵文字1文字を入力',
+                  // メモ入力欄
+                  TextFormField(
+                    controller: _noteController,
+                    decoration: const InputDecoration(
+                      labelText: 'メモ（任意）',
+                      border: OutlineInputBorder(),
+                      hintText: '実行時のメモを入力',
+                    ),
+                    maxLines: 3,
                   ),
-                  maxLength: 1, // 1文字のみ入力可能
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'アイコンを入力してください';
-                    }
-                    return null;
-                  },
-                ),
-              if (widget.existingWorkLog == null) const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-              // 家事ログの完了時刻入力欄
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('完了時刻'),
-                subtitle: Text(dateFormat.format(_completedAt)),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () => _selectDateTime(context),
+                  // 完了時刻入力欄
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('完了時刻'),
+                    subtitle: Text(dateFormat.format(_completedAt)),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () => _selectDateTime(context),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // 実行ユーザー表示
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('実行したユーザー'),
+                    subtitle: Text(currentUser?.displayName ?? 'ゲスト'),
+                    leading: const Icon(Icons.person),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-
-              // 家事ログの実行したユーザー表示
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('実行したユーザー'),
-                subtitle: Text(currentUser?.displayName ?? 'ゲスト'),
-                leading: const Icon(Icons.person),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error:
+            (error, stackTrace) =>
+                Center(child: Text('家事データの読み込みに失敗しました: $error')),
       ),
       actions: [
         TextButton(
@@ -270,10 +305,10 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
   }
 
   void _submitForm() {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate() && _selectedHouseWorkId != null) {
       final workLogRepository = ref.read(workLogRepositoryProvider);
       final currentUser = ref.read(authServiceProvider).currentUser;
-      final houseId = ref.read(currentHouseIdProvider); // ハウスIDを取得
+      final houseId = ref.read(currentHouseIdProvider);
 
       if (currentUser == null) {
         ScaffoldMessenger.of(
@@ -282,22 +317,18 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
         return;
       }
 
-      // 既存のワークログを元にした場合でも、常に新規ワークログとして登録するためIDは空文字列を指定
+      // 新しい家事ログを作成
       final workLog = WorkLog(
-        id: '', // 常に新規ワークログとして登録するため空文字列を指定
-        title: widget.existingWorkLog?.title ?? _titleController.text,
-        icon: widget.existingWorkLog?.icon ?? _iconController.text, // アイコンを設定
-        createdAt: DateTime.now(),
-        completedAt: _completedAt,
-        createdBy: currentUser.uid,
-        completedBy: currentUser.uid,
-        isShared: true, // デフォルトで共有
-        isRecurring: false, // 家事ログは繰り返しなし
-        isCompleted: true, // 家事ログは完了済み
+        id: '', // 常に新規家事ログとして登録するため空文字列を指定
+        houseWorkId: _selectedHouseWorkId!, // 選択された家事のID
+        completedAt: _completedAt, // 完了時刻
+        completedBy: currentUser.uid, // 実行ユーザー
+        note:
+            _noteController.text.isNotEmpty ? _noteController.text : null, // メモ
       );
 
       try {
-        // ワークログを保存（houseIdを指定）
+        // 家事ログを保存
         workLogRepository.save(houseId, workLog);
 
         // 保存成功メッセージを表示
@@ -306,7 +337,7 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
             context,
           ).showSnackBar(const SnackBar(content: Text('家事ログを登録しました')));
 
-          // ダイアログを閉じて更新フラグをtrueで返す
+          // ダイアログを閉じる（更新フラグをtrueにして渡す）
           Navigator.of(context).pop(true);
         }
       } on FirebaseException catch (e) {
