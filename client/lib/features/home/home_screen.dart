@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/features/home/work_log_add_dialog.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
@@ -73,22 +74,61 @@ class HomeScreen extends ConsumerWidget {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            // ワークログ追加画面に遷移
-            Navigator.of(context)
-                .push(
-                  MaterialPageRoute<bool?>(
-                    builder: (context) => const WorkLogAddScreen(),
+            // 家事ログ追加の選択肢を表示するボトムシートを表示
+            showModalBottomSheet<void>(
+              context: context,
+              builder:
+                  (context) => Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.add_circle),
+                        title: const Text('家事ログを画面で追加'),
+                        onTap: () {
+                          Navigator.pop(context); // ボトムシートを閉じる
+                          // 既存のワークログ追加画面に遷移
+                          Navigator.of(context)
+                              .push(
+                                MaterialPageRoute<bool?>(
+                                  builder:
+                                      (context) => const WorkLogAddScreen(),
+                                ),
+                              )
+                              .then((updated) {
+                                // 家事ログが追加された場合（updatedがtrue）、データを更新
+                                if (updated ?? false) {
+                                  ref
+                                    ..invalidate(completedWorkLogsProvider)
+                                    ..invalidate(
+                                      frequentlyCompletedWorkLogsProvider,
+                                    )
+                                    ..invalidate(plannedWorkLogsProvider);
+                                }
+                              });
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.add_box),
+                        title: const Text('家事ログをダイアログで追加'),
+                        onTap: () {
+                          Navigator.pop(context); // ボトムシートを閉じる
+                          // 新しい家事ログ追加ダイアログを表示
+                          showWorkLogAddDialog(context, ref).then((updated) {
+                            // 家事ログが追加された場合（updatedがtrue）、データを更新
+                            if (updated ?? false) {
+                              ref
+                                ..invalidate(completedWorkLogsProvider)
+                                ..invalidate(
+                                  frequentlyCompletedWorkLogsProvider,
+                                )
+                                ..invalidate(plannedWorkLogsProvider);
+                            }
+                          });
+                        },
+                      ),
+                    ],
                   ),
-                )
-                .then((updated) {
-                  // 家事ログが追加された場合（updatedがtrue）、データを更新
-                  if (updated ?? false) {
-                    ref
-                      ..invalidate(completedWorkLogsProvider)
-                      ..invalidate(frequentlyCompletedWorkLogsProvider)
-                      ..invalidate(plannedWorkLogsProvider);
-                  }
-                });
+            );
           },
           child: const Icon(Icons.add),
         ),
@@ -131,26 +171,72 @@ class HomeScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: InkWell(
                   onTap: () {
-                    // 選択された家事ログを元に新しい家事ログを登録する画面に遷移
-                    Navigator.of(context)
-                        .push(
-                          MaterialPageRoute<bool?>(
-                            builder:
-                                (context) =>
-                                    WorkLogAddScreen.fromExistingWorkLog(
-                                      workLog,
-                                    ),
+                    // ダイアログで家事ログを追加するか、画面で追加するかを選択するボトムシートを表示
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder:
+                          (context) => Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                leading: const Icon(Icons.add_circle),
+                                title: const Text('家事ログを画面で記録'),
+                                onTap: () {
+                                  Navigator.pop(context); // ボトムシートを閉じる
+                                  // 既存のワークログ追加画面に遷移
+                                  Navigator.of(context)
+                                      .push(
+                                        MaterialPageRoute<bool?>(
+                                          builder:
+                                              (context) =>
+                                                  WorkLogAddScreen.fromExistingWorkLog(
+                                                    workLog,
+                                                  ),
+                                        ),
+                                      )
+                                      .then((updated) {
+                                        // 家事ログが追加された場合（updatedがtrue）、データを更新
+                                        if (updated == true) {
+                                          ref
+                                            ..invalidate(
+                                              completedWorkLogsProvider,
+                                            )
+                                            ..invalidate(
+                                              frequentlyCompletedWorkLogsProvider,
+                                            )
+                                            ..invalidate(
+                                              plannedWorkLogsProvider,
+                                            );
+                                        }
+                                      });
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.add_box),
+                                title: const Text('家事ログをダイアログで記録'),
+                                onTap: () {
+                                  Navigator.pop(context); // ボトムシートを閉じる
+                                  // 新しい家事ログ追加ダイアログを表示
+                                  showWorkLogAddDialog(
+                                    context,
+                                    ref,
+                                    existingWorkLog: workLog,
+                                  ).then((updated) {
+                                    // 家事ログが追加された場合（updatedがtrue）、データを更新
+                                    if (updated == true) {
+                                      ref
+                                        ..invalidate(completedWorkLogsProvider)
+                                        ..invalidate(
+                                          frequentlyCompletedWorkLogsProvider,
+                                        )
+                                        ..invalidate(plannedWorkLogsProvider);
+                                    }
+                                  });
+                                },
+                              ),
+                            ],
                           ),
-                        )
-                        .then((updated) {
-                          // 家事ログが追加された場合（updatedがtrue）、データを更新
-                          if (updated == true) {
-                            ref
-                              ..invalidate(completedWorkLogsProvider)
-                              ..invalidate(frequentlyCompletedWorkLogsProvider)
-                              ..invalidate(plannedWorkLogsProvider);
-                          }
-                        });
+                    );
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(8),
