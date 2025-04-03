@@ -31,7 +31,11 @@ platform :android do
     begin
       release_notes = generate_release_notes
 
-      File.write(release_notes_path, release_notes)
+      # Google Playのリリースノートにおける文字数制限に対応
+      trimmed_release_notes = release_notes[0...500]
+      UI.message("Trimmed release notes to 500 characters")
+
+      File.write(release_notes_path, trimmed_release_notes)
 
       build_dev
 
