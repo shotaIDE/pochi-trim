@@ -21,7 +21,7 @@ class WorkLogDetailScreen extends ConsumerWidget {
 
     // 対応する家事情報を取得
     final houseWorkAsync = ref.watch(
-      FutureProvider<HouseWork?>((ref) async {
+      FutureProvider<HouseWork?>((ref) {
         final repository = ref.read(houseWorkRepositoryProvider);
         return repository.getById(houseId, workLog.houseWorkId);
       }),

@@ -178,7 +178,7 @@ class WorkLogRepository {
     String houseId,
     WorkLog workLog,
     String userId,
-  ) async {
+  ) {
     // 家事ログを完了としてマークするロジック
     final updatedWorkLog = WorkLog(
       id: workLog.id,
