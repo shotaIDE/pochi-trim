@@ -16,6 +16,8 @@ abstract class WorkLog with _$WorkLog {
     String? note, // 実行時のメモ（オプション）
   }) = _WorkLog;
 
+  const WorkLog._();
+
   factory WorkLog.fromJson(Map<String, dynamic> json) =>
       _$WorkLogFromJson(json);
 

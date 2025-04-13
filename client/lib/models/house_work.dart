@@ -8,8 +8,6 @@ part 'house_work.g.dart';
 /// 家事の基本情報を表現する
 @freezed
 abstract class HouseWork with _$HouseWork {
-  // プライベートコンストラクタを追加
-
   const factory HouseWork({
     required String id,
     required String title,
@@ -22,6 +20,8 @@ abstract class HouseWork with _$HouseWork {
     int? recurringIntervalMs,
     @Default(0) int priority,
   }) = _HouseWork;
+
+  const HouseWork._();
 
   factory HouseWork.fromJson(Map<String, dynamic> json) =>
       _$HouseWorkFromJson(json);
