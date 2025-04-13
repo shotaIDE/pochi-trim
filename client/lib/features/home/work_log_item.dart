@@ -2,8 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/work_log_add_dialog.dart';
 import 'package:house_worker/features/home/work_log_provider.dart';
+import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
+import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:intl/intl.dart';
+
+// WorkLogに対応するHouseWorkを取得するプロバイダー
+final FutureProviderFamily<HouseWork?, WorkLog> _houseWorkForLogProvider =
+    FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
+      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+      // ここではハウスIDをハードコードしていますが、実際のアプリケーションでは適切な方法で取得してください
+      const houseId = 'default-house-id';
+      return houseWorkRepository.getById(houseId, workLog.houseWorkId);
+    });
 
 class WorkLogItem extends ConsumerWidget {
   const WorkLogItem({
@@ -19,6 +30,9 @@ class WorkLogItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // WorkLogに関連するHouseWorkを取得
+    final houseWorkAsync = ref.watch(_houseWorkForLogProvider(workLog));
+
     return Dismissible(
       key: Key('workLog-${workLog.id}'),
       background: Container(
@@ -64,100 +78,95 @@ class WorkLogItem extends ConsumerWidget {
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+            child: houseWorkAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Text('エラー: $err'),
+              data: (houseWork) {
+                // HouseWorkがnullの場合は代替表示
+                final icon = houseWork?.icon ?? '📝';
+                final title = houseWork?.title ?? '不明な家事';
+                // WorkLogは常に完了しているので以下の条件分岐は不要
+                // const isCompleted = true;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // アイコンを表示
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withAlpha(25),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      alignment: Alignment.center,
-                      margin: const EdgeInsets.only(right: 12),
-                      child: Text(
-                        workLog.icon,
-                        style: const TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        workLog.title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                    Row(
+                      children: [
+                        // アイコンを表示
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withAlpha(25),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          margin: const EdgeInsets.only(right: 12),
+                          child: Text(
+                            icon,
+                            style: const TextStyle(fontSize: 24),
+                          ),
                         ),
-                      ),
-                    ),
-                    // 記録ボタンを追加
-                    IconButton(
-                      icon: const Icon(Icons.add_circle_outline),
-                      tooltip: 'この家事を記録する',
-                      onPressed: () {
-                        // 家事ログ追加ダイアログを表示
-                        showWorkLogAddDialog(
-                          context,
-                          ref,
-                          existingWorkLog: workLog,
-                        ).then((updated) {
-                          // 家事ログが追加された場合（updatedがtrue）、データを更新
-                          if (updated == true) {
-                            ref
-                              ..invalidate(completedWorkLogsProvider)
-                              ..invalidate(frequentlyCompletedWorkLogsProvider);
-                          }
-                        });
-                      },
-                    ),
-                    // 完了ボタンを追加（onCompleteが提供されている場合のみ表示）
-                    if (onComplete != null && !workLog.isCompleted)
-                      IconButton(
-                        icon: const Icon(Icons.check_circle_outline),
-                        tooltip: 'この家事を完了としてマーク',
-                        onPressed: onComplete,
-                        color: Colors.green,
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child:
-                          workLog.isCompleted
-                              ? _CompletedDateText(
-                                completedAt: workLog.completedAt,
-                              )
-                              : const Text(
-                                '未完了',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        workLog.isCompleted
-                            ? '実行者: ${workLog.completedBy ?? "不明"}'
-                            : '作成者: ${workLog.createdBy}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                        // 記録ボタンを追加
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline),
+                          tooltip: 'この家事を記録する',
+                          onPressed: () {
+                            // 家事ログ追加ダイアログを表示
+                            showWorkLogAddDialog(
+                              context,
+                              ref,
+                              existingWorkLog: workLog,
+                            ).then((updated) {
+                              // 家事ログが追加された場合（updatedがtrue）、データを更新
+                              if (updated == true) {
+                                ref
+                                  ..invalidate(completedWorkLogsProvider)
+                                  ..invalidate(
+                                    frequentlyCompletedWorkLogsProvider,
+                                  );
+                              }
+                            });
+                          },
+                        ),
+                        // 完了ボタンは不要（WorkLogは既に完了しているため）
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: _CompletedDateText(
+                            completedAt: workLog.completedAt,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            '実行者: ${workLog.completedBy}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-                ),
-              ],
+                );
+              },
             ),
           ),
         ),

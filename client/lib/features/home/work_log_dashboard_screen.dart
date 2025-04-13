@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// HomeScreen.dartからインポート
+import 'package:house_worker/features/home/home_screen.dart'
+    show houseWorkForWorkLogProvider;
 import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:intl/intl.dart';
@@ -12,11 +15,20 @@ class WorkLogDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // この家事に関連するログを取得
     final workLogsAsyncValue = ref.watch(
-      workLogsByTitleProvider(workLog.title),
+      workLogsByHouseWorkIdProvider(workLog.houseWorkId),
     );
 
+    // 関連する家事情報を取得
+    final houseWorkAsyncValue = ref.watch(houseWorkForWorkLogProvider(workLog));
+
     return Scaffold(
-      appBar: AppBar(title: Text('${workLog.title}のダッシュボード')),
+      appBar: AppBar(
+        title: houseWorkAsyncValue.when(
+          data: (houseWork) => Text('${houseWork?.title ?? "家事"}のダッシュボード'),
+          loading: () => const Text('ダッシュボード読み込み中...'),
+          error: (_, _) => const Text('家事ダッシュボード'),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -30,35 +42,44 @@ class WorkLogDashboardScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        // アイコンを表示
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withAlpha(
-                              26, // 0.1 = 約10%の透明度 = 255 * 0.1 ≈ 26
-                            ),
-                            borderRadius: BorderRadius.circular(10),
+                    houseWorkAsyncValue.when(
+                      data:
+                          (houseWork) => Row(
+                            children: [
+                              // アイコンを表示
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(
+                                    context,
+                                  ).primaryColor.withAlpha(
+                                    26, // 0.1 = 約10%の透明度 = 255 * 0.1 ≈ 26
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                alignment: Alignment.center,
+                                margin: const EdgeInsets.only(right: 16),
+                                child: Text(
+                                  houseWork?.icon ?? '🏠',
+                                  style: const TextStyle(fontSize: 30),
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  houseWork?.title ?? '不明な家事',
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          alignment: Alignment.center,
-                          margin: const EdgeInsets.only(right: 16),
-                          child: Text(
-                            workLog.icon,
-                            style: const TextStyle(fontSize: 30),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            workLog.title,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
+                      loading:
+                          () =>
+                              const Center(child: CircularProgressIndicator()),
+                      error: (_, _) => const Text('家事情報の取得に失敗しました'),
                     ),
                     const SizedBox(height: 24),
                     // 完了ログ件数
@@ -104,9 +125,7 @@ class WorkLogDashboardScreen extends ConsumerWidget {
                                   title: _CompletedDateText(
                                     completedAt: log.completedAt,
                                   ),
-                                  subtitle: Text(
-                                    '実行者: ${log.completedBy ?? "不明"}',
-                                  ),
+                                  subtitle: Text('実行者: ${log.completedBy}'),
                                 ),
                               );
                             },

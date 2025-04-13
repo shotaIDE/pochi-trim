@@ -10,6 +10,17 @@ final completedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
   return workLogRepository.getCompletedWorkLogs(houseId);
 });
 
+// 特定の家事IDに関連するワークログを取得するプロバイダー
+final FutureProviderFamily<List<WorkLog>, String>
+workLogsByHouseWorkIdProvider = FutureProvider.family<List<WorkLog>, String>((
+  ref,
+  houseWorkId,
+) {
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
+  final houseId = ref.watch(currentHouseIdProvider);
+  return workLogRepository.getWorkLogsByHouseWork(houseId, houseWorkId);
+});
+
 // タイトルでワークログを検索するプロバイダー
 final FutureProviderFamily<List<WorkLog>, String> workLogsByTitleProvider =
     FutureProvider.family<List<WorkLog>, String>((ref, title) {
@@ -47,35 +58,38 @@ final frequentlyCompletedWorkLogsProvider = FutureProvider<List<WorkLog>>((
   final completedLogs =
       await workLogRepository.getCompletedWorkLogs(houseId).first;
 
-  // タイトルごとに集計して、頻度の高い順にソート
-  final titleFrequency = <String, int>{};
-  final latestLogByTitle = <String, WorkLog>{};
+  // 家事IDごとに集計して、頻度の高い順にソート
+  final houseWorkFrequency = <String, int>{};
+  final latestLogByHouseWork = <String, WorkLog>{};
 
   for (final log in completedLogs) {
-    titleFrequency[log.title] = (titleFrequency[log.title] ?? 0) + 1;
+    houseWorkFrequency[log.houseWorkId] =
+        (houseWorkFrequency[log.houseWorkId] ?? 0) + 1;
 
-    // 各タイトルの最新のログを保持
-    final existingLog = latestLogByTitle[log.title];
+    // 各家事IDの最新のログを保持
+    final existingLog = latestLogByHouseWork[log.houseWorkId];
     // completedAtがnullの場合を考慮
     final logCompletedAt = log.completedAt;
     final existingLogCompletedAt = existingLog?.completedAt;
 
     if (existingLog == null ||
-        (logCompletedAt != null &&
-            (existingLogCompletedAt == null ||
-                logCompletedAt.isAfter(existingLogCompletedAt)))) {
-      latestLogByTitle[log.title] = log;
+        (existingLogCompletedAt == null ||
+            logCompletedAt.isAfter(existingLogCompletedAt))) {
+      latestLogByHouseWork[log.houseWorkId] = log;
     }
   }
 
-  // 頻度順にソートされたタイトルのリスト
-  final sortedTitles =
-      titleFrequency.keys.toList()
-        ..sort((a, b) => titleFrequency[b]!.compareTo(titleFrequency[a]!));
+  // 頻度順にソートされた家事IDのリスト
+  final sortedHouseWorkIds =
+      houseWorkFrequency.keys.toList()..sort(
+        (a, b) => houseWorkFrequency[b]!.compareTo(houseWorkFrequency[a]!),
+      );
 
   // 上位5件のログを返す（または全件数が5未満の場合はすべて）
-  final topTitles = sortedTitles.take(5).toList();
-  return topTitles.map((title) => latestLogByTitle[title]!).toList();
+  return sortedHouseWorkIds
+      .take(5)
+      .map((id) => latestLogByHouseWork[id]!)
+      .toList();
 });
 
 class WorkLogDeletionNotifier {

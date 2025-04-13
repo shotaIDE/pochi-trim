@@ -9,28 +9,32 @@ final workLogRepositoryProvider = Provider<WorkLogRepository>((ref) {
   return WorkLogRepository();
 });
 
+/// 家事ログリポジトリ
+/// 家事の実行記録を管理するためのリポジトリ
 class WorkLogRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // ハウスIDを指定してワークログコレクションの参照を取得
+  // ハウスIDを指定して家事ログコレクションの参照を取得
   CollectionReference _getWorkLogsCollection(String houseId) {
     return _firestore.collection('houses').doc(houseId).collection('workLogs');
   }
 
+  /// 家事ログを保存する
   Future<String> save(String houseId, WorkLog workLog) async {
     final workLogsCollection = _getWorkLogsCollection(houseId);
 
     if (workLog.id.isEmpty) {
-      // 新規ワークログの場合
+      // 新規家事ログの場合
       final docRef = await workLogsCollection.add(workLog.toFirestore());
       return docRef.id;
     } else {
-      // 既存ワークログの更新
+      // 既存家事ログの更新
       await workLogsCollection.doc(workLog.id).update(workLog.toFirestore());
       return workLog.id;
     }
   }
 
+  /// 複数の家事ログを一括保存する
   Future<List<String>> saveAll(String houseId, List<WorkLog> workLogs) async {
     final ids = <String>[];
     for (final workLog in workLogs) {
@@ -40,6 +44,7 @@ class WorkLogRepository {
     return ids;
   }
 
+  /// IDを指定して家事ログを取得する
   Future<WorkLog?> getById(String houseId, String id) async {
     final doc = await _getWorkLogsCollection(houseId).doc(id).get();
     if (doc.exists) {
@@ -48,21 +53,24 @@ class WorkLogRepository {
     return null;
   }
 
+  /// すべての家事ログを取得する
   Future<List<WorkLog>> getAll(String houseId) async {
     final querySnapshot = await _getWorkLogsCollection(houseId).get();
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
+  /// 家事ログを削除する
   Future<bool> delete(String houseId, String id) async {
     try {
       await _getWorkLogsCollection(houseId).doc(id).delete();
       return true;
     } on FirebaseException catch (e) {
-      _logger.warning('ワークログ削除エラー', e);
+      _logger.warning('家事ログ削除エラー', e);
       return false;
     }
   }
 
+  /// すべての家事ログを削除する
   Future<void> deleteAll(String houseId) async {
     final querySnapshot = await _getWorkLogsCollection(houseId).get();
     final batch = _firestore.batch();
@@ -74,113 +82,112 @@ class WorkLogRepository {
     await batch.commit();
   }
 
-  Future<List<WorkLog>> getIncompleteWorkLogs(String houseId) async {
+  /// 特定の家事に関連する家事ログを取得する
+  Future<List<WorkLog>> getWorkLogsByHouseWork(
+    String houseId,
+    String houseWorkId,
+  ) async {
     final querySnapshot =
         await _getWorkLogsCollection(houseId)
-            .where('isCompleted', isEqualTo: false)
-            .orderBy('priority', descending: true)
+            .where('houseWorkId', isEqualTo: houseWorkId)
+            .orderBy('completedAt', descending: true)
             .get();
 
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
-  Stream<List<WorkLog>> getCompletedWorkLogs(String houseId) {
+  /// 特定のユーザーが実行した家事ログを取得する
+  Future<List<WorkLog>> getWorkLogsByUser(String houseId, String userId) async {
+    final querySnapshot =
+        await _getWorkLogsCollection(houseId)
+            .where('completedBy', isEqualTo: userId)
+            .orderBy('completedAt', descending: true)
+            .get();
+
+    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
+  }
+
+  /// 最新の家事ログを取得するストリーム
+  Stream<List<WorkLog>> getRecentWorkLogs(String houseId, {int limit = 20}) {
     return _getWorkLogsCollection(houseId)
-        .orderBy('createdAt', descending: true)
+        .orderBy('completedAt', descending: true)
+        .limit(limit)
         .snapshots()
         .map((snapshot) => snapshot.docs.map(WorkLog.fromFirestore).toList());
   }
 
-  Future<List<WorkLog>> getWorkLogsByUser(String houseId, String userId) async {
-    // createdByまたはcompletedByがuserIdに一致するワークログを取得
-    final createdBySnapshot =
-        await _getWorkLogsCollection(
-          houseId,
-        ).where('createdBy', isEqualTo: userId).get();
-
-    final completedBySnapshot =
-        await _getWorkLogsCollection(
-          houseId,
-        ).where('completedBy', isEqualTo: userId).get();
-
-    // 結果をマージして重複を排除
-    final processedIds = <String>{};
-    final workLogs = <WorkLog>[];
-
-    for (final doc in createdBySnapshot.docs) {
-      if (!processedIds.contains(doc.id)) {
-        workLogs.add(WorkLog.fromFirestore(doc));
-        processedIds.add(doc.id);
-      }
-    }
-
-    for (final doc in completedBySnapshot.docs) {
-      if (!processedIds.contains(doc.id)) {
-        workLogs.add(WorkLog.fromFirestore(doc));
-        processedIds.add(doc.id);
-      }
-    }
-
-    return workLogs;
-  }
-
-  Future<List<WorkLog>> getSharedWorkLogs(String houseId) async {
-    final querySnapshot =
-        await _getWorkLogsCollection(houseId)
-            .where('isShared', isEqualTo: true)
-            .orderBy('priority', descending: true)
-            .get();
-
-    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
-  }
-
-  Future<List<WorkLog>> getRecurringWorkLogs(String houseId) async {
-    final querySnapshot =
-        await _getWorkLogsCollection(houseId)
-            .where('isRecurring', isEqualTo: true)
-            .orderBy('priority', descending: true)
-            .get();
-
-    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
-  }
-
-  Future<void> completeWorkLog(
+  /// 特定の期間内の家事ログを取得する
+  Future<List<WorkLog>> getWorkLogsByDateRange(
     String houseId,
-    WorkLog workLog,
-    String userId,
+    DateTime startDate,
+    DateTime endDate,
   ) async {
-    // freezedモデルはイミュータブルなので、copyWithを使用して新しいインスタンスを作成
-    final completedWorkLog = workLog.copyWith(
-      isCompleted: true,
-      completedAt: DateTime.now(),
-      completedBy: userId,
-    );
+    final querySnapshot =
+        await _getWorkLogsCollection(houseId)
+            .where(
+              'completedAt',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+            )
+            .where(
+              'completedAt',
+              isLessThanOrEqualTo: Timestamp.fromDate(endDate),
+            )
+            .orderBy('completedAt', descending: true)
+            .get();
 
-    await _getWorkLogsCollection(
-      houseId,
-    ).doc(workLog.id).update(completedWorkLog.toFirestore());
+    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
+  /// 未完了の家事ログを取得する
+  Future<List<WorkLog>> getIncompleteWorkLogs(String houseId) async {
+    // 未完了の家事ログを取得するロジックを実装
+    // 例: 特定のフラグが立っていないものを取得
+    final querySnapshot =
+        await _getWorkLogsCollection(houseId)
+            .where('isCompleted', isEqualTo: false)
+            .orderBy('dueDate', descending: false)
+            .get();
+
+    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
+  }
+
+  /// 完了済みの家事ログを取得するストリーム
+  Stream<List<WorkLog>> getCompletedWorkLogs(String houseId) {
+    return _getWorkLogsCollection(houseId)
+        .where('isCompleted', isEqualTo: true)
+        .orderBy('completedAt', descending: true)
+        .limit(50) // 最新の50件に制限
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map(WorkLog.fromFirestore).toList());
+  }
+
+  /// タイトルで家事ログを検索する
   Future<List<WorkLog>> getWorkLogsByTitle(String houseId, String title) async {
+    // タイトルで家事ログを検索するロジック
     final querySnapshot =
         await _getWorkLogsCollection(houseId)
             .where('title', isEqualTo: title)
-            .orderBy('createdAt', descending: true)
+            .orderBy('completedAt', descending: true)
             .get();
 
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
-  // 権限チェック用のメソッド
-  Future<bool> hasPermission(String houseId, String userId) async {
-    final DocumentSnapshot permissionDoc =
-        await _firestore
-            .collection('permissions')
-            .doc(houseId)
-            .collection('admin')
-            .doc(userId)
-            .get();
+  /// 家事ログを完了としてマークする
+  Future<String> completeWorkLog(
+    String houseId,
+    WorkLog workLog,
+    String userId,
+  ) {
+    // 家事ログを完了としてマークするロジック
+    final updatedWorkLog = WorkLog(
+      id: workLog.id,
+      houseWorkId: workLog.houseWorkId,
+      completedAt: DateTime.now(), // 現在時刻を完了時刻として設定
+      completedBy: userId, // 完了したユーザーのIDを設定
+      note: workLog.note,
+    );
 
-    return permissionDoc.exists;
+    return save(houseId, updatedWorkLog);
   }
 }

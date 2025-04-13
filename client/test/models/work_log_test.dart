@@ -11,147 +11,62 @@ void main() {
   group('WorkLog Model Tests', () {
     // テスト用のデータ
     const testId = 'test-id';
-    const testTitle = 'テスト作業';
-    const testDescription = 'これはテスト用の作業です';
-    const testIcon = '🧹';
-    final testCreatedAt = DateTime(2023);
+    const testHouseWorkId = 'house-work-1';
     final testCompletedAt = DateTime(2023, 1, 2);
-    const testCreatedBy = 'user-1';
     const testCompletedBy = 'user-2';
-    const testIsShared = true;
-    const testIsRecurring = true;
-    const testRecurringIntervalMs = 86400000; // 1日
-    const testIsCompleted = true;
-    const testPriority = 2;
+    const testNote = 'これはテスト用のメモです';
 
     test('WorkLogモデルが正しく作成されること', () {
       final workLog = WorkLog(
         id: testId,
-        title: testTitle,
-        description: testDescription,
-        icon: testIcon,
-        createdAt: testCreatedAt,
+        houseWorkId: testHouseWorkId,
         completedAt: testCompletedAt,
-        createdBy: testCreatedBy,
         completedBy: testCompletedBy,
-        isShared: testIsShared,
-        isRecurring: testIsRecurring,
-        recurringIntervalMs: testRecurringIntervalMs,
-        isCompleted: testIsCompleted,
-        priority: testPriority,
+        note: testNote,
       );
 
       expect(workLog.id, equals(testId));
-      expect(workLog.title, equals(testTitle));
-      expect(workLog.description, equals(testDescription));
-      expect(workLog.icon, equals(testIcon));
-      expect(workLog.createdAt, equals(testCreatedAt));
+      expect(workLog.houseWorkId, equals(testHouseWorkId));
       expect(workLog.completedAt, equals(testCompletedAt));
-      expect(workLog.createdBy, equals(testCreatedBy));
       expect(workLog.completedBy, equals(testCompletedBy));
-      expect(workLog.isShared, equals(testIsShared));
-      expect(workLog.isRecurring, equals(testIsRecurring));
-      expect(workLog.recurringIntervalMs, equals(testRecurringIntervalMs));
-      expect(workLog.isCompleted, equals(testIsCompleted));
-      expect(workLog.priority, equals(testPriority));
+      expect(workLog.note, equals(testNote));
     });
 
     test('デフォルト値が正しく設定されること', () {
       final workLog = WorkLog(
         id: testId,
-        title: testTitle,
-        icon: testIcon,
-        createdAt: testCreatedAt,
-        createdBy: testCreatedBy,
-        isShared: testIsShared,
-        isRecurring: testIsRecurring,
+        houseWorkId: testHouseWorkId,
+        completedAt: testCompletedAt,
+        completedBy: testCompletedBy,
       );
 
-      expect(workLog.isCompleted, equals(false)); // デフォルト値のテスト
-      expect(workLog.priority, equals(0)); // デフォルト値のテスト
-    });
-
-    test('recurringInterval getterが正しく動作すること', () {
-      final workLog = WorkLog(
-        id: testId,
-        title: testTitle,
-        icon: testIcon,
-        createdAt: testCreatedAt,
-        createdBy: testCreatedBy,
-        isShared: testIsShared,
-        isRecurring: testIsRecurring,
-        recurringIntervalMs: testRecurringIntervalMs,
-      );
-
-      expect(
-        workLog.recurringInterval,
-        equals(const Duration(milliseconds: testRecurringIntervalMs)),
-      );
-
-      final workLogWithoutInterval = WorkLog(
-        id: testId,
-        title: testTitle,
-        icon: testIcon,
-        createdAt: testCreatedAt,
-        createdBy: testCreatedBy,
-        isShared: testIsShared,
-        isRecurring: false,
-      );
-
-      expect(workLogWithoutInterval.recurringInterval, isNull);
+      expect(workLog.note, isNull); // デフォルト値のテスト
     });
 
     test('toFirestore()が正しいMapを返すこと', () {
       final workLog = WorkLog(
         id: testId,
-        title: testTitle,
-        description: testDescription,
-        icon: testIcon,
-        createdAt: testCreatedAt,
+        houseWorkId: testHouseWorkId,
         completedAt: testCompletedAt,
-        createdBy: testCreatedBy,
         completedBy: testCompletedBy,
-        isShared: testIsShared,
-        isRecurring: testIsRecurring,
-        recurringIntervalMs: testRecurringIntervalMs,
-        isCompleted: testIsCompleted,
-        priority: testPriority,
+        note: testNote,
       );
 
       final firestoreMap = workLog.toFirestore();
 
-      expect(firestoreMap['title'], equals(testTitle));
-      expect(firestoreMap['description'], equals(testDescription));
-      expect(firestoreMap['icon'], equals(testIcon));
-      expect(firestoreMap['createdBy'], equals(testCreatedBy));
+      expect(firestoreMap['houseWorkId'], equals(testHouseWorkId));
       expect(firestoreMap['completedBy'], equals(testCompletedBy));
-      expect(firestoreMap['isShared'], equals(testIsShared));
-      expect(firestoreMap['isRecurring'], equals(testIsRecurring));
-      expect(
-        firestoreMap['recurringIntervalMs'],
-        equals(testRecurringIntervalMs),
-      );
-      expect(firestoreMap['isCompleted'], equals(testIsCompleted));
-      expect(firestoreMap['priority'], equals(testPriority));
-      expect(firestoreMap['createdAt'], isA<Timestamp>());
+      expect(firestoreMap['note'], equals(testNote));
       expect(firestoreMap['completedAt'], isA<Timestamp>());
     });
 
     test('fromFirestore()が正しくWorkLogオブジェクトを作成すること', () {
       // Firestoreのドキュメントスナップショットをモック
       final mockData = {
-        'title': testTitle,
-        'description': testDescription,
-        'icon': testIcon,
-        'createdAt': Timestamp.fromDate(testCreatedAt),
+        'houseWorkId': testHouseWorkId,
         'completedAt': Timestamp.fromDate(testCompletedAt),
-        'createdBy': testCreatedBy,
         'completedBy': testCompletedBy,
-        'isShared': testIsShared,
-        'isRecurring': testIsRecurring,
-        'recurringIntervalMs': testRecurringIntervalMs,
-        'isCompleted': testIsCompleted,
-        'priority': testPriority,
+        'note': testNote,
       };
 
       final mockDocSnapshot = MockDocumentSnapshot();
@@ -161,26 +76,18 @@ void main() {
       final workLog = WorkLog.fromFirestore(mockDocSnapshot);
 
       expect(workLog.id, equals(testId));
-      expect(workLog.title, equals(testTitle));
-      expect(workLog.description, equals(testDescription));
-      expect(workLog.icon, equals(testIcon));
-      expect(workLog.createdAt, equals(testCreatedAt));
+      expect(workLog.houseWorkId, equals(testHouseWorkId));
       expect(workLog.completedAt, equals(testCompletedAt));
-      expect(workLog.createdBy, equals(testCreatedBy));
       expect(workLog.completedBy, equals(testCompletedBy));
-      expect(workLog.isShared, equals(testIsShared));
-      expect(workLog.isRecurring, equals(testIsRecurring));
-      expect(workLog.recurringIntervalMs, equals(testRecurringIntervalMs));
-      expect(workLog.isCompleted, equals(testIsCompleted));
-      expect(workLog.priority, equals(testPriority));
+      expect(workLog.note, equals(testNote));
     });
 
     test('fromFirestore()が欠損データに対してデフォルト値を設定すること', () {
       // 一部のフィールドが欠けているデータ
       final mockIncompleteData = {
-        'title': testTitle,
-        'createdAt': Timestamp.fromDate(testCreatedAt),
-        'createdBy': testCreatedBy,
+        'houseWorkId': testHouseWorkId,
+        'completedAt': Timestamp.fromDate(testCompletedAt),
+        'completedBy': testCompletedBy,
       };
 
       final mockDocSnapshot = MockDocumentSnapshot();
@@ -190,18 +97,10 @@ void main() {
       final workLog = WorkLog.fromFirestore(mockDocSnapshot);
 
       expect(workLog.id, equals(testId));
-      expect(workLog.title, equals(testTitle));
-      expect(workLog.description, isNull);
-      expect(workLog.icon, equals('🏠')); // デフォルトアイコン
-      expect(workLog.createdAt, equals(testCreatedAt));
-      expect(workLog.completedAt, isNull);
-      expect(workLog.createdBy, equals(testCreatedBy));
-      expect(workLog.completedBy, isNull);
-      expect(workLog.isShared, equals(false));
-      expect(workLog.isRecurring, equals(false));
-      expect(workLog.recurringIntervalMs, isNull);
-      expect(workLog.isCompleted, equals(false));
-      expect(workLog.priority, equals(0));
+      expect(workLog.houseWorkId, equals(testHouseWorkId));
+      expect(workLog.completedAt, equals(testCompletedAt));
+      expect(workLog.completedBy, equals(testCompletedBy));
+      expect(workLog.note, isNull);
     });
   });
 }

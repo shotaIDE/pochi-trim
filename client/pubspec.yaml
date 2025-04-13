@@ -19,6 +19,7 @@ dependencies:
   freezed_annotation:
   google_fonts:
   intl:
+  json_annotation: 4.9.0
   logging:
   package_info_plus:
   path_provider:
@@ -34,6 +35,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   freezed:
+  json_serializable: 6.9.4
   mockito:
   pedantic_mono: 1.30.3
 

@@ -6,7 +6,9 @@ import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
 import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:house_worker/features/settings/settings_screen.dart';
+import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
+import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
 
@@ -21,6 +23,14 @@ final plannedWorkLogsProvider = FutureProvider<List<WorkLog>>((ref) {
   final houseId = ref.watch<String>(currentHouseIdProvider);
   return workLogRepository.getIncompleteWorkLogs(houseId);
 });
+
+// WorkLogに対応するHouseWorkを取得するプロバイダー
+final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
+    FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
+      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+      final houseId = ref.watch(currentHouseIdProvider);
+      return houseWorkRepository.getById(houseId, workLog.houseWorkId);
+    });
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -128,46 +138,65 @@ class HomeScreen extends ConsumerWidget {
             itemCount: frequentWorkLogs.length,
             itemBuilder: (context, index) {
               final workLog = frequentWorkLogs[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: InkWell(
-                  onTap: () {
-                    // 家事ログ追加ダイアログを直接表示
-                    showWorkLogAddDialog(
-                      context,
-                      ref,
-                      existingWorkLog: workLog,
-                    ).then((updated) {
-                      // 家事ログが追加された場合（updatedがtrue）、データを更新
-                      if (updated == true) {
-                        ref
-                          ..invalidate(completedWorkLogsProvider)
-                          ..invalidate(frequentlyCompletedWorkLogsProvider)
-                          ..invalidate(plannedWorkLogsProvider);
-                      }
-                    });
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min, // 内容に合わせてサイズを最小化
-                      children: [
-                        Text(
-                          workLog.icon,
-                          style: const TextStyle(fontSize: 24),
+              // HouseWorkの情報を取得
+              final houseWorkAsync = ref.watch(
+                houseWorkForWorkLogProvider(workLog),
+              );
+
+              return houseWorkAsync.when(
+                data: (houseWork) {
+                  if (houseWork == null) {
+                    return const SizedBox.shrink(); // 家事情報がない場合は表示しない
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: InkWell(
+                      onTap: () {
+                        // 家事ログ追加ダイアログを直接表示
+                        showWorkLogAddDialog(
+                          context,
+                          ref,
+                          existingWorkLog: workLog,
+                        ).then((updated) {
+                          // 家事ログが追加された場合（updatedがtrue）、データを更新
+                          if (updated == true) {
+                            ref
+                              ..invalidate(completedWorkLogsProvider)
+                              ..invalidate(frequentlyCompletedWorkLogsProvider)
+                              ..invalidate(plannedWorkLogsProvider);
+                          }
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min, // 内容に合わせてサイズを最小化
+                          children: [
+                            Text(
+                              houseWork.icon,
+                              style: const TextStyle(fontSize: 24),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              houseWork.title,
+                              style: const TextStyle(fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          workLog.title,
-                          style: const TextStyle(fontSize: 12),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
+                loading:
+                    () => const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: CircularProgressIndicator(),
+                    ),
+                error: (_, _) => const SizedBox.shrink(),
               );
             },
           ),
