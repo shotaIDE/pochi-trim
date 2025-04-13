@@ -85,8 +85,8 @@ class WorkLogItem extends ConsumerWidget {
                 // HouseWorkがnullの場合は代替表示
                 final icon = houseWork?.icon ?? '📝';
                 final title = houseWork?.title ?? '不明な家事';
-                // completedAtは必須フィールドなので、常に存在する
-                const isCompleted = true; // WorkLogは常に完了している
+                // WorkLogは常に完了しているので以下の条件分岐は不要
+                // const isCompleted = true;
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,14 +139,7 @@ class WorkLogItem extends ConsumerWidget {
                             });
                           },
                         ),
-                        // 完了ボタンを追加（onCompleteが提供されている場合のみ表示）
-                        if (onComplete != null && !isCompleted)
-                          IconButton(
-                            icon: const Icon(Icons.check_circle_outline),
-                            tooltip: 'この家事を完了としてマーク',
-                            onPressed: onComplete,
-                            color: Colors.green,
-                          ),
+                        // 完了ボタンは不要（WorkLogは既に完了しているため）
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -154,19 +147,9 @@ class WorkLogItem extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Flexible(
-                          child:
-                              isCompleted
-                                  ? _CompletedDateText(
-                                    completedAt: workLog.completedAt,
-                                  )
-                                  : const Text(
-                                    '未完了',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                          child: _CompletedDateText(
+                            completedAt: workLog.completedAt,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Flexible(
