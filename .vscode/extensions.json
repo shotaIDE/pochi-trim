@@ -1,5 +1,6 @@
 {
   "recommendations": [
+    "dart-code.flutter",
     "esbenp.prettier-vscode",
     "github.vscode-github-actions",
     "streetsidesoftware.code-spell-checker",
