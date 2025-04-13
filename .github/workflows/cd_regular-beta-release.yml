@@ -68,7 +68,7 @@ jobs:
     needs:
       - trigger-cd-dev
     if: needs.trigger-cd-dev.outputs.new-tag-generated == 'true'
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
