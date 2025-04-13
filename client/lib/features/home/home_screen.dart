@@ -196,7 +196,7 @@ class HomeScreen extends ConsumerWidget {
                       padding: EdgeInsets.symmetric(horizontal: 8),
                       child: CircularProgressIndicator(),
                     ),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
               );
             },
           ),

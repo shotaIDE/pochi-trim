@@ -26,7 +26,7 @@ class WorkLogDashboardScreen extends ConsumerWidget {
         title: houseWorkAsyncValue.when(
           data: (houseWork) => Text('${houseWork?.title ?? "家事"}のダッシュボード'),
           loading: () => const Text('ダッシュボード読み込み中...'),
-          error: (_, __) => const Text('家事ダッシュボード'),
+          error: (_, _) => const Text('家事ダッシュボード'),
         ),
       ),
       body: SingleChildScrollView(
@@ -79,7 +79,7 @@ class WorkLogDashboardScreen extends ConsumerWidget {
                       loading:
                           () =>
                               const Center(child: CircularProgressIndicator()),
-                      error: (_, __) => const Text('家事情報の取得に失敗しました'),
+                      error: (_, _) => const Text('家事情報の取得に失敗しました'),
                     ),
                     const SizedBox(height: 24),
                     // 完了ログ件数
