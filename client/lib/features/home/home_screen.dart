@@ -250,7 +250,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   child: Container(
                     width: 1,
-                    color: Colors.grey.withOpacity(0.3),
+                    color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
                   ),
                 ),
 
