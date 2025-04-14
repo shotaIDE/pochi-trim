@@ -93,10 +93,8 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
   late final TextEditingController _descriptionController;
 
   var _icon = '🏠';
-  var _isShared = true;
   var _isRecurring = false;
   int? _recurringIntervalMs;
-  var _priority = 0;
 
   @override
   void initState() {
@@ -109,10 +107,8 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
         text: hw.description ?? '',
       );
       _icon = hw.icon;
-      _isShared = hw.isShared;
       _isRecurring = hw.isRecurring;
       _recurringIntervalMs = hw.recurringIntervalMs;
-      _priority = hw.priority;
     } else {
       _titleController = TextEditingController();
       _descriptionController = TextEditingController();
@@ -195,18 +191,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
               ),
               const SizedBox(height: 16),
 
-              // 共有設定
-              SwitchListTile(
-                title: const Text('家族で共有する'),
-                subtitle: const Text('ONにすると家族全員にこの家事が表示されます'),
-                value: _isShared,
-                onChanged: (value) {
-                  setState(() {
-                    _isShared = value;
-                  });
-                },
-              ),
-
               // 繰り返し設定
               SwitchListTile(
                 title: const Text('定期的な家事'),
@@ -229,15 +213,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
                   onTap: _selectRecurringInterval,
                 ),
               ],
-
-              const SizedBox(height: 8),
-              // 優先度設定
-              ListTile(
-                title: const Text('優先度'),
-                subtitle: Text(_getPriorityText()),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: _selectPriority,
-              ),
 
               const SizedBox(height: 24),
 
@@ -369,53 +344,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
     }
   }
 
-  String _getPriorityText() {
-    switch (_priority) {
-      case 0:
-        return '標準';
-      case 1:
-        return '高';
-      case 2:
-        return '最高';
-      default:
-        return '標準';
-    }
-  }
-
-  Future<void> _selectPriority() async {
-    final priorities = [
-      {'label': '標準', 'value': 0},
-      {'label': '高', 'value': 1},
-      {'label': '最高', 'value': 2},
-    ];
-
-    final selectedPriority = await showDialog<int>(
-      context: context,
-      builder:
-          (context) => SimpleDialog(
-            title: const Text('優先度'),
-            children:
-                priorities
-                    .map(
-                      (priority) => SimpleDialogOption(
-                        onPressed:
-                            () => Navigator.of(
-                              context,
-                            ).pop(priority['value']! as int),
-                        child: Text(priority['label']! as String),
-                      ),
-                    )
-                    .toList(),
-          ),
-    );
-
-    if (selectedPriority != null) {
-      setState(() {
-        _priority = selectedPriority;
-      });
-    }
-  }
-
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
@@ -440,10 +368,8 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
         icon: _icon,
         createdAt: widget.existingHouseWork?.createdAt ?? DateTime.now(),
         createdBy: widget.existingHouseWork?.createdBy ?? currentUser.uid,
-        isShared: _isShared,
         isRecurring: _isRecurring,
         recurringIntervalMs: _isRecurring ? _recurringIntervalMs : null,
-        priority: _priority,
       );
 
       try {

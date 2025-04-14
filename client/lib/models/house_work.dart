@@ -15,10 +15,8 @@ abstract class HouseWork with _$HouseWork {
     required String icon,
     required DateTime createdAt,
     required String createdBy,
-    required bool isShared,
     required bool isRecurring,
     int? recurringIntervalMs,
-    @Default(0) int priority,
   }) = _HouseWork;
 
   const HouseWork._();
@@ -36,10 +34,8 @@ abstract class HouseWork with _$HouseWork {
       icon: data['icon']?.toString() ?? '🏠', // デフォルトアイコンを家の絵文字に設定
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       createdBy: data['createdBy']?.toString() ?? '',
-      isShared: data['isShared'] as bool? ?? false,
       isRecurring: data['isRecurring'] as bool? ?? false,
       recurringIntervalMs: data['recurringIntervalMs'] as int?,
-      priority: data['priority'] as int? ?? 0, // デフォルト優先度
     );
   }
 
