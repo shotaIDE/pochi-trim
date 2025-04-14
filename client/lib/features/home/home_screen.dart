@@ -43,6 +43,7 @@ final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
     });
 
 // 家事をもとに新しいWorkLogを作成するための便利なプロバイダー
+// TODO(ide): これが本当に必要か確認
 final ProviderFamily<WorkLog, HouseWork> workLogForHouseWorkProvider =
     Provider.family<WorkLog, HouseWork>((ref, houseWork) {
       return WorkLog(
