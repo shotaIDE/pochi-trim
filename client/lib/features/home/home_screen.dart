@@ -24,12 +24,34 @@ final plannedWorkLogsProvider = FutureProvider<List<WorkLog>>((ref) {
   return workLogRepository.getIncompleteWorkLogs(houseId);
 });
 
+// 最近登録された家事を取得するプロバイダー
+final recentlyAddedHouseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+  final houseId = ref.watch(currentHouseIdProvider);
+
+  return houseWorkRepository
+      .getAll(houseId: houseId)
+      .map((houseWorks) => houseWorks.take(5).toList());
+});
+
 // WorkLogに対応するHouseWorkを取得するプロバイダー
 final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
     FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
       final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
       final houseId = ref.watch(currentHouseIdProvider);
       return houseWorkRepository.getById(houseId, workLog.houseWorkId);
+    });
+
+// 家事をもとに新しいWorkLogを作成するための便利なプロバイダー
+// TODO(ide): これが本当に必要か確認
+final ProviderFamily<WorkLog, HouseWork> workLogForHouseWorkProvider =
+    Provider.family<WorkLog, HouseWork>((ref, houseWork) {
+      return WorkLog(
+        id: '',
+        houseWorkId: houseWork.id,
+        completedAt: DateTime.now(),
+        completedBy: ref.read(authServiceProvider).currentUser?.uid ?? '',
+      );
     });
 
 class HomeScreen extends ConsumerWidget {
@@ -84,15 +106,15 @@ class HomeScreen extends ConsumerWidget {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            // 家事ログ追加画面に直接遷移
+            // 家事追加画面に直接遷移
             Navigator.of(context)
                 .push(
                   MaterialPageRoute<bool?>(
-                    builder: (context) => const WorkLogAddScreen(),
+                    builder: (context) => const HouseWorkAddScreen(),
                   ),
                 )
                 .then((updated) {
-                  // 家事ログが追加された場合（updatedがtrue）、データを更新
+                  // 家事が追加された場合（updatedがtrue）、データを更新
                   if (updated ?? false) {
                     ref
                       ..invalidate(completedWorkLogsProvider)
@@ -113,97 +135,210 @@ class HomeScreen extends ConsumerWidget {
       frequentlyCompletedWorkLogsProvider,
     );
 
-    return frequentWorkLogsAsync.when(
-      data: (frequentWorkLogs) {
-        if (frequentWorkLogs.isEmpty) {
-          return const SizedBox.shrink(); // 家事ログがない場合は表示しない
-        }
+    final recentHouseWorksAsync = ref.watch(recentlyAddedHouseWorksProvider);
 
-        return Container(
-          // TODO(ide): 高さを固定せず、内容に合わせて自動調整したい
-          height: 90,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
-                spreadRadius: 1,
-                blurRadius: 5,
-                offset: const Offset(0, -1),
+    return Container(
+      // TODO(ide): 高さを固定せず、内容に合わせて自動調整したい
+      height: 90,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, -1),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(left: 12, top: 4, bottom: 2),
+            child: Text(
+              'クイック登録',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
               ),
-            ],
+            ),
           ),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: frequentWorkLogs.length,
-            itemBuilder: (context, index) {
-              final workLog = frequentWorkLogs[index];
-              // HouseWorkの情報を取得
-              final houseWorkAsync = ref.watch(
-                houseWorkForWorkLogProvider(workLog),
-              );
+          Expanded(
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                // 最近登録された家事一覧
+                ...recentHouseWorksAsync.when(
+                  data: (recentHouseWorks) {
+                    if (recentHouseWorks.isEmpty) {
+                      return [const SizedBox.shrink()];
+                    }
 
-              return houseWorkAsync.when(
-                data: (houseWork) {
-                  if (houseWork == null) {
-                    return const SizedBox.shrink(); // 家事情報がない場合は表示しない
-                  }
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: InkWell(
-                      onTap: () {
-                        // 家事ログ追加ダイアログを直接表示
-                        showWorkLogAddDialog(
-                          context,
-                          ref,
-                          existingWorkLog: workLog,
-                        ).then((updated) {
-                          // 家事ログが追加された場合（updatedがtrue）、データを更新
-                          if (updated == true) {
-                            ref
-                              ..invalidate(completedWorkLogsProvider)
-                              ..invalidate(frequentlyCompletedWorkLogsProvider)
-                              ..invalidate(plannedWorkLogsProvider);
-                          }
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min, // 内容に合わせてサイズを最小化
-                          children: [
-                            Text(
-                              houseWork.icon,
-                              style: const TextStyle(fontSize: 24),
+                    return recentHouseWorks.map((houseWork) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: InkWell(
+                          onTap: () {
+                            // 家事ログを追加するダイアログを表示
+                            final newWorkLog = ref.read(
+                              workLogForHouseWorkProvider(houseWork),
+                            );
+                            showWorkLogAddDialog(
+                              context,
+                              ref,
+                              existingWorkLog: newWorkLog,
+                            ).then((updated) {
+                              if (updated == true) {
+                                ref
+                                  ..invalidate(completedWorkLogsProvider)
+                                  ..invalidate(
+                                    frequentlyCompletedWorkLogsProvider,
+                                  )
+                                  ..invalidate(plannedWorkLogsProvider);
+                              }
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green[50],
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    houseWork.icon,
+                                    style: const TextStyle(fontSize: 24),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  houseWork.title,
+                                  style: const TextStyle(fontSize: 12),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              houseWork.title,
-                              style: const TextStyle(fontSize: 12),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                },
-                loading:
-                    () => const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: CircularProgressIndicator(),
-                    ),
-                error: (_, _) => const SizedBox.shrink(),
-              );
-            },
+                      );
+                    }).toList();
+                  },
+                  loading:
+                      () => [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: CircularProgressIndicator(),
+                        ),
+                      ],
+                  error: (_, _) => [const SizedBox.shrink()],
+                ),
+
+                // 区切り線
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  child: Container(
+                    width: 1,
+                    color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
+                  ),
+                ),
+
+                // 最近よく完了されている家事ログ一覧
+                ...frequentWorkLogsAsync.when(
+                  data: (frequentWorkLogs) {
+                    if (frequentWorkLogs.isEmpty) {
+                      return [const SizedBox.shrink()];
+                    }
+
+                    return List.generate(frequentWorkLogs.length, (index) {
+                      final workLog = frequentWorkLogs[index];
+                      final houseWorkAsync = ref.watch(
+                        houseWorkForWorkLogProvider(workLog),
+                      );
+
+                      return houseWorkAsync.when(
+                        data: (houseWork) {
+                          if (houseWork == null) {
+                            return const SizedBox.shrink();
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: InkWell(
+                              onTap: () {
+                                // 家事ログ追加ダイアログを直接表示
+                                showWorkLogAddDialog(
+                                  context,
+                                  ref,
+                                  existingWorkLog: workLog,
+                                ).then((updated) {
+                                  if (updated == true) {
+                                    ref
+                                      ..invalidate(completedWorkLogsProvider)
+                                      ..invalidate(
+                                        frequentlyCompletedWorkLogsProvider,
+                                      )
+                                      ..invalidate(plannedWorkLogsProvider);
+                                  }
+                                });
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue[50],
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Text(
+                                        houseWork.icon,
+                                        style: const TextStyle(fontSize: 24),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      houseWork.title,
+                                      style: const TextStyle(fontSize: 12),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        loading:
+                            () => const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              child: CircularProgressIndicator(),
+                            ),
+                        error: (_, _) => const SizedBox.shrink(),
+                      );
+                    });
+                  },
+                  loading: () => [const SizedBox.shrink()],
+                  error: (_, _) => [const SizedBox.shrink()],
+                ),
+              ],
+            ),
           ),
-        );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
+        ],
+      ),
     );
   }
 }

@@ -77,7 +77,7 @@ String getRandomEmoji() {
 final FutureProviderFamily<List<HouseWork>, String> dialogHouseWorksProvider =
     FutureProvider.family<List<HouseWork>, String>((ref, houseId) {
       final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
-      return houseWorkRepository.getAll(houseId);
+      return houseWorkRepository.getAllOnce(houseId);
     });
 
 /// 家事ログ追加ダイアログを表示する関数
@@ -113,7 +113,6 @@ class WorkLogAddDialog extends ConsumerStatefulWidget {
 
 class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _noteController;
 
   String? _selectedHouseWorkId;
   HouseWork? _selectedHouseWork;
@@ -124,19 +123,11 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
     super.initState();
     // 既存のワークログがある場合は、そのデータを初期値として設定
     if (widget.existingWorkLog != null) {
-      _noteController = TextEditingController();
       _selectedHouseWorkId = widget.existingWorkLog!.houseWorkId;
       _completedAt = widget.existingWorkLog!.completedAt;
     } else {
-      _noteController = TextEditingController();
       _completedAt = DateTime.now();
     }
-  }
-
-  @override
-  void dispose() {
-    _noteController.dispose();
-    super.dispose();
   }
 
   @override
@@ -226,25 +217,9 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
                         style: const TextStyle(fontSize: 24),
                       ),
                       title: Text(_selectedHouseWork!.title),
-                      subtitle:
-                          _selectedHouseWork!.description != null
-                              ? Text(_selectedHouseWork!.description!)
-                              : null,
                     ),
                     const SizedBox(height: 16),
                   ],
-
-                  // メモ入力欄
-                  TextFormField(
-                    controller: _noteController,
-                    decoration: const InputDecoration(
-                      labelText: 'メモ（任意）',
-                      border: OutlineInputBorder(),
-                      hintText: '実行時のメモを入力',
-                    ),
-                    maxLines: 3,
-                  ),
-                  const SizedBox(height: 16),
 
                   // 完了時刻入力欄
                   ListTile(
@@ -331,8 +306,6 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
         houseWorkId: _selectedHouseWorkId!, // 選択された家事のID
         completedAt: _completedAt, // 完了時刻
         completedBy: currentUser.uid, // 実行ユーザー
-        note:
-            _noteController.text.isNotEmpty ? _noteController.text : null, // メモ
       );
 
       try {

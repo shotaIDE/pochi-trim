@@ -14,7 +14,6 @@ void main() {
     const testHouseWorkId = 'house-work-1';
     final testCompletedAt = DateTime(2023, 1, 2);
     const testCompletedBy = 'user-2';
-    const testNote = 'これはテスト用のメモです';
 
     test('WorkLogモデルが正しく作成されること', () {
       final workLog = WorkLog(
@@ -22,25 +21,12 @@ void main() {
         houseWorkId: testHouseWorkId,
         completedAt: testCompletedAt,
         completedBy: testCompletedBy,
-        note: testNote,
       );
 
       expect(workLog.id, equals(testId));
       expect(workLog.houseWorkId, equals(testHouseWorkId));
       expect(workLog.completedAt, equals(testCompletedAt));
       expect(workLog.completedBy, equals(testCompletedBy));
-      expect(workLog.note, equals(testNote));
-    });
-
-    test('デフォルト値が正しく設定されること', () {
-      final workLog = WorkLog(
-        id: testId,
-        houseWorkId: testHouseWorkId,
-        completedAt: testCompletedAt,
-        completedBy: testCompletedBy,
-      );
-
-      expect(workLog.note, isNull); // デフォルト値のテスト
     });
 
     test('toFirestore()が正しいMapを返すこと', () {
@@ -49,15 +35,13 @@ void main() {
         houseWorkId: testHouseWorkId,
         completedAt: testCompletedAt,
         completedBy: testCompletedBy,
-        note: testNote,
       );
 
       final firestoreMap = workLog.toFirestore();
 
       expect(firestoreMap['houseWorkId'], equals(testHouseWorkId));
       expect(firestoreMap['completedBy'], equals(testCompletedBy));
-      expect(firestoreMap['note'], equals(testNote));
-      expect(firestoreMap['completedAt'], isA<Timestamp>());
+      expect(firestoreMap['completedAt'], equals(testCompletedAt));
     });
 
     test('fromFirestore()が正しくWorkLogオブジェクトを作成すること', () {
@@ -66,7 +50,6 @@ void main() {
         'houseWorkId': testHouseWorkId,
         'completedAt': Timestamp.fromDate(testCompletedAt),
         'completedBy': testCompletedBy,
-        'note': testNote,
       };
 
       final mockDocSnapshot = MockDocumentSnapshot();
@@ -79,7 +62,6 @@ void main() {
       expect(workLog.houseWorkId, equals(testHouseWorkId));
       expect(workLog.completedAt, equals(testCompletedAt));
       expect(workLog.completedBy, equals(testCompletedBy));
-      expect(workLog.note, equals(testNote));
     });
 
     test('fromFirestore()が欠損データに対してデフォルト値を設定すること', () {
@@ -100,7 +82,6 @@ void main() {
       expect(workLog.houseWorkId, equals(testHouseWorkId));
       expect(workLog.completedAt, equals(testCompletedAt));
       expect(workLog.completedBy, equals(testCompletedBy));
-      expect(workLog.note, isNull);
     });
   });
 }

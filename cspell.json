@@ -6,7 +6,6 @@
   "dictionaries": ["domain", "dependency"],
   "ignorePaths": [
     "*.freezed.dart",
-    "*.g.dart",
     "client/ios/Pods",
     "client/lib/firebase_options_*.dart",
     "generated_plugin_registrant.dart",
