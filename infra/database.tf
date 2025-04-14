@@ -57,7 +57,7 @@ resource "google_firestore_index" "house_works" {
   ]
 }
 
-resource "google_firestore_index" "work_logs_user_created" {
+resource "google_firestore_index" "work_logs" {
   project    = google_project.default.project_id
   collection = "workLogs"
   database   = google_firestore_database.default.name
