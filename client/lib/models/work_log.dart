@@ -9,10 +9,9 @@ part 'work_log.freezed.dart';
 abstract class WorkLog with _$WorkLog {
   const factory WorkLog({
     required String id,
-    required String houseWorkId, // 関連する家事のID
+    required String houseWorkId, // 家事のID
     required DateTime completedAt, // 完了時刻
     required String completedBy, // 実行ユーザー
-    String? note, // 実行時のメモ（オプション）
   }) = _WorkLog;
 
   const WorkLog._();
@@ -25,7 +24,6 @@ abstract class WorkLog with _$WorkLog {
       houseWorkId: data['houseWorkId']?.toString() ?? '',
       completedAt: (data['completedAt'] as Timestamp).toDate(),
       completedBy: data['completedBy']?.toString() ?? '',
-      note: data['note']?.toString(),
     );
   }
 
@@ -36,7 +34,6 @@ abstract class WorkLog with _$WorkLog {
       // `DateTime` インスタンスはそのままFirestoreに渡すことで、Firestore側でタイムスタンプ型として保持させる
       'completedAt': completedAt,
       'completedBy': completedBy,
-      'note': note,
     };
   }
 }

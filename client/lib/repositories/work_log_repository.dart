@@ -185,7 +185,6 @@ class WorkLogRepository {
       houseWorkId: workLog.houseWorkId,
       completedAt: DateTime.now(), // 現在時刻を完了時刻として設定
       completedBy: userId, // 完了したユーザーのIDを設定
-      note: workLog.note,
     );
 
     return save(houseId, updatedWorkLog);

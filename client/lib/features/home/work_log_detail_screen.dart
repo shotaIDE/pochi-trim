@@ -82,8 +82,6 @@ class WorkLogDetailScreen extends ConsumerWidget {
                   // WorkLogの情報を表示
                   _buildInfoRow('実行日時', dateFormat.format(workLog.completedAt)),
                   _buildInfoRow('実行者', workLog.completedBy),
-                  if (workLog.note != null && workLog.note!.isNotEmpty)
-                    _buildInfoRow('メモ', workLog.note!),
 
                   if (houseWork.isRecurring &&
                       houseWork.recurringIntervalMs != null)

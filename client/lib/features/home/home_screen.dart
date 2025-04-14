@@ -51,7 +51,6 @@ final ProviderFamily<WorkLog, HouseWork> workLogForHouseWorkProvider =
         houseWorkId: houseWork.id,
         completedAt: DateTime.now(),
         completedBy: ref.read(authServiceProvider).currentUser?.uid ?? '',
-        note: '',
       );
     });
 
