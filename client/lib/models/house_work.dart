@@ -32,7 +32,10 @@ abstract class HouseWork with _$HouseWork {
       title: data['title']?.toString() ?? '',
       description: data['description']?.toString(),
       icon: data['icon']?.toString() ?? '🏠', // デフォルトアイコンを家の絵文字に設定
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      createdAt:
+          data['createdAt'] is Timestamp
+              ? (data['createdAt'] as Timestamp).toDate()
+              : DateTime.now(),
       createdBy: data['createdBy']?.toString() ?? '',
       isRecurring: data['isRecurring'] as bool? ?? false,
       recurringIntervalMs: data['recurringIntervalMs'] as int?,
@@ -41,6 +44,14 @@ abstract class HouseWork with _$HouseWork {
 
   // FirestoreへのデータマッピングのためのMap
   Map<String, dynamic> toFirestore() {
-    return toJson()..remove('id');
+    return {
+      'title': title,
+      'description': description,
+      'icon': icon,
+      'createdAt': createdAt,
+      'createdBy': createdBy,
+      'isRecurring': isRecurring,
+      'recurringIntervalMs': recurringIntervalMs,
+    };
   }
 }

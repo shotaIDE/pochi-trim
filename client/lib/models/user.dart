@@ -41,7 +41,7 @@ abstract class User with _$User {
       'name': name,
       'email': email,
       'householdIds': householdIds,
-      'createdAt': Timestamp.fromDate(createdAt),
+      'createdAt': createdAt,
       'isPremium': isPremium,
     };
   }

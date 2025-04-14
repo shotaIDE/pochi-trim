@@ -38,9 +38,6 @@ abstract class WorkLog with _$WorkLog {
 
   // FirestoreへのデータマッピングのためのMap
   Map<String, dynamic> toFirestore() {
-    final data = toJson()..remove('id');
-    // DateTimeをTimestampに変換
-    data['completedAt'] = Timestamp.fromDate(completedAt);
-    return data;
+    return toJson()..remove('id');
   }
 }
