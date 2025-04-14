@@ -25,14 +25,13 @@ final plannedWorkLogsProvider = FutureProvider<List<WorkLog>>((ref) {
 });
 
 // 最近登録された家事を取得するプロバイダー
-final recentlyAddedHouseWorksProvider = FutureProvider<List<HouseWork>>((ref) {
+final recentlyAddedHouseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
   final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
   final houseId = ref.watch(currentHouseIdProvider);
-  return houseWorkRepository.getAll(houseId).then((houseWorks) {
-    // 作成日時で降順にソートして最新の5件を返す
-    houseWorks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return houseWorks.take(5).toList();
-  });
+
+  return houseWorkRepository
+      .getAllStream(houseId: houseId)
+      .map((houseWorks) => houseWorks.take(5).toList());
 });
 
 // WorkLogに対応するHouseWorkを取得するプロバイダー

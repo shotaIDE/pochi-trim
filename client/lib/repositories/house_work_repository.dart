@@ -67,6 +67,13 @@ class HouseWorkRepository {
     return querySnapshot.docs.map(HouseWork.fromFirestore).toList();
   }
 
+  Stream<List<HouseWork>> getAllStream({required String houseId}) {
+    return _getHouseWorksCollection(houseId)
+        .orderBy('createdBy', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map(HouseWork.fromFirestore).toList());
+  }
+
   /// 家事を削除する
   Future<bool> delete(String houseId, String id) async {
     try {
