@@ -61,17 +61,16 @@ class HouseWorkRepository {
     return null;
   }
 
-  /// すべての家事を取得する
-  Future<List<HouseWork>> getAllOnce(String houseId) async {
-    final querySnapshot = await _getHouseWorksCollection(houseId).get();
-    return querySnapshot.docs.map(HouseWork.fromFirestore).toList();
-  }
-
   Stream<List<HouseWork>> getAll({required String houseId}) {
     return _getHouseWorksCollection(houseId)
         .orderBy('createdBy', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs.map(HouseWork.fromFirestore).toList());
+  }
+
+  Future<List<HouseWork>> getAllOnce(String houseId) async {
+    final querySnapshot = await _getHouseWorksCollection(houseId).get();
+    return querySnapshot.docs.map(HouseWork.fromFirestore).toList();
   }
 
   /// 家事を削除する
