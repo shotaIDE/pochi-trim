@@ -13,7 +13,10 @@ final FutureProviderFamily<HouseWork?, WorkLog> _houseWorkForLogProvider =
       final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
       // ここではハウスIDをハードコードしていますが、実際のアプリケーションでは適切な方法で取得してください
       const houseId = 'default-house-id';
-      return houseWorkRepository.getById(houseId, workLog.houseWorkId);
+      return houseWorkRepository.getByIdOnce(
+        houseId: houseId,
+        houseWorkId: workLog.houseWorkId,
+      );
     });
 
 class WorkLogItem extends ConsumerWidget {

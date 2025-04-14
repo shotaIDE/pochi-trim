@@ -74,10 +74,14 @@ String getRandomEmoji() {
 // ハウスIDを提供するプロバイダーはwork_log_add_screenからインポート
 
 // 家事一覧を取得するプロバイダー
-final FutureProviderFamily<List<HouseWork>, String> dialogHouseWorksProvider =
-    FutureProvider.family<List<HouseWork>, String>((ref, houseId) {
+final StreamProviderFamily<HouseWork?, String> _houseWorkProvider =
+    StreamProvider.family<HouseWork?, String>((ref, houseWorkId) {
       final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
-      return houseWorkRepository.getAllOnce(houseId);
+      final houseId = ref.read(currentHouseIdProvider);
+      return houseWorkRepository.getById(
+        houseId: houseId,
+        houseWorkId: houseWorkId,
+      );
     });
 
 /// 家事ログ追加ダイアログを表示する関数
@@ -90,7 +94,7 @@ final FutureProviderFamily<List<HouseWork>, String> dialogHouseWorksProvider =
 Future<bool?> showWorkLogAddDialog(
   BuildContext context,
   WidgetRef ref, {
-  WorkLog? existingWorkLog,
+  required WorkLog existingWorkLog,
 }) {
   return showDialog<bool>(
     context: context,
@@ -99,13 +103,14 @@ Future<bool?> showWorkLogAddDialog(
 }
 
 class WorkLogAddDialog extends ConsumerStatefulWidget {
-  const WorkLogAddDialog({super.key, this.existingWorkLog});
+  const WorkLogAddDialog({super.key, required this.existingWorkLog});
 
   // 既存のワークログから新しいワークログを作成するためのファクトリコンストラクタ
   factory WorkLogAddDialog.fromExistingWorkLog(WorkLog workLog) {
     return WorkLogAddDialog(existingWorkLog: workLog);
   }
-  final WorkLog? existingWorkLog;
+
+  final WorkLog existingWorkLog;
 
   @override
   ConsumerState<WorkLogAddDialog> createState() => _WorkLogAddDialogState();
@@ -114,7 +119,7 @@ class WorkLogAddDialog extends ConsumerStatefulWidget {
 class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
   final _formKey = GlobalKey<FormState>();
 
-  String? _selectedHouseWorkId;
+  late String _selectedHouseWorkId;
   HouseWork? _selectedHouseWork;
   late DateTime _completedAt;
 
@@ -122,41 +127,27 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
   void initState() {
     super.initState();
     // 既存のワークログがある場合は、そのデータを初期値として設定
-    if (widget.existingWorkLog != null) {
-      _selectedHouseWorkId = widget.existingWorkLog!.houseWorkId;
-      _completedAt = widget.existingWorkLog!.completedAt;
-    } else {
-      _completedAt = DateTime.now();
-    }
+    _selectedHouseWorkId = widget.existingWorkLog.houseWorkId;
+    _completedAt = widget.existingWorkLog.completedAt;
   }
 
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(authServiceProvider).currentUser;
     final dateFormat = DateFormat('yyyy/MM/dd HH:mm');
-    final houseId = ref.watch(currentHouseIdProvider);
-    final houseWorksAsync = ref.watch(dialogHouseWorksProvider(houseId));
+    final houseWorksAsync = ref.watch(_houseWorkProvider(_selectedHouseWorkId));
 
     return AlertDialog(
-      title: Text(widget.existingWorkLog != null ? '家事ログを記録' : '家事ログ追加'),
+      title: const Text('家事ログを記録'),
       content: houseWorksAsync.when(
-        data: (houseWorks) {
+        data: (houseWork) {
           // 家事が選択されていない場合、最初の家事を選択
-          if (_selectedHouseWorkId == null && houseWorks.isNotEmpty) {
-            _selectedHouseWorkId = houseWorks.first.id;
-            _selectedHouseWork = houseWorks.first;
-          }
-
-          // 選択された家事を特定
-          if (_selectedHouseWork == null && _selectedHouseWorkId != null) {
-            _selectedHouseWork = houseWorks.firstWhere(
-              (hw) => hw.id == _selectedHouseWorkId,
-              orElse:
-                  () =>
-                      houseWorks.isNotEmpty
-                          ? houseWorks.first
-                          : throw StateError('家事データが見つかりません'),
-            );
+          if (houseWork != null) {
+            _selectedHouseWorkId = houseWork.id;
+            _selectedHouseWork = houseWork;
+          } else {
+            // TODO(ide): 家事が選択されていない場合の処理を追加
+            throw StateError('家事データが見つかりません');
           }
 
           return Form(
@@ -166,48 +157,6 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 家事選択ドロップダウン
-                  DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                      labelText: '家事を選択',
-                      border: OutlineInputBorder(),
-                    ),
-                    value: _selectedHouseWorkId,
-                    items:
-                        houseWorks.map((houseWork) {
-                          return DropdownMenuItem<String>(
-                            value: houseWork.id,
-                            child: Row(
-                              children: [
-                                Text(houseWork.icon),
-                                const SizedBox(width: 8),
-                                Text(houseWork.title),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedHouseWorkId = value;
-                        _selectedHouseWork = houseWorks.firstWhere(
-                          (hw) => hw.id == value,
-                          orElse:
-                              () =>
-                                  houseWorks.isNotEmpty
-                                      ? houseWorks.first
-                                      : throw StateError('家事データが見つかりません'),
-                        );
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '家事を選択してください';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
                   // 選択された家事の詳細表示
                   if (_selectedHouseWork != null) ...[
                     ListTile(
@@ -288,7 +237,7 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
   }
 
   void _submitForm() {
-    if (_formKey.currentState!.validate() && _selectedHouseWorkId != null) {
+    if (_formKey.currentState!.validate()) {
       final workLogRepository = ref.read(workLogRepositoryProvider);
       final currentUser = ref.read(authServiceProvider).currentUser;
       final houseId = ref.read(currentHouseIdProvider);
@@ -303,7 +252,7 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
       // 新しい家事ログを作成
       final workLog = WorkLog(
         id: '', // 常に新規家事ログとして登録するため空文字列を指定
-        houseWorkId: _selectedHouseWorkId!, // 選択された家事のID
+        houseWorkId: _selectedHouseWorkId, // 選択された家事のID
         completedAt: _completedAt, // 完了時刻
         completedBy: currentUser.uid, // 実行ユーザー
       );

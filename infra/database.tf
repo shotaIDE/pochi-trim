@@ -37,7 +37,27 @@ resource "google_firebaserules_release" "firestore" {
   ]
 }
 
-resource "google_firestore_index" "work_logs_user_created" {
+resource "google_firestore_index" "house_works" {
+  project    = google_project.default.project_id
+  collection = "houseWorks"
+  database   = google_firestore_database.default.name
+
+  fields {
+    field_path = "title"
+    order      = "ASCENDING"
+  }
+
+  fields {
+    field_path = "createdAt"
+    order      = "DESCENDING"
+  }
+
+  depends_on = [
+    google_firestore_database.default,
+  ]
+}
+
+resource "google_firestore_index" "work_logs" {
   project    = google_project.default.project_id
   collection = "workLogs"
   database   = google_firestore_database.default.name
@@ -48,7 +68,7 @@ resource "google_firestore_index" "work_logs_user_created" {
   }
 
   fields {
-    field_path = "createdAt"
+    field_path = "completedAt"
     order      = "DESCENDING"
   }
 
