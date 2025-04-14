@@ -69,7 +69,7 @@ void main() {
       expect(firestoreMap['email'], equals(testEmail));
       expect(firestoreMap['householdIds'], equals(testHouseholdIds));
       expect(firestoreMap['isPremium'], equals(testIsPremium));
-      expect(firestoreMap['createdAt'], isA<Timestamp>());
+      expect(firestoreMap['createdAt'], equals(testCreatedAt));
     });
 
     test('fromFirestore()が正しくUserオブジェクトを作成すること', () {

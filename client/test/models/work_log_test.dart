@@ -41,7 +41,7 @@ void main() {
 
       expect(firestoreMap['houseWorkId'], equals(testHouseWorkId));
       expect(firestoreMap['completedBy'], equals(testCompletedBy));
-      expect(firestoreMap['completedAt'], isA<Timestamp>());
+      expect(firestoreMap['completedAt'], equals(testCompletedAt));
     });
 
     test('fromFirestore()が正しくWorkLogオブジェクトを作成すること', () {
