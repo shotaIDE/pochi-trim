@@ -62,12 +62,12 @@ class HouseWorkRepository {
   }
 
   /// すべての家事を取得する
-  Future<List<HouseWork>> getAll(String houseId) async {
+  Future<List<HouseWork>> getAllOnce(String houseId) async {
     final querySnapshot = await _getHouseWorksCollection(houseId).get();
     return querySnapshot.docs.map(HouseWork.fromFirestore).toList();
   }
 
-  Stream<List<HouseWork>> getAllStream({required String houseId}) {
+  Stream<List<HouseWork>> getAll({required String houseId}) {
     return _getHouseWorksCollection(houseId)
         .orderBy('createdBy', descending: true)
         .snapshots()

@@ -77,7 +77,7 @@ String getRandomEmoji() {
 final FutureProviderFamily<List<HouseWork>, String> dialogHouseWorksProvider =
     FutureProvider.family<List<HouseWork>, String>((ref, houseId) {
       final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
-      return houseWorkRepository.getAll(houseId);
+      return houseWorkRepository.getAllOnce(houseId);
     });
 
 /// 家事ログ追加ダイアログを表示する関数

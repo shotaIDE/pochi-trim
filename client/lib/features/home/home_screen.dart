@@ -30,7 +30,7 @@ final recentlyAddedHouseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
   final houseId = ref.watch(currentHouseIdProvider);
 
   return houseWorkRepository
-      .getAllStream(houseId: houseId)
+      .getAll(houseId: houseId)
       .map((houseWorks) => houseWorks.take(5).toList());
 });
 
