@@ -84,15 +84,15 @@ class HomeScreen extends ConsumerWidget {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            // 家事ログ追加画面に直接遷移
+            // 家事追加画面に直接遷移
             Navigator.of(context)
                 .push(
                   MaterialPageRoute<bool?>(
-                    builder: (context) => const WorkLogAddScreen(),
+                    builder: (context) => const HouseWorkAddScreen(),
                   ),
                 )
                 .then((updated) {
-                  // 家事ログが追加された場合（updatedがtrue）、データを更新
+                  // 家事が追加された場合（updatedがtrue）、データを更新
                   if (updated ?? false) {
                     ref
                       ..invalidate(completedWorkLogsProvider)
