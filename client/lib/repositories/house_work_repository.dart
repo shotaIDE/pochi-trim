@@ -52,9 +52,26 @@ class HouseWorkRepository {
     return ids;
   }
 
+  Stream<HouseWork?> getById({
+    required String houseId,
+    required String houseWorkId,
+  }) {
+    return _getHouseWorksCollection(houseId).doc(houseWorkId).snapshots().map((
+      doc,
+    ) {
+      if (doc.exists) {
+        return HouseWork.fromFirestore(doc);
+      }
+      return null;
+    });
+  }
+
   /// IDを指定して家事を取得する
-  Future<HouseWork?> getById(String houseId, String id) async {
-    final doc = await _getHouseWorksCollection(houseId).doc(id).get();
+  Future<HouseWork?> getByIdOnce({
+    required String houseId,
+    required String houseWorkId,
+  }) async {
+    final doc = await _getHouseWorksCollection(houseId).doc(houseWorkId).get();
     if (doc.exists) {
       return HouseWork.fromFirestore(doc);
     }
