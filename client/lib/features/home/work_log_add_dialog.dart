@@ -226,10 +226,6 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
                         style: const TextStyle(fontSize: 24),
                       ),
                       title: Text(_selectedHouseWork!.title),
-                      subtitle:
-                          _selectedHouseWork!.description != null
-                              ? Text(_selectedHouseWork!.description!)
-                              : null,
                     ),
                     const SizedBox(height: 16),
                   ],

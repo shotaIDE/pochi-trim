@@ -90,7 +90,6 @@ class HouseWorkAddScreen extends ConsumerStatefulWidget {
 class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
-  late final TextEditingController _descriptionController;
 
   var _icon = '🏠';
   var _isRecurring = false;
@@ -103,15 +102,11 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
     if (widget.existingHouseWork != null) {
       final hw = widget.existingHouseWork!;
       _titleController = TextEditingController(text: hw.title);
-      _descriptionController = TextEditingController(
-        text: hw.description ?? '',
-      );
       _icon = hw.icon;
       _isRecurring = hw.isRecurring;
       _recurringIntervalMs = hw.recurringIntervalMs;
     } else {
       _titleController = TextEditingController();
-      _descriptionController = TextEditingController();
       _icon = getRandomEmoji(); // デフォルトでランダムな絵文字を設定
     }
   }
@@ -119,7 +114,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
   @override
   void dispose() {
     _titleController.dispose();
-    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -176,18 +170,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 16),
-
-              // 説明入力欄
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: '説明（任意）',
-                  border: OutlineInputBorder(),
-                  hintText: '家事の説明を入力',
-                ),
-                maxLines: 3,
               ),
               const SizedBox(height: 16),
 
@@ -361,10 +343,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
       final houseWork = HouseWork(
         id: widget.existingHouseWork?.id ?? '', // 編集時は既存のID、新規作成時は空文字列
         title: _titleController.text,
-        description:
-            _descriptionController.text.isNotEmpty
-                ? _descriptionController.text
-                : null,
         icon: _icon,
         createdAt: widget.existingHouseWork?.createdAt ?? DateTime.now(),
         createdBy: widget.existingHouseWork?.createdBy ?? currentUser.uid,

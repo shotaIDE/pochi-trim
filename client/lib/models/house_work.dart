@@ -10,7 +10,6 @@ abstract class HouseWork with _$HouseWork {
   const factory HouseWork({
     required String id,
     required String title,
-    String? description,
     required String icon,
     required DateTime createdAt,
     required String createdBy,
@@ -26,7 +25,6 @@ abstract class HouseWork with _$HouseWork {
     return HouseWork(
       id: doc.id,
       title: data['title']?.toString() ?? '',
-      description: data['description']?.toString(),
       icon: data['icon']?.toString() ?? '🏠', // デフォルトアイコンを家の絵文字に設定
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       createdBy: data['createdBy']?.toString() ?? '',
@@ -39,7 +37,6 @@ abstract class HouseWork with _$HouseWork {
   Map<String, dynamic> toFirestore() {
     return {
       'title': title,
-      'description': description,
       'icon': icon,
       // `DateTime` インスタンスはそのままFirestoreに渡すことで、Firestore側でタイムスタンプ型として保持させる
       'createdAt': createdAt,

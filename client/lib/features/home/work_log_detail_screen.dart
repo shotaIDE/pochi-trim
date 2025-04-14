@@ -77,27 +77,6 @@ class WorkLogDetailScreen extends ConsumerWidget {
                         ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  if (houseWork.description != null &&
-                      houseWork.description!.isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          '詳細:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          houseWork.description!,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    ),
                   const Divider(),
                   const SizedBox(height: 8),
                   // WorkLogの情報を表示
