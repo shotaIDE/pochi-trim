@@ -32,10 +32,7 @@ abstract class HouseWork with _$HouseWork {
       title: data['title']?.toString() ?? '',
       description: data['description']?.toString(),
       icon: data['icon']?.toString() ?? '🏠', // デフォルトアイコンを家の絵文字に設定
-      createdAt:
-          data['createdAt'] is Timestamp
-              ? (data['createdAt'] as Timestamp).toDate()
-              : DateTime.now(),
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
       createdBy: data['createdBy']?.toString() ?? '',
       isRecurring: data['isRecurring'] as bool? ?? false,
       recurringIntervalMs: data['recurringIntervalMs'] as int?,

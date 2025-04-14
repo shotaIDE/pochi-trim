@@ -27,10 +27,7 @@ abstract class WorkLog with _$WorkLog {
     return WorkLog(
       id: doc.id,
       houseWorkId: data['houseWorkId']?.toString() ?? '',
-      completedAt:
-          data['completedAt'] != null
-              ? (data['completedAt'] as Timestamp).toDate()
-              : DateTime.now(),
+      completedAt: (data['completedAt'] as Timestamp).toDate(),
       completedBy: data['completedBy']?.toString() ?? '',
       note: data['note']?.toString(),
     );
