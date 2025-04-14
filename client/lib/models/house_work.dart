@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'house_work.freezed.dart';
-part 'house_work.g.dart';
 
 /// 家事モデル
 /// 家事の基本情報を表現する
@@ -20,9 +19,6 @@ abstract class HouseWork with _$HouseWork {
   }) = _HouseWork;
 
   const HouseWork._();
-
-  factory HouseWork.fromJson(Map<String, dynamic> json) =>
-      _$HouseWorkFromJson(json);
 
   // Firestoreからのデータ変換
   factory HouseWork.fromFirestore(DocumentSnapshot doc) {
@@ -45,6 +41,7 @@ abstract class HouseWork with _$HouseWork {
       'title': title,
       'description': description,
       'icon': icon,
+      // `DateTime` インスタンスはそのままFirestoreに渡すことで、Firestore側でタイムスタンプ型として保持させる
       'createdAt': createdAt,
       'createdBy': createdBy,
       'isRecurring': isRecurring,

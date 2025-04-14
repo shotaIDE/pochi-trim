@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'work_log.freezed.dart';
-part 'work_log.g.dart';
 
 /// 家事ログモデル
 /// 家事の実行記録を表現する
@@ -18,9 +17,6 @@ abstract class WorkLog with _$WorkLog {
 
   const WorkLog._();
 
-  factory WorkLog.fromJson(Map<String, dynamic> json) =>
-      _$WorkLogFromJson(json);
-
   // Firestoreからのデータ変換
   factory WorkLog.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data()! as Map<String, dynamic>;
@@ -35,6 +31,12 @@ abstract class WorkLog with _$WorkLog {
 
   // FirestoreへのデータマッピングのためのMap
   Map<String, dynamic> toFirestore() {
-    return toJson()..remove('id');
+    return {
+      'houseWorkId': houseWorkId,
+      // `DateTime` インスタンスはそのままFirestoreに渡すことで、Firestore側でタイムスタンプ型として保持させる
+      'completedAt': completedAt,
+      'completedBy': completedBy,
+      'note': note,
+    };
   }
 }

@@ -41,6 +41,7 @@ abstract class User with _$User {
       'name': name,
       'email': email,
       'householdIds': householdIds,
+      // `DateTime` インスタンスはそのままFirestoreに渡すことで、Firestore側でタイムスタンプ型として保持させる
       'createdAt': createdAt,
       'isPremium': isPremium,
     };
