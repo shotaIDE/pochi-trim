@@ -239,7 +239,7 @@ class HomeScreen extends ConsumerWidget {
                           child: CircularProgressIndicator(),
                         ),
                       ],
-                  error: (_, __) => [const SizedBox.shrink()],
+                  error: (_, _) => [const SizedBox.shrink()],
                 ),
 
                 // 区切り線
@@ -328,12 +328,12 @@ class HomeScreen extends ConsumerWidget {
                               padding: EdgeInsets.symmetric(horizontal: 8),
                               child: CircularProgressIndicator(),
                             ),
-                        error: (_, __) => const SizedBox.shrink(),
+                        error: (_, _) => const SizedBox.shrink(),
                       );
                     });
                   },
                   loading: () => [const SizedBox.shrink()],
-                  error: (_, __) => [const SizedBox.shrink()],
+                  error: (_, _) => [const SizedBox.shrink()],
                 ),
               ],
             ),
