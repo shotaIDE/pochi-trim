@@ -145,7 +145,7 @@ class WorkLogRepository {
     final querySnapshot =
         await _getWorkLogsCollection(houseId)
             .where('isCompleted', isEqualTo: false)
-            .orderBy('dueDate', descending: false)
+            .orderBy('completedAt', descending: false)
             .get();
 
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
