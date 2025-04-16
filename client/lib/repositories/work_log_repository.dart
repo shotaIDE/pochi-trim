@@ -144,8 +144,8 @@ class WorkLogRepository {
     // 例: 特定のフラグが立っていないものを取得
     final querySnapshot =
         await _getWorkLogsCollection(houseId)
-            .where('isCompleted', isEqualTo: false)
-            .orderBy('dueDate', descending: false)
+            // TODO(ide): 未完了の条件を指定
+            .orderBy('completedAt', descending: false)
             .get();
 
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
@@ -154,7 +154,6 @@ class WorkLogRepository {
   /// 完了済みの家事ログを取得するストリーム
   Stream<List<WorkLog>> getCompletedWorkLogs(String houseId) {
     return _getWorkLogsCollection(houseId)
-        .where('isCompleted', isEqualTo: true)
         .orderBy('completedAt', descending: true)
         .limit(50) // 最新の50件に制限
         .snapshots()
