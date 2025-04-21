@@ -76,7 +76,7 @@ class WorkLogService {
         ..invalidate(frequentlyCompletedWorkLogsProvider);
 
       return true;
-    } catch (e) {
+    } on Exception catch (e) {
       // エラー時の処理
       if (context.mounted) {
         ScaffoldMessenger.of(
