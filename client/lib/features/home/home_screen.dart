@@ -12,16 +12,15 @@ import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
+import 'package:house_worker/services/house_id_provider.dart';
 
 // 選択されたタブを管理するプロバイダー
 final selectedTabProvider = StateProvider<int>((ref) => 0);
 
 // 予定家事一覧を提供するプロバイダー
 final plannedWorkLogsProvider = FutureProvider<List<WorkLog>>((ref) {
-  final workLogRepository = ref.watch<WorkLogRepository>(
-    workLogRepositoryProvider,
-  );
-  final houseId = ref.watch<String>(currentHouseIdProvider);
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
+  final houseId = ref.watch(currentHouseIdProvider);
   return workLogRepository.getIncompleteWorkLogs(houseId);
 });
 

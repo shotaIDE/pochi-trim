@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/home/work_log_add_screen.dart'; // currentHouseIdProviderをインポート
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
+import 'package:house_worker/services/house_id_provider.dart';
 
 // 完了済みワークログの一覧を提供するプロバイダー
 final completedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
