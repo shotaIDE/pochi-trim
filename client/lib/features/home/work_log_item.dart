@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/home/work_log_add_dialog.dart';
 import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
+import 'package:house_worker/services/work_log_service.dart';
 import 'package:intl/intl.dart';
 
 // WorkLogに対応するHouseWorkを取得するプロバイダー
@@ -124,22 +124,15 @@ class WorkLogItem extends ConsumerWidget {
                         IconButton(
                           icon: const Icon(Icons.add_circle_outline),
                           tooltip: 'この家事を記録する',
-                          onPressed: () {
-                            // 家事ログ追加ダイアログを表示
-                            showWorkLogAddDialog(
+                          onPressed: () async {
+                            // WorkLogServiceを使って家事ログを直接記録
+                            final workLogService = ref.read(
+                              workLogServiceProvider,
+                            );
+                            await workLogService.recordWorkLog(
                               context,
-                              ref,
-                              existingWorkLog: workLog,
-                            ).then((updated) {
-                              // 家事ログが追加された場合（updatedがtrue）、データを更新
-                              if (updated == true) {
-                                ref
-                                  ..invalidate(completedWorkLogsProvider)
-                                  ..invalidate(
-                                    frequentlyCompletedWorkLogsProvider,
-                                  );
-                              }
-                            });
+                              workLog.houseWorkId,
+                            );
                           },
                         ),
                         // 完了ボタンは不要（WorkLogは既に完了しているため）

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
-import 'package:house_worker/features/home/work_log_add_dialog.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
@@ -13,12 +12,13 @@ import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/house_id_provider.dart';
+import 'package:house_worker/services/work_log_service.dart';
 
 // 選択されたタブを管理するプロバイダー
 final selectedTabProvider = StateProvider<int>((ref) => 0);
 
 // 予定家事一覧を提供するプロバイダー
-final plannedWorkLogsProvider = FutureProvider<List<WorkLog>>((ref) {
+final plannedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
   final houseId = ref.watch(currentHouseIdProvider);
   return workLogRepository.getIncompleteWorkLogs(houseId);
@@ -114,21 +114,11 @@ class HomeScreen extends ConsumerWidget {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             // 家事追加画面に直接遷移
-            Navigator.of(context)
-                .push(
-                  MaterialPageRoute<bool?>(
-                    builder: (context) => const HouseWorkAddScreen(),
-                  ),
-                )
-                .then((updated) {
-                  // 家事が追加された場合（updatedがtrue）、データを更新
-                  if (updated ?? false) {
-                    ref
-                      ..invalidate(completedWorkLogsProvider)
-                      ..invalidate(frequentlyCompletedWorkLogsProvider)
-                      ..invalidate(plannedWorkLogsProvider);
-                  }
-                });
+            Navigator.of(context).push(
+              MaterialPageRoute<bool?>(
+                builder: (context) => const HouseWorkAddScreen(),
+              ),
+            );
           },
           child: const Icon(Icons.add),
         ),
@@ -143,6 +133,7 @@ class HomeScreen extends ConsumerWidget {
     );
 
     final recentHouseWorksAsync = ref.watch(recentlyAddedHouseWorksProvider);
+    final workLogService = ref.watch(workLogServiceProvider);
 
     return Container(
       // TODO(ide): 高さを固定せず、内容に合わせて自動調整したい
@@ -187,25 +178,12 @@ class HomeScreen extends ConsumerWidget {
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: InkWell(
-                          onTap: () {
-                            // 家事ログを追加するダイアログを表示
-                            final newWorkLog = ref.read(
-                              workLogForHouseWorkProvider(houseWork),
-                            );
-                            showWorkLogAddDialog(
+                          onTap: () async {
+                            // 共通サービスを使用して家事ログを記録
+                            await workLogService.recordWorkLog(
                               context,
-                              ref,
-                              existingWorkLog: newWorkLog,
-                            ).then((updated) {
-                              if (updated == true) {
-                                ref
-                                  ..invalidate(completedWorkLogsProvider)
-                                  ..invalidate(
-                                    frequentlyCompletedWorkLogsProvider,
-                                  )
-                                  ..invalidate(plannedWorkLogsProvider);
-                              }
-                            });
+                              houseWork.id,
+                            );
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8),
@@ -282,22 +260,12 @@ class HomeScreen extends ConsumerWidget {
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: InkWell(
-                              onTap: () {
-                                // 家事ログ追加ダイアログを直接表示
-                                showWorkLogAddDialog(
+                              onTap: () async {
+                                // 共通サービスを使用して家事ログを記録
+                                await workLogService.recordWorkLog(
                                   context,
-                                  ref,
-                                  existingWorkLog: workLog,
-                                ).then((updated) {
-                                  if (updated == true) {
-                                    ref
-                                      ..invalidate(completedWorkLogsProvider)
-                                      ..invalidate(
-                                        frequentlyCompletedWorkLogsProvider,
-                                      )
-                                      ..invalidate(plannedWorkLogsProvider);
-                                  }
-                                });
+                                  workLog.houseWorkId,
+                                );
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(8),
@@ -412,12 +380,6 @@ class _PlannedWorkLogsTab extends ConsumerWidget {
                       workLog,
                       userId,
                     );
-
-                    // データを更新
-                    ref
-                      ..invalidate(completedWorkLogsProvider)
-                      ..invalidate(frequentlyCompletedWorkLogsProvider)
-                      ..invalidate(plannedWorkLogsProvider);
                   }
                 },
               );
