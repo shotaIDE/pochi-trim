@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
@@ -69,11 +68,6 @@ class WorkLogService {
           context,
         ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
       }
-
-      // データを更新
-      ref
-        ..invalidate(completedWorkLogsProvider)
-        ..invalidate(frequentlyCompletedWorkLogsProvider);
 
       return true;
     } on Exception catch (e) {
