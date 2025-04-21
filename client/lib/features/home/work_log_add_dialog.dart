@@ -126,9 +126,10 @@ class _WorkLogAddDialogState extends ConsumerState<WorkLogAddDialog> {
   @override
   void initState() {
     super.initState();
-    // 既存のワークログがある場合は、そのデータを初期値として設定
+    // 既存のワークログのデータを初期値として設定（家事IDのみ）
     _selectedHouseWorkId = widget.existingWorkLog.houseWorkId;
-    _completedAt = widget.existingWorkLog.completedAt;
+    // 完了時刻は現在時刻を初期値として設定
+    _completedAt = DateTime.now();
   }
 
   @override
