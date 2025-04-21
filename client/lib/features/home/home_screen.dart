@@ -12,6 +12,7 @@ import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/house_id_provider.dart';
+import 'package:house_worker/services/work_log_service.dart';
 
 // 選択されたタブを管理するプロバイダー
 final selectedTabProvider = StateProvider<int>((ref) => 0);
@@ -142,6 +143,7 @@ class HomeScreen extends ConsumerWidget {
     );
 
     final recentHouseWorksAsync = ref.watch(recentlyAddedHouseWorksProvider);
+    final workLogService = ref.watch(workLogServiceProvider);
 
     return Container(
       // TODO(ide): 高さを固定せず、内容に合わせて自動調整したい
@@ -187,56 +189,15 @@ class HomeScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: InkWell(
                           onTap: () async {
-                            // 家事ログを直接現在時刻で登録
-                            final currentUser =
-                                ref.read(authServiceProvider).currentUser;
-                            if (currentUser == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('ユーザー情報が取得できませんでした'),
-                                ),
-                              );
-                              return;
-                            }
-
-                            final workLogRepository = ref.read(
-                              workLogRepositoryProvider,
-                            );
-                            final houseId = ref.read(currentHouseIdProvider);
-
-                            // 新しい家事ログを作成
-                            final workLog = WorkLog(
-                              id: '', // 新規登録のため空文字列
-                              houseWorkId: houseWork.id,
-                              completedAt: DateTime.now(), // 現在時刻
-                              completedBy: currentUser.uid,
+                            // 共通サービスを使用して家事ログを記録
+                            final result = await workLogService.recordWorkLog(
+                              context,
+                              houseWork.id,
                             );
 
-                            try {
-                              // 家事ログを保存
-                              await workLogRepository.save(houseId, workLog);
-
-                              // 成功メッセージを表示
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('家事ログを記録しました')),
-                                );
-                              }
-
-                              // データを更新
-                              ref
-                                ..invalidate(completedWorkLogsProvider)
-                                ..invalidate(
-                                  frequentlyCompletedWorkLogsProvider,
-                                )
-                                ..invalidate(plannedWorkLogsProvider);
-                            } catch (e) {
-                              // エラー時の処理
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('エラーが発生しました: $e')),
-                                );
-                              }
+                            // plannedWorkLogsProviderも更新
+                            if (result) {
+                              ref.invalidate(plannedWorkLogsProvider);
                             }
                           },
                           child: Padding(
@@ -315,63 +276,16 @@ class HomeScreen extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: InkWell(
                               onTap: () async {
-                                // 家事ログを直接現在時刻で登録
-                                final currentUser =
-                                    ref.read(authServiceProvider).currentUser;
-                                if (currentUser == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('ユーザー情報が取得できませんでした'),
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                final workLogRepository = ref.read(
-                                  workLogRepositoryProvider,
-                                );
-                                final houseId = ref.read(
-                                  currentHouseIdProvider,
-                                );
-
-                                // 新しい家事ログを作成（同じ家事IDを使用）
-                                final newWorkLog = WorkLog(
-                                  id: '', // 新規登録のため空文字列
-                                  houseWorkId: workLog.houseWorkId,
-                                  completedAt: DateTime.now(), // 現在時刻
-                                  completedBy: currentUser.uid,
-                                );
-
-                                try {
-                                  // 家事ログを保存
-                                  await workLogRepository.save(
-                                    houseId,
-                                    newWorkLog,
-                                  );
-
-                                  // 成功メッセージを表示
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('家事ログを記録しました'),
-                                      ),
+                                // 共通サービスを使用して家事ログを記録
+                                final result = await workLogService
+                                    .recordWorkLog(
+                                      context,
+                                      workLog.houseWorkId,
                                     );
-                                  }
 
-                                  // データを更新
-                                  ref
-                                    ..invalidate(completedWorkLogsProvider)
-                                    ..invalidate(
-                                      frequentlyCompletedWorkLogsProvider,
-                                    )
-                                    ..invalidate(plannedWorkLogsProvider);
-                                } catch (e) {
-                                  // エラー時の処理
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('エラーが発生しました: $e')),
-                                    );
-                                  }
+                                // plannedWorkLogsProviderも更新
+                                if (result) {
+                                  ref.invalidate(plannedWorkLogsProvider);
                                 }
                               },
                               child: Padding(
