@@ -139,16 +139,9 @@ class WorkLogRepository {
   }
 
   /// 未完了の家事ログを取得する
-  Future<List<WorkLog>> getIncompleteWorkLogs(String houseId) async {
-    // 未完了の家事ログを取得するロジックを実装
-    // 例: 特定のフラグが立っていないものを取得
-    final querySnapshot =
-        await _getWorkLogsCollection(houseId)
-            // TODO(ide): 未完了の条件を指定
-            .orderBy('completedAt', descending: false)
-            .get();
-
-    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
+  Stream<List<WorkLog>> getIncompleteWorkLogs(String houseId) {
+    // TODO(ide): 未完了のクエリを実装する
+    return getCompletedWorkLogs(houseId);
   }
 
   /// 完了済みの家事ログを取得するストリーム

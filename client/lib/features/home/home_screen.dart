@@ -18,7 +18,7 @@ import 'package:house_worker/services/work_log_service.dart';
 final selectedTabProvider = StateProvider<int>((ref) => 0);
 
 // 予定家事一覧を提供するプロバイダー
-final plannedWorkLogsProvider = FutureProvider<List<WorkLog>>((ref) {
+final plannedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
   final houseId = ref.watch(currentHouseIdProvider);
   return workLogRepository.getIncompleteWorkLogs(houseId);
@@ -114,21 +114,11 @@ class HomeScreen extends ConsumerWidget {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             // 家事追加画面に直接遷移
-            Navigator.of(context)
-                .push(
-                  MaterialPageRoute<bool?>(
-                    builder: (context) => const HouseWorkAddScreen(),
-                  ),
-                )
-                .then((updated) {
-                  // 家事が追加された場合（updatedがtrue）、データを更新
-                  if (updated ?? false) {
-                    ref
-                      ..invalidate(completedWorkLogsProvider)
-                      ..invalidate(frequentlyCompletedWorkLogsProvider)
-                      ..invalidate(plannedWorkLogsProvider);
-                  }
-                });
+            Navigator.of(context).push(
+              MaterialPageRoute<bool?>(
+                builder: (context) => const HouseWorkAddScreen(),
+              ),
+            );
           },
           child: const Icon(Icons.add),
         ),
@@ -190,15 +180,10 @@ class HomeScreen extends ConsumerWidget {
                         child: InkWell(
                           onTap: () async {
                             // 共通サービスを使用して家事ログを記録
-                            final result = await workLogService.recordWorkLog(
+                            await workLogService.recordWorkLog(
                               context,
                               houseWork.id,
                             );
-
-                            // plannedWorkLogsProviderも更新
-                            if (result) {
-                              ref.invalidate(plannedWorkLogsProvider);
-                            }
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8),
@@ -277,16 +262,10 @@ class HomeScreen extends ConsumerWidget {
                             child: InkWell(
                               onTap: () async {
                                 // 共通サービスを使用して家事ログを記録
-                                final result = await workLogService
-                                    .recordWorkLog(
-                                      context,
-                                      workLog.houseWorkId,
-                                    );
-
-                                // plannedWorkLogsProviderも更新
-                                if (result) {
-                                  ref.invalidate(plannedWorkLogsProvider);
-                                }
+                                await workLogService.recordWorkLog(
+                                  context,
+                                  workLog.houseWorkId,
+                                );
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(8),
@@ -401,12 +380,6 @@ class _PlannedWorkLogsTab extends ConsumerWidget {
                       workLog,
                       userId,
                     );
-
-                    // データを更新
-                    ref
-                      ..invalidate(completedWorkLogsProvider)
-                      ..invalidate(frequentlyCompletedWorkLogsProvider)
-                      ..invalidate(plannedWorkLogsProvider);
                   }
                 },
               );
