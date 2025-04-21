@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/home/work_log_add_dialog.dart';
 import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
+import 'package:house_worker/repositories/work_log_repository.dart';
+import 'package:house_worker/services/auth_service.dart';
+import 'package:house_worker/services/house_id_provider.dart';
 import 'package:intl/intl.dart';
 
 // WorkLogに対応するHouseWorkを取得するプロバイダー
@@ -124,22 +126,57 @@ class WorkLogItem extends ConsumerWidget {
                         IconButton(
                           icon: const Icon(Icons.add_circle_outline),
                           tooltip: 'この家事を記録する',
-                          onPressed: () {
-                            // 家事ログ追加ダイアログを表示
-                            showWorkLogAddDialog(
-                              context,
-                              ref,
-                              existingWorkLog: workLog,
-                            ).then((updated) {
-                              // 家事ログが追加された場合（updatedがtrue）、データを更新
-                              if (updated == true) {
-                                ref
-                                  ..invalidate(completedWorkLogsProvider)
-                                  ..invalidate(
-                                    frequentlyCompletedWorkLogsProvider,
-                                  );
+                          onPressed: () async {
+                            // 現在のユーザーIDを取得
+                            final currentUser =
+                                ref.read(authServiceProvider).currentUser;
+                            if (currentUser == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('ユーザー情報が取得できませんでした'),
+                                ),
+                              );
+                              return;
+                            }
+
+                            // 家事ログを直接現在時刻で登録
+                            final workLogRepository = ref.read(
+                              workLogRepositoryProvider,
+                            );
+                            final houseId = ref.read(currentHouseIdProvider);
+
+                            // 新しい家事ログを作成して保存
+                            final newWorkLog = WorkLog(
+                              id: '', // 新規登録のため空文字列
+                              houseWorkId: workLog.houseWorkId,
+                              completedAt: DateTime.now(), // 現在時刻
+                              completedBy: currentUser.uid,
+                            );
+
+                            try {
+                              await workLogRepository.save(houseId, newWorkLog);
+
+                              // 成功メッセージを表示
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('家事ログを記録しました')),
+                                );
                               }
-                            });
+
+                              // データを更新
+                              ref
+                                ..invalidate(completedWorkLogsProvider)
+                                ..invalidate(
+                                  frequentlyCompletedWorkLogsProvider,
+                                );
+                            } catch (e) {
+                              // エラー時の処理
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('エラーが発生しました: $e')),
+                                );
+                              }
+                            }
                           },
                         ),
                         // 完了ボタンは不要（WorkLogは既に完了しているため）
