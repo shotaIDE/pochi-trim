@@ -82,12 +82,6 @@ class HomeScreen extends ConsumerWidget {
                 );
               },
             ),
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () {
-                ref.read(authServiceProvider).signOut();
-              },
-            ),
           ],
           bottom: TabBar(
             onTap: (index) {
