@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/home/work_log_add_dialog.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
@@ -72,6 +73,16 @@ class HomeScreen extends ConsumerWidget {
         appBar: AppBar(
           title: const Text('家事ログ'),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.analytics),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const AnalysisScreen(),
+                  ),
+                );
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.settings),
               onPressed: () {
