@@ -3,12 +3,12 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
+import 'package:house_worker/services/house_id_provider.dart';
 import 'package:intl/intl.dart';
 
 // ランダムな絵文字を生成するためのリスト
@@ -70,8 +70,6 @@ String getRandomEmoji() {
   final random = Random();
   return _emojiList[random.nextInt(_emojiList.length)];
 }
-
-// ハウスIDを提供するプロバイダーはwork_log_add_screenからインポート
 
 // 家事一覧を取得するプロバイダー
 final StreamProviderFamily<HouseWork?, String> _houseWorkProvider =

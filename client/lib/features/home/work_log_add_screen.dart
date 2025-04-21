@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
+import 'package:house_worker/services/house_id_provider.dart';
 
 // ランダムな絵文字を生成するためのリスト
 const _emojiList = <String>[
@@ -66,13 +67,6 @@ String getRandomEmoji() {
   final random = Random();
   return _emojiList[random.nextInt(_emojiList.length)];
 }
-
-// ハウスIDを提供するプロバイダー（実際のアプリケーションに合わせて調整してください）
-final currentHouseIdProvider = Provider<String>((ref) {
-  // 実際のアプリケーションでは、ユーザーが選択したハウスIDを返すロジックを実装
-  // 例: ユーザー設定から取得、状態管理から取得など
-  return 'default-house-id'; // デフォルト値（実際の実装では適切な値に置き換えてください）
-});
 
 class HouseWorkAddScreen extends ConsumerStatefulWidget {
   const HouseWorkAddScreen({super.key, this.existingHouseWork});
