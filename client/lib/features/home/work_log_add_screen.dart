@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
-import 'package:house_worker/services/house_id_provider.dart'; // 共通のプロバイダーをインポート
+import 'package:house_worker/services/house_id_provider.dart';
 
 // ランダムな絵文字を生成するためのリスト
 const _emojiList = <String>[
