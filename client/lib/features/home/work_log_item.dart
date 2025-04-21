@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/home/home_screen.dart';
 import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
@@ -130,15 +129,10 @@ class WorkLogItem extends ConsumerWidget {
                             final workLogService = ref.read(
                               workLogServiceProvider,
                             );
-                            final result = await workLogService.recordWorkLog(
+                            await workLogService.recordWorkLog(
                               context,
                               workLog.houseWorkId,
                             );
-
-                            // plannedWorkLogsProviderも更新
-                            if (result) {
-                              ref.invalidate(plannedWorkLogsProvider);
-                            }
                           },
                         ),
                         // 完了ボタンは不要（WorkLogは既に完了しているため）
