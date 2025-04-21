@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
-import 'package:house_worker/features/home/work_log_add_dialog.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
@@ -187,25 +186,58 @@ class HomeScreen extends ConsumerWidget {
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: InkWell(
-                          onTap: () {
-                            // 家事ログを追加するダイアログを表示
-                            final newWorkLog = ref.read(
-                              workLogForHouseWorkProvider(houseWork),
+                          onTap: () async {
+                            // 家事ログを直接現在時刻で登録
+                            final currentUser =
+                                ref.read(authServiceProvider).currentUser;
+                            if (currentUser == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('ユーザー情報が取得できませんでした'),
+                                ),
+                              );
+                              return;
+                            }
+
+                            final workLogRepository = ref.read(
+                              workLogRepositoryProvider,
                             );
-                            showWorkLogAddDialog(
-                              context,
-                              ref,
-                              existingWorkLog: newWorkLog,
-                            ).then((updated) {
-                              if (updated == true) {
-                                ref
-                                  ..invalidate(completedWorkLogsProvider)
-                                  ..invalidate(
-                                    frequentlyCompletedWorkLogsProvider,
-                                  )
-                                  ..invalidate(plannedWorkLogsProvider);
+                            final houseId = ref.read(currentHouseIdProvider);
+
+                            // 新しい家事ログを作成
+                            final workLog = WorkLog(
+                              id: '', // 新規登録のため空文字列
+                              houseWorkId: houseWork.id,
+                              completedAt: DateTime.now(), // 現在時刻
+                              completedBy: currentUser.uid,
+                            );
+
+                            try {
+                              // 家事ログを保存
+                              await workLogRepository.save(houseId, workLog);
+
+                              // 成功メッセージを表示
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('家事ログを記録しました')),
+                                );
                               }
-                            });
+
+                              // データを更新
+                              ref
+                                ..invalidate(completedWorkLogsProvider)
+                                ..invalidate(
+                                  frequentlyCompletedWorkLogsProvider,
+                                )
+                                ..invalidate(plannedWorkLogsProvider);
+                            } catch (e) {
+                              // エラー時の処理
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('エラーが発生しました: $e')),
+                                );
+                              }
+                            }
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8),
@@ -282,22 +314,65 @@ class HomeScreen extends ConsumerWidget {
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: InkWell(
-                              onTap: () {
-                                // 家事ログ追加ダイアログを直接表示
-                                showWorkLogAddDialog(
-                                  context,
-                                  ref,
-                                  existingWorkLog: workLog,
-                                ).then((updated) {
-                                  if (updated == true) {
-                                    ref
-                                      ..invalidate(completedWorkLogsProvider)
-                                      ..invalidate(
-                                        frequentlyCompletedWorkLogsProvider,
-                                      )
-                                      ..invalidate(plannedWorkLogsProvider);
+                              onTap: () async {
+                                // 家事ログを直接現在時刻で登録
+                                final currentUser =
+                                    ref.read(authServiceProvider).currentUser;
+                                if (currentUser == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('ユーザー情報が取得できませんでした'),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                final workLogRepository = ref.read(
+                                  workLogRepositoryProvider,
+                                );
+                                final houseId = ref.read(
+                                  currentHouseIdProvider,
+                                );
+
+                                // 新しい家事ログを作成（同じ家事IDを使用）
+                                final newWorkLog = WorkLog(
+                                  id: '', // 新規登録のため空文字列
+                                  houseWorkId: workLog.houseWorkId,
+                                  completedAt: DateTime.now(), // 現在時刻
+                                  completedBy: currentUser.uid,
+                                );
+
+                                try {
+                                  // 家事ログを保存
+                                  await workLogRepository.save(
+                                    houseId,
+                                    newWorkLog,
+                                  );
+
+                                  // 成功メッセージを表示
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('家事ログを記録しました'),
+                                      ),
+                                    );
                                   }
-                                });
+
+                                  // データを更新
+                                  ref
+                                    ..invalidate(completedWorkLogsProvider)
+                                    ..invalidate(
+                                      frequentlyCompletedWorkLogsProvider,
+                                    )
+                                    ..invalidate(plannedWorkLogsProvider);
+                                } catch (e) {
+                                  // エラー時の処理
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('エラーが発生しました: $e')),
+                                    );
+                                  }
+                                }
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(8),
