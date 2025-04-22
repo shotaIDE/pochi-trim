@@ -122,16 +122,163 @@ class HomeScreen extends ConsumerWidget {
           },
           child: const Icon(Icons.add),
         ),
-        bottomNavigationBar: _buildBottomShortcutBar(context, ref),
+        bottomNavigationBar: const _ShortCutBar(),
       ),
     );
   }
+}
 
-  Widget _buildBottomShortcutBar(BuildContext context, WidgetRef ref) {
+// これから行う予定家事一覧のタブ
+class _PlannedWorkLogsTab extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final plannedWorkLogsAsync = ref.watch(plannedWorkLogsProvider);
+
+    return plannedWorkLogsAsync.when(
+      data: (workLogs) {
+        if (workLogs.isEmpty) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.calendar_today, size: 64, color: Colors.grey),
+                SizedBox(height: 16),
+                Text(
+                  '予定されている家事はありません',
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  '家事を追加すると、ここに表示されます',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            // プロバイダーを更新して最新のデータを取得
+            ref.invalidate(plannedWorkLogsProvider);
+          },
+          child: ListView.builder(
+            itemCount: workLogs.length,
+            itemBuilder: (context, index) {
+              final workLog = workLogs[index];
+              return WorkLogItem(
+                workLog: workLog,
+                onTap: () {
+                  // 家事ダッシュボード画面に遷移
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder:
+                          (context) => WorkLogDashboardScreen(workLog: workLog),
+                    ),
+                  );
+                },
+                onComplete: () async {
+                  // 家事を完了としてマーク
+                  final userId = ref.read(authServiceProvider).currentUser?.uid;
+                  if (userId != null) {
+                    final workLogRepository = ref.read<WorkLogRepository>(
+                      workLogRepositoryProvider,
+                    );
+                    final houseId = ref.read(currentHouseIdProvider);
+                    await workLogRepository.completeWorkLog(
+                      houseId,
+                      workLog,
+                      userId,
+                    );
+                  }
+                },
+              );
+            },
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error:
+          (error, stackTrace) => Center(
+            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
+          ),
+    );
+  }
+}
+
+// 完了した家事ログ一覧のタブ
+class _CompletedWorkLogsTab extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final completedWorkLogsAsync = ref.watch(completedWorkLogsProvider);
+
+    return completedWorkLogsAsync.when(
+      data: (workLogs) {
+        if (workLogs.isEmpty) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.task_alt, size: 64, color: Colors.grey),
+                SizedBox(height: 16),
+                Text(
+                  '完了した家事ログはありません',
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  '家事を完了すると、ここに表示されます',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            // プロバイダーを更新して最新のデータを取得
+            ref
+              ..invalidate(completedWorkLogsProvider)
+              ..invalidate(frequentlyCompletedWorkLogsProvider);
+          },
+          child: ListView.builder(
+            itemCount: workLogs.length,
+            itemBuilder: (context, index) {
+              final workLog = workLogs[index];
+              return WorkLogItem(
+                workLog: workLog,
+                onTap: () {
+                  // 家事ダッシュボード画面に遷移
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder:
+                          (context) => WorkLogDashboardScreen(workLog: workLog),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error:
+          (error, stackTrace) => Center(
+            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
+          ),
+    );
+  }
+}
+
+class _ShortCutBar extends ConsumerWidget {
+  const _ShortCutBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final frequentWorkLogsAsync = ref.watch(
       frequentlyCompletedWorkLogsProvider,
     );
-
     final recentHouseWorksAsync = ref.watch(recentlyAddedHouseWorksProvider);
     final workLogService = ref.watch(workLogServiceProvider);
 
@@ -314,149 +461,6 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-// これから行う予定家事一覧のタブ
-class _PlannedWorkLogsTab extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final plannedWorkLogsAsync = ref.watch(plannedWorkLogsProvider);
-
-    return plannedWorkLogsAsync.when(
-      data: (workLogs) {
-        if (workLogs.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.calendar_today, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  '予定されている家事はありません',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  '家事を追加すると、ここに表示されます',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: () async {
-            // プロバイダーを更新して最新のデータを取得
-            ref.invalidate(plannedWorkLogsProvider);
-          },
-          child: ListView.builder(
-            itemCount: workLogs.length,
-            itemBuilder: (context, index) {
-              final workLog = workLogs[index];
-              return WorkLogItem(
-                workLog: workLog,
-                onTap: () {
-                  // 家事ダッシュボード画面に遷移
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder:
-                          (context) => WorkLogDashboardScreen(workLog: workLog),
-                    ),
-                  );
-                },
-                onComplete: () async {
-                  // 家事を完了としてマーク
-                  final userId = ref.read(authServiceProvider).currentUser?.uid;
-                  if (userId != null) {
-                    final workLogRepository = ref.read<WorkLogRepository>(
-                      workLogRepositoryProvider,
-                    );
-                    final houseId = ref.read(currentHouseIdProvider);
-                    await workLogRepository.completeWorkLog(
-                      houseId,
-                      workLog,
-                      userId,
-                    );
-                  }
-                },
-              );
-            },
-          ),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, stackTrace) => Center(
-            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-          ),
-    );
-  }
-}
-
-// 完了した家事ログ一覧のタブ
-class _CompletedWorkLogsTab extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final completedWorkLogsAsync = ref.watch(completedWorkLogsProvider);
-
-    return completedWorkLogsAsync.when(
-      data: (workLogs) {
-        if (workLogs.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.task_alt, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  '完了した家事ログはありません',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  '家事を完了すると、ここに表示されます',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: () async {
-            // プロバイダーを更新して最新のデータを取得
-            ref
-              ..invalidate(completedWorkLogsProvider)
-              ..invalidate(frequentlyCompletedWorkLogsProvider);
-          },
-          child: ListView.builder(
-            itemCount: workLogs.length,
-            itemBuilder: (context, index) {
-              final workLog = workLogs[index];
-              return WorkLogItem(
-                workLog: workLog,
-                onTap: () {
-                  // 家事ダッシュボード画面に遷移
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder:
-                          (context) => WorkLogDashboardScreen(workLog: workLog),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, stackTrace) => Center(
-            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-          ),
     );
   }
 }
