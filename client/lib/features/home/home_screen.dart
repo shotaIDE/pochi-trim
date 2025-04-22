@@ -24,16 +24,6 @@ final plannedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
   return workLogRepository.getIncompleteWorkLogs(houseId);
 });
 
-// 最近登録された家事を取得するプロバイダー
-final recentlyAddedHouseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
-  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-  final houseId = ref.watch(currentHouseIdProvider);
-
-  return houseWorkRepository
-      .getAll(houseId: houseId)
-      .map((houseWorks) => houseWorks.take(5).toList());
-});
-
 // WorkLogに対応するHouseWorkを取得するプロバイダー
 final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
     FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
@@ -279,7 +269,7 @@ class _ShortCutBottomBar extends ConsumerWidget {
     final frequentWorkLogsAsync = ref.watch(
       frequentlyCompletedWorkLogsProvider,
     );
-    final recentHouseWorksAsync = ref.watch(recentlyAddedHouseWorksProvider);
+    final recentHouseWorksAsync = ref.watch(houseWorksProvider);
     final workLogService = ref.watch(workLogServiceProvider);
 
     return Container(

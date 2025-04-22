@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
+import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/house_id_provider.dart';
 
@@ -90,6 +92,15 @@ final frequentlyCompletedWorkLogsProvider = FutureProvider<List<WorkLog>>((
       .take(5)
       .map((id) => latestLogByHouseWork[id]!)
       .toList();
+});
+
+final houseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+  final houseId = ref.watch(currentHouseIdProvider);
+
+  return houseWorkRepository
+      .getAll(houseId: houseId)
+      .map((houseWorks) => houseWorks.toList());
 });
 
 class WorkLogDeletionNotifier {
