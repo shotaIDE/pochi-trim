@@ -122,7 +122,7 @@ class HomeScreen extends ConsumerWidget {
           },
           child: const Icon(Icons.add),
         ),
-        bottomNavigationBar: const _ShortCutBar(),
+        bottomNavigationBar: const _ShortCutBottomBar(),
       ),
     );
   }
@@ -271,8 +271,8 @@ class _CompletedWorkLogsTab extends ConsumerWidget {
   }
 }
 
-class _ShortCutBar extends ConsumerWidget {
-  const _ShortCutBar();
+class _ShortCutBottomBar extends ConsumerWidget {
+  const _ShortCutBottomBar();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -283,8 +283,7 @@ class _ShortCutBar extends ConsumerWidget {
     final workLogService = ref.watch(workLogServiceProvider);
 
     return Container(
-      // TODO(ide): フォントサイズに応じて高さを調整する
-      height: 120,
+      constraints: const BoxConstraints(maxHeight: 130),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
