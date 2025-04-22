@@ -49,8 +49,7 @@ final Provider<WorkLogDeletionNotifier> workLogDeletionProvider = Provider((
   );
 });
 
-// よく完了されている家事ログを取得するプロバイダー
-final frequentlyCompletedWorkLogsProvider = FutureProvider<List<WorkLog>>((
+final frequentlyCompletedHouseWorksProvider = FutureProvider<List<HouseWork>>((
   ref,
 ) async {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
