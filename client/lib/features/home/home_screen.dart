@@ -122,197 +122,7 @@ class HomeScreen extends ConsumerWidget {
           },
           child: const Icon(Icons.add),
         ),
-        bottomNavigationBar: _buildBottomShortcutBar(context, ref),
-      ),
-    );
-  }
-
-  Widget _buildBottomShortcutBar(BuildContext context, WidgetRef ref) {
-    final frequentWorkLogsAsync = ref.watch(
-      frequentlyCompletedWorkLogsProvider,
-    );
-
-    final recentHouseWorksAsync = ref.watch(recentlyAddedHouseWorksProvider);
-    final workLogService = ref.watch(workLogServiceProvider);
-
-    return Container(
-      // TODO(ide): 高さを固定せず、内容に合わせて自動調整したい
-      height: 90,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, -1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 12, top: 4, bottom: 2),
-            child: Text(
-              'クイック登録',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                // 最近登録された家事一覧
-                ...recentHouseWorksAsync.when(
-                  data: (recentHouseWorks) {
-                    if (recentHouseWorks.isEmpty) {
-                      return [const SizedBox.shrink()];
-                    }
-
-                    return recentHouseWorks.map((houseWork) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: InkWell(
-                          onTap: () async {
-                            // 共通サービスを使用して家事ログを記録
-                            await workLogService.recordWorkLog(
-                              context,
-                              houseWork.id,
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green[50],
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Text(
-                                    houseWork.icon,
-                                    style: const TextStyle(fontSize: 24),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  houseWork.title,
-                                  style: const TextStyle(fontSize: 12),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList();
-                  },
-                  loading:
-                      () => [
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: CircularProgressIndicator(),
-                        ),
-                      ],
-                  error: (_, _) => [const SizedBox.shrink()],
-                ),
-
-                // 区切り線
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  child: Container(
-                    width: 1,
-                    color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
-                  ),
-                ),
-
-                // 最近よく完了されている家事ログ一覧
-                ...frequentWorkLogsAsync.when(
-                  data: (frequentWorkLogs) {
-                    if (frequentWorkLogs.isEmpty) {
-                      return [const SizedBox.shrink()];
-                    }
-
-                    return List.generate(frequentWorkLogs.length, (index) {
-                      final workLog = frequentWorkLogs[index];
-                      final houseWorkAsync = ref.watch(
-                        houseWorkForWorkLogProvider(workLog),
-                      );
-
-                      return houseWorkAsync.when(
-                        data: (houseWork) {
-                          if (houseWork == null) {
-                            return const SizedBox.shrink();
-                          }
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: InkWell(
-                              onTap: () async {
-                                // 共通サービスを使用して家事ログを記録
-                                await workLogService.recordWorkLog(
-                                  context,
-                                  workLog.houseWorkId,
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(2),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue[50],
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Text(
-                                        houseWork.icon,
-                                        style: const TextStyle(fontSize: 24),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      houseWork.title,
-                                      style: const TextStyle(fontSize: 12),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 2,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                        loading:
-                            () => const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8),
-                              child: CircularProgressIndicator(),
-                            ),
-                        error: (_, _) => const SizedBox.shrink(),
-                      );
-                    });
-                  },
-                  loading: () => [const SizedBox.shrink()],
-                  error: (_, _) => [const SizedBox.shrink()],
-                ),
-              ],
-            ),
-          ),
-        ],
+        bottomNavigationBar: const _ShortCutBottomBar(),
       ),
     );
   }
@@ -457,6 +267,184 @@ class _CompletedWorkLogsTab extends ConsumerWidget {
           (error, stackTrace) => Center(
             child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
           ),
+    );
+  }
+}
+
+class _ShortCutBottomBar extends ConsumerWidget {
+  const _ShortCutBottomBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final frequentWorkLogsAsync = ref.watch(
+      frequentlyCompletedWorkLogsProvider,
+    );
+    final recentHouseWorksAsync = ref.watch(recentlyAddedHouseWorksProvider);
+    final workLogService = ref.watch(workLogServiceProvider);
+
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 130),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, -1),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            // 最近登録された家事一覧
+            ...recentHouseWorksAsync.when(
+              data: (recentHouseWorks) {
+                if (recentHouseWorks.isEmpty) {
+                  return [const SizedBox.shrink()];
+                }
+
+                return recentHouseWorks.map((houseWork) {
+                  return SizedBox(
+                    width: 80,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: InkWell(
+                        onTap: () async {
+                          // 共通サービスを使用して家事ログを記録
+                          await workLogService.recordWorkLog(
+                            context,
+                            houseWork.id,
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: 4,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.green[50],
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Text(
+                                  houseWork.icon,
+                                  style: const TextStyle(fontSize: 24),
+                                ),
+                              ),
+                              Text(
+                                houseWork.title,
+                                style: const TextStyle(fontSize: 12),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList();
+              },
+              loading:
+                  () => [
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ],
+              error: (_, _) => [const SizedBox.shrink()],
+            ),
+
+            // 区切り線
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Container(
+                width: 1,
+                color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
+              ),
+            ),
+
+            // 最近よく完了されている家事ログ一覧
+            ...frequentWorkLogsAsync.when(
+              data: (frequentWorkLogs) {
+                if (frequentWorkLogs.isEmpty) {
+                  return [const SizedBox.shrink()];
+                }
+
+                return List.generate(frequentWorkLogs.length, (index) {
+                  final workLog = frequentWorkLogs[index];
+                  final houseWorkAsync = ref.watch(
+                    houseWorkForWorkLogProvider(workLog),
+                  );
+
+                  return houseWorkAsync.when(
+                    data: (houseWork) {
+                      if (houseWork == null) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: InkWell(
+                          onTap: () async {
+                            // 共通サービスを使用して家事ログを記録
+                            await workLogService.recordWorkLog(
+                              context,
+                              workLog.houseWorkId,
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue[50],
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    houseWork.icon,
+                                    style: const TextStyle(fontSize: 24),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  houseWork.title,
+                                  style: const TextStyle(fontSize: 12),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    loading:
+                        () => const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: CircularProgressIndicator(),
+                        ),
+                    error: (_, _) => const SizedBox.shrink(),
+                  );
+                });
+              },
+              loading: () => [const SizedBox.shrink()],
+              error: (_, _) => [const SizedBox.shrink()],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
