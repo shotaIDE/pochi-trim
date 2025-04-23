@@ -1,5 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
+import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/house_id_provider.dart';
 
@@ -47,49 +50,66 @@ final Provider<WorkLogDeletionNotifier> workLogDeletionProvider = Provider((
   );
 });
 
-// よく完了されている家事ログを取得するプロバイダー
-final frequentlyCompletedWorkLogsProvider = FutureProvider<List<WorkLog>>((
-  ref,
-) async {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
-  final houseId = ref.watch(currentHouseIdProvider);
+final houseWorksSortedByMostFrequentlyUsedProvider = StreamProvider<
+  List<HouseWork>
+>((ref) {
+  final houseWorksAsync = ref.watch(houseWorksProvider);
+  final completedWorkLogs = ref.watch(completedWorkLogsProvider);
 
-  // 完了済みの家事ログを取得
-  final completedLogs =
-      await workLogRepository.getCompletedWorkLogs(houseId).first;
+  return houseWorksAsync.when(
+    data: (houseWorks) {
+      final latestUsedTimeOfHouseWorks = <HouseWork, DateTime>{};
+      for (final houseWork in houseWorks) {
+        latestUsedTimeOfHouseWorks[houseWork] = houseWork.createdAt;
+      }
 
-  // 家事IDごとに集計して、頻度の高い順にソート
-  final houseWorkFrequency = <String, int>{};
-  final latestLogByHouseWork = <String, WorkLog>{};
+      completedWorkLogs.maybeWhen(
+        data: (workLogs) {
+          for (final workLog in workLogs) {
+            final targetHouseWork = houseWorks.firstWhereOrNull(
+              (houseWork) => houseWork.id == workLog.houseWorkId,
+            );
+            if (targetHouseWork == null) {
+              continue;
+            }
 
-  for (final log in completedLogs) {
-    houseWorkFrequency[log.houseWorkId] =
-        (houseWorkFrequency[log.houseWorkId] ?? 0) + 1;
+            final currentLatestUsedTime =
+                latestUsedTimeOfHouseWorks[targetHouseWork];
+            if (currentLatestUsedTime == null) {
+              latestUsedTimeOfHouseWorks[targetHouseWork] = workLog.completedAt;
+              continue;
+            }
 
-    // 各家事IDの最新のログを保持
-    final existingLog = latestLogByHouseWork[log.houseWorkId];
-    // completedAtがnullの場合を考慮
-    final logCompletedAt = log.completedAt;
-    final existingLogCompletedAt = existingLog?.completedAt;
+            if (currentLatestUsedTime.isAfter(workLog.completedAt)) {
+              continue;
+            }
 
-    if (existingLog == null ||
-        (existingLogCompletedAt == null ||
-            logCompletedAt.isAfter(existingLogCompletedAt))) {
-      latestLogByHouseWork[log.houseWorkId] = log;
-    }
-  }
-
-  // 頻度順にソートされた家事IDのリスト
-  final sortedHouseWorkIds =
-      houseWorkFrequency.keys.toList()..sort(
-        (a, b) => houseWorkFrequency[b]!.compareTo(houseWorkFrequency[a]!),
+            latestUsedTimeOfHouseWorks[targetHouseWork] = workLog.completedAt;
+          }
+        },
+        orElse: () {},
       );
 
-  // 上位5件のログを返す（または全件数が5未満の場合はすべて）
-  return sortedHouseWorkIds
-      .take(5)
-      .map((id) => latestLogByHouseWork[id]!)
-      .toList();
+      return Stream.value(
+        latestUsedTimeOfHouseWorks.entries
+            .sortedBy((entry) => entry.value)
+            .reversed
+            .map((entry) => entry.key)
+            .toList(),
+      );
+    },
+    error: (error, stack) => Stream.error(error),
+    loading: Stream.empty,
+  );
+});
+
+final houseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+  final houseId = ref.watch(currentHouseIdProvider);
+
+  return houseWorkRepository
+      .getAll(houseId: houseId)
+      .map((houseWorks) => houseWorks.toList());
 });
 
 class WorkLogDeletionNotifier {

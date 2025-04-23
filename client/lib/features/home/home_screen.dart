@@ -24,16 +24,6 @@ final plannedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
   return workLogRepository.getIncompleteWorkLogs(houseId);
 });
 
-// 最近登録された家事を取得するプロバイダー
-final recentlyAddedHouseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
-  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-  final houseId = ref.watch(currentHouseIdProvider);
-
-  return houseWorkRepository
-      .getAll(houseId: houseId)
-      .map((houseWorks) => houseWorks.take(5).toList());
-});
-
 // WorkLogに対応するHouseWorkを取得するプロバイダー
 final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
     FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
@@ -240,7 +230,7 @@ class _CompletedWorkLogsTab extends ConsumerWidget {
             // プロバイダーを更新して最新のデータを取得
             ref
               ..invalidate(completedWorkLogsProvider)
-              ..invalidate(frequentlyCompletedWorkLogsProvider);
+              ..invalidate(houseWorksSortedByMostFrequentlyUsedProvider);
           },
           child: ListView.builder(
             itemCount: workLogs.length,
@@ -276,16 +266,15 @@ class _ShortCutBottomBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final frequentWorkLogsAsync = ref.watch(
-      frequentlyCompletedWorkLogsProvider,
+    final houseWorksAsync = ref.watch(
+      houseWorksSortedByMostFrequentlyUsedProvider,
     );
-    final recentHouseWorksAsync = ref.watch(recentlyAddedHouseWorksProvider);
     final workLogService = ref.watch(workLogServiceProvider);
 
     return Container(
       constraints: const BoxConstraints(maxHeight: 130),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
@@ -301,7 +290,7 @@ class _ShortCutBottomBar extends ConsumerWidget {
           scrollDirection: Axis.horizontal,
           children: [
             // 最近登録された家事一覧
-            ...recentHouseWorksAsync.when(
+            ...houseWorksAsync.when(
               data: (recentHouseWorks) {
                 if (recentHouseWorks.isEmpty) {
                   return [const SizedBox.shrink()];
@@ -309,43 +298,49 @@ class _ShortCutBottomBar extends ConsumerWidget {
 
                 return recentHouseWorks.map((houseWork) {
                   return SizedBox(
-                    width: 80,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: InkWell(
-                        onTap: () async {
-                          // 共通サービスを使用して家事ログを記録
-                          await workLogService.recordWorkLog(
-                            context,
-                            houseWork.id,
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            spacing: 4,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  color: Colors.green[50],
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  houseWork.icon,
-                                  style: const TextStyle(fontSize: 24),
-                                ),
+                    width: 100,
+                    child: InkWell(
+                      onTap: () async {
+                        // 共通サービスを使用して家事ログを記録
+                        await workLogService.recordWorkLog(
+                          context,
+                          houseWork.id,
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 4,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 4,
+                          children: [
+                            Container(
+                              alignment: Alignment.center,
+                              // TODO(ide): 共通化できる
+                              decoration: BoxDecoration(
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.surfaceContainer,
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              Text(
-                                houseWork.title,
-                                style: const TextStyle(fontSize: 12),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                                textAlign: TextAlign.center,
+                              width: 32,
+                              height: 32,
+                              child: Text(
+                                houseWork.icon,
+                                style: const TextStyle(fontSize: 24),
                               ),
-                            ],
-                          ),
+                            ),
+                            Text(
+                              houseWork.title,
+                              style: const TextStyle(fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -359,87 +354,6 @@ class _ShortCutBottomBar extends ConsumerWidget {
                       child: CircularProgressIndicator(),
                     ),
                   ],
-              error: (_, _) => [const SizedBox.shrink()],
-            ),
-
-            // 区切り線
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Container(
-                width: 1,
-                color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
-              ),
-            ),
-
-            // 最近よく完了されている家事ログ一覧
-            ...frequentWorkLogsAsync.when(
-              data: (frequentWorkLogs) {
-                if (frequentWorkLogs.isEmpty) {
-                  return [const SizedBox.shrink()];
-                }
-
-                return List.generate(frequentWorkLogs.length, (index) {
-                  final workLog = frequentWorkLogs[index];
-                  final houseWorkAsync = ref.watch(
-                    houseWorkForWorkLogProvider(workLog),
-                  );
-
-                  return houseWorkAsync.when(
-                    data: (houseWork) {
-                      if (houseWork == null) {
-                        return const SizedBox.shrink();
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: InkWell(
-                          onTap: () async {
-                            // 共通サービスを使用して家事ログを記録
-                            await workLogService.recordWorkLog(
-                              context,
-                              workLog.houseWorkId,
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue[50],
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Text(
-                                    houseWork.icon,
-                                    style: const TextStyle(fontSize: 24),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  houseWork.title,
-                                  style: const TextStyle(fontSize: 12),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    loading:
-                        () => const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: CircularProgressIndicator(),
-                        ),
-                    error: (_, _) => const SizedBox.shrink(),
-                  );
-                });
-              },
-              loading: () => [const SizedBox.shrink()],
               error: (_, _) => [const SizedBox.shrink()],
             ),
           ],

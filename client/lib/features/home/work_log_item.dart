@@ -98,13 +98,14 @@ class WorkLogItem extends ConsumerWidget {
                       children: [
                         // アイコンを表示
                         Container(
-                          width: 40,
-                          height: 40,
+                          alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withAlpha(25),
+                            color:
+                                Theme.of(context).colorScheme.surfaceContainer,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          alignment: Alignment.center,
+                          width: 40,
+                          height: 40,
                           margin: const EdgeInsets.only(right: 12),
                           child: Text(
                             icon,
