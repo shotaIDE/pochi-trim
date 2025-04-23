@@ -230,7 +230,7 @@ class _CompletedWorkLogsTab extends ConsumerWidget {
             // プロバイダーを更新して最新のデータを取得
             ref
               ..invalidate(completedWorkLogsProvider)
-              ..invalidate(houseWorksSortedByUsageFrequencyProvider);
+              ..invalidate(houseWorksSortedByMostFrequentlyUsedProvider);
           },
           child: ListView.builder(
             itemCount: workLogs.length,
@@ -266,7 +266,9 @@ class _ShortCutBottomBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final houseWorksAsync = ref.watch(houseWorksSortedByUsageFrequencyProvider);
+    final houseWorksAsync = ref.watch(
+      houseWorksSortedByMostFrequentlyUsedProvider,
+    );
     final workLogService = ref.watch(workLogServiceProvider);
 
     return Container(

@@ -50,7 +50,7 @@ final Provider<WorkLogDeletionNotifier> workLogDeletionProvider = Provider((
   );
 });
 
-final houseWorksSortedByUsageFrequencyProvider =
+final houseWorksSortedByMostFrequentlyUsedProvider =
     StreamProvider<List<HouseWork>>((ref) {
       final houseWorksAsync = ref.watch(houseWorksProvider);
       final completedWorkLogs = ref.watch(completedWorkLogsProvider);
@@ -94,6 +94,7 @@ final houseWorksSortedByUsageFrequencyProvider =
           return Stream.value(
             latestUsedTimeForHouseWorks.entries
                 .sortedBy((entry) => entry.value)
+                .reversed
                 .map((entry) => entry.key)
                 .toList(),
           );
