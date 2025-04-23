@@ -316,11 +316,17 @@ class _ShortCutBottomBar extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           spacing: 4,
                           children: [
-                            DecoratedBox(
+                            Container(
+                              alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.green[50],
-                                borderRadius: BorderRadius.circular(16),
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.surfaceContainer,
+                                borderRadius: BorderRadius.circular(8),
                               ),
+                              width: 32,
+                              height: 32,
                               child: Text(
                                 houseWork.icon,
                                 style: const TextStyle(fontSize: 24),
