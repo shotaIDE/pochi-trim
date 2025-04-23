@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
@@ -62,7 +63,7 @@ final frequentlyCompletedHouseWorksProvider = StreamProvider<List<HouseWork>>((
           final houseWorksSet = <HouseWork>{};
 
           for (final workLog in workLogs) {
-            final targetHouseWork = houseWorks.firstOrNull(
+            final targetHouseWork = houseWorks.firstWhereOrNull(
               (houseWork) => houseWork.id == workLog.houseWorkId,
             );
             if (targetHouseWork == null) {
