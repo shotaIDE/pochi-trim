@@ -49,48 +49,38 @@ final Provider<WorkLogDeletionNotifier> workLogDeletionProvider = Provider((
   );
 });
 
-final frequentlyCompletedHouseWorksProvider = FutureProvider<List<HouseWork>>((
+final frequentlyCompletedHouseWorksProvider = StreamProvider<List<HouseWork>>((
   ref,
-) async {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
-  final houseId = ref.watch(currentHouseIdProvider);
+) {
+  final houseWorks = ref.watch(houseWorksProvider);
+  final completedWorkLogs = ref.watch(completedWorkLogsProvider);
 
-  // 完了済みの家事ログを取得
-  final completedLogs =
-      await workLogRepository.getCompletedWorkLogs(houseId).first;
+  return houseWorks.when(
+    data: (houseWorks) {
+      return completedWorkLogs.when(
+        data: (workLogs) {
+          final houseWorksSet = <HouseWork>{};
 
-  // 家事IDごとに集計して、頻度の高い順にソート
-  final houseWorkFrequency = <String, int>{};
-  final latestLogByHouseWork = <String, WorkLog>{};
+          for (final workLog in workLogs) {
+            final targetHouseWork = houseWorks.firstOrNull(
+              (houseWork) => houseWork.id == workLog.houseWorkId,
+            );
+            if (targetHouseWork == null) {
+              continue;
+            }
 
-  for (final log in completedLogs) {
-    houseWorkFrequency[log.houseWorkId] =
-        (houseWorkFrequency[log.houseWorkId] ?? 0) + 1;
+            houseWorksSet.add(targetHouseWork);
+          }
 
-    // 各家事IDの最新のログを保持
-    final existingLog = latestLogByHouseWork[log.houseWorkId];
-    // completedAtがnullの場合を考慮
-    final logCompletedAt = log.completedAt;
-    final existingLogCompletedAt = existingLog?.completedAt;
-
-    if (existingLog == null ||
-        (existingLogCompletedAt == null ||
-            logCompletedAt.isAfter(existingLogCompletedAt))) {
-      latestLogByHouseWork[log.houseWorkId] = log;
-    }
-  }
-
-  // 頻度順にソートされた家事IDのリスト
-  final sortedHouseWorkIds =
-      houseWorkFrequency.keys.toList()..sort(
-        (a, b) => houseWorkFrequency[b]!.compareTo(houseWorkFrequency[a]!),
+          return Stream.value(houseWorksSet.toList());
+        },
+        error: Stream.error,
+        loading: Stream.empty,
       );
-
-  // 上位5件のログを返す（または全件数が5未満の場合はすべて）
-  return sortedHouseWorkIds
-      .take(5)
-      .map((id) => latestLogByHouseWork[id]!)
-      .toList();
+    },
+    error: (error, stack) => Stream.error(error),
+    loading: Stream.empty,
+  );
 });
 
 final houseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
