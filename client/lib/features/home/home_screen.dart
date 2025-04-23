@@ -298,43 +298,42 @@ class _ShortCutBottomBar extends ConsumerWidget {
 
                 return recentHouseWorks.map((houseWork) {
                   return SizedBox(
-                    width: 80,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: InkWell(
-                        onTap: () async {
-                          // 共通サービスを使用して家事ログを記録
-                          await workLogService.recordWorkLog(
-                            context,
-                            houseWork.id,
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            spacing: 4,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  color: Colors.green[50],
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  houseWork.icon,
-                                  style: const TextStyle(fontSize: 24),
-                                ),
+                    width: 100,
+                    child: InkWell(
+                      onTap: () async {
+                        // 共通サービスを使用して家事ログを記録
+                        await workLogService.recordWorkLog(
+                          context,
+                          houseWork.id,
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 4,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 4,
+                          children: [
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Colors.green[50],
+                                borderRadius: BorderRadius.circular(16),
                               ),
-                              Text(
-                                houseWork.title,
-                                style: const TextStyle(fontSize: 12),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                                textAlign: TextAlign.center,
+                              child: Text(
+                                houseWork.icon,
+                                style: const TextStyle(fontSize: 24),
                               ),
-                            ],
-                          ),
+                            ),
+                            Text(
+                              houseWork.title,
+                              style: const TextStyle(fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
                       ),
                     ),
