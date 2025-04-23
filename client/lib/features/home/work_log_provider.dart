@@ -50,39 +50,58 @@ final Provider<WorkLogDeletionNotifier> workLogDeletionProvider = Provider((
   );
 });
 
-final frequentlyCompletedHouseWorksProvider = StreamProvider<List<HouseWork>>((
-  ref,
-) {
-  final houseWorks = ref.watch(houseWorksProvider);
-  final completedWorkLogs = ref.watch(completedWorkLogsProvider);
+final houseWorksSortedByUsageFrequencyProvider =
+    StreamProvider<List<HouseWork>>((ref) {
+      final houseWorksAsync = ref.watch(houseWorksProvider);
+      final completedWorkLogs = ref.watch(completedWorkLogsProvider);
 
-  return houseWorks.when(
-    data: (houseWorks) {
-      return completedWorkLogs.when(
-        data: (workLogs) {
-          final houseWorksSet = <HouseWork>{};
-
-          for (final workLog in workLogs) {
-            final targetHouseWork = houseWorks.firstWhereOrNull(
-              (houseWork) => houseWork.id == workLog.houseWorkId,
-            );
-            if (targetHouseWork == null) {
-              continue;
-            }
-
-            houseWorksSet.add(targetHouseWork);
+      return houseWorksAsync.when(
+        data: (houseWorks) {
+          final latestUsedTimeForHouseWorks = <HouseWork, DateTime>{};
+          for (final houseWork in houseWorks) {
+            latestUsedTimeForHouseWorks[houseWork] = houseWork.createdAt;
           }
 
-          return Stream.value(houseWorksSet.toList());
+          completedWorkLogs.maybeWhen(
+            data: (workLogs) {
+              for (final workLog in workLogs) {
+                final targetHouseWork = houseWorks.firstWhereOrNull(
+                  (houseWork) => houseWork.id == workLog.houseWorkId,
+                );
+                if (targetHouseWork == null) {
+                  continue;
+                }
+
+                final currentLatestUsedTime =
+                    latestUsedTimeForHouseWorks[targetHouseWork];
+                if (currentLatestUsedTime == null) {
+                  latestUsedTimeForHouseWorks[targetHouseWork] =
+                      workLog.completedAt;
+                  continue;
+                }
+
+                if (currentLatestUsedTime.isAfter(workLog.completedAt)) {
+                  continue;
+                }
+
+                latestUsedTimeForHouseWorks[targetHouseWork] =
+                    workLog.completedAt;
+              }
+            },
+            orElse: () {},
+          );
+
+          return Stream.value(
+            latestUsedTimeForHouseWorks.entries
+                .sortedBy((entry) => entry.value)
+                .map((entry) => entry.key)
+                .toList(),
+          );
         },
-        error: Stream.error,
+        error: (error, stack) => Stream.error(error),
         loading: Stream.empty,
       );
-    },
-    error: (error, stack) => Stream.error(error),
-    loading: Stream.empty,
-  );
-});
+    });
 
 final houseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
   final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);

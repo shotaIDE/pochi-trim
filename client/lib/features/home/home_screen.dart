@@ -230,7 +230,7 @@ class _CompletedWorkLogsTab extends ConsumerWidget {
             // プロバイダーを更新して最新のデータを取得
             ref
               ..invalidate(completedWorkLogsProvider)
-              ..invalidate(frequentlyCompletedHouseWorksProvider);
+              ..invalidate(houseWorksSortedByUsageFrequencyProvider);
           },
           child: ListView.builder(
             itemCount: workLogs.length,
@@ -266,10 +266,7 @@ class _ShortCutBottomBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final frequentWorkLogsAsync = ref.watch(
-      frequentlyCompletedHouseWorksProvider,
-    );
-    final recentHouseWorksAsync = ref.watch(houseWorksProvider);
+    final houseWorksAsync = ref.watch(houseWorksSortedByUsageFrequencyProvider);
     final workLogService = ref.watch(workLogServiceProvider);
 
     return Container(
@@ -291,7 +288,7 @@ class _ShortCutBottomBar extends ConsumerWidget {
           scrollDirection: Axis.horizontal,
           children: [
             // 最近登録された家事一覧
-            ...recentHouseWorksAsync.when(
+            ...houseWorksAsync.when(
               data: (recentHouseWorks) {
                 if (recentHouseWorks.isEmpty) {
                   return [const SizedBox.shrink()];
@@ -349,87 +346,6 @@ class _ShortCutBottomBar extends ConsumerWidget {
                       child: CircularProgressIndicator(),
                     ),
                   ],
-              error: (_, _) => [const SizedBox.shrink()],
-            ),
-
-            // 区切り線
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Container(
-                width: 1,
-                color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
-              ),
-            ),
-
-            // 最近よく完了されている家事ログ一覧
-            ...frequentWorkLogsAsync.when(
-              data: (frequentWorkLogs) {
-                if (frequentWorkLogs.isEmpty) {
-                  return [const SizedBox.shrink()];
-                }
-
-                return List.generate(frequentWorkLogs.length, (index) {
-                  final workLog = frequentWorkLogs[index];
-                  final houseWorkAsync = ref.watch(
-                    houseWorkForWorkLogProvider(workLog),
-                  );
-
-                  return houseWorkAsync.when(
-                    data: (houseWork) {
-                      if (houseWork == null) {
-                        return const SizedBox.shrink();
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: InkWell(
-                          onTap: () async {
-                            // 共通サービスを使用して家事ログを記録
-                            await workLogService.recordWorkLog(
-                              context,
-                              workLog.houseWorkId,
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue[50],
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Text(
-                                    houseWork.icon,
-                                    style: const TextStyle(fontSize: 24),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  houseWork.title,
-                                  style: const TextStyle(fontSize: 12),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    loading:
-                        () => const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: CircularProgressIndicator(),
-                        ),
-                    error: (_, _) => const SizedBox.shrink(),
-                  );
-                });
-              },
-              loading: () => [const SizedBox.shrink()],
               error: (_, _) => [const SizedBox.shrink()],
             ),
           ],
