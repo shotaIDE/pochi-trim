@@ -318,6 +318,7 @@ class _ShortCutBottomBar extends ConsumerWidget {
                           children: [
                             Container(
                               alignment: Alignment.center,
+                              // TODO(ide): 共通化できる
                               decoration: BoxDecoration(
                                 color:
                                     Theme.of(
