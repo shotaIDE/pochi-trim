@@ -274,7 +274,7 @@ class _ShortCutBottomBar extends ConsumerWidget {
     return Container(
       constraints: const BoxConstraints(maxHeight: 130),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
