@@ -304,7 +304,6 @@ class _ShortCutBottomBar extends ConsumerWidget {
                       onTap: () async {
                         await HapticFeedback.mediumImpact();
 
-                        // mounted チェックを追加して BuildContext が有効かを確認
                         if (!context.mounted) {
                           return;
                         }
