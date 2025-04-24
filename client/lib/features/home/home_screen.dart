@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
@@ -301,7 +302,13 @@ class _ShortCutBottomBar extends ConsumerWidget {
                     width: 100,
                     child: InkWell(
                       onTap: () async {
-                        // 共通サービスを使用して家事ログを記録
+                        await HapticFeedback.mediumImpact();
+
+                        if (!context.mounted) {
+                          return;
+                        }
+
+                        // TODO(ide): 共通サービスを使用して家事ログを記録
                         await workLogService.recordWorkLog(
                           context,
                           houseWork.id,
