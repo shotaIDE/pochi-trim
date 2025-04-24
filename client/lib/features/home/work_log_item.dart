@@ -129,6 +129,10 @@ class WorkLogItem extends ConsumerWidget {
                           onPressed: () async {
                             await HapticFeedback.mediumImpact();
 
+                            if (!context.mounted) {
+                              return;
+                            }
+
                             // WorkLogServiceを使って家事ログを直接記録
                             final workLogService = ref.read(
                               workLogServiceProvider,

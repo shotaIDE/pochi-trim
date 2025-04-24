@@ -304,6 +304,11 @@ class _ShortCutBottomBar extends ConsumerWidget {
                       onTap: () async {
                         await HapticFeedback.mediumImpact();
 
+                        // mounted チェックを追加して BuildContext が有効かを確認
+                        if (!context.mounted) {
+                          return;
+                        }
+
                         // TODO(ide): 共通サービスを使用して家事ログを記録
                         await workLogService.recordWorkLog(
                           context,
