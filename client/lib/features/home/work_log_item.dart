@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:house_worker/models/house_work.dart';
@@ -126,6 +127,8 @@ class WorkLogItem extends ConsumerWidget {
                           icon: const Icon(Icons.add_circle_outline),
                           tooltip: 'この家事を記録する',
                           onPressed: () async {
+                            await HapticFeedback.mediumImpact();
+
                             // WorkLogServiceを使って家事ログを直接記録
                             final workLogService = ref.read(
                               workLogServiceProvider,
