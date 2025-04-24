@@ -198,13 +198,25 @@ class _PlannedWorkLogsTab extends ConsumerWidget {
 }
 
 // 完了した家事ログ一覧のタブ
-class _CompletedWorkLogsTab extends ConsumerWidget {
+class _CompletedWorkLogsTab extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_CompletedWorkLogsTab> createState() =>
+      _CompletedWorkLogsTabState();
+}
+
+class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
+  final _listKey = GlobalKey<AnimatedListState>();
+  List<WorkLog> _currentWorkLogs = [];
+
+  @override
+  Widget build(BuildContext context) {
     final completedWorkLogsAsync = ref.watch(completedWorkLogsProvider);
 
     return completedWorkLogsAsync.when(
       data: (workLogs) {
+        // 新しい家事ログが追加された場合のアニメーション処理
+        _handleListChanges(workLogs);
+
         if (workLogs.isEmpty) {
           return const Center(
             child: Column(
@@ -233,22 +245,12 @@ class _CompletedWorkLogsTab extends ConsumerWidget {
               ..invalidate(completedWorkLogsProvider)
               ..invalidate(houseWorksSortedByMostFrequentlyUsedProvider);
           },
-          child: ListView.builder(
-            itemCount: workLogs.length,
-            itemBuilder: (context, index) {
-              final workLog = workLogs[index];
-              return WorkLogItem(
-                workLog: workLog,
-                onTap: () {
-                  // 家事ダッシュボード画面に遷移
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder:
-                          (context) => WorkLogDashboardScreen(workLog: workLog),
-                    ),
-                  );
-                },
-              );
+          child: AnimatedList(
+            key: _listKey,
+            initialItemCount: _currentWorkLogs.length,
+            itemBuilder: (context, index, animation) {
+              final workLog = _currentWorkLogs[index];
+              return _buildAnimatedItem(context, workLog, animation);
             },
           ),
         );
@@ -259,6 +261,87 @@ class _CompletedWorkLogsTab extends ConsumerWidget {
             child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
           ),
     );
+  }
+
+  // 新しいアイテムのアニメーション付きウィジェット
+  Widget _buildAnimatedItem(
+    BuildContext context,
+    WorkLog workLog,
+    Animation<double> animation,
+  ) {
+    return SizeTransition(
+      sizeFactor: animation,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, -1), // 右からスライドイン
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(parent: animation, curve: Curves.easeOutQuart),
+        ),
+        child: FadeTransition(
+          opacity: animation,
+          child: WorkLogItem(
+            workLog: workLog,
+            onTap: () {
+              // 家事ダッシュボード画面に遷移
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder:
+                      (context) => WorkLogDashboardScreen(workLog: workLog),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  // リスト変更を処理し、必要に応じてアニメーション
+  void _handleListChanges(List<WorkLog> newWorkLogs) {
+    if (_currentWorkLogs.isEmpty) {
+      // 初回ロード時は単純に一括設定
+      setState(() {
+        _currentWorkLogs = List.from(newWorkLogs);
+      });
+      return;
+    }
+
+    // 新しく追加されたアイテムを検出
+    for (final newLog in newWorkLogs) {
+      final existingIndex = _currentWorkLogs.indexWhere(
+        (log) => log.id == newLog.id,
+      );
+      if (existingIndex == -1) {
+        // 新しいログを追加してアニメーション
+        _currentWorkLogs.insert(0, newLog); // 最新のログを先頭に追加
+        _listKey.currentState?.insertItem(0);
+      }
+    }
+
+    // 削除されたアイテムを検出（必要に応じて）
+    final toRemove = <WorkLog>[];
+    for (final existingLog in _currentWorkLogs) {
+      if (!newWorkLogs.any((log) => log.id == existingLog.id)) {
+        toRemove.add(existingLog);
+      }
+    }
+
+    // 削除アニメーション（必要に応じて）
+    for (final logToRemove in toRemove) {
+      final index = _currentWorkLogs.indexOf(logToRemove);
+      if (index != -1) {
+        final removedItem = _currentWorkLogs.removeAt(index);
+        _listKey.currentState?.removeItem(
+          index,
+          (context, animation) => _buildAnimatedItem(
+            context,
+            removedItem,
+            animation.drive(Tween(begin: 1, end: 0)),
+          ),
+        );
+      }
+    }
   }
 }
 
