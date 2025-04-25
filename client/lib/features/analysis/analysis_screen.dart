@@ -90,6 +90,140 @@ final weekdayFrequencyProvider = FutureProvider<List<WeekdayFrequency>>((
   return result;
 });
 
+// 期間で絞り込まれた家事ログの取得と分析のためのプロバイダー
+final FutureProviderFamily<List<WorkLog>, int> filteredWorkLogsProvider =
+    FutureProvider.family<List<WorkLog>, int>((ref, period) async {
+      final workLogRepository = ref.watch(workLogRepositoryProvider);
+      final houseId = ref.watch(currentHouseIdProvider);
+      final allWorkLogs = await workLogRepository.getAll(houseId);
+
+      // 現在時刻を取得
+      final now = DateTime.now();
+
+      // 期間によるフィルタリング
+      switch (period) {
+        case 0: // 今日
+          final startOfDay = DateTime(now.year, now.month, now.day);
+          final endOfDay = startOfDay
+              .add(const Duration(days: 1))
+              .subtract(const Duration(microseconds: 1));
+          return allWorkLogs
+              .where(
+                (log) =>
+                    log.completedAt.isAfter(startOfDay) &&
+                    log.completedAt.isBefore(endOfDay),
+              )
+              .toList();
+
+        case 1: // 今週
+          // 週の開始は月曜日、終了は日曜日とする
+          final currentWeekday = now.weekday;
+          final startOfWeek = DateTime(
+            now.year,
+            now.month,
+            now.day,
+          ).subtract(Duration(days: currentWeekday - 1));
+          final endOfWeek = startOfWeek
+              .add(const Duration(days: 7))
+              .subtract(const Duration(microseconds: 1));
+          return allWorkLogs
+              .where(
+                (log) =>
+                    log.completedAt.isAfter(startOfWeek) &&
+                    log.completedAt.isBefore(endOfWeek),
+              )
+              .toList();
+
+        case 2: // 今月
+          final startOfMonth = DateTime(now.year, now.month);
+          final endOfMonth =
+              (now.month < 12)
+                  ? DateTime(now.year, now.month + 1)
+                  : DateTime(now.year + 1);
+          final lastDayOfMonth = endOfMonth.subtract(
+            const Duration(microseconds: 1),
+          );
+          return allWorkLogs
+              .where(
+                (log) =>
+                    log.completedAt.isAfter(startOfMonth) &&
+                    log.completedAt.isBefore(lastDayOfMonth),
+              )
+              .toList();
+
+        default:
+          return allWorkLogs;
+      }
+    });
+
+// 各家事の実行頻度を取得するプロバイダー（期間フィルタリング付き）
+final FutureProviderFamily<List<HouseWorkFrequency>, int>
+filteredHouseWorkFrequencyProvider =
+    FutureProvider.family<List<HouseWorkFrequency>, int>((ref, period) async {
+      // フィルタリングされた家事ログのデータを待機
+      final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
+      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+      final houseId = ref.watch(currentHouseIdProvider);
+
+      // 家事IDごとにグループ化して頻度をカウント
+      final frequencyMap = <String, int>{};
+      for (final workLog in workLogs) {
+        frequencyMap[workLog.houseWorkId] =
+            (frequencyMap[workLog.houseWorkId] ?? 0) + 1;
+      }
+
+      // HouseWorkFrequencyのリストを作成
+      final result = <HouseWorkFrequency>[];
+      for (final entry in frequencyMap.entries) {
+        final houseWork = await houseWorkRepository.getByIdOnce(
+          houseId: houseId,
+          houseWorkId: entry.key,
+        );
+
+        if (houseWork != null) {
+          result.add(
+            HouseWorkFrequency(houseWork: houseWork, count: entry.value),
+          );
+        }
+      }
+
+      // 頻度の高い順にソート
+      result.sort((a, b) => b.count.compareTo(a.count));
+
+      return result;
+    });
+
+// 曜日ごとの家事実行頻度を取得するプロバイダー（期間フィルタリング付き）
+final FutureProviderFamily<List<WeekdayFrequency>, int>
+filteredWeekdayFrequencyProvider =
+    FutureProvider.family<List<WeekdayFrequency>, int>((ref, period) async {
+      // フィルタリングされた家事ログのデータを待機
+      final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
+
+      // 曜日名の配列（インデックスは0が日曜日）
+      final weekdayNames = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
+
+      // 曜日ごとにグループ化して頻度をカウント
+      final frequencyMap = <int, int>{};
+      for (final workLog in workLogs) {
+        final weekday = workLog.completedAt.weekday % 7; // 0-6の値（0が日曜日）
+        frequencyMap[weekday] = (frequencyMap[weekday] ?? 0) + 1;
+      }
+
+      // 日曜日から土曜日の順に並べたWeekdayFrequencyのリストを作成
+      final result = <WeekdayFrequency>[];
+      for (var i = 0; i < 7; i++) {
+        result.add(
+          WeekdayFrequency(
+            weekday: weekdayNames[i],
+            count: frequencyMap[i] ?? 0,
+          ),
+        );
+      }
+
+      return result;
+    });
+
 /// 分析画面
 ///
 /// 家事の実行頻度や曜日ごとの頻度分析を表示する
@@ -106,6 +240,19 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   /// 1: 曜日ごとの頻度分析
   var _analysisMode = 0;
 
+  /// 分析期間
+  /// 0: 今日
+  /// 1: 今週
+  /// 2: 今月
+  var _analysisPeriod = 1; // デフォルトは「今週」
+
+  // 分析期間の選択肢
+  final _periodItems = [
+    const DropdownMenuItem<int>(value: 0, child: Text('今日')),
+    const DropdownMenuItem<int>(value: 1, child: Text('今週')),
+    const DropdownMenuItem<int>(value: 2, child: Text('今月')),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,6 +268,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       ),
       body: Column(
         children: [
+          // 分析期間の切り替えUI
+          _buildAnalysisPeriodSwitcher(),
+
           // 分析方式の切り替えUI
           _buildAnalysisModeSwitcher(),
 
@@ -130,6 +280,30 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 _analysisMode == 0
                     ? _buildFrequencyAnalysis()
                     : _buildWeekdayAnalysis(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 分析期間の切り替えUIを構築
+  Widget _buildAnalysisPeriodSwitcher() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          const Text('分析期間: ', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(width: 8),
+          DropdownButton<int>(
+            value: _analysisPeriod,
+            items: _periodItems,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() {
+                  _analysisPeriod = value;
+                });
+              }
+            },
           ),
         ],
       ),
@@ -159,7 +333,10 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   Widget _buildFrequencyAnalysis() {
     return Consumer(
       builder: (context, ref, child) {
-        final frequencyDataAsync = ref.watch(houseWorkFrequencyProvider);
+        // 選択された期間に基づいてフィルタリングされたデータを取得
+        final frequencyDataAsync = ref.watch(
+          filteredHouseWorkFrequencyProvider(_analysisPeriod),
+        );
 
         return frequencyDataAsync.when(
           data: (frequencyData) {
@@ -188,6 +365,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
               );
             }
 
+            // 期間に応じたタイトルのテキストを作成
+            final periodText = _getPeriodText();
+
             return Card(
               margin: const EdgeInsets.all(16),
               child: Padding(
@@ -195,9 +375,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '家事の実行頻度（回数が多い順）',
-                      style: TextStyle(
+                    Text(
+                      '$periodTextの家事実行頻度（回数が多い順）',
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -243,7 +423,10 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   Widget _buildWeekdayAnalysis() {
     return Consumer(
       builder: (context, ref, child) {
-        final weekdayDataAsync = ref.watch(weekdayFrequencyProvider);
+        // 選択された期間に基づいてフィルタリングされたデータを取得
+        final weekdayDataAsync = ref.watch(
+          filteredWeekdayFrequencyProvider(_analysisPeriod),
+        );
 
         return weekdayDataAsync.when(
           data: (weekdayData) {
@@ -277,6 +460,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 .map((e) => e.count)
                 .reduce((a, b) => a > b ? a : b);
 
+            // 期間に応じたタイトルのテキストを作成
+            final periodText = _getPeriodText();
+
             return Card(
               margin: const EdgeInsets.all(16),
               child: Padding(
@@ -284,9 +470,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '曜日ごとの家事実行頻度',
-                      style: TextStyle(
+                    Text(
+                      '$periodTextの曜日ごとの家事実行頻度',
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -347,5 +533,19 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         );
       },
     );
+  }
+
+  /// 選択されている期間に応じたテキストを返す
+  String _getPeriodText() {
+    switch (_analysisPeriod) {
+      case 0:
+        return '今日';
+      case 1:
+        return '今週';
+      case 2:
+        return '今月';
+      default:
+        return '';
+    }
   }
 }
