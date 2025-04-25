@@ -663,7 +663,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
             // 期間に応じたタイトルのテキストを作成
             final periodText = _getPeriodText();
 
-            // 家事ごとの堆積棒グラフのための色リスト
+            // 家事ごとの積み上げ棒グラフのための色リスト
             final colors = [
               Colors.blue,
               Colors.green,
@@ -733,7 +733,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                                   height: 24,
                                   child: Row(
                                     children: [
-                                      // 家事ごとの堆積棒グラフ
+                                      // 家事ごとの積み上げ棒グラフ
                                       ...item.houseWorkFrequencies.asMap().entries.map((entry) {
                                         final i = entry.key;
                                         final workFreq = entry.value;

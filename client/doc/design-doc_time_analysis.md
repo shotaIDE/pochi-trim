@@ -29,7 +29,7 @@
       - 家事の実行頻度を曜日ごとに表示する
     - 時間帯による分析
       - 家事の実行回数を 3 時間帯ごとに表示する
-      - 家事ごとの堆積棒グラフを表示する
+      - 家事ごとの積み上げ棒グラフを表示する
 ```
 
 ## 実装計画
@@ -234,8 +234,8 @@ Widget _buildTimeSlotAnalysis() {
                       itemCount: timeSlotData.length,
                       itemBuilder: (context, index) {
                         final item = timeSlotData[index];
-
-                        // 家事ごとの堆積棒グラフのための色リスト
+                        
+                        // 家事ごとの積み上げ棒グラフのための色リスト
                         final colors = [
                           Colors.blue,
                           Colors.green,
@@ -246,7 +246,7 @@ Widget _buildTimeSlotAnalysis() {
                           Colors.amber,
                           Colors.indigo,
                         ];
-
+                        
                         if (item.totalCount == 0) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -284,12 +284,12 @@ Widget _buildTimeSlotAnalysis() {
                                 height: 24,
                                 child: Row(
                                   children: [
-                                    // 家事ごとの堆積棒グラフ
+                                    // 家事ごとの積み上げ棒グラフ
                                     ...item.houseWorkFrequencies.asMap().entries.map((entry) {
                                       final i = entry.key;
                                       final workFreq = entry.value;
                                       final ratio = workFreq.count / item.totalCount.toDouble();
-
+                                      
                                       return Expanded(
                                         flex: (ratio * 100).toInt(),
                                         child: Container(
@@ -298,7 +298,7 @@ Widget _buildTimeSlotAnalysis() {
                                         ),
                                       );
                                     }).toList(),
-
+                                    
                                     // データが少ない場合、残りのスペースを埋める透明コンテナ
                                     if (item.houseWorkFrequencies.isEmpty)
                                       Expanded(
@@ -318,7 +318,7 @@ Widget _buildTimeSlotAnalysis() {
                                 children: item.houseWorkFrequencies.asMap().entries.map((entry) {
                                   final i = entry.key;
                                   final workFreq = entry.value;
-
+                                  
                                   return Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -371,7 +371,7 @@ Widget _buildTimeSlotAnalysis() {
    - 異なる分析期間での時間帯分析の結果が正しいかのテスト
 
 3. UI テスト：
-   - 堆積棒グラフが正しく表示されるかのテスト
+   - 積み上げ棒グラフが正しく表示されるかのテスト
    - 凡例が正しく表示されるかのテスト
    - データがない場合の表示のテスト
 
