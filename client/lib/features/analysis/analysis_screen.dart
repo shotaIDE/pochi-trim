@@ -20,6 +20,18 @@ class WeekdayFrequency {
   final int count;
 }
 
+// 時間帯別の家事実行頻度のためのデータクラス
+class TimeSlotFrequency {
+  TimeSlotFrequency({
+    required this.timeSlot,
+    required this.houseWorkFrequencies,
+    required this.totalCount,
+  });
+  final String timeSlot;          // 時間帯の表示名（例：「0-3時」）
+  final List<HouseWorkFrequency> houseWorkFrequencies;  // その時間帯での家事ごとの実行回数
+  final int totalCount;           // その時間帯の合計実行回数
+}
+
 // 家事ログの取得と分析のためのプロバイダー
 final workLogsForAnalysisProvider = FutureProvider<List<WorkLog>>((ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
@@ -224,6 +236,74 @@ filteredWeekdayFrequencyProvider =
       return result;
     });
 
+// 時間帯ごとの家事実行頻度を取得するプロバイダー（期間フィルタリング付き）
+final FutureProviderFamily<List<TimeSlotFrequency>, int>
+filteredTimeSlotFrequencyProvider =
+    FutureProvider.family<List<TimeSlotFrequency>, int>((ref, period) async {
+      // フィルタリングされた家事ログのデータを待機
+      final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
+      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+      final houseId = ref.watch(currentHouseIdProvider);
+
+      // 時間帯の定義（3時間ごと）
+      final timeSlots = [
+        '0-3時', '3-6時', '6-9時', '9-12時',
+        '12-15時', '15-18時', '18-21時', '21-24時'
+      ];
+      
+      // 時間帯ごと、家事IDごとにグループ化して頻度をカウント
+      final timeSlotMap = <int, Map<String, int>>{};
+      // 各時間帯の初期化
+      for (var i = 0; i < 8; i++) {
+        timeSlotMap[i] = <String, int>{};
+      }
+      
+      // 家事ログを時間帯と家事IDでグループ化
+      for (final workLog in workLogs) {
+        final hour = workLog.completedAt.hour;
+        final timeSlotIndex = hour ~/ 3; // 0-7のインデックス（3時間ごとの区分）
+        final houseWorkId = workLog.houseWorkId;
+        
+        timeSlotMap[timeSlotIndex]![houseWorkId] = 
+            (timeSlotMap[timeSlotIndex]![houseWorkId] ?? 0) + 1;
+      }
+
+      // TimeSlotFrequencyのリストを作成
+      final result = <TimeSlotFrequency>[];
+      for (var i = 0; i < 8; i++) {
+        final houseWorkFrequencies = <HouseWorkFrequency>[];
+        var totalCount = 0;
+        
+        // 各家事IDごとの頻度を取得
+        for (final entry in timeSlotMap[i]!.entries) {
+          final houseWork = await houseWorkRepository.getByIdOnce(
+            houseId: houseId,
+            houseWorkId: entry.key,
+          );
+          
+          if (houseWork != null) {
+            houseWorkFrequencies.add(
+              HouseWorkFrequency(houseWork: houseWork, count: entry.value),
+            );
+            totalCount += entry.value;
+          }
+        }
+        
+        // 頻度の高い順にソート
+        houseWorkFrequencies.sort((a, b) => b.count.compareTo(a.count));
+        
+        result.add(
+          TimeSlotFrequency(
+            timeSlot: timeSlots[i],
+            houseWorkFrequencies: houseWorkFrequencies,
+            totalCount: totalCount,
+          ),
+        );
+      }
+
+      return result;
+    });
+
 /// 分析画面
 ///
 /// 家事の実行頻度や曜日ごとの頻度分析を表示する
@@ -276,10 +356,18 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
 
           // 分析結果表示
           Expanded(
-            child:
-                _analysisMode == 0
-                    ? _buildFrequencyAnalysis()
-                    : _buildWeekdayAnalysis(),
+            child: () {
+              switch (_analysisMode) {
+                case 0:
+                  return _buildFrequencyAnalysis();
+                case 1:
+                  return _buildWeekdayAnalysis();
+                case 2:
+                  return _buildTimeSlotAnalysis();
+                default:
+                  return _buildFrequencyAnalysis();
+              }
+            }(),
           ),
         ],
       ),
@@ -318,6 +406,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         segments: const [
           ButtonSegment<int>(value: 0, label: Text('家事の頻度分析')),
           ButtonSegment<int>(value: 1, label: Text('曜日ごとの頻度分析')),
+          ButtonSegment<int>(value: 2, label: Text('時間帯による分析')),
         ],
         selected: {_analysisMode},
         onSelectionChanged: (Set<int> newSelection) {
@@ -530,6 +619,187 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
               (error, stackTrace) => Center(
                 child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
               ),
+        );
+      },
+    );
+  }
+
+  /// 時間帯による分析を表示するウィジェットを構築
+  Widget _buildTimeSlotAnalysis() {
+    return Consumer(
+      builder: (context, ref, child) {
+        // 選択された期間に基づいてフィルタリングされたデータを取得
+        final timeSlotDataAsync = ref.watch(
+          filteredTimeSlotFrequencyProvider(_analysisPeriod),
+        );
+
+        return timeSlotDataAsync.when(
+          data: (timeSlotData) {
+            if (timeSlotData.every((data) => data.totalCount == 0)) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.access_time, size: 64, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      '家事ログがありません',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '家事を完了すると、ここに分析結果が表示されます',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            // 期間に応じたタイトルのテキストを作成
+            final periodText = _getPeriodText();
+
+            // 家事ごとの堆積棒グラフのための色リスト
+            final colors = [
+              Colors.blue,
+              Colors.green,
+              Colors.orange,
+              Colors.purple,
+              Colors.teal,
+              Colors.pink,
+              Colors.amber,
+              Colors.indigo,
+            ];
+
+            return Card(
+              margin: const EdgeInsets.all(16),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$periodTextの時間帯ごとの家事実行頻度',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: timeSlotData.length,
+                        itemBuilder: (context, index) {
+                          final item = timeSlotData[index];
+
+                          if (item.totalCount == 0) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(item.timeSlot),
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    height: 24,
+                                    color: Colors.grey.withOpacity(0.2),
+                                    child: const Center(
+                                      child: Text('データなし', style: TextStyle(color: Colors.grey)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(item.timeSlot),
+                                    Text('合計: ${item.totalCount}回'),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                SizedBox(
+                                  height: 24,
+                                  child: Row(
+                                    children: [
+                                      // 家事ごとの堆積棒グラフ
+                                      ...item.houseWorkFrequencies.asMap().entries.map((entry) {
+                                        final i = entry.key;
+                                        final workFreq = entry.value;
+                                        final ratio = workFreq.count / item.totalCount.toDouble();
+
+                                        return Expanded(
+                                          flex: (ratio * 100).toInt(),
+                                          child: Container(
+                                            height: 24,
+                                            color: colors[i % colors.length],
+                                          ),
+                                        );
+                                      }).toList(),
+
+                                      // データが少ない場合、残りのスペースを埋める透明コンテナ
+                                      if (item.houseWorkFrequencies.isEmpty)
+                                        Expanded(
+                                          child: Container(
+                                            height: 24,
+                                            color: Colors.grey.withOpacity(0.2),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                // 凡例の表示
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  children: item.houseWorkFrequencies.asMap().entries.map((entry) {
+                                    final i = entry.key;
+                                    final workFreq = entry.value;
+
+                                    return Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 12,
+                                          height: 12,
+                                          color: colors[i % colors.length],
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${workFreq.houseWork.title}: ${workFreq.count}回',
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
+          ),
         );
       },
     );
