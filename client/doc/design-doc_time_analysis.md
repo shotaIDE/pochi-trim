@@ -234,7 +234,7 @@ Widget _buildTimeSlotAnalysis() {
                       itemCount: timeSlotData.length,
                       itemBuilder: (context, index) {
                         final item = timeSlotData[index];
-                        
+
                         // 家事ごとの積み上げ棒グラフのための色リスト
                         final colors = [
                           Colors.blue,
@@ -246,7 +246,7 @@ Widget _buildTimeSlotAnalysis() {
                           Colors.amber,
                           Colors.indigo,
                         ];
-                        
+
                         if (item.totalCount == 0) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -289,7 +289,7 @@ Widget _buildTimeSlotAnalysis() {
                                       final i = entry.key;
                                       final workFreq = entry.value;
                                       final ratio = workFreq.count / item.totalCount.toDouble();
-                                      
+
                                       return Expanded(
                                         flex: (ratio * 100).toInt(),
                                         child: Container(
@@ -298,7 +298,7 @@ Widget _buildTimeSlotAnalysis() {
                                         ),
                                       );
                                     }).toList(),
-                                    
+
                                     // データが少ない場合、残りのスペースを埋める透明コンテナ
                                     if (item.houseWorkFrequencies.isEmpty)
                                       Expanded(
@@ -318,7 +318,7 @@ Widget _buildTimeSlotAnalysis() {
                                 children: item.houseWorkFrequencies.asMap().entries.map((entry) {
                                   final i = entry.key;
                                   final workFreq = entry.value;
-                                  
+
                                   return Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [

@@ -27,9 +27,9 @@ class TimeSlotFrequency {
     required this.houseWorkFrequencies,
     required this.totalCount,
   });
-  final String timeSlot;          // 時間帯の表示名（例：「0-3時」）
-  final List<HouseWorkFrequency> houseWorkFrequencies;  // その時間帯での家事ごとの実行回数
-  final int totalCount;           // その時間帯の合計実行回数
+  final String timeSlot; // 時間帯の表示名（例：「0-3時」）
+  final List<HouseWorkFrequency> houseWorkFrequencies; // その時間帯での家事ごとの実行回数
+  final int totalCount; // その時間帯の合計実行回数
 }
 
 // 家事ログの取得と分析のためのプロバイダー
@@ -247,24 +247,30 @@ filteredTimeSlotFrequencyProvider =
 
       // 時間帯の定義（3時間ごと）
       final timeSlots = [
-        '0-3時', '3-6時', '6-9時', '9-12時',
-        '12-15時', '15-18時', '18-21時', '21-24時'
+        '0-3時',
+        '3-6時',
+        '6-9時',
+        '9-12時',
+        '12-15時',
+        '15-18時',
+        '18-21時',
+        '21-24時',
       ];
-      
+
       // 時間帯ごと、家事IDごとにグループ化して頻度をカウント
       final timeSlotMap = <int, Map<String, int>>{};
       // 各時間帯の初期化
       for (var i = 0; i < 8; i++) {
         timeSlotMap[i] = <String, int>{};
       }
-      
+
       // 家事ログを時間帯と家事IDでグループ化
       for (final workLog in workLogs) {
         final hour = workLog.completedAt.hour;
         final timeSlotIndex = hour ~/ 3; // 0-7のインデックス（3時間ごとの区分）
         final houseWorkId = workLog.houseWorkId;
-        
-        timeSlotMap[timeSlotIndex]![houseWorkId] = 
+
+        timeSlotMap[timeSlotIndex]![houseWorkId] =
             (timeSlotMap[timeSlotIndex]![houseWorkId] ?? 0) + 1;
       }
 
@@ -273,14 +279,14 @@ filteredTimeSlotFrequencyProvider =
       for (var i = 0; i < 8; i++) {
         final houseWorkFrequencies = <HouseWorkFrequency>[];
         var totalCount = 0;
-        
+
         // 各家事IDごとの頻度を取得
         for (final entry in timeSlotMap[i]!.entries) {
           final houseWork = await houseWorkRepository.getByIdOnce(
             houseId: houseId,
             houseWorkId: entry.key,
           );
-          
+
           if (houseWork != null) {
             houseWorkFrequencies.add(
               HouseWorkFrequency(houseWork: houseWork, count: entry.value),
@@ -288,10 +294,10 @@ filteredTimeSlotFrequencyProvider =
             totalCount += entry.value;
           }
         }
-        
+
         // 頻度の高い順にソート
         houseWorkFrequencies.sort((a, b) => b.count.compareTo(a.count));
-        
+
         result.add(
           TimeSlotFrequency(
             timeSlot: timeSlots[i],
@@ -660,6 +666,11 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
               );
             }
 
+            // 全時間帯の中での最大合計回数を取得（グラフの横幅スケール統一のため）
+            final maxTotalCount = timeSlotData
+                .map((e) => e.totalCount)
+                .reduce((a, b) => a > b ? a : b);
+
             // 期間に応じたタイトルのテキストを作成
             final periodText = _getPeriodText();
 
@@ -708,7 +719,10 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                                     height: 24,
                                     color: Colors.grey.withOpacity(0.2),
                                     child: const Center(
-                                      child: Text('データなし', style: TextStyle(color: Colors.grey)),
+                                      child: Text(
+                                        'データなし',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -716,74 +730,104 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                             );
                           }
 
+                          // 最大値に対する割合に基づいてバー全体の長さを決定
+                          final totalRatio =
+                              maxTotalCount > 0
+                                  ? item.totalCount / maxTotalCount.toDouble()
+                                  : 0;
+
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(item.timeSlot),
                                     Text('合計: ${item.totalCount}回'),
                                   ],
                                 ),
                                 const SizedBox(height: 4),
-                                SizedBox(
-                                  height: 24,
-                                  child: Row(
-                                    children: [
-                                      // 家事ごとの積み上げ棒グラフ
-                                      ...item.houseWorkFrequencies.asMap().entries.map((entry) {
-                                        final i = entry.key;
-                                        final workFreq = entry.value;
-                                        final ratio = workFreq.count / item.totalCount.toDouble();
+                                Row(
+                                  children: [
+                                    // 積み上げ棒グラフ部分（全体の長さは合計回数に比例）
+                                    Expanded(
+                                      flex: (totalRatio * 100).toInt(),
+                                      child: SizedBox(
+                                        height: 24,
+                                        child: Row(
+                                          children: [
+                                            // 家事ごとの積み上げ棒グラフ
+                                            ...item.houseWorkFrequencies
+                                                .asMap()
+                                                .entries
+                                                .map((entry) {
+                                                  final i = entry.key;
+                                                  final workFreq = entry.value;
+                                                  final ratio =
+                                                      workFreq.count /
+                                                      item.totalCount
+                                                          .toDouble();
 
-                                        return Expanded(
-                                          flex: (ratio * 100).toInt(),
-                                          child: Container(
-                                            height: 24,
-                                            color: colors[i % colors.length],
-                                          ),
-                                        );
-                                      }).toList(),
-
-                                      // データが少ない場合、残りのスペースを埋める透明コンテナ
-                                      if (item.houseWorkFrequencies.isEmpty)
-                                        Expanded(
-                                          child: Container(
-                                            height: 24,
-                                            color: Colors.grey.withOpacity(0.2),
-                                          ),
+                                                  return Expanded(
+                                                    flex: (ratio * 100).toInt(),
+                                                    child: Container(
+                                                      height: 24,
+                                                      color:
+                                                          colors[i %
+                                                              colors.length],
+                                                    ),
+                                                  );
+                                                }),
+                                          ],
                                         ),
-                                    ],
-                                  ),
+                                      ),
+                                    ),
+                                    // 空白部分（最大値に満たない部分）
+                                    if (totalRatio < 1)
+                                      Expanded(
+                                        flex: 100 - (totalRatio * 100).toInt(),
+                                        child: Container(),
+                                      ),
+                                    const SizedBox(width: 8),
+                                    Text('${item.totalCount}回'),
+                                  ],
                                 ),
                                 const SizedBox(height: 8),
                                 // 凡例の表示
                                 Wrap(
                                   spacing: 8,
                                   runSpacing: 4,
-                                  children: item.houseWorkFrequencies.asMap().entries.map((entry) {
-                                    final i = entry.key;
-                                    final workFreq = entry.value;
+                                  children:
+                                      item.houseWorkFrequencies
+                                          .asMap()
+                                          .entries
+                                          .map((entry) {
+                                            final i = entry.key;
+                                            final workFreq = entry.value;
 
-                                    return Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          width: 12,
-                                          height: 12,
-                                          color: colors[i % colors.length],
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '${workFreq.houseWork.title}: ${workFreq.count}回',
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                      ],
-                                    );
-                                  }).toList(),
+                                            return Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Container(
+                                                  width: 12,
+                                                  height: 12,
+                                                  color:
+                                                      colors[i % colors.length],
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  '${workFreq.houseWork.title}: ${workFreq.count}回',
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          })
+                                          .toList(),
                                 ),
                               ],
                             ),
@@ -797,9 +841,10 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-          ),
+          error:
+              (error, stackTrace) => Center(
+                child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
+              ),
         );
       },
     );
