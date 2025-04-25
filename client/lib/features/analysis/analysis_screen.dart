@@ -717,7 +717,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                                   const SizedBox(height: 4),
                                   Container(
                                     height: 24,
-                                    color: Colors.grey.withOpacity(0.2),
+                                    color: Colors.grey.withAlpha(
+                                      51,
+                                    ), // 0.2 * 255 = 51
                                     child: const Center(
                                       child: Text(
                                         'データなし',
@@ -807,6 +809,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                                           .map((entry) {
                                             final i = entry.key;
                                             final workFreq = entry.value;
+                                            final countResult =
+                                                '${workFreq.houseWork.title}: '
+                                                '${workFreq.count}回';
 
                                             return Row(
                                               mainAxisSize: MainAxisSize.min,
@@ -819,7 +824,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                                                 ),
                                                 const SizedBox(width: 4),
                                                 Text(
-                                                  '${workFreq.houseWork.title}: ${workFreq.count}回',
+                                                  countResult,
                                                   style: const TextStyle(
                                                     fontSize: 12,
                                                   ),
