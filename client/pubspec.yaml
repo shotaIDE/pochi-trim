@@ -25,6 +25,7 @@ dependencies:
   package_info_plus:
   path_provider:
   riverpod:
+  riverpod_annotation: 2.6.1
   share_plus:
   url_launcher:
 
@@ -38,6 +39,7 @@ dev_dependencies:
   freezed:
   mockito:
   pedantic_mono: 1.30.3
+  riverpod_generator: 2.6.5
 
 flutter:
   uses-material-design: true

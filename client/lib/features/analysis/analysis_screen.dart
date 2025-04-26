@@ -7,6 +7,7 @@ import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/house_id_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // 家事ごとの頻度分析のためのデータクラス
 class HouseWorkFrequency {
@@ -100,9 +101,8 @@ final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
 });
 
 // 曜日ごとの家事実行頻度を取得するプロバイダー
-final weekdayFrequencyProvider = FutureProvider<List<DayOfTheWeekFrequency>>((
-  ref,
-) async {
+@riverpod
+Future<List<DayOfTheWeekFrequency>> dayOfTheWeekFrequencies(Ref ref) async {
   // 家事ログのデータを待機
   final workLogs = await ref.watch(workLogsForAnalysisProvider.future);
   final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
@@ -161,7 +161,7 @@ final weekdayFrequencyProvider = FutureProvider<List<DayOfTheWeekFrequency>>((
   }
 
   return result;
-});
+}
 
 // 期間で絞り込まれた家事ログの取得と分析のためのプロバイダー
 final FutureProviderFamily<List<WorkLog>, int> filteredWorkLogsProvider =
