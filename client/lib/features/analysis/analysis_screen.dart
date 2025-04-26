@@ -697,11 +697,6 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
               );
             }
 
-            // 全時間帯の中での最大合計回数を取得（グラフの横幅スケール統一のため）
-            final maxTotalCount = timeSlotData
-                .map((e) => e.totalCount)
-                .reduce((a, b) => a > b ? a : b);
-
             // 期間に応じたタイトルのテキストを作成
             final periodText = _getPeriodText();
 
@@ -716,6 +711,25 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
               Colors.amber,
               Colors.indigo,
             ];
+
+            // 凡例データの収集
+            final allHouseWorks = <HouseWork>{};
+            final houseWorkColorMap = <String, Color>{};
+
+            // すべての家事を収集し、それぞれに色を割り当てる
+            for (final slot in timeSlotData) {
+              for (var i = 0; i < slot.houseWorkFrequencies.length; i++) {
+                final houseWork = slot.houseWorkFrequencies[i].houseWork;
+                allHouseWorks.add(houseWork);
+                if (!houseWorkColorMap.containsKey(houseWork.id)) {
+                  houseWorkColorMap[houseWork.id] =
+                      colors[houseWorkColorMap.length % colors.length];
+                }
+              }
+            }
+
+            // 家事を集約してリスト化（凡例用）
+            final legendItems = allHouseWorks.toList();
 
             return Card(
               margin: const EdgeInsets.all(16),
@@ -732,143 +746,128 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    // fl_chartの積み上げ棒グラフの表示
                     Expanded(
-                      child: ListView.builder(
-                        itemCount: timeSlotData.length,
-                        itemBuilder: (context, index) {
-                          final item = timeSlotData[index];
-
-                          if (item.totalCount == 0) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(item.timeSlot),
-                                  const SizedBox(height: 4),
-                                  Container(
-                                    height: 24,
-                                    color: Colors.grey.withAlpha(
-                                      51,
-                                    ), // 0.2 * 255 = 51
-                                    child: const Center(
-                                      child: Text(
-                                        'データなし',
-                                        style: TextStyle(color: Colors.grey),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-
-                          // 最大値に対する割合に基づいてバー全体の長さを決定
-                          final totalRatio =
-                              maxTotalCount > 0
-                                  ? item.totalCount / maxTotalCount.toDouble()
-                                  : 0;
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(item.timeSlot),
-                                    Text('合計: ${item.totalCount}回'),
-                                  ],
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 16, right: 16),
+                        child: BarChart(
+                          BarChartData(
+                            alignment: BarChartAlignment.spaceAround,
+                            maxY: timeSlotData
+                                .map((e) => e.totalCount.toDouble())
+                                .reduce((a, b) => a > b ? a : b),
+                            titlesData: FlTitlesData(
+                              leftTitles: const AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 30,
                                 ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    // 積み上げ棒グラフ部分（全体の長さは合計回数に比例）
-                                    Expanded(
-                                      flex: (totalRatio * 100).toInt(),
-                                      child: SizedBox(
-                                        height: 24,
-                                        child: Row(
-                                          children: [
-                                            // 家事ごとの積み上げ棒グラフ
-                                            ...item.houseWorkFrequencies
-                                                .asMap()
-                                                .entries
-                                                .map((entry) {
-                                                  final i = entry.key;
-                                                  final workFreq = entry.value;
-                                                  final ratio =
-                                                      workFreq.count /
-                                                      item.totalCount
-                                                          .toDouble();
-
-                                                  return Expanded(
-                                                    flex: (ratio * 100).toInt(),
-                                                    child: Container(
-                                                      height: 24,
-                                                      color:
-                                                          colors[i %
-                                                              colors.length],
-                                                    ),
-                                                  );
-                                                }),
-                                          ],
+                              ),
+                              rightTitles: const AxisTitles(),
+                              topTitles: const AxisTitles(),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  getTitlesWidget: (value, meta) {
+                                    if (value < 0 ||
+                                        value >= timeSlotData.length) {
+                                      return const Text('');
+                                    }
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 8),
+                                      child: Text(
+                                        timeSlotData[value.toInt()].timeSlot,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    ),
-                                    // 空白部分（最大値に満たない部分）
-                                    if (totalRatio < 1)
-                                      Expanded(
-                                        flex: 100 - (totalRatio * 100).toInt(),
-                                        child: Container(),
-                                      ),
-                                    const SizedBox(width: 8),
-                                    Text('${item.totalCount}回'),
-                                  ],
+                                    );
+                                  },
+                                  reservedSize: 30,
                                 ),
-                                const SizedBox(height: 8),
-                                // 凡例の表示
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 4,
-                                  children:
-                                      item.houseWorkFrequencies
-                                          .asMap()
-                                          .entries
-                                          .map((entry) {
-                                            final i = entry.key;
-                                            final workFreq = entry.value;
-                                            final countResult =
-                                                '${workFreq.houseWork.title}: '
-                                                '${workFreq.count}回';
-
-                                            return Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Container(
-                                                  width: 12,
-                                                  height: 12,
-                                                  color:
-                                                      colors[i % colors.length],
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  countResult,
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ],
-                                            );
-                                          })
-                                          .toList(),
-                                ),
-                              ],
+                              ),
                             ),
-                          );
-                        },
+                            gridData: const FlGridData(
+                              horizontalInterval: 4,
+                              drawVerticalLine: false,
+                            ),
+                            borderData: FlBorderData(
+                              show: true,
+                              border: Border(
+                                left: BorderSide(
+                                  color: Theme.of(context).dividerColor,
+                                ),
+                                bottom: BorderSide(
+                                  color: Theme.of(context).dividerColor,
+                                ),
+                              ),
+                            ),
+                            barGroups:
+                                timeSlotData.asMap().entries.map((entry) {
+                                  final index = entry.key;
+                                  final data = entry.value;
+
+                                  return BarChartGroupData(
+                                    x: index,
+                                    barRods: [
+                                      data.toBarChartRodData(
+                                        width: 20,
+                                        x: index.toDouble(),
+                                        colors: colors,
+                                      ),
+                                    ],
+                                  );
+                                }).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // 凡例の表示
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            '凡例:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 16,
+                            runSpacing: 8,
+                            children:
+                                legendItems.map((houseWork) {
+                                  final color =
+                                      houseWorkColorMap[houseWork.id] ??
+                                      colors[0];
+                                  return Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 16,
+                                        height: 16,
+                                        color: color,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        houseWork.title,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ],
+                                  );
+                                }).toList(),
+                          ),
+                        ],
                       ),
                     ),
                   ],
