@@ -1,4 +1,5 @@
 *.freezed.dart
+*.g.dart
 *.mocks.dart
 google-services.json
 GoogleService-Info.plist

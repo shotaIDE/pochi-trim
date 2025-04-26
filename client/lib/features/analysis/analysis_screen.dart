@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/features/analysis/analysis_provider.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
@@ -11,13 +12,6 @@ import 'package:house_worker/services/house_id_provider.dart';
 class HouseWorkFrequency {
   HouseWorkFrequency({required this.houseWork, required this.count});
   final HouseWork houseWork;
-  final int count;
-}
-
-// 曜日ごとの頻度分析のためのデータクラス
-class WeekdayFrequency {
-  WeekdayFrequency({required this.weekday, required this.count});
-  final String weekday;
   final int count;
 }
 
@@ -101,34 +95,6 @@ final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
 
   // 頻度の高い順にソート
   result.sort((a, b) => b.count.compareTo(a.count));
-
-  return result;
-});
-
-// 曜日ごとの家事実行頻度を取得するプロバイダー
-final weekdayFrequencyProvider = FutureProvider<List<WeekdayFrequency>>((
-  ref,
-) async {
-  // 家事ログのデータを待機
-  final workLogs = await ref.watch(workLogsForAnalysisProvider.future);
-
-  // 曜日名の配列（インデックスは0が日曜日）
-  final weekdayNames = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
-
-  // 曜日ごとにグループ化して頻度をカウント
-  final frequencyMap = <int, int>{};
-  for (final workLog in workLogs) {
-    final weekday = workLog.completedAt.weekday % 7; // 0-6の値（0が日曜日）
-    frequencyMap[weekday] = (frequencyMap[weekday] ?? 0) + 1;
-  }
-
-  // 日曜日から土曜日の順に並べたWeekdayFrequencyのリストを作成
-  final result = <WeekdayFrequency>[];
-  for (var i = 0; i < 7; i++) {
-    result.add(
-      WeekdayFrequency(weekday: weekdayNames[i], count: frequencyMap[i] ?? 0),
-    );
-  }
 
   return result;
 });
@@ -232,37 +198,6 @@ filteredHouseWorkFrequencyProvider =
 
       // 頻度の高い順にソート
       result.sort((a, b) => b.count.compareTo(a.count));
-
-      return result;
-    });
-
-// 曜日ごとの家事実行頻度を取得するプロバイダー（期間フィルタリング付き）
-final FutureProviderFamily<List<WeekdayFrequency>, int>
-filteredWeekdayFrequencyProvider =
-    FutureProvider.family<List<WeekdayFrequency>, int>((ref, period) async {
-      // フィルタリングされた家事ログのデータを待機
-      final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
-
-      // 曜日名の配列（インデックスは0が日曜日）
-      final weekdayNames = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
-
-      // 曜日ごとにグループ化して頻度をカウント
-      final frequencyMap = <int, int>{};
-      for (final workLog in workLogs) {
-        final weekday = workLog.completedAt.weekday % 7; // 0-6の値（0が日曜日）
-        frequencyMap[weekday] = (frequencyMap[weekday] ?? 0) + 1;
-      }
-
-      // 日曜日から土曜日の順に並べたWeekdayFrequencyのリストを作成
-      final result = <WeekdayFrequency>[];
-      for (var i = 0; i < 7; i++) {
-        result.add(
-          WeekdayFrequency(
-            weekday: weekdayNames[i],
-            count: frequencyMap[i] ?? 0,
-          ),
-        );
-      }
 
       return result;
     });
@@ -398,9 +333,11 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 case 0:
                   return _buildFrequencyAnalysis();
                 case 1:
-                  return _buildWeekdayAnalysis();
+                  return _WeekdayAnalysisPanel(analysisPeriod: _analysisPeriod);
                 case 2:
-                  return _TimeSlotAnalysisPanel(analysisPeriod: _analysisMode);
+                  return _TimeSlotAnalysisPanel(
+                    analysisPeriod: _analysisPeriod,
+                  );
                 default:
                   return _buildFrequencyAnalysis();
               }
@@ -442,7 +379,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       child: SegmentedButton<int>(
         segments: const [
           ButtonSegment<int>(value: 0, label: Text('家事の頻度分析')),
-          ButtonSegment<int>(value: 1, label: Text('曜日ごとの頻度分析')),
+          ButtonSegment<int>(value: 1, label: Text('曜日による分析')),
           ButtonSegment<int>(value: 2, label: Text('時間帯による分析')),
         ],
         selected: {_analysisMode},
@@ -544,120 +481,215 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       },
     );
   }
+}
 
-  /// 曜日ごとの頻度分析を表示するウィジェットを構築
-  Widget _buildWeekdayAnalysis() {
-    return Consumer(
-      builder: (context, ref, child) {
-        // 選択された期間に基づいてフィルタリングされたデータを取得
-        final weekdayDataAsync = ref.watch(
-          filteredWeekdayFrequencyProvider(_analysisPeriod),
-        );
+class _WeekdayAnalysisPanel extends ConsumerWidget {
+  const _WeekdayAnalysisPanel({required this.analysisPeriod});
 
-        return weekdayDataAsync.when(
-          data: (weekdayData) {
-            if (weekdayData.every((data) => data.count == 0)) {
-              return const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.calendar_today, size: 64, color: Colors.grey),
-                    SizedBox(height: 16),
-                    Text(
-                      '家事ログがありません',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      '家事を完了すると、ここに分析結果が表示されます',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+  final int analysisPeriod;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 選択された期間に基づいてフィルタリングされたデータを取得
+    final weekdayDataAsync = ref.watch(
+      filteredWeekdayFrequenciesProvider(period: analysisPeriod),
+    );
+
+    return weekdayDataAsync.when(
+      data: (weekdayData) {
+        if (weekdayData.every((data) => data.totalCount == 0)) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.calendar_today, size: 64, color: Colors.grey),
+                SizedBox(height: 16),
+                Text(
+                  '家事ログがありません',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              );
+                SizedBox(height: 8),
+                Text(
+                  '家事を完了すると、ここに分析結果が表示されます',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        }
+
+        // 期間に応じたタイトルのテキストを作成
+        final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
+
+        // 家事ごとの積み上げ棒グラフのための色リスト
+        final colors = [
+          Colors.blue,
+          Colors.green,
+          Colors.orange,
+          Colors.purple,
+          Colors.teal,
+          Colors.pink,
+          Colors.amber,
+          Colors.indigo,
+        ];
+
+        // 凡例データの収集
+        final allHouseWorks = <HouseWork>{};
+        final houseWorkColorMap = <String, Color>{};
+
+        // すべての家事を収集し、それぞれに色を割り当てる
+        for (final day in weekdayData) {
+          for (var i = 0; i < day.houseWorkFrequencies.length; i++) {
+            final houseWork = day.houseWorkFrequencies[i].houseWork;
+            allHouseWorks.add(houseWork);
+            if (!houseWorkColorMap.containsKey(houseWork.id)) {
+              houseWorkColorMap[houseWork.id] =
+                  colors[houseWorkColorMap.length % colors.length];
             }
+          }
+        }
 
-            // 最大値を取得（グラフの描画に使用）
-            final maxCount = weekdayData
-                .map((e) => e.count)
-                .reduce((a, b) => a > b ? a : b);
+        // 家事を集約してリスト化（凡例用）
+        final legendItems = allHouseWorks.toList();
 
-            // 期間に応じたタイトルのテキストを作成
-            final periodText = _getPeriodText(analysisPeriod: _analysisPeriod);
-
-            return Card(
-              margin: const EdgeInsets.all(16),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$periodTextの曜日ごとの家事実行頻度',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: weekdayData.length,
-                        itemBuilder: (context, index) {
-                          final item = weekdayData[index];
-                          // 最大値に対する割合に基づいてバーの長さを決定
-                          final ratio =
-                              maxCount > 0
-                                  ? item.count / maxCount.toDouble()
-                                  : 0;
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(item.weekday),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      flex: (ratio * 100).toInt(),
-                                      child: Container(
-                                        height: 24,
-                                        color: Theme.of(context).primaryColor,
-                                      ),
-                                    ),
-                                    if (ratio < 1)
-                                      Expanded(
-                                        flex: 100 - (ratio * 100).toInt(),
-                                        child: Container(),
-                                      ),
-                                    const SizedBox(width: 8),
-                                    Text('${item.count}回'),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+        return Card(
+          margin: const EdgeInsets.all(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$periodTextの曜日ごとの家事実行頻度',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error:
-              (error, stackTrace) => Center(
-                child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-              ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16, right: 16),
+                    child: BarChart(
+                      BarChartData(
+                        alignment: BarChartAlignment.spaceAround,
+                        maxY: weekdayData
+                            .map((e) => e.totalCount.toDouble())
+                            .reduce((a, b) => a > b ? a : b),
+                        titlesData: FlTitlesData(
+                          leftTitles: const AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 30,
+                            ),
+                          ),
+                          rightTitles: const AxisTitles(),
+                          topTitles: const AxisTitles(),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              getTitlesWidget: (value, meta) {
+                                if (value < 0 || value >= weekdayData.length) {
+                                  return const Text('');
+                                }
+                                return Text(weekdayData[value.toInt()].weekday);
+                              },
+                            ),
+                          ),
+                        ),
+                        gridData: const FlGridData(
+                          horizontalInterval: 4,
+                          drawVerticalLine: false,
+                        ),
+                        borderData: FlBorderData(
+                          show: true,
+                          border: Border(
+                            left: BorderSide(
+                              color: Theme.of(context).dividerColor,
+                            ),
+                            bottom: BorderSide(
+                              color: Theme.of(context).dividerColor,
+                            ),
+                          ),
+                        ),
+                        barGroups:
+                            weekdayData.asMap().entries.map((entry) {
+                              final index = entry.key;
+                              final data = entry.value;
+
+                              return BarChartGroupData(
+                                x: index,
+                                barRods: [
+                                  data.toBarChartRodData(
+                                    width: 20,
+                                    x: index.toDouble(),
+                                    colors: colors,
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                        rotationQuarterTurns: 1,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 凡例の表示
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withAlpha(26), // 0.1 * 255 = 約26
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '凡例:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 16,
+                        runSpacing: 8,
+                        children:
+                            legendItems.map((houseWork) {
+                              final color =
+                                  houseWorkColorMap[houseWork.id] ?? colors[0];
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 16,
+                                    height: 16,
+                                    color: color,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    houseWork.title,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error:
+          (error, stackTrace) => Center(
+            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
+          ),
     );
   }
 }
