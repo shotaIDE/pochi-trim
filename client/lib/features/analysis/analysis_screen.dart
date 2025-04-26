@@ -773,18 +773,10 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                                         value >= timeSlotData.length) {
                                       return const Text('');
                                     }
-                                    return Padding(
-                                      padding: const EdgeInsets.only(top: 8),
-                                      child: Text(
-                                        timeSlotData[value.toInt()].timeSlot,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                    return Text(
+                                      timeSlotData[value.toInt()].timeSlot,
                                     );
                                   },
-                                  reservedSize: 30,
                                 ),
                               ),
                             ),
