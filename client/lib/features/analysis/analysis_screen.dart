@@ -811,6 +811,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                                     ],
                                   );
                                 }).toList(),
+                            rotationQuarterTurns: 1,
                           ),
                         ),
                       ),
