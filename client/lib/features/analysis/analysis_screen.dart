@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/features/analysis/day_of_the_week_frequency.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
@@ -12,48 +13,6 @@ class HouseWorkFrequency {
   HouseWorkFrequency({required this.houseWork, required this.count});
   final HouseWork houseWork;
   final int count;
-}
-
-// 曜日ごとの頻度分析のためのデータクラス
-class WeekdayFrequency {
-  WeekdayFrequency({
-    required this.weekday,
-    required this.houseWorkFrequencies,
-    required this.totalCount,
-  });
-  final String weekday;
-  final List<HouseWorkFrequency> houseWorkFrequencies; // その曜日での家事ごとの実行回数
-  final int totalCount; // その曜日の合計実行回数
-
-  // fl_chartのBarChartRodData作成用のヘルパーメソッド
-  BarChartRodData toBarChartRodData({
-    required double width,
-    required double x,
-    required List<Color> colors,
-  }) {
-    // 家事の実行回数ごとにRodStackItemを作成
-    final rodStackItems = <BarChartRodStackItem>[];
-
-    double fromY = 0;
-    for (var i = 0; i < houseWorkFrequencies.length; i++) {
-      final item = houseWorkFrequencies[i];
-      final toY = fromY + item.count;
-
-      rodStackItems.add(
-        BarChartRodStackItem(fromY, toY, colors[i % colors.length]),
-      );
-
-      fromY = toY;
-    }
-
-    return BarChartRodData(
-      toY: totalCount.toDouble(),
-      width: width,
-      color: Colors.transparent,
-      rodStackItems: rodStackItems,
-      borderRadius: BorderRadius.zero,
-    );
-  }
 }
 
 // 時間帯別の家事実行頻度のためのデータクラス
@@ -141,7 +100,7 @@ final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
 });
 
 // 曜日ごとの家事実行頻度を取得するプロバイダー
-final weekdayFrequencyProvider = FutureProvider<List<WeekdayFrequency>>((
+final weekdayFrequencyProvider = FutureProvider<List<DayOfTheWeekFrequency>>((
   ref,
 ) async {
   // 家事ログのデータを待機
@@ -169,7 +128,7 @@ final weekdayFrequencyProvider = FutureProvider<List<WeekdayFrequency>>((
   }
 
   // WeekdayFrequencyのリストを作成
-  final result = <WeekdayFrequency>[];
+  final result = <DayOfTheWeekFrequency>[];
   for (var i = 0; i < 7; i++) {
     final houseWorkFrequencies = <HouseWorkFrequency>[];
     var totalCount = 0;
@@ -193,7 +152,7 @@ final weekdayFrequencyProvider = FutureProvider<List<WeekdayFrequency>>((
     houseWorkFrequencies.sort((a, b) => b.count.compareTo(a.count));
 
     result.add(
-      WeekdayFrequency(
+      DayOfTheWeekFrequency(
         weekday: weekdayNames[i],
         houseWorkFrequencies: houseWorkFrequencies,
         totalCount: totalCount,
@@ -308,9 +267,12 @@ filteredHouseWorkFrequencyProvider =
     });
 
 // 曜日ごとの家事実行頻度を取得するプロバイダー（期間フィルタリング付き）
-final FutureProviderFamily<List<WeekdayFrequency>, int>
+final FutureProviderFamily<List<DayOfTheWeekFrequency>, int>
 filteredWeekdayFrequencyProvider =
-    FutureProvider.family<List<WeekdayFrequency>, int>((ref, period) async {
+    FutureProvider.family<List<DayOfTheWeekFrequency>, int>((
+      ref,
+      period,
+    ) async {
       // フィルタリングされた家事ログのデータを待機
       final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
       final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
@@ -336,7 +298,7 @@ filteredWeekdayFrequencyProvider =
       }
 
       // WeekdayFrequencyのリストを作成
-      final result = <WeekdayFrequency>[];
+      final result = <DayOfTheWeekFrequency>[];
       for (var i = 0; i < 7; i++) {
         final houseWorkFrequencies = <HouseWorkFrequency>[];
         var totalCount = 0;
@@ -360,7 +322,7 @@ filteredWeekdayFrequencyProvider =
         houseWorkFrequencies.sort((a, b) => b.count.compareTo(a.count));
 
         result.add(
-          WeekdayFrequency(
+          DayOfTheWeekFrequency(
             weekday: weekdayNames[i],
             houseWorkFrequencies: houseWorkFrequencies,
             totalCount: totalCount,
