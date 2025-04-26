@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/house_work.dart';
@@ -30,6 +31,36 @@ class TimeSlotFrequency {
   final String timeSlot; // 時間帯の表示名（例：「0-3時」）
   final List<HouseWorkFrequency> houseWorkFrequencies; // その時間帯での家事ごとの実行回数
   final int totalCount; // その時間帯の合計実行回数
+
+  // fl_chartのBarChartRodData作成用のヘルパーメソッド
+  BarChartRodData toBarChartRodData({
+    required double width,
+    required double x,
+    required List<Color> colors,
+  }) {
+    // 家事の実行回数ごとにRodStackItemを作成
+    final rodStackItems = <BarChartRodStackItem>[];
+
+    double fromY = 0;
+    for (var i = 0; i < houseWorkFrequencies.length; i++) {
+      final item = houseWorkFrequencies[i];
+      final toY = fromY + item.count;
+
+      rodStackItems.add(
+        BarChartRodStackItem(fromY, toY, colors[i % colors.length]),
+      );
+
+      fromY = toY;
+    }
+
+    return BarChartRodData(
+      toY: totalCount.toDouble(),
+      width: width,
+      color: Colors.transparent,
+      rodStackItems: rodStackItems,
+      borderRadius: BorderRadius.zero,
+    );
+  }
 }
 
 // 家事ログの取得と分析のためのプロバイダー
