@@ -400,7 +400,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 case 1:
                   return _buildWeekdayAnalysis();
                 case 2:
-                  return _buildTimeSlotAnalysis();
+                  return _TimeSlotAnalysisPanel(analysisPeriod: _analysisMode);
                 default:
                   return _buildFrequencyAnalysis();
               }
@@ -492,7 +492,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
             }
 
             // 期間に応じたタイトルのテキストを作成
-            final periodText = _getPeriodText();
+            final periodText = _getPeriodText(analysisPeriod: _analysisPeriod);
 
             return Card(
               margin: const EdgeInsets.all(16),
@@ -587,7 +587,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 .reduce((a, b) => a > b ? a : b);
 
             // 期間に応じたタイトルのテキストを作成
-            final periodText = _getPeriodText();
+            final periodText = _getPeriodText(analysisPeriod: _analysisPeriod);
 
             return Card(
               margin: const EdgeInsets.all(16),
@@ -660,235 +660,232 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       },
     );
   }
+}
 
-  /// 時間帯による分析を表示するウィジェットを構築
-  Widget _buildTimeSlotAnalysis() {
-    return Consumer(
-      builder: (context, ref, child) {
-        // 選択された期間に基づいてフィルタリングされたデータを取得
-        final timeSlotDataAsync = ref.watch(
-          filteredTimeSlotFrequencyProvider(_analysisPeriod),
-        );
+class _TimeSlotAnalysisPanel extends ConsumerWidget {
+  const _TimeSlotAnalysisPanel({required this.analysisPeriod});
 
-        return timeSlotDataAsync.when(
-          data: (timeSlotData) {
-            if (timeSlotData.every((data) => data.totalCount == 0)) {
-              return const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.access_time, size: 64, color: Colors.grey),
-                    SizedBox(height: 16),
-                    Text(
-                      '家事ログがありません',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      '家事を完了すると、ここに分析結果が表示されます',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+  final int analysisPeriod;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 選択された期間に基づいてフィルタリングされたデータを取得
+    final timeSlotDataAsync = ref.watch(
+      filteredTimeSlotFrequencyProvider(analysisPeriod),
+    );
+
+    return timeSlotDataAsync.when(
+      data: (timeSlotData) {
+        if (timeSlotData.every((data) => data.totalCount == 0)) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.access_time, size: 64, color: Colors.grey),
+                SizedBox(height: 16),
+                Text(
+                  '家事ログがありません',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              );
+                SizedBox(height: 8),
+                Text(
+                  '家事を完了すると、ここに分析結果が表示されます',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        }
+
+        // 期間に応じたタイトルのテキストを作成
+        final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
+
+        // 家事ごとの積み上げ棒グラフのための色リスト
+        final colors = [
+          Colors.blue,
+          Colors.green,
+          Colors.orange,
+          Colors.purple,
+          Colors.teal,
+          Colors.pink,
+          Colors.amber,
+          Colors.indigo,
+        ];
+
+        // 凡例データの収集
+        final allHouseWorks = <HouseWork>{};
+        final houseWorkColorMap = <String, Color>{};
+
+        // すべての家事を収集し、それぞれに色を割り当てる
+        for (final slot in timeSlotData) {
+          for (var i = 0; i < slot.houseWorkFrequencies.length; i++) {
+            final houseWork = slot.houseWorkFrequencies[i].houseWork;
+            allHouseWorks.add(houseWork);
+            if (!houseWorkColorMap.containsKey(houseWork.id)) {
+              houseWorkColorMap[houseWork.id] =
+                  colors[houseWorkColorMap.length % colors.length];
             }
+          }
+        }
 
-            // 期間に応じたタイトルのテキストを作成
-            final periodText = _getPeriodText();
+        // 家事を集約してリスト化（凡例用）
+        final legendItems = allHouseWorks.toList();
 
-            // 家事ごとの積み上げ棒グラフのための色リスト
-            final colors = [
-              Colors.blue,
-              Colors.green,
-              Colors.orange,
-              Colors.purple,
-              Colors.teal,
-              Colors.pink,
-              Colors.amber,
-              Colors.indigo,
-            ];
-
-            // 凡例データの収集
-            final allHouseWorks = <HouseWork>{};
-            final houseWorkColorMap = <String, Color>{};
-
-            // すべての家事を収集し、それぞれに色を割り当てる
-            for (final slot in timeSlotData) {
-              for (var i = 0; i < slot.houseWorkFrequencies.length; i++) {
-                final houseWork = slot.houseWorkFrequencies[i].houseWork;
-                allHouseWorks.add(houseWork);
-                if (!houseWorkColorMap.containsKey(houseWork.id)) {
-                  houseWorkColorMap[houseWork.id] =
-                      colors[houseWorkColorMap.length % colors.length];
-                }
-              }
-            }
-
-            // 家事を集約してリスト化（凡例用）
-            final legendItems = allHouseWorks.toList();
-
-            return Card(
-              margin: const EdgeInsets.all(16),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$periodTextの時間帯ごとの家事実行頻度',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // fl_chartの積み上げ棒グラフの表示
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 16, right: 16),
-                        child: BarChart(
-                          BarChartData(
-                            alignment: BarChartAlignment.spaceAround,
-                            maxY: timeSlotData
-                                .map((e) => e.totalCount.toDouble())
-                                .reduce((a, b) => a > b ? a : b),
-                            titlesData: FlTitlesData(
-                              leftTitles: const AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 30,
-                                ),
-                              ),
-                              rightTitles: const AxisTitles(),
-                              topTitles: const AxisTitles(),
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  getTitlesWidget: (value, meta) {
-                                    if (value < 0 ||
-                                        value >= timeSlotData.length) {
-                                      return const Text('');
-                                    }
-                                    return Text(
-                                      timeSlotData[value.toInt()].timeSlot,
-                                    );
-                                  },
-                                ),
-                              ),
+        return Card(
+          margin: const EdgeInsets.all(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$periodTextの時間帯ごとの家事実行頻度',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // fl_chartの積み上げ棒グラフの表示
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16, right: 16),
+                    child: BarChart(
+                      BarChartData(
+                        alignment: BarChartAlignment.spaceAround,
+                        maxY: timeSlotData
+                            .map((e) => e.totalCount.toDouble())
+                            .reduce((a, b) => a > b ? a : b),
+                        titlesData: FlTitlesData(
+                          leftTitles: const AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 30,
                             ),
-                            gridData: const FlGridData(
-                              horizontalInterval: 4,
-                              drawVerticalLine: false,
+                          ),
+                          rightTitles: const AxisTitles(),
+                          topTitles: const AxisTitles(),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              getTitlesWidget: (value, meta) {
+                                if (value < 0 || value >= timeSlotData.length) {
+                                  return const Text('');
+                                }
+                                return Text(
+                                  timeSlotData[value.toInt()].timeSlot,
+                                );
+                              },
                             ),
-                            borderData: FlBorderData(
-                              show: true,
-                              border: Border(
-                                left: BorderSide(
-                                  color: Theme.of(context).dividerColor,
-                                ),
-                                bottom: BorderSide(
-                                  color: Theme.of(context).dividerColor,
-                                ),
-                              ),
-                            ),
-                            barGroups:
-                                timeSlotData.asMap().entries.map((entry) {
-                                  final index = entry.key;
-                                  final data = entry.value;
-
-                                  return BarChartGroupData(
-                                    x: index,
-                                    barRods: [
-                                      data.toBarChartRodData(
-                                        width: 20,
-                                        x: index.toDouble(),
-                                        colors: colors,
-                                      ),
-                                    ],
-                                  );
-                                }).toList(),
-                            rotationQuarterTurns: 1,
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // 凡例の表示
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            '凡例:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                        gridData: const FlGridData(
+                          horizontalInterval: 4,
+                          drawVerticalLine: false,
+                        ),
+                        borderData: FlBorderData(
+                          show: true,
+                          border: Border(
+                            left: BorderSide(
+                              color: Theme.of(context).dividerColor,
+                            ),
+                            bottom: BorderSide(
+                              color: Theme.of(context).dividerColor,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 16,
-                            runSpacing: 8,
-                            children:
-                                legendItems.map((houseWork) {
-                                  final color =
-                                      houseWorkColorMap[houseWork.id] ??
-                                      colors[0];
-                                  return Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 16,
-                                        height: 16,
-                                        color: color,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        houseWork.title,
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    ],
-                                  );
-                                }).toList(),
-                          ),
-                        ],
+                        ),
+                        barGroups:
+                            timeSlotData.asMap().entries.map((entry) {
+                              final index = entry.key;
+                              final data = entry.value;
+
+                              return BarChartGroupData(
+                                x: index,
+                                barRods: [
+                                  data.toBarChartRodData(
+                                    width: 20,
+                                    x: index.toDouble(),
+                                    colors: colors,
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                        rotationQuarterTurns: 1,
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error:
-              (error, stackTrace) => Center(
-                child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-              ),
+                const SizedBox(height: 16),
+                // 凡例の表示
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withAlpha(26), // 0.1 * 255 = 約26
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '凡例:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 16,
+                        runSpacing: 8,
+                        children:
+                            legendItems.map((houseWork) {
+                              final color =
+                                  houseWorkColorMap[houseWork.id] ?? colors[0];
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 16,
+                                    height: 16,
+                                    color: color,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    houseWork.title,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error:
+          (error, stackTrace) => Center(
+            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
+          ),
     );
   }
+}
 
-  /// 選択されている期間に応じたテキストを返す
-  String _getPeriodText() {
-    switch (_analysisPeriod) {
-      case 0:
-        return '今日';
-      case 1:
-        return '今週';
-      case 2:
-        return '今月';
-      default:
-        return '';
-    }
+/// 選択されている期間に応じたテキストを返す
+String _getPeriodText({required int analysisPeriod}) {
+  switch (analysisPeriod) {
+    case 0:
+      return '今日';
+    case 1:
+      return '今週';
+    case 2:
+      return '今月';
+    default:
+      return '';
   }
 }
