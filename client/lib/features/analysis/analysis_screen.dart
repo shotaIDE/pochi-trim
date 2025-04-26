@@ -747,7 +747,6 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // fl_chartの積み上げ棒グラフの表示
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 16, right: 16),
