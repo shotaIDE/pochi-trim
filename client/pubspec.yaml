@@ -13,6 +13,7 @@ dependencies:
   cupertino_icons:
   firebase_auth:
   firebase_core:
+  fl_chart: 0.71.0
   flutter:
     sdk: flutter
   flutter_riverpod:
