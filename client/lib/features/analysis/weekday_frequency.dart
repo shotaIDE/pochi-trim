@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
 
-part 'day_of_the_week_frequency.freezed.dart';
+part 'weekday_frequency.freezed.dart';
 
 @freezed
-abstract class DayOfTheWeekFrequency with _$DayOfTheWeekFrequency {
-  const factory DayOfTheWeekFrequency({
+abstract class WeekdayFrequency with _$WeekdayFrequency {
+  const factory WeekdayFrequency({
     required String weekday,
     // その曜日での家事ごとの実行回数
     required List<HouseWorkFrequency> houseWorkFrequencies,
     required int totalCount,
-  }) = _DayOfTheWeekFrequency;
+  }) = _WeekdayFrequency;
 
-  const DayOfTheWeekFrequency._();
+  const WeekdayFrequency._();
 
   // fl_chartのBarChartRodData作成用のヘルパーメソッド
   BarChartRodData toBarChartRodData({
