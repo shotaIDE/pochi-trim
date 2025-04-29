@@ -1,5 +1,7 @@
 # coding: utf-8
 
+import json
+
 import google.cloud.firestore
 from firebase_admin import auth, firestore, initialize_app
 from firebase_functions import https_fn
@@ -32,4 +34,9 @@ def generate_my_house(req: https_fn.Request) -> https_fn.Response:
 
     print(f"House document has been created: ID = {house_doc_id}, admin user = {user_id}")
 
-    return https_fn.Response(f"house document ID {house_doc_id} added with admin user {user_id}.")
+    response_dic = {
+        "houseDocId": house_doc_id,
+        "adminUser": user_id
+    }
+    response_json = json.dumps(response_dic)
+    return https_fn.Response(response_json, status=200, mimetype="application/json")

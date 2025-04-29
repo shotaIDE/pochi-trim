@@ -26,18 +26,6 @@ class AuthService {
 
   Future<void> signInAnonymously() async {
     try {
-      // Cloud Function APIを呼び出し
-      try {
-        final functions = FirebaseFunctions.instance;
-        final callable = functions.httpsCallable('generate_my_house');
-        final result = await callable.call();
-        debugPrint('Cloud Function Response: ${result.data}');
-        _logger.info('generate_my_house APIの呼び出しに成功しました: ${result.data}');
-      } catch (apiError) {
-        debugPrint('Cloud Function Error: $apiError');
-        _logger.warning('generate_my_house APIの呼び出しに失敗しました: $apiError');
-      }
-
       final credential = await _firebaseAuth.signInAnonymously();
       final user = credential.user;
 
@@ -62,7 +50,19 @@ class AuthService {
       }
     } catch (e) {
       _logger.warning('匿名サインインに失敗しました: $e');
-      rethrow;
+      // rethrow;
+    }
+
+    // Cloud Function APIを呼び出し
+    try {
+      final functions = FirebaseFunctions.instance;
+      final callable = functions.httpsCallable('generate_my_house');
+      final result = await callable.call();
+      debugPrint('Cloud Function Response: ${result.data}');
+      _logger.info('generate_my_house APIの呼び出しに成功しました: ${result.data}');
+    } catch (apiError) {
+      debugPrint('Cloud Function Error: $apiError');
+      _logger.warning('generate_my_house APIの呼び出しに失敗しました: $apiError');
     }
   }
 
