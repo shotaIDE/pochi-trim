@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   cloud_firestore:
+  cloud_functions: 5.5.0
   collection:
   cupertino_icons:
   firebase_auth:
