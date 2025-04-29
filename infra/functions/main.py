@@ -1,10 +1,20 @@
 # coding: utf-8
 
-from firebase_admin import initialize_app
+import google.cloud.firestore
+from firebase_admin import firestore, initialize_app
 from firebase_functions import https_fn
 
 initialize_app()
 
 @https_fn.on_request()
-def on_request_example(req: https_fn.Request) -> https_fn.Response:
-    return https_fn.Response("Hello world!")
+def generate_my_house(req: https_fn.Request) -> https_fn.Response:
+    # TODO: 認証は必要？
+
+    firestore_client: google.cloud.firestore.Client = firestore.client()
+
+    _, house_doc_ref = firestore_client.collection("permissions").add({})
+
+    house_doc_id = house_doc_ref.id
+    print(f"House document has been created: ID = {house_doc_id}")
+
+    return https_fn.Response(f"house document ID {house_doc_id} added.")
