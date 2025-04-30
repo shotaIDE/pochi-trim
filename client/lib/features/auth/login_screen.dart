@@ -17,7 +17,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.listenManual(loginButtonTappedResultProvider, (previous, next) {
       next.maybeWhen(
         error: (_, _) {
-          // TODO(ide): エラーハンドリング
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('ログインに失敗しました。しばらくしてから再度お試しください。')),
+          );
         },
         orElse: () {},
       );
@@ -51,13 +53,11 @@ class _LoginButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final loginButtonTappedResultNotifier = ref.watch(
-      loginButtonTappedResultProvider.notifier,
-    );
-
     return ElevatedButton(
       onPressed: () async {
-        await loginButtonTappedResultNotifier.onLoginTapped();
+        await ref
+            .read(loginButtonTappedResultProvider.notifier)
+            .onLoginTapped();
       },
       child: const Text('ゲストとしてログイン'),
     );
