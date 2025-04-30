@@ -3,11 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/user.dart' as app_user;
 import 'package:house_worker/repositories/user_repository.dart';
 import 'package:logging/logging.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final authServiceProvider = Provider<AuthService>((ref) {
+part 'auth_service.g.dart';
+
+@riverpod
+AuthService authService(Ref ref) {
   final userRepository = ref.watch(userRepositoryProvider);
   return AuthService(firebase_auth.FirebaseAuth.instance, userRepository);
-});
+}
 
 final authStateProvider = StreamProvider<firebase_auth.User?>((ref) {
   return ref.watch(authServiceProvider).authStateChanges;
