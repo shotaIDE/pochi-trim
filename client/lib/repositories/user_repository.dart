@@ -2,10 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/user.dart' as app_user;
 import 'package:logging/logging.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final userRepositoryProvider = Provider<UserRepository>((ref) {
+part 'user_repository.g.dart';
+
+@riverpod
+UserRepository userRepository(Ref ref) {
   return UserRepository();
-});
+}
 
 class UserRepository {
   final _logger = Logger('UserRepository');
