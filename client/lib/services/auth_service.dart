@@ -1,6 +1,4 @@
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/user.dart' as app_user;
 import 'package:house_worker/repositories/user_repository.dart';
@@ -51,18 +49,6 @@ class AuthService {
     } catch (e) {
       _logger.warning('匿名サインインに失敗しました: $e');
       // rethrow;
-    }
-
-    // Cloud Function APIを呼び出し
-    try {
-      final functions = FirebaseFunctions.instance;
-      final callable = functions.httpsCallable('generate_my_house');
-      final result = await callable.call();
-      debugPrint('Cloud Function Response: ${result.data}');
-      _logger.info('generate_my_house APIの呼び出しに成功しました: ${result.data}');
-    } catch (apiError) {
-      debugPrint('Cloud Function Error: $apiError');
-      _logger.warning('generate_my_house APIの呼び出しに失敗しました: $apiError');
     }
   }
 

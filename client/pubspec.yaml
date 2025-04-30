@@ -39,6 +39,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   freezed:
+  json_serializable: 6.9.5
   mockito:
   pedantic_mono: 1.30.3
   riverpod_generator: 2.6.5
