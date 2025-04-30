@@ -185,7 +185,6 @@ filteredHouseWorkFrequencyProvider =
       final result = <HouseWorkFrequency>[];
       for (final entry in frequencyMap.entries) {
         final houseWork = await houseWorkRepository.getByIdOnce(
-          houseId: houseId,
           houseWorkId: entry.key,
         );
 

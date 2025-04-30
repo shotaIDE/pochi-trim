@@ -1,30 +1,43 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/house_work.dart';
+import 'package:house_worker/services/house_id_provider.dart';
 import 'package:logging/logging.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'house_work_repository.g.dart';
 
 final _logger = Logger('HouseWorkRepository');
 
-final houseWorkRepositoryProvider = Provider<HouseWorkRepository>((ref) {
-  return HouseWorkRepository();
-});
+@riverpod
+HouseWorkRepository houseWorkRepository(Ref ref) {
+  final houseId = ref.watch(currentHouseIdProvider);
+  if (houseId == null) {
+    throw Exception('House ID is not set');
+  }
+
+  return HouseWorkRepository(houseId: houseId);
+}
 
 /// 家事リポジトリ
 /// 家事の基本情報を管理するためのリポジトリ
 class HouseWorkRepository {
+  HouseWorkRepository({required String houseId}) : _houseId = houseId;
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String _houseId;
 
   // ハウスIDを指定して家事コレクションの参照を取得
-  CollectionReference _getHouseWorksCollection(String houseId) {
+  CollectionReference _getHouseWorksCollection() {
     return _firestore
         .collection('houses')
-        .doc(houseId)
+        .doc(_houseId)
         .collection('houseWorks');
   }
 
   /// 家事を保存する
-  Future<String> save(String houseId, HouseWork houseWork) async {
-    final houseWorksCollection = _getHouseWorksCollection(houseId);
+  Future<String> save(HouseWork houseWork) async {
+    final houseWorksCollection = _getHouseWorksCollection();
 
     if (houseWork.id.isEmpty) {
       // 新規家事の場合
@@ -40,25 +53,17 @@ class HouseWorkRepository {
   }
 
   /// 複数の家事を一括保存する
-  Future<List<String>> saveAll(
-    String houseId,
-    List<HouseWork> houseWorks,
-  ) async {
+  Future<List<String>> saveAll(List<HouseWork> houseWorks) async {
     final ids = <String>[];
     for (final houseWork in houseWorks) {
-      final id = await save(houseId, houseWork);
+      final id = await save(houseWork);
       ids.add(id);
     }
     return ids;
   }
 
-  Stream<HouseWork?> getById({
-    required String houseId,
-    required String houseWorkId,
-  }) {
-    return _getHouseWorksCollection(houseId).doc(houseWorkId).snapshots().map((
-      doc,
-    ) {
+  Stream<HouseWork?> getById({required String houseWorkId}) {
+    return _getHouseWorksCollection().doc(houseWorkId).snapshots().map((doc) {
       if (doc.exists) {
         return HouseWork.fromFirestore(doc);
       }
@@ -67,33 +72,30 @@ class HouseWorkRepository {
   }
 
   /// IDを指定して家事を取得する
-  Future<HouseWork?> getByIdOnce({
-    required String houseId,
-    required String houseWorkId,
-  }) async {
-    final doc = await _getHouseWorksCollection(houseId).doc(houseWorkId).get();
+  Future<HouseWork?> getByIdOnce({required String houseWorkId}) async {
+    final doc = await _getHouseWorksCollection().doc(houseWorkId).get();
     if (doc.exists) {
       return HouseWork.fromFirestore(doc);
     }
     return null;
   }
 
-  Stream<List<HouseWork>> getAll({required String houseId}) {
-    return _getHouseWorksCollection(houseId)
+  Stream<List<HouseWork>> getAll() {
+    return _getHouseWorksCollection()
         .orderBy('createdBy', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs.map(HouseWork.fromFirestore).toList());
   }
 
-  Future<List<HouseWork>> getAllOnce(String houseId) async {
-    final querySnapshot = await _getHouseWorksCollection(houseId).get();
+  Future<List<HouseWork>> getAllOnce() async {
+    final querySnapshot = await _getHouseWorksCollection().get();
     return querySnapshot.docs.map(HouseWork.fromFirestore).toList();
   }
 
   /// 家事を削除する
-  Future<bool> delete(String houseId, String id) async {
+  Future<bool> delete(String id) async {
     try {
-      await _getHouseWorksCollection(houseId).doc(id).delete();
+      await _getHouseWorksCollection().doc(id).delete();
       return true;
     } on FirebaseException catch (e) {
       _logger.warning('家事削除エラー', e);
@@ -102,8 +104,8 @@ class HouseWorkRepository {
   }
 
   /// すべての家事を削除する
-  Future<void> deleteAll(String houseId) async {
-    final querySnapshot = await _getHouseWorksCollection(houseId).get();
+  Future<void> deleteAll() async {
+    final querySnapshot = await _getHouseWorksCollection().get();
     final batch = _firestore.batch();
 
     for (final doc in querySnapshot.docs) {
@@ -114,9 +116,9 @@ class HouseWorkRepository {
   }
 
   /// 共有されている家事を取得する
-  Future<List<HouseWork>> getSharedHouseWorks(String houseId) async {
+  Future<List<HouseWork>> getSharedHouseWorks() async {
     final querySnapshot =
-        await _getHouseWorksCollection(houseId)
+        await _getHouseWorksCollection()
             .where('isShared', isEqualTo: true)
             .orderBy('priority', descending: true)
             .get();
@@ -125,9 +127,9 @@ class HouseWorkRepository {
   }
 
   /// 繰り返し設定がある家事を取得する
-  Future<List<HouseWork>> getRecurringHouseWorks(String houseId) async {
+  Future<List<HouseWork>> getRecurringHouseWorks() async {
     final querySnapshot =
-        await _getHouseWorksCollection(houseId)
+        await _getHouseWorksCollection()
             .where('isRecurring', isEqualTo: true)
             .orderBy('priority', descending: true)
             .get();
@@ -136,12 +138,9 @@ class HouseWorkRepository {
   }
 
   /// タイトルで家事を検索する
-  Future<List<HouseWork>> getHouseWorksByTitle(
-    String houseId,
-    String title,
-  ) async {
+  Future<List<HouseWork>> getHouseWorksByTitle(String title) async {
     final querySnapshot =
-        await _getHouseWorksCollection(houseId)
+        await _getHouseWorksCollection()
             .where('title', isEqualTo: title)
             .orderBy('createdAt', descending: true)
             .get();
@@ -150,12 +149,9 @@ class HouseWorkRepository {
   }
 
   /// 特定のユーザーが作成した家事を取得する
-  Future<List<HouseWork>> getHouseWorksByUser(
-    String houseId,
-    String userId,
-  ) async {
+  Future<List<HouseWork>> getHouseWorksByUser(String userId) async {
     final querySnapshot =
-        await _getHouseWorksCollection(houseId)
+        await _getHouseWorksCollection()
             .where('createdBy', isEqualTo: userId)
             .orderBy('createdAt', descending: true)
             .get();
