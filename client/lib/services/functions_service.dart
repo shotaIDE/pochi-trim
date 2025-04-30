@@ -15,16 +15,17 @@ Future<String> generateMyHouse(Ref ref) async {
   final functions = FirebaseFunctions.instance;
   final callable = functions.httpsCallable('generate_my_house');
 
-  final HttpsCallableResult<GenerateMyHouseResultFunctions> result;
+  final HttpsCallableResult<Map<String, dynamic>> rawResult;
   try {
-    result = await callable.call<GenerateMyHouseResultFunctions>();
+    rawResult = await callable.call<Map<String, dynamic>>();
   } on FirebaseFunctionsException catch (e) {
     logger.info('Call error: ${e.code}');
 
     throw GenerateMyHouseException();
   }
 
-  final houseId = result.data.houseDocId;
+  final result = GenerateMyHouseResultFunctions.fromJson(rawResult.data);
+  final houseId = result.houseDocId;
 
   logger.info('Got house ID: $houseId');
 

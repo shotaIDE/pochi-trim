@@ -43,11 +43,22 @@ class AuthService {
     }
 
     _logger.info('ユーザーがログインしました。UID: ${user.uid}');
-    // ユーザーがデータベースに存在するか確認
+  }
+
+  Future<void> signOut() async {
+    await _firebaseAuth.signOut();
+  }
+
+  Future<void> createUser() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      _logger.warning('ユーザーがログインしていません。');
+      return;
+    }
+
     final existingUser = await _userRepository.getUserByUid(user.uid);
 
     if (existingUser == null) {
-      // 新規ユーザーを作成
       final newUser = app_user.User(
         id: '', // 新規ユーザーの場合は空文字列を指定し、Firestoreが自動的にIDを生成
         uid: user.uid,
@@ -59,10 +70,6 @@ class AuthService {
 
       await _userRepository.createUser(newUser);
     }
-  }
-
-  Future<void> signOut() async {
-    await _firebaseAuth.signOut();
   }
 
   firebase_auth.User? get currentUser => _firebaseAuth.currentUser;
