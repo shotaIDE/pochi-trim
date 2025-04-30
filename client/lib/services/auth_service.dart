@@ -7,6 +7,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_service.g.dart';
 
+class SignInException implements Exception {}
+
 @riverpod
 AuthService authService(Ref ref) {
   final userRepository = ref.watch(userRepositoryProvider);
@@ -27,32 +29,36 @@ class AuthService {
       _firebaseAuth.authStateChanges();
 
   Future<void> signInAnonymously() async {
+    final firebase_auth.UserCredential userCredential;
     try {
-      final credential = await _firebaseAuth.signInAnonymously();
-      final user = credential.user;
+      userCredential = await _firebaseAuth.signInAnonymously();
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      _logger.warning('匿名ログインに失敗しました: $e');
+      // TODO(ide): 自前の型で包む
+      throw SignInException();
+    }
 
-      if (user != null) {
-        _logger.info('ユーザーがログインしました。UID: ${user.uid}');
-        // ユーザーがデータベースに存在するか確認
-        final existingUser = await _userRepository.getUserByUid(user.uid);
+    final user = userCredential.user;
+    if (user == null) {
+      throw SignInException();
+    }
 
-        if (existingUser == null) {
-          // 新規ユーザーを作成
-          final newUser = app_user.User(
-            id: '', // 新規ユーザーの場合は空文字列を指定し、Firestoreが自動的にIDを生成
-            uid: user.uid,
-            name: 'ゲスト',
-            email: user.email ?? '',
-            householdIds: [],
-            createdAt: DateTime.now(),
-          );
+    _logger.info('ユーザーがログインしました。UID: ${user.uid}');
+    // ユーザーがデータベースに存在するか確認
+    final existingUser = await _userRepository.getUserByUid(user.uid);
 
-          await _userRepository.createUser(newUser);
-        }
-      }
-    } catch (e) {
-      _logger.warning('匿名サインインに失敗しました: $e');
-      // rethrow;
+    if (existingUser == null) {
+      // 新規ユーザーを作成
+      final newUser = app_user.User(
+        id: '', // 新規ユーザーの場合は空文字列を指定し、Firestoreが自動的にIDを生成
+        uid: user.uid,
+        name: 'ゲスト',
+        email: user.email ?? '',
+        householdIds: [],
+        createdAt: DateTime.now(),
+      );
+
+      await _userRepository.createUser(newUser);
     }
   }
 
