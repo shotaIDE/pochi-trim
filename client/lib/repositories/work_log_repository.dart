@@ -1,27 +1,36 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/work_log.dart';
+import 'package:house_worker/services/house_id_provider.dart';
 import 'package:logging/logging.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 final _logger = Logger('WorkLogRepository');
 
-final workLogRepositoryProvider = Provider<WorkLogRepository>((ref) {
-  return WorkLogRepository();
-});
+@riverpod
+WorkLogRepository workLogRepository(Ref ref) {
+  final houseId = ref.watch(currentHouseIdProvider);
+  if (houseId == null) {
+    throw Exception('House ID is null');
+  }
 
-/// 家事ログリポジトリ
-/// 家事の実行記録を管理するためのリポジトリ
+  return WorkLogRepository(houseId: houseId);
+}
+
 class WorkLogRepository {
+  WorkLogRepository({required String houseId}) : _houseId = houseId;
+
+  final String _houseId;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // ハウスIDを指定して家事ログコレクションの参照を取得
-  CollectionReference _getWorkLogsCollection(String houseId) {
-    return _firestore.collection('houses').doc(houseId).collection('workLogs');
+  CollectionReference _getWorkLogsCollection() {
+    return _firestore.collection('houses').doc(_houseId).collection('workLogs');
   }
 
   /// 家事ログを保存する
-  Future<String> save(String houseId, WorkLog workLog) async {
-    final workLogsCollection = _getWorkLogsCollection(houseId);
+  Future<String> save(WorkLog workLog) async {
+    final workLogsCollection = _getWorkLogsCollection();
 
     if (workLog.id.isEmpty) {
       // 新規家事ログの場合
@@ -35,18 +44,18 @@ class WorkLogRepository {
   }
 
   /// 複数の家事ログを一括保存する
-  Future<List<String>> saveAll(String houseId, List<WorkLog> workLogs) async {
+  Future<List<String>> saveAll(List<WorkLog> workLogs) async {
     final ids = <String>[];
     for (final workLog in workLogs) {
-      final id = await save(houseId, workLog);
+      final id = await save(workLog);
       ids.add(id);
     }
     return ids;
   }
 
   /// IDを指定して家事ログを取得する
-  Future<WorkLog?> getById(String houseId, String id) async {
-    final doc = await _getWorkLogsCollection(houseId).doc(id).get();
+  Future<WorkLog?> getById(String id) async {
+    final doc = await _getWorkLogsCollection().doc(id).get();
     if (doc.exists) {
       return WorkLog.fromFirestore(doc);
     }
@@ -54,15 +63,15 @@ class WorkLogRepository {
   }
 
   /// すべての家事ログを取得する
-  Future<List<WorkLog>> getAll(String houseId) async {
-    final querySnapshot = await _getWorkLogsCollection(houseId).get();
+  Future<List<WorkLog>> getAll() async {
+    final querySnapshot = await _getWorkLogsCollection().get();
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
   /// 家事ログを削除する
-  Future<bool> delete(String houseId, String id) async {
+  Future<bool> delete(String id) async {
     try {
-      await _getWorkLogsCollection(houseId).doc(id).delete();
+      await _getWorkLogsCollection().doc(id).delete();
       return true;
     } on FirebaseException catch (e) {
       _logger.warning('家事ログ削除エラー', e);
@@ -71,8 +80,8 @@ class WorkLogRepository {
   }
 
   /// すべての家事ログを削除する
-  Future<void> deleteAll(String houseId) async {
-    final querySnapshot = await _getWorkLogsCollection(houseId).get();
+  Future<void> deleteAll() async {
+    final querySnapshot = await _getWorkLogsCollection().get();
     final batch = _firestore.batch();
 
     for (final doc in querySnapshot.docs) {
@@ -83,12 +92,9 @@ class WorkLogRepository {
   }
 
   /// 特定の家事に関連する家事ログを取得する
-  Future<List<WorkLog>> getWorkLogsByHouseWork(
-    String houseId,
-    String houseWorkId,
-  ) async {
+  Future<List<WorkLog>> getWorkLogsByHouseWork(String houseWorkId) async {
     final querySnapshot =
-        await _getWorkLogsCollection(houseId)
+        await _getWorkLogsCollection()
             .where('houseWorkId', isEqualTo: houseWorkId)
             .orderBy('completedAt', descending: true)
             .get();
@@ -97,9 +103,9 @@ class WorkLogRepository {
   }
 
   /// 特定のユーザーが実行した家事ログを取得する
-  Future<List<WorkLog>> getWorkLogsByUser(String houseId, String userId) async {
+  Future<List<WorkLog>> getWorkLogsByUser(String userId) async {
     final querySnapshot =
-        await _getWorkLogsCollection(houseId)
+        await _getWorkLogsCollection()
             .where('completedBy', isEqualTo: userId)
             .orderBy('completedAt', descending: true)
             .get();
@@ -108,8 +114,8 @@ class WorkLogRepository {
   }
 
   /// 最新の家事ログを取得するストリーム
-  Stream<List<WorkLog>> getRecentWorkLogs(String houseId, {int limit = 20}) {
-    return _getWorkLogsCollection(houseId)
+  Stream<List<WorkLog>> getRecentWorkLogs({int limit = 20}) {
+    return _getWorkLogsCollection()
         .orderBy('completedAt', descending: true)
         .limit(limit)
         .snapshots()
@@ -118,12 +124,11 @@ class WorkLogRepository {
 
   /// 特定の期間内の家事ログを取得する
   Future<List<WorkLog>> getWorkLogsByDateRange(
-    String houseId,
     DateTime startDate,
     DateTime endDate,
   ) async {
     final querySnapshot =
-        await _getWorkLogsCollection(houseId)
+        await _getWorkLogsCollection()
             .where(
               'completedAt',
               isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
@@ -139,14 +144,14 @@ class WorkLogRepository {
   }
 
   /// 未完了の家事ログを取得する
-  Stream<List<WorkLog>> getIncompleteWorkLogs(String houseId) {
+  Stream<List<WorkLog>> getIncompleteWorkLogs() {
     // TODO(ide): 未完了のクエリを実装する
-    return getCompletedWorkLogs(houseId);
+    return getCompletedWorkLogs();
   }
 
   /// 完了済みの家事ログを取得するストリーム
-  Stream<List<WorkLog>> getCompletedWorkLogs(String houseId) {
-    return _getWorkLogsCollection(houseId)
+  Stream<List<WorkLog>> getCompletedWorkLogs() {
+    return _getWorkLogsCollection()
         .orderBy('completedAt', descending: true)
         .limit(50) // 最新の50件に制限
         .snapshots()
@@ -154,10 +159,10 @@ class WorkLogRepository {
   }
 
   /// タイトルで家事ログを検索する
-  Future<List<WorkLog>> getWorkLogsByTitle(String houseId, String title) async {
+  Future<List<WorkLog>> getWorkLogsByTitle(String title) async {
     // タイトルで家事ログを検索するロジック
     final querySnapshot =
-        await _getWorkLogsCollection(houseId)
+        await _getWorkLogsCollection()
             .where('title', isEqualTo: title)
             .orderBy('completedAt', descending: true)
             .get();
@@ -166,11 +171,7 @@ class WorkLogRepository {
   }
 
   /// 家事ログを完了としてマークする
-  Future<String> completeWorkLog(
-    String houseId,
-    WorkLog workLog,
-    String userId,
-  ) {
+  Future<String> completeWorkLog(WorkLog workLog, String userId) {
     // 家事ログを完了としてマークするロジック
     final updatedWorkLog = WorkLog(
       id: workLog.id,
@@ -179,6 +180,6 @@ class WorkLogRepository {
       completedBy: userId, // 完了したユーザーのIDを設定
     );
 
-    return save(houseId, updatedWorkLog);
+    return save(updatedWorkLog);
   }
 }
