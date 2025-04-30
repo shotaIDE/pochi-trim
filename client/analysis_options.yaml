@@ -6,3 +6,5 @@ analyzer:
     - "**/*.freezed.dart"
     - "**/*.g.dart"
     - "lib/firebase_options*.dart"
+  plugins:
+    - custom_lint
