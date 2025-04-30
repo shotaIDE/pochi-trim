@@ -188,6 +188,7 @@ class AuthWrapper extends ConsumerWidget {
           () =>
               const Scaffold(body: Center(child: CircularProgressIndicator())),
       error:
+          // TODO(ide): この場合は不測の事態としてエラー収集
           (error, stackTrace) => Scaffold(
             body: Center(
               child: Column(
