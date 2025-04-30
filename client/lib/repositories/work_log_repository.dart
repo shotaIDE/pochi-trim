@@ -5,6 +5,8 @@ import 'package:house_worker/services/house_id_provider.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+part 'work_log_repository.g.dart';
+
 final _logger = Logger('WorkLogRepository');
 
 @riverpod

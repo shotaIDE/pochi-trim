@@ -6,13 +6,9 @@ import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:intl/intl.dart';
 
 class WorkLogDetailScreen extends ConsumerWidget {
-  const WorkLogDetailScreen({
-    super.key,
-    required this.workLog,
-    required this.houseId,
-  });
+  const WorkLogDetailScreen({super.key, required this.workLog});
+
   final WorkLog workLog;
-  final String houseId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,10 +19,7 @@ class WorkLogDetailScreen extends ConsumerWidget {
     final houseWorkAsync = ref.watch(
       FutureProvider<HouseWork?>((ref) {
         final repository = ref.read(houseWorkRepositoryProvider);
-        return repository.getByIdOnce(
-          houseId: houseId,
-          houseWorkId: workLog.houseWorkId,
-        );
+        return repository.getByIdOnce(houseWorkId: workLog.houseWorkId);
       }),
     );
 

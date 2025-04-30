@@ -4,20 +4,26 @@ import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/house_id_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-/// 家事ログの操作に関する共通処理を提供するプロバイダー
-final workLogServiceProvider = Provider<WorkLogService>((ref) {
+part 'work_log_service.g.dart';
+
+@riverpod
+WorkLogService workLogService(Ref ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
-  final currentHouseId = ref.watch(currentHouseIdProvider);
+  final houseId = ref.watch(currentHouseIdProvider);
+  if (houseId == null) {
+    throw Exception('House ID is not set');
+  }
 
   return WorkLogService(
     workLogRepository: workLogRepository,
     authService: authService,
-    currentHouseId: currentHouseId,
+    currentHouseId: houseId,
     ref: ref,
   );
-});
+}
 
 /// 家事ログに関する共通操作を提供するサービスクラス
 class WorkLogService {
@@ -60,7 +66,7 @@ class WorkLogService {
 
     try {
       // 家事ログを保存
-      await workLogRepository.save(currentHouseId, workLog);
+      await workLogRepository.save(workLog);
 
       // 成功メッセージを表示
       if (context.mounted) {

@@ -4,13 +4,12 @@ import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
-import 'package:house_worker/services/house_id_provider.dart';
 
 // 完了済みワークログの一覧を提供するプロバイダー
 final completedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
-  final houseId = ref.watch(currentHouseIdProvider);
-  return workLogRepository.getCompletedWorkLogs(houseId);
+
+  return workLogRepository.getCompletedWorkLogs();
 });
 
 // 特定の家事IDに関連するワークログを取得するプロバイダー
@@ -20,16 +19,16 @@ workLogsByHouseWorkIdProvider = FutureProvider.family<List<WorkLog>, String>((
   houseWorkId,
 ) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
-  final houseId = ref.watch(currentHouseIdProvider);
-  return workLogRepository.getWorkLogsByHouseWork(houseId, houseWorkId);
+
+  return workLogRepository.getWorkLogsByHouseWork(houseWorkId);
 });
 
 // タイトルでワークログを検索するプロバイダー
 final FutureProviderFamily<List<WorkLog>, String> workLogsByTitleProvider =
     FutureProvider.family<List<WorkLog>, String>((ref, title) {
       final workLogRepository = ref.watch(workLogRepositoryProvider);
-      final houseId = ref.watch(currentHouseIdProvider);
-      return workLogRepository.getWorkLogsByTitle(houseId, title);
+
+      return workLogRepository.getWorkLogsByTitle(title);
     });
 
 // 削除されたワークログを一時的に保持するプロバイダー
@@ -105,11 +104,8 @@ final houseWorksSortedByMostFrequentlyUsedProvider = StreamProvider<
 
 final houseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
   final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-  final houseId = ref.watch(currentHouseIdProvider);
 
-  return houseWorkRepository
-      .getAll(houseId: houseId)
-      .map((houseWorks) => houseWorks.toList());
+  return houseWorkRepository.getAll().map((houseWorks) => houseWorks.toList());
 });
 
 class WorkLogDeletionNotifier {
@@ -122,11 +118,8 @@ class WorkLogDeletionNotifier {
     // 削除前にワークログを保存
     ref.read(deletedWorkLogProvider.notifier).state = workLog;
 
-    // ハウスIDを取得
-    final houseId = ref.read(currentHouseIdProvider);
-
     // ワークログを削除
-    await workLogRepository.delete(houseId, workLog.id);
+    await workLogRepository.delete(workLog.id);
 
     // 既存のタイマーがあればキャンセル
     final existingTimerId = ref.read(undoDeleteTimerProvider);
@@ -154,11 +147,8 @@ class WorkLogDeletionNotifier {
   Future<void> undoDelete() async {
     final deletedWorkLog = ref.read(deletedWorkLogProvider);
     if (deletedWorkLog != null) {
-      // ハウスIDを取得
-      final houseId = ref.read(currentHouseIdProvider);
-
       // ワークログを復元
-      await workLogRepository.save(houseId, deletedWorkLog);
+      await workLogRepository.save(deletedWorkLog);
 
       // 状態をリセット
       ref.read(deletedWorkLogProvider.notifier).state = null;

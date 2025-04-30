@@ -6,7 +6,6 @@ import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
-import 'package:house_worker/services/house_id_provider.dart';
 
 // 家事ごとの頻度分析のためのデータクラス
 class HouseWorkFrequency {
@@ -60,7 +59,6 @@ class TimeSlotFrequency {
 // 家事ログの取得と分析のためのプロバイダー
 final workLogsForAnalysisProvider = FutureProvider<List<WorkLog>>((ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
-  final houseId = ref.watch(currentHouseIdProvider);
   return workLogRepository.getAll();
 });
 
@@ -101,8 +99,7 @@ final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
 final FutureProviderFamily<List<WorkLog>, int> filteredWorkLogsProvider =
     FutureProvider.family<List<WorkLog>, int>((ref, period) async {
       final workLogRepository = ref.watch(workLogRepositoryProvider);
-      final houseId = ref.watch(currentHouseIdProvider);
-      final allWorkLogs = await workLogRepository.getAll(houseId);
+      final allWorkLogs = await workLogRepository.getAll();
 
       // 現在時刻を取得
       final now = DateTime.now();

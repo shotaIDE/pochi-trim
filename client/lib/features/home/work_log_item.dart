@@ -12,12 +12,7 @@ import 'package:intl/intl.dart';
 final FutureProviderFamily<HouseWork?, WorkLog> _houseWorkForLogProvider =
     FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
       final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-      // ここではハウスIDをハードコードしていますが、実際のアプリケーションでは適切な方法で取得してください
-      const houseId = 'default-house-id';
-      return houseWorkRepository.getByIdOnce(
-        houseId: houseId,
-        houseWorkId: workLog.houseWorkId,
-      );
+      return houseWorkRepository.getByIdOnce(houseWorkId: workLog.houseWorkId);
     });
 
 class WorkLogItem extends ConsumerWidget {
