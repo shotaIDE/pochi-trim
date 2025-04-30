@@ -34,11 +34,8 @@ final plannedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
 final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
     FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
       final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-      final houseId = ref.watch(currentHouseIdProvider);
-      return houseWorkRepository.getByIdOnce(
-        houseId: houseId,
-        houseWorkId: workLog.houseWorkId,
-      );
+
+      return houseWorkRepository.getByIdOnce(houseWorkId: workLog.houseWorkId);
     });
 
 // 家事をもとに新しいWorkLogを作成するための便利なプロバイダー
