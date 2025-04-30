@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:house_worker/services/auth_service.dart';
+import 'package:house_worker/services/functions_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'login_presenter.freezed.dart';
@@ -18,13 +19,14 @@ class LoginButtonTappedResult extends _$LoginButtonTappedResult {
   }
 
   Future<void> onLoginTapped() async {
-    final authService = ref.watch(authServiceProvider);
-
     state = const AsyncValue.loading();
 
+    final authService = ref.read(authServiceProvider);
     await authService.signInAnonymously();
 
+    await ref.read(generateMyHouseProvider.future);
     // TODO(ide): エラーハンドリング
+
     state = const AsyncValue.data(LoginResultValue(isSuccess: true));
   }
 }
