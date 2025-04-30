@@ -26,9 +26,6 @@ class LoginButtonTappedResult extends _$LoginButtonTappedResult {
     await authService.signInAnonymously();
 
     final myHouseId = await ref.read(generateMyHouseProvider.future);
-    if (myHouseId == null) {
-      throw Exception('家の生成に失敗しました');
-    }
 
     ref.read(currentHouseIdProvider.notifier).setHouseId(myHouseId);
 
