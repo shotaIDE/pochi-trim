@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/analysis/weekday_frequency.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
-import 'package:house_worker/services/house_id_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analysis_provider.g.dart';
@@ -16,7 +15,6 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
   // フィルタリングされた家事ログのデータを待機
   final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
   final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-  final houseId = ref.watch(currentHouseIdProvider);
 
   // 曜日名の配列（インデックスは0が日曜日）
   final weekdayNames = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
@@ -46,7 +44,6 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
     // 各家事IDごとの頻度を取得
     for (final entry in weekdayMap[i]!.entries) {
       final houseWork = await houseWorkRepository.getByIdOnce(
-        houseId: houseId,
         houseWorkId: entry.key,
       );
 
