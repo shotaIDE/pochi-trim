@@ -14,7 +14,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void initState() {
     super.initState();
 
-    ref.listenManual(loginButtonTappedResultProvider, (previous, next) async {
+    ref.listenManual(loginButtonTappedResultProvider, (previous, next) {
       next.maybeWhen(
         error: (_, _) {
           // TODO(ide): エラーハンドリング
