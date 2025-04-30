@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:house_worker/models/sign_in_result.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/functions_service.dart';
 import 'package:house_worker/services/house_id_provider.dart';
@@ -23,12 +24,21 @@ class LoginButtonTappedResult extends _$LoginButtonTappedResult {
     state = const AsyncValue.loading();
 
     final authService = ref.read(authServiceProvider);
-    await authService.signInAnonymously();
+    try {
+      await authService.signInAnonymously();
+    } on SignInException catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return;
+    }
 
-    final myHouseId = await ref.read(generateMyHouseProvider.future);
+    final String myHouseId;
+    try {
+      myHouseId = await ref.read(generateMyHouseProvider.future);
+    } on GenerateMyHouseException catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return;
+    }
 
     ref.read(currentHouseIdProvider.notifier).setHouseId(myHouseId);
-
-    state = const AsyncValue.data(LoginResultValue(isSuccess: true));
   }
 }
