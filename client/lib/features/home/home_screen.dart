@@ -22,6 +22,11 @@ final selectedTabProvider = StateProvider<int>((ref) => 0);
 final plannedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
   final houseId = ref.watch(currentHouseIdProvider);
+
+  if (houseId == null) {
+    return const Stream.empty();
+  }
+
   return workLogRepository.getIncompleteWorkLogs(houseId);
 });
 
