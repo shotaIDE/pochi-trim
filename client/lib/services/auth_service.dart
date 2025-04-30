@@ -33,7 +33,7 @@ class AuthService {
       userCredential = await _firebaseAuth.signInAnonymously();
     } on firebase_auth.FirebaseAuthException catch (e) {
       _logger.warning('匿名ログインに失敗しました: $e');
-      // TODO(ide): 自前の型で包む
+
       throw SignInException();
     }
 
