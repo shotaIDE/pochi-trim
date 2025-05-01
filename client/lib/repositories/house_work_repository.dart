@@ -11,8 +11,8 @@ part 'house_work_repository.g.dart';
 final _logger = Logger('HouseWorkRepository');
 
 @riverpod
-HouseWorkRepository houseWorkRepository(Ref ref) {
-  final houseId = ref.watch(currentHouseIdProvider);
+Future<HouseWorkRepository> houseWorkRepository(Ref ref) async {
+  final houseId = await ref.watch(currentHouseIdProvider.future);
   if (houseId == null) {
     throw NoHouseIdError();
   }

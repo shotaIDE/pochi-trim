@@ -57,8 +57,9 @@ class TimeSlotFrequency {
 }
 
 // 家事ログの取得と分析のためのプロバイダー
-final workLogsForAnalysisProvider = FutureProvider<List<WorkLog>>((ref) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
+final workLogsForAnalysisProvider = FutureProvider<List<WorkLog>>((ref) async {
+  final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
+
   return workLogRepository.getAllOnce();
 });
 
@@ -68,7 +69,9 @@ final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
 ) async {
   // 家事ログのデータを待機
   final workLogs = await ref.watch(workLogsForAnalysisProvider.future);
-  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+  final houseWorkRepository = await ref.watch(
+    houseWorkRepositoryProvider.future,
+  );
 
   // 家事IDごとにグループ化して頻度をカウント
   final frequencyMap = <String, int>{};
@@ -99,7 +102,9 @@ filteredHouseWorkFrequencyProvider =
     FutureProvider.family<List<HouseWorkFrequency>, int>((ref, period) async {
       // フィルタリングされた家事ログのデータを待機
       final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
-      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+      final houseWorkRepository = await ref.watch(
+        houseWorkRepositoryProvider.future,
+      );
 
       // 家事IDごとにグループ化して頻度をカウント
       final frequencyMap = <String, int>{};
@@ -132,7 +137,9 @@ filteredTimeSlotFrequencyProvider =
     FutureProvider.family<List<TimeSlotFrequency>, int>((ref, period) async {
       // フィルタリングされた家事ログのデータを待機
       final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
-      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+      final houseWorkRepository = await ref.watch(
+        houseWorkRepositoryProvider.future,
+      );
 
       // 時間帯の定義（3時間ごと）
       final timeSlots = [

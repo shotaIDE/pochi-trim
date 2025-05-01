@@ -10,12 +10,15 @@ import 'package:intl/intl.dart';
 
 // WorkLogに対応するHouseWorkを取得するプロバイダー
 final FutureProviderFamily<HouseWork?, WorkLog> _houseWorkForLogProvider =
-    FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
-      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+    FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) async {
+      final houseWorkRepository = await ref.watch(
+        houseWorkRepositoryProvider.future,
+      );
+
       return houseWorkRepository.getByIdOnce(workLog.houseWorkId);
     });
 
-class WorkLogItem extends ConsumerWidget {
+class WorkLogItem extends ConsumerStatefulWidget {
   const WorkLogItem({
     super.key,
     required this.workLog,
@@ -28,12 +31,17 @@ class WorkLogItem extends ConsumerWidget {
   final VoidCallback? onComplete;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WorkLogItem> createState() => _WorkLogItemState();
+}
+
+class _WorkLogItemState extends ConsumerState<WorkLogItem> {
+  @override
+  Widget build(BuildContext context) {
     // WorkLogに関連するHouseWorkを取得
-    final houseWorkAsync = ref.watch(_houseWorkForLogProvider(workLog));
+    final houseWorkAsync = ref.watch(_houseWorkForLogProvider(widget.workLog));
 
     return Dismissible(
-      key: Key('workLog-${workLog.id}'),
+      key: Key('workLog-${widget.workLog.id}'),
       background: Container(
         color: Colors.red,
         alignment: Alignment.centerRight,
@@ -41,11 +49,14 @@ class WorkLogItem extends ConsumerWidget {
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       direction: DismissDirection.endToStart,
-      onDismissed: (direction) {
+      onDismissed: (direction) async {
         // ワークログ削除処理
-        ref.read(workLogDeletionProvider).deleteWorkLog(workLog);
+        final workLogDeletion = await ref.read(workLogDeletionProvider.future);
+        await workLogDeletion.deleteWorkLog(widget.workLog);
 
-        // スナックバーを表示
+        if (!context.mounted) {
+          return;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Row(
@@ -57,9 +68,11 @@ class WorkLogItem extends ConsumerWidget {
             ),
             action: SnackBarAction(
               label: '元に戻す',
-              onPressed: () {
-                // 削除を取り消す
-                ref.read(workLogDeletionProvider).undoDelete();
+              onPressed: () async {
+                final workLogDeletion = await ref.read(
+                  workLogDeletionProvider.future,
+                );
+                await workLogDeletion.undoDelete();
               },
             ),
             duration: const Duration(seconds: 5),
@@ -74,7 +87,7 @@ class WorkLogItem extends ConsumerWidget {
         elevation: 2,
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: InkWell(
-          onTap: onTap,
+          onTap: widget.onTap,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: houseWorkAsync.when(
@@ -124,17 +137,17 @@ class WorkLogItem extends ConsumerWidget {
                           onPressed: () async {
                             await HapticFeedback.mediumImpact();
 
+                            final workLogService = await ref.read(
+                              workLogServiceProvider.future,
+                            );
+
                             if (!context.mounted) {
                               return;
                             }
 
-                            // WorkLogServiceを使って家事ログを直接記録
-                            final workLogService = ref.read(
-                              workLogServiceProvider,
-                            );
                             await workLogService.recordWorkLog(
                               context,
-                              workLog.houseWorkId,
+                              widget.workLog.houseWorkId,
                             );
                           },
                         ),
@@ -147,13 +160,13 @@ class WorkLogItem extends ConsumerWidget {
                       children: [
                         Flexible(
                           child: _CompletedDateText(
-                            completedAt: workLog.completedAt,
+                            completedAt: widget.workLog.completedAt,
                           ),
                         ),
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            '実行者: ${workLog.completedBy}',
+                            '実行者: ${widget.workLog.completedBy}',
                             style: const TextStyle(
                               fontSize: 14,
                               color: Colors.grey,

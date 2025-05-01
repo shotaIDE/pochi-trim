@@ -319,10 +319,16 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
     }
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
+      final houseWorkRepository = await ref.read(
+        houseWorkRepositoryProvider.future,
+      );
       final currentUser = ref.read(authServiceProvider).currentUser;
+
+      if (!mounted) {
+        return;
+      }
 
       if (currentUser == null) {
         ScaffoldMessenger.of(
@@ -344,7 +350,7 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
 
       try {
         // 家事を保存
-        houseWorkRepository.save(houseWork);
+        await houseWorkRepository.save(houseWork);
 
         // 保存成功メッセージを表示
         if (mounted) {

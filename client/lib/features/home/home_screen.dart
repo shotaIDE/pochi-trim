@@ -19,15 +19,20 @@ final selectedTabProvider = StateProvider<int>((ref) => 0);
 
 // 予定家事一覧を提供するプロバイダー
 final plannedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
+  final workLogRepositoryAsync = ref.watch(workLogRepositoryProvider);
 
-  return workLogRepository.getIncompleteWorkLogs();
+  return workLogRepositoryAsync.maybeWhen(
+    data: (repository) => repository.getIncompleteWorkLogs(),
+    orElse: Stream.empty,
+  );
 });
 
 // WorkLogに対応するHouseWorkを取得するプロバイダー
 final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
-    FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
-      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+    FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) async {
+      final houseWorkRepository = await ref.watch(
+        houseWorkRepositoryProvider.future,
+      );
 
       return houseWorkRepository.getByIdOnce(workLog.houseWorkId);
     });
@@ -168,8 +173,8 @@ class _PlannedWorkLogsTab extends ConsumerWidget {
                   // 家事を完了としてマーク
                   final userId = ref.read(authServiceProvider).currentUser?.uid;
                   if (userId != null) {
-                    final workLogRepository = ref.read<WorkLogRepository>(
-                      workLogRepositoryProvider,
+                    final workLogRepository = await ref.read(
+                      workLogRepositoryProvider.future,
                     );
                     await workLogRepository.completeWorkLog(workLog, userId);
                   }
@@ -344,7 +349,7 @@ class _ShortCutBottomBar extends ConsumerWidget {
     final houseWorksAsync = ref.watch(
       houseWorksSortedByMostFrequentlyUsedProvider,
     );
-    final workLogService = ref.watch(workLogServiceProvider);
+    final workLogServiceFuture = ref.watch(workLogServiceProvider.future);
 
     return Container(
       constraints: const BoxConstraints(maxHeight: 130),
@@ -377,6 +382,8 @@ class _ShortCutBottomBar extends ConsumerWidget {
                     child: InkWell(
                       onTap: () async {
                         await HapticFeedback.mediumImpact();
+
+                        final workLogService = await workLogServiceFuture;
 
                         if (!context.mounted) {
                           return;

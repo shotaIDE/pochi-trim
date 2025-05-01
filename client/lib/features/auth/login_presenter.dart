@@ -33,6 +33,6 @@ class LoginButtonTappedResult extends _$LoginButtonTappedResult {
       return;
     }
 
-    ref.read(currentHouseIdProvider.notifier).setHouseId(myHouseId);
+    await ref.read(currentHouseIdProvider.notifier).setHouseId(myHouseId);
   }
 }

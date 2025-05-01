@@ -7,9 +7,12 @@ import 'package:house_worker/repositories/work_log_repository.dart';
 
 // 完了済みワークログの一覧を提供するプロバイダー
 final completedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
+  final workLogRepositoryAsync = ref.watch(workLogRepositoryProvider);
 
-  return workLogRepository.getCompletedWorkLogs();
+  return workLogRepositoryAsync.maybeWhen(
+    data: (repository) => repository.getCompletedWorkLogs(),
+    orElse: Stream.empty,
+  );
 });
 
 // 特定の家事IDに関連するワークログを取得するプロバイダー
@@ -17,16 +20,18 @@ final FutureProviderFamily<List<WorkLog>, String>
 workLogsByHouseWorkIdProvider = FutureProvider.family<List<WorkLog>, String>((
   ref,
   houseWorkId,
-) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
+) async {
+  final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
 
   return workLogRepository.getWorkLogsByHouseWork(houseWorkId);
 });
 
 // タイトルでワークログを検索するプロバイダー
 final FutureProviderFamily<List<WorkLog>, String> workLogsByTitleProvider =
-    FutureProvider.family<List<WorkLog>, String>((ref, title) {
-      final workLogRepository = ref.watch(workLogRepositoryProvider);
+    FutureProvider.family<List<WorkLog>, String>((ref, title) async {
+      final workLogRepository = await ref.watch(
+        workLogRepositoryProvider.future,
+      );
 
       return workLogRepository.getWorkLogsByTitle(title);
     });
@@ -38,16 +43,17 @@ final deletedWorkLogProvider = StateProvider<WorkLog?>((ref) => null);
 final undoDeleteTimerProvider = StateProvider<int?>((ref) => null);
 
 // ワークログ削除処理を行うプロバイダー
-final Provider<WorkLogDeletionNotifier> workLogDeletionProvider = Provider((
-  ref,
-) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
+final FutureProvider<WorkLogDeletionNotifier> workLogDeletionProvider =
+    FutureProvider((ref) async {
+      final workLogRepository = await ref.watch(
+        workLogRepositoryProvider.future,
+      );
 
-  return WorkLogDeletionNotifier(
-    workLogRepository: workLogRepository,
-    ref: ref,
-  );
-});
+      return WorkLogDeletionNotifier(
+        workLogRepository: workLogRepository,
+        ref: ref,
+      );
+    });
 
 final houseWorksSortedByMostFrequentlyUsedProvider = StreamProvider<
   List<HouseWork>
@@ -103,9 +109,14 @@ final houseWorksSortedByMostFrequentlyUsedProvider = StreamProvider<
 });
 
 final houseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
-  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+  final houseWorkRepositoryAsync = ref.watch(houseWorkRepositoryProvider);
 
-  return houseWorkRepository.getAll().map((houseWorks) => houseWorks.toList());
+  return houseWorkRepositoryAsync.maybeWhen(
+    data:
+        (repository) =>
+            repository.getAll().map((houseWorks) => houseWorks.toList()),
+    orElse: Stream.empty,
+  );
 });
 
 class WorkLogDeletionNotifier {
