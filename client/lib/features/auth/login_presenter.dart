@@ -1,3 +1,4 @@
+import 'package:house_worker/models/generate_my_house_exception.dart';
 import 'package:house_worker/models/sign_in_result.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/functions_service.dart';
