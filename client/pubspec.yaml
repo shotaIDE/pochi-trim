@@ -10,15 +10,15 @@ environment:
 dependencies:
   cloud_firestore: 5.6.7
   cloud_functions: 5.5.0
-  collection:
-  cupertino_icons:
+  collection: 1.19.1
+  cupertino_icons: 1.0.8
   firebase_auth: 5.5.2
   firebase_core: 3.13.0
   fl_chart: 0.71.0
   flutter:
     sdk: flutter
   flutter_riverpod: 2.6.1
-  flutter_slidable:
+  flutter_slidable: 4.0.0
   freezed_annotation: 3.0.0
   google_fonts:
   intl: 0.20.2
