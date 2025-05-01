@@ -1,0 +1,1 @@
+class GenerateMyHouseException implements Exception {}

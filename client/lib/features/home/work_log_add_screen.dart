@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
-import 'package:house_worker/services/house_id_provider.dart';
 
 // ランダムな絵文字を生成するためのリスト
 const _emojiList = <String>[
@@ -324,7 +323,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
     if (_formKey.currentState!.validate()) {
       final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
       final currentUser = ref.read(authServiceProvider).currentUser;
-      final houseId = ref.read(currentHouseIdProvider);
 
       if (currentUser == null) {
         ScaffoldMessenger.of(
@@ -346,7 +344,7 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
 
       try {
         // 家事を保存
-        houseWorkRepository.save(houseId, houseWork);
+        houseWorkRepository.save(houseWork);
 
         // 保存成功メッセージを表示
         if (mounted) {

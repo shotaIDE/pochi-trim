@@ -8,11 +8,12 @@ environment:
   sdk: 3.7.2
 
 dependencies:
-  cloud_firestore:
+  cloud_firestore: 5.6.7
+  cloud_functions: 5.5.0
   collection:
   cupertino_icons:
-  firebase_auth:
-  firebase_core:
+  firebase_auth: 5.5.2
+  firebase_core: 3.13.0
   fl_chart: 0.71.0
   flutter:
     sdk: flutter
@@ -32,14 +33,17 @@ dependencies:
 dev_dependencies:
   build_runner:
   cider: 0.2.8
+  custom_lint: 0.7.5
   flutter_launcher_icons:
   flutter_lints:
   flutter_test:
     sdk: flutter
   freezed:
+  json_serializable: 6.9.5
   mockito:
   pedantic_mono: 1.30.3
   riverpod_generator: 2.6.5
+  riverpod_lint: 2.6.5
 
 flutter:
   uses-material-design: true

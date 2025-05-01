@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -57,8 +58,7 @@ String getEmulatorHost() {
 void setupFirebaseEmulators(String host) {
   FirebaseAuth.instance.useAuthEmulator(host, 9099);
   FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
-  // Functionsも使用する場合は以下を追加
-  // FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
+  FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
 }
 
 // 環境設定を行う関数
@@ -188,6 +188,7 @@ class AuthWrapper extends ConsumerWidget {
           () =>
               const Scaffold(body: Center(child: CircularProgressIndicator())),
       error:
+          // TODO(ide): この場合は不測の事態としてエラー収集
           (error, stackTrace) => Scaffold(
             body: Center(
               child: Column(

@@ -1,13 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/models/sign_in_result.dart';
 import 'package:house_worker/models/user.dart' as app_user;
 import 'package:house_worker/repositories/user_repository.dart';
 import 'package:logging/logging.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final authServiceProvider = Provider<AuthService>((ref) {
+part 'auth_service.g.dart';
+
+@riverpod
+AuthService authService(Ref ref) {
   final userRepository = ref.watch(userRepositoryProvider);
   return AuthService(firebase_auth.FirebaseAuth.instance, userRepository);
-});
+}
 
 final authStateProvider = StreamProvider<firebase_auth.User?>((ref) {
   return ref.watch(authServiceProvider).authStateChanges;
@@ -23,37 +28,48 @@ class AuthService {
       _firebaseAuth.authStateChanges();
 
   Future<void> signInAnonymously() async {
+    final firebase_auth.UserCredential userCredential;
     try {
-      final credential = await _firebaseAuth.signInAnonymously();
-      final user = credential.user;
+      userCredential = await _firebaseAuth.signInAnonymously();
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      _logger.warning('匿名ログインに失敗しました: $e');
 
-      if (user != null) {
-        _logger.info('ユーザーがログインしました。UID: ${user.uid}');
-        // ユーザーがデータベースに存在するか確認
-        final existingUser = await _userRepository.getUserByUid(user.uid);
-
-        if (existingUser == null) {
-          // 新規ユーザーを作成
-          final newUser = app_user.User(
-            id: '', // 新規ユーザーの場合は空文字列を指定し、Firestoreが自動的にIDを生成
-            uid: user.uid,
-            name: 'ゲスト',
-            email: user.email ?? '',
-            householdIds: [],
-            createdAt: DateTime.now(),
-          );
-
-          await _userRepository.createUser(newUser);
-        }
-      }
-    } catch (e) {
-      _logger.warning('匿名サインインに失敗しました: $e');
-      rethrow;
+      throw SignInException();
     }
+
+    final user = userCredential.user;
+    if (user == null) {
+      throw SignInException();
+    }
+
+    _logger.info('ユーザーがログインしました。UID: ${user.uid}');
   }
 
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
+  }
+
+  Future<void> createUser() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      _logger.warning('ユーザーがログインしていません。');
+      return;
+    }
+
+    final existingUser = await _userRepository.getUserByUid(user.uid);
+
+    if (existingUser == null) {
+      final newUser = app_user.User(
+        id: '', // 新規ユーザーの場合は空文字列を指定し、Firestoreが自動的にIDを生成
+        uid: user.uid,
+        name: 'ゲスト',
+        email: user.email ?? '',
+        householdIds: [],
+        createdAt: DateTime.now(),
+      );
+
+      await _userRepository.createUser(newUser);
+    }
   }
 
   firebase_auth.User? get currentUser => _firebaseAuth.currentUser;

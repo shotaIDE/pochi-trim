@@ -12,9 +12,26 @@
       "port": 8080,
       "host": "0.0.0.0"
     },
+    "functions": {
+      "port": 5001,
+      "host": "0.0.0.0"
+    },
     "ui": {
       "enabled": true
     },
     "singleProjectMode": true
-  }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "venv",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
 }

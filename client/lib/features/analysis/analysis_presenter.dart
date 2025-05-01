@@ -1,13 +1,77 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/analysis/weekday_frequency.dart';
+import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
-import 'package:house_worker/services/house_id_provider.dart';
+import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'analysis_provider.g.dart';
+part 'analysis_presenter.g.dart';
 
-// 曜日ごとの家事実行頻度を取得するプロバイダー（期間フィルタリング付き）
+@riverpod
+Future<List<WorkLog>> filteredWorkLogs(Ref ref, int period) async {
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
+  final allWorkLogs = await workLogRepository.getAllOnce();
+
+  // 現在時刻を取得
+  final now = DateTime.now();
+
+  // 期間によるフィルタリング
+  switch (period) {
+    case 0: // 今日
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay
+          .add(const Duration(days: 1))
+          .subtract(const Duration(microseconds: 1));
+      return allWorkLogs
+          .where(
+            (log) =>
+                log.completedAt.isAfter(startOfDay) &&
+                log.completedAt.isBefore(endOfDay),
+          )
+          .toList();
+
+    case 1: // 今週
+      // 週の開始は月曜日、終了は日曜日とする
+      final currentWeekday = now.weekday;
+      final startOfWeek = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: currentWeekday - 1));
+      final endOfWeek = startOfWeek
+          .add(const Duration(days: 7))
+          .subtract(const Duration(microseconds: 1));
+      return allWorkLogs
+          .where(
+            (log) =>
+                log.completedAt.isAfter(startOfWeek) &&
+                log.completedAt.isBefore(endOfWeek),
+          )
+          .toList();
+
+    case 2: // 今月
+      final startOfMonth = DateTime(now.year, now.month);
+      final endOfMonth =
+          (now.month < 12)
+              ? DateTime(now.year, now.month + 1)
+              : DateTime(now.year + 1);
+      final lastDayOfMonth = endOfMonth.subtract(
+        const Duration(microseconds: 1),
+      );
+      return allWorkLogs
+          .where(
+            (log) =>
+                log.completedAt.isAfter(startOfMonth) &&
+                log.completedAt.isBefore(lastDayOfMonth),
+          )
+          .toList();
+
+    default:
+      return allWorkLogs;
+  }
+}
+
 @riverpod
 Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
   Ref ref, {
@@ -16,7 +80,6 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
   // フィルタリングされた家事ログのデータを待機
   final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
   final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-  final houseId = ref.watch(currentHouseIdProvider);
 
   // 曜日名の配列（インデックスは0が日曜日）
   final weekdayNames = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
@@ -45,10 +108,7 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
 
     // 各家事IDごとの頻度を取得
     for (final entry in weekdayMap[i]!.entries) {
-      final houseWork = await houseWorkRepository.getByIdOnce(
-        houseId: houseId,
-        houseWorkId: entry.key,
-      );
+      final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
 
       if (houseWork != null) {
         houseWorkFrequencies.add(

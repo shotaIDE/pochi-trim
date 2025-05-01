@@ -12,7 +12,6 @@ import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
-import 'package:house_worker/services/house_id_provider.dart';
 import 'package:house_worker/services/work_log_service.dart';
 
 // 選択されたタブを管理するプロバイダー
@@ -21,19 +20,16 @@ final selectedTabProvider = StateProvider<int>((ref) => 0);
 // 予定家事一覧を提供するプロバイダー
 final plannedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
-  final houseId = ref.watch(currentHouseIdProvider);
-  return workLogRepository.getIncompleteWorkLogs(houseId);
+
+  return workLogRepository.getIncompleteWorkLogs();
 });
 
 // WorkLogに対応するHouseWorkを取得するプロバイダー
 final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
     FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
       final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-      final houseId = ref.watch(currentHouseIdProvider);
-      return houseWorkRepository.getByIdOnce(
-        houseId: houseId,
-        houseWorkId: workLog.houseWorkId,
-      );
+
+      return houseWorkRepository.getByIdOnce(workLog.houseWorkId);
     });
 
 // 家事をもとに新しいWorkLogを作成するための便利なプロバイダー
@@ -175,12 +171,7 @@ class _PlannedWorkLogsTab extends ConsumerWidget {
                     final workLogRepository = ref.read<WorkLogRepository>(
                       workLogRepositoryProvider,
                     );
-                    final houseId = ref.read(currentHouseIdProvider);
-                    await workLogRepository.completeWorkLog(
-                      houseId,
-                      workLog,
-                      userId,
-                    );
+                    await workLogRepository.completeWorkLog(workLog, userId);
                   }
                 },
               );

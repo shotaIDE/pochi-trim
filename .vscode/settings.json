@@ -25,9 +25,20 @@
     "editor.wordWrap": "on",
     "files.trimTrailingWhitespace": true
   },
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit",
+      "source.unusedImports": "explicit"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "files.trimTrailingWhitespace": true
+  },
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.tabSize": 2
-  }
+  },
+  "python.defaultInterpreterPath": "infra/functions/venv/bin/python"
 }
