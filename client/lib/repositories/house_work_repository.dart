@@ -24,12 +24,11 @@ HouseWorkRepository houseWorkRepository(Ref ref) {
 class HouseWorkRepository {
   HouseWorkRepository({required String houseId}) : _houseId = houseId;
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _houseId;
 
   // ハウスIDを指定して家事コレクションの参照を取得
   CollectionReference _getHouseWorksCollection() {
-    return _firestore
+    return FirebaseFirestore.instance
         .collection('houses')
         .doc(_houseId)
         .collection('houseWorks');
@@ -106,7 +105,7 @@ class HouseWorkRepository {
   /// すべての家事を削除する
   Future<void> deleteAll() async {
     final querySnapshot = await _getHouseWorksCollection().get();
-    final batch = _firestore.batch();
+    final batch = FirebaseFirestore.instance.batch();
 
     for (final doc in querySnapshot.docs) {
       batch.delete(doc.reference);

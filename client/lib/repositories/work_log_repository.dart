@@ -23,11 +23,13 @@ class WorkLogRepository {
   WorkLogRepository({required String houseId}) : _houseId = houseId;
 
   final String _houseId;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // ハウスIDを指定して家事ログコレクションの参照を取得
   CollectionReference _getWorkLogsCollection() {
-    return _firestore.collection('houses').doc(_houseId).collection('workLogs');
+    return FirebaseFirestore.instance
+        .collection('houses')
+        .doc(_houseId)
+        .collection('workLogs');
   }
 
   /// 家事ログを保存する
@@ -83,7 +85,7 @@ class WorkLogRepository {
   /// すべての家事ログを削除する
   Future<void> deleteAll() async {
     final querySnapshot = await _getWorkLogsCollection().get();
-    final batch = _firestore.batch();
+    final batch = FirebaseFirestore.instance.batch();
 
     for (final doc in querySnapshot.docs) {
       batch.delete(doc.reference);
