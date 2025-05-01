@@ -6,8 +6,7 @@ part 'house_id_provider.g.dart';
 class CurrentHouseId extends _$CurrentHouseId {
   @override
   String? build() {
-    // TODO(ide): 適切な値に置き換える
-    return 'default-house-id';
+    return null;
   }
 
   // ignore: use_setters_to_change_properties

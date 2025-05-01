@@ -28,6 +28,9 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
 
     print(f"House document has been created: ID = {house_doc_id}, admin user = {user_id}")
 
+    # TODO: デバッグ用なので差し替える
+    house_doc_id = 'default-house-id'
+
     return {
         "houseDocId": house_doc_id,
         "adminUser": user_id
