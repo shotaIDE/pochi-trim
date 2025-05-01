@@ -64,8 +64,7 @@ class WorkLogRepository {
     return null;
   }
 
-  /// すべての家事ログを取得する
-  Future<List<WorkLog>> getAll() async {
+  Future<List<WorkLog>> getAllOnce() async {
     final querySnapshot = await _getWorkLogsCollection().get();
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }

@@ -11,7 +11,7 @@ part 'analysis_presenter.g.dart';
 @riverpod
 Future<List<WorkLog>> filteredWorkLogs(Ref ref, int period) async {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
-  final allWorkLogs = await workLogRepository.getAll();
+  final allWorkLogs = await workLogRepository.getAllOnce();
 
   // 現在時刻を取得
   final now = DateTime.now();
