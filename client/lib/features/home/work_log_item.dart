@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 final FutureProviderFamily<HouseWork?, WorkLog> _houseWorkForLogProvider =
     FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
       final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-      return houseWorkRepository.getByIdOnce(houseWorkId: workLog.houseWorkId);
+      return houseWorkRepository.getByIdOnce(workLog.houseWorkId);
     });
 
 class WorkLogItem extends ConsumerWidget {

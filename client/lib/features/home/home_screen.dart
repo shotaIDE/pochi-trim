@@ -29,7 +29,7 @@ final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
     FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
       final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
-      return houseWorkRepository.getByIdOnce(houseWorkId: workLog.houseWorkId);
+      return houseWorkRepository.getByIdOnce(workLog.houseWorkId);
     });
 
 // 家事をもとに新しいWorkLogを作成するための便利なプロバイダー

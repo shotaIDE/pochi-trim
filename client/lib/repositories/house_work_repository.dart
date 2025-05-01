@@ -62,7 +62,7 @@ class HouseWorkRepository {
     return ids;
   }
 
-  Stream<HouseWork?> getById({required String houseWorkId}) {
+  Stream<HouseWork?> getById(String houseWorkId) {
     return _getHouseWorksCollection().doc(houseWorkId).snapshots().map((doc) {
       if (doc.exists) {
         return HouseWork.fromFirestore(doc);
@@ -72,7 +72,7 @@ class HouseWorkRepository {
   }
 
   /// IDを指定して家事を取得する
-  Future<HouseWork?> getByIdOnce({required String houseWorkId}) async {
+  Future<HouseWork?> getByIdOnce(String houseWorkId) async {
     final doc = await _getHouseWorksCollection().doc(houseWorkId).get();
     if (doc.exists) {
       return HouseWork.fromFirestore(doc);

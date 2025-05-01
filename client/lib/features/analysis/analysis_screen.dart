@@ -83,9 +83,7 @@ final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
   // HouseWorkFrequencyのリストを作成
   final result = <HouseWorkFrequency>[];
   for (final entry in frequencyMap.entries) {
-    final houseWork = await houseWorkRepository.getByIdOnce(
-      houseWorkId: entry.key,
-    );
+    final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
 
     if (houseWork != null) {
       result.add(HouseWorkFrequency(houseWork: houseWork, count: entry.value));
@@ -180,9 +178,7 @@ filteredHouseWorkFrequencyProvider =
       // HouseWorkFrequencyのリストを作成
       final result = <HouseWorkFrequency>[];
       for (final entry in frequencyMap.entries) {
-        final houseWork = await houseWorkRepository.getByIdOnce(
-          houseWorkId: entry.key,
-        );
+        final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
 
         if (houseWork != null) {
           result.add(
@@ -242,9 +238,7 @@ filteredTimeSlotFrequencyProvider =
 
         // 各家事IDごとの頻度を取得
         for (final entry in timeSlotMap[i]!.entries) {
-          final houseWork = await houseWorkRepository.getByIdOnce(
-            houseWorkId: entry.key,
-          );
+          final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
 
           if (houseWork != null) {
             houseWorkFrequencies.add(

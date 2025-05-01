@@ -43,9 +43,7 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
 
     // 各家事IDごとの頻度を取得
     for (final entry in weekdayMap[i]!.entries) {
-      final houseWork = await houseWorkRepository.getByIdOnce(
-        houseWorkId: entry.key,
-      );
+      final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
 
       if (houseWork != null) {
         houseWorkFrequencies.add(
