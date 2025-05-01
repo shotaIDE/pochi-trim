@@ -1,14 +1,11 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/analysis/analysis_provider.dart';
+import 'package:house_worker/features/analysis/analysis_presenter.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-part 'analysis_screen.g.dart';
 
 // 家事ごとの頻度分析のためのデータクラス
 class HouseWorkFrequency {
@@ -95,70 +92,6 @@ final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
 
   return result;
 });
-
-@riverpod
-Future<List<WorkLog>> filteredWorkLogs(Ref ref, int period) async {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
-  final allWorkLogs = await workLogRepository.getAll();
-
-  // 現在時刻を取得
-  final now = DateTime.now();
-
-  // 期間によるフィルタリング
-  switch (period) {
-    case 0: // 今日
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = startOfDay
-          .add(const Duration(days: 1))
-          .subtract(const Duration(microseconds: 1));
-      return allWorkLogs
-          .where(
-            (log) =>
-                log.completedAt.isAfter(startOfDay) &&
-                log.completedAt.isBefore(endOfDay),
-          )
-          .toList();
-
-    case 1: // 今週
-      // 週の開始は月曜日、終了は日曜日とする
-      final currentWeekday = now.weekday;
-      final startOfWeek = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).subtract(Duration(days: currentWeekday - 1));
-      final endOfWeek = startOfWeek
-          .add(const Duration(days: 7))
-          .subtract(const Duration(microseconds: 1));
-      return allWorkLogs
-          .where(
-            (log) =>
-                log.completedAt.isAfter(startOfWeek) &&
-                log.completedAt.isBefore(endOfWeek),
-          )
-          .toList();
-
-    case 2: // 今月
-      final startOfMonth = DateTime(now.year, now.month);
-      final endOfMonth =
-          (now.month < 12)
-              ? DateTime(now.year, now.month + 1)
-              : DateTime(now.year + 1);
-      final lastDayOfMonth = endOfMonth.subtract(
-        const Duration(microseconds: 1),
-      );
-      return allWorkLogs
-          .where(
-            (log) =>
-                log.completedAt.isAfter(startOfMonth) &&
-                log.completedAt.isBefore(lastDayOfMonth),
-          )
-          .toList();
-
-    default:
-      return allWorkLogs;
-  }
-}
 
 // 各家事の実行頻度を取得するプロバイダー（期間フィルタリング付き）
 final FutureProviderFamily<List<HouseWorkFrequency>, int>
