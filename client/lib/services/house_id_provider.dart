@@ -10,9 +10,10 @@ class CurrentHouseId extends _$CurrentHouseId {
   Future<String?> build() async {
     final preferenceService = ref.watch(preferenceServiceProvider);
 
-    final houseId = await preferenceService.getString(
-      PreferenceKey.currentHouseId,
-    );
+    final houseId =
+        await preferenceService.getString(PreferenceKey.currentHouseId) ??
+        // TODO(ide): 開発用。本番リリース時には削除する
+        'default-house-id';
 
     return houseId;
   }
