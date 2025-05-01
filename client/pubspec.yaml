@@ -38,7 +38,7 @@ dev_dependencies:
   flutter_lints: 5.0.0
   flutter_test:
     sdk: flutter
-  freezed: 3.0.4
+  freezed: 3.0.6
   json_serializable: 6.9.5
   mockito:
   pedantic_mono: 1.30.3
