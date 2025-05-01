@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/models/no_house_id_error.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/services/house_id_provider.dart';
 import 'package:logging/logging.dart';
@@ -13,7 +14,7 @@ final _logger = Logger('WorkLogRepository');
 WorkLogRepository workLogRepository(Ref ref) {
   final houseId = ref.watch(currentHouseIdProvider);
   if (houseId == null) {
-    throw Exception('House ID is null');
+    throw NoHouseIdError();
   }
 
   return WorkLogRepository(houseId: houseId);
