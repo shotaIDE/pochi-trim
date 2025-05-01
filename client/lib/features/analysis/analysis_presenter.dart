@@ -10,7 +10,8 @@ part 'analysis_presenter.g.dart';
 
 @riverpod
 Future<List<WorkLog>> filteredWorkLogs(Ref ref, int period) async {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
+  final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
+
   final allWorkLogs = await workLogRepository.getAllOnce();
 
   // 現在時刻を取得
@@ -79,7 +80,9 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
 }) async {
   // フィルタリングされた家事ログのデータを待機
   final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
-  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+  final houseWorkRepository = await ref.watch(
+    houseWorkRepositoryProvider.future,
+  );
 
   // 曜日名の配列（インデックスは0が日曜日）
   final weekdayNames = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];

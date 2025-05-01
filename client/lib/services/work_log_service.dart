@@ -10,10 +10,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'work_log_service.g.dart';
 
 @riverpod
-WorkLogService workLogService(Ref ref) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
+Future<WorkLogService> workLogService(Ref ref) async {
+  final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
   final authService = ref.watch(authServiceProvider);
-  final houseId = ref.watch(currentHouseIdProvider);
+  final houseId = await ref.watch(currentHouseIdProvider.future);
   if (houseId == null) {
     throw NoHouseIdError();
   }

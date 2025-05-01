@@ -17,16 +17,18 @@ final FutureProviderFamily<List<WorkLog>, String>
 workLogsByHouseWorkIdProvider = FutureProvider.family<List<WorkLog>, String>((
   ref,
   houseWorkId,
-) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
+) async {
+  final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
 
   return workLogRepository.getWorkLogsByHouseWork(houseWorkId);
 });
 
 // タイトルでワークログを検索するプロバイダー
 final FutureProviderFamily<List<WorkLog>, String> workLogsByTitleProvider =
-    FutureProvider.family<List<WorkLog>, String>((ref, title) {
-      final workLogRepository = ref.watch(workLogRepositoryProvider);
+    FutureProvider.family<List<WorkLog>, String>((ref, title) async {
+      final workLogRepository = await ref.watch(
+        workLogRepositoryProvider.future,
+      );
 
       return workLogRepository.getWorkLogsByTitle(title);
     });
