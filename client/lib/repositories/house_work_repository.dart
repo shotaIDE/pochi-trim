@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/house_work.dart';
+import 'package:house_worker/models/no_house_id_error.dart';
 import 'package:house_worker/services/house_id_provider.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -13,7 +14,7 @@ final _logger = Logger('HouseWorkRepository');
 HouseWorkRepository houseWorkRepository(Ref ref) {
   final houseId = ref.watch(currentHouseIdProvider);
   if (houseId == null) {
-    throw Exception('House ID is not set');
+    throw NoHouseIdError();
   }
 
   return HouseWorkRepository(houseId: houseId);

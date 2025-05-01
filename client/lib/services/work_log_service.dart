@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/models/no_house_id_error.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
@@ -14,7 +15,7 @@ WorkLogService workLogService(Ref ref) {
   final authService = ref.watch(authServiceProvider);
   final houseId = ref.watch(currentHouseIdProvider);
   if (houseId == null) {
-    throw Exception('House ID is not set');
+    throw NoHouseIdError();
   }
 
   return WorkLogService(
