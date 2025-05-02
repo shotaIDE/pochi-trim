@@ -10,9 +10,16 @@ import 'package:house_worker/repositories/work_log_repository.dart';
 
 // 家事ごとの頻度分析のためのデータクラス
 class HouseWorkFrequency {
-  HouseWorkFrequency({required this.houseWork, required this.count});
+  HouseWorkFrequency({
+    required this.houseWork,
+    required this.count,
+    // TODO(ide): デフォルト引数を廃止する
+    this.color = Colors.grey,
+  });
+
   final HouseWork houseWork;
   final int count;
+  final Color color;
 }
 
 // 時間帯別の家事実行頻度のためのデータクラス
@@ -463,51 +470,6 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
           Colors.indigo,
         ];
 
-        // 凡例データの収集
-        final allHouseWorks = <HouseWork>{};
-        final houseWorkColorMap = <String, Color>{};
-
-        // すべての家事を収集し、それぞれに色を割り当てる
-        for (final day in weekdayData) {
-          for (var i = 0; i < day.houseWorkFrequencies.length; i++) {
-            final houseWork = day.houseWorkFrequencies[i].houseWork;
-            allHouseWorks.add(houseWork);
-            if (!houseWorkColorMap.containsKey(houseWork.id)) {
-              houseWorkColorMap[houseWork.id] =
-                  colors[houseWorkColorMap.length % colors.length];
-            }
-          }
-        }
-
-        // 家事を集約してリスト化（凡例用）
-        final legendItems = allHouseWorks.toList();
-
-        // 表示・非表示の状態に基づいて、各曜日のデータをフィルタリング
-        final filteredWeekdayData =
-            weekdayData.map((day) {
-              // 表示する家事だけをフィルタリング
-              final visibleFrequencies =
-                  day.houseWorkFrequencies
-                      .where(
-                        (freq) =>
-                            houseWorkVisibilities[freq.houseWork.id] ?? true,
-                      )
-                      .toList();
-
-              // 表示する家事の合計回数を計算
-              final visibleTotalCount = visibleFrequencies.fold(
-                0,
-                (sum, freq) => sum + freq.count,
-              );
-
-              // 新しいWeekdayFrequencyオブジェクトを作成
-              return WeekdayFrequency(
-                weekday: day.weekday,
-                houseWorkFrequencies: visibleFrequencies,
-                totalCount: visibleTotalCount,
-              );
-            }).toList();
-
         return Card(
           margin: const EdgeInsets.all(16),
           child: Padding(
@@ -542,12 +504,11 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                             sideTitles: SideTitles(
                               showTitles: true,
                               getTitlesWidget: (value, meta) {
-                                if (value < 0 ||
-                                    value >= filteredWeekdayData.length) {
+                                if (value < 0 || value >= weekdayData.length) {
                                   return const Text('');
                                 }
                                 return Text(
-                                  filteredWeekdayData[value.toInt()]
+                                  weekdayData[value.toInt()]
                                       .weekday
                                       .displayName,
                                 );
@@ -571,7 +532,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                           ),
                         ),
                         barGroups:
-                            filteredWeekdayData.asMap().entries.map((entry) {
+                            weekdayData.asMap().entries.map((entry) {
                               final index = entry.key;
                               final data = entry.value;
 
@@ -581,14 +542,10 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
 
                               // 表示されている家事だけを処理
                               for (final freq in data.houseWorkFrequencies) {
-                                final houseWork = freq.houseWork;
-                                final color =
-                                    houseWorkColorMap[houseWork.id] ??
-                                    colors[0];
                                 final toY = fromY + freq.count;
 
                                 rodStackItems.add(
-                                  BarChartRodStackItem(fromY, toY, color),
+                                  BarChartRodStackItem(fromY, toY, freq.color),
                                 );
 
                                 fromY = toY;

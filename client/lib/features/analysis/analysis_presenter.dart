@@ -105,6 +105,9 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
   final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
   final houseWorkVisibilities = ref.watch(houseWorkVisibilitiesProvider);
   final houseWorks = await ref.watch(_houseWorksFilePrivateProvider.future);
+  final colorOfHouseWorks = await ref.watch(
+    _colorOfHouseWorksFilePrivateProvider.future,
+  );
 
   final workLogCountsStatistics =
       Weekday.values.map((weekday) {
@@ -124,6 +127,7 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
               return HouseWorkFrequency(
                 houseWork: houseWork,
                 count: workLogsOfTargetHouseWork.length,
+                color: colorOfHouseWorks[houseWork.id] ?? Colors.grey,
               );
             }).toList();
 
