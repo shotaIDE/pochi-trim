@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/analysis/weekday_frequency.dart';
+import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
@@ -103,6 +105,7 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
   final houseWorkRepository = await ref.watch(
     houseWorkRepositoryProvider.future,
   );
+  final houseWorkVisibilities = ref.watch(houseWorkVisibilitiesProvider);
 
   // 曜日名の配列（インデックスは0が日曜日）
   final weekdayNames = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
@@ -153,5 +156,102 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
     );
   }
 
-  return result;
+  final colors = [
+    Colors.blue,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+    Colors.teal,
+    Colors.pink,
+    Colors.amber,
+    Colors.indigo,
+  ];
+
+  // 凡例データの収集
+  final allHouseWorks = <HouseWork>{};
+  final houseWorkColorMap = <String, Color>{};
+
+  // すべての家事を収集し、それぞれに色を割り当てる
+  for (final day in result) {
+    for (var i = 0; i < day.houseWorkFrequencies.length; i++) {
+      final houseWork = day.houseWorkFrequencies[i].houseWork;
+      allHouseWorks.add(houseWork);
+      if (!houseWorkColorMap.containsKey(houseWork.id)) {
+        houseWorkColorMap[houseWork.id] =
+            colors[houseWorkColorMap.length % colors.length];
+      }
+    }
+  }
+
+  // 家事を集約してリスト化（凡例用）
+  final legendItems = allHouseWorks.toList();
+
+  // 表示・非表示の状態に基づいて、各曜日のデータをフィルタリング
+  final filteredWeekdayData =
+      result.map((day) {
+        // 表示する家事だけをフィルタリング
+        final visibleFrequencies =
+            day.houseWorkFrequencies
+                .where(
+                  (freq) => houseWorkVisibilities[freq.houseWork.id] ?? true,
+                )
+                .toList();
+
+        // 表示する家事の合計回数を計算
+        final visibleTotalCount = visibleFrequencies.fold(
+          0,
+          (sum, freq) => sum + freq.count,
+        );
+
+        // 新しいWeekdayFrequencyオブジェクトを作成
+        return WeekdayFrequency(
+          weekday: day.weekday,
+          houseWorkFrequencies: visibleFrequencies,
+          totalCount: visibleTotalCount,
+        );
+      }).toList();
+
+  return filteredWeekdayData;
+}
+
+@riverpod
+Stream<List<HouseWork>> _houseWorksFilePrivate(Ref ref) {
+  final houseWorkRepositoryAsync = ref.watch(houseWorkRepositoryProvider);
+
+  return houseWorkRepositoryAsync.when(
+    data: (repository) => repository.getAll(),
+    error: (error, stack) => Stream.error(error),
+    loading: Stream.empty,
+  );
+}
+
+@riverpod
+Stream<Map<String, Color>> _colorOfHouseWorksFilePrivate(Ref ref) {
+  final houseWorksAsync = ref.watch(_houseWorksFilePrivateProvider);
+
+  final colors = [
+    Colors.blue,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+    Colors.teal,
+    Colors.pink,
+    Colors.amber,
+    Colors.indigo,
+  ];
+
+  return houseWorksAsync.when(
+    data: (houseWorks) {
+      final colorsOfHouseWorks = <String, Color>{};
+
+      for (final houseWork in houseWorks) {
+        colorsOfHouseWorks[houseWork.id] =
+            colors[colorsOfHouseWorks.length % colors.length];
+      }
+
+      return Stream.value(colorsOfHouseWorks);
+    },
+    error: (error, stack) => Stream.error(error),
+    loading: Stream.empty,
+  );
 }
