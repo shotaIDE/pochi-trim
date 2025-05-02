@@ -6,7 +6,6 @@ import 'package:house_worker/features/home/home_presenter.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
-import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:house_worker/features/settings/settings_screen.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
