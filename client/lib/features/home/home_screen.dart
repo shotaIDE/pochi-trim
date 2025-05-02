@@ -376,64 +376,7 @@ class _ShortCutBottomBar extends ConsumerWidget {
                 }
 
                 return recentHouseWorks.map((houseWork) {
-                  return SizedBox(
-                    width: 100,
-                    child: InkWell(
-                      onTap: () async {
-                        await HapticFeedback.mediumImpact();
-
-                        final workLogService = await ref.read(
-                          workLogServiceProvider.future,
-                        );
-
-                        if (!context.mounted) {
-                          return;
-                        }
-
-                        // TODO(ide): 共通サービスを使用して家事ログを記録
-                        await workLogService.recordWorkLog(
-                          context,
-                          houseWork.id,
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 4,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          spacing: 4,
-                          children: [
-                            Container(
-                              alignment: Alignment.center,
-                              // TODO(ide): 共通化できる
-                              decoration: BoxDecoration(
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.surfaceContainer,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              width: 32,
-                              height: 32,
-                              child: Text(
-                                houseWork.icon,
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                            ),
-                            Text(
-                              houseWork.title,
-                              style: const TextStyle(fontSize: 12),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
+                  return _QuickRegisterButton(houseWork: houseWork);
                 }).toList();
               },
               loading:
@@ -446,6 +389,63 @@ class _ShortCutBottomBar extends ConsumerWidget {
               error: (_, _) => [const SizedBox.shrink()],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickRegisterButton extends ConsumerWidget {
+  const _QuickRegisterButton({required this.houseWork});
+
+  final HouseWork houseWork;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SizedBox(
+      width: 100,
+      child: InkWell(
+        onTap: () async {
+          await HapticFeedback.mediumImpact();
+
+          final workLogService = await ref.read(workLogServiceProvider.future);
+
+          if (!context.mounted) {
+            return;
+          }
+
+          // TODO(ide): 共通サービスを使用して家事ログを記録
+          await workLogService.recordWorkLog(context, houseWork.id);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
+            children: [
+              Container(
+                alignment: Alignment.center,
+                // TODO(ide): 共通化できる
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                width: 32,
+                height: 32,
+                child: Text(
+                  houseWork.icon,
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
+              Text(
+                houseWork.title,
+                style: const TextStyle(fontSize: 12),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
