@@ -13,7 +13,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analysis_presenter.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class HouseWorkVisibilities extends _$HouseWorkVisibilities {
   @override
   Map<String, bool> build() {
