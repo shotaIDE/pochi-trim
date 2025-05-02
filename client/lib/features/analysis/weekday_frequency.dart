@@ -3,13 +3,14 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
+import 'package:house_worker/features/analysis/weekday.dart';
 
 part 'weekday_frequency.freezed.dart';
 
 @freezed
 abstract class WeekdayFrequency with _$WeekdayFrequency {
   const factory WeekdayFrequency({
-    required String weekday,
+    required Weekday weekday,
     // その曜日での家事ごとの実行回数
     required List<HouseWorkFrequency> houseWorkFrequencies,
     required int totalCount,
