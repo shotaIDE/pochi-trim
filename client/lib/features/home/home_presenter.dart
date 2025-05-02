@@ -11,32 +11,25 @@ Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
   final houseWorks = await ref.watch(houseWorksProvider.future);
   final completedWorkLogs = await ref.watch(completedWorkLogsProvider.future);
 
-  // 家事ごとの完了回数をカウント
-  final completionCountByHouseWork = <HouseWork, int>{};
-  // 完了されたことがある家事と完了されたことがない家事を分ける
+  final completionCountOfHouseWorks = <HouseWork, int>{};
   final completedHouseWorks = <HouseWork>[];
   final neverCompletedHouseWorks = <HouseWork>[];
 
-  // 初期化：すべての家事の完了回数を0に設定
   for (final houseWork in houseWorks) {
-    completionCountByHouseWork[houseWork] = 0;
+    completionCountOfHouseWorks[houseWork] = 0;
   }
 
-  // 完了ログを走査して、各家事の完了回数をカウント
-  for (final workLog in completedWorkLogs) {
-    final targetHouseWork = houseWorks.firstWhereOrNull(
-      (houseWork) => houseWork.id == workLog.houseWorkId,
-    );
-    if (targetHouseWork == null) {
-      continue;
-    }
+  for (final houseWork in houseWorks) {
+    final completionCount =
+        completedWorkLogs
+            .where((workLog) => workLog.houseWorkId == houseWork.id)
+            .length;
 
-    completionCountByHouseWork[targetHouseWork] =
-        (completionCountByHouseWork[targetHouseWork] ?? 0) + 1;
+    completionCountOfHouseWorks[houseWork] = completionCount;
   }
 
   // 完了されたことがある家事と完了されたことがない家事を分ける
-  for (final entry in completionCountByHouseWork.entries) {
+  for (final entry in completionCountOfHouseWorks.entries) {
     if (entry.value > 0) {
       completedHouseWorks.add(entry.key);
     } else {
@@ -46,7 +39,7 @@ Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
 
   // 1. 完了されたことがある家事を完了回数の多い順に並べる
   final sortedCompletedHouseWorks = completedHouseWorks.sortedBy(
-    (houseWork) => -completionCountByHouseWork[houseWork]!,
+    (houseWork) => -completionCountOfHouseWorks[houseWork]!,
   );
 
   // 2. 完了されたことがない家事を作成日時の新しい順に並べる
