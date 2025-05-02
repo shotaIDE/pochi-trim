@@ -114,7 +114,7 @@ class HomeScreen extends ConsumerWidget {
           },
           child: const Icon(Icons.add),
         ),
-        bottomNavigationBar: const _ShortCutBottomBar(),
+        bottomNavigationBar: const _QuickRegisterBottomBar(),
       ),
     );
   }
@@ -341,8 +341,8 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
   }
 }
 
-class _ShortCutBottomBar extends ConsumerWidget {
-  const _ShortCutBottomBar();
+class _QuickRegisterBottomBar extends ConsumerWidget {
+  const _QuickRegisterBottomBar();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
