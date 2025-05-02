@@ -508,14 +508,6 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
               );
             }).toList();
 
-        // 最大値を計算（表示されている家事のみ）
-        var maxY = 10.0; // デフォルト値
-        if (filteredWeekdayData.isNotEmpty) {
-          maxY = filteredWeekdayData
-              .map((e) => e.totalCount.toDouble())
-              .reduce((a, b) => a > b ? a : b);
-        }
-
         return Card(
           margin: const EdgeInsets.all(16),
           child: Padding(
@@ -537,7 +529,6 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                     child: BarChart(
                       BarChartData(
                         alignment: BarChartAlignment.spaceAround,
-                        maxY: maxY > 0 ? maxY : 10, // 最大値が0の場合は10を設定
                         titlesData: FlTitlesData(
                           leftTitles: const AxisTitles(
                             sideTitles: SideTitles(
