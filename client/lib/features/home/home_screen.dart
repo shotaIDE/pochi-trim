@@ -394,24 +394,33 @@ class _QuickRegisterBottomBarState
         top: false,
         child: Skeletonizer(
           enabled: _sortedHouseWorksByCompletionCountAsync.isLoading,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              // 最近登録された家事一覧
-              ..._sortedHouseWorksByCompletionCountAsync.when(
-                data: (recentHouseWorks) {
-                  if (recentHouseWorks.isEmpty) {
-                    return [const SizedBox.shrink()];
-                  }
-
-                  return recentHouseWorks.map((houseWork) {
+          child: _sortedHouseWorksByCompletionCountAsync.when(
+            data: (recentHouseWorks) {
+              final items =
+                  recentHouseWorks.map((houseWork) {
                     return _QuickRegisterButton(houseWork: houseWork);
                   }).toList();
-                },
-                loading: () => List.filled(4, const _FakeQuickRegisterButton()),
-                error: (_, _) => [const SizedBox.shrink()],
-              ),
-            ],
+
+              return ListView(
+                scrollDirection: Axis.horizontal,
+                children: items,
+              );
+            },
+            loading:
+                () => ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: List.filled(4, const _FakeQuickRegisterButton()),
+                ),
+            error:
+                (_, _) => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text(
+                      'クイック登録の取得に失敗しました。アプリを再起動し、再度お試しください。',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
           ),
         ),
       ),
