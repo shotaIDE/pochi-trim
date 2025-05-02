@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
@@ -54,59 +53,6 @@ final FutureProvider<WorkLogDeletionNotifier> workLogDeletionProvider =
         ref: ref,
       );
     });
-
-final houseWorksSortedByMostFrequentlyUsedProvider = StreamProvider<
-  List<HouseWork>
->((ref) {
-  final houseWorksAsync = ref.watch(houseWorksProvider);
-  final completedWorkLogs = ref.watch(completedWorkLogsProvider);
-
-  return houseWorksAsync.when(
-    data: (houseWorks) {
-      final latestUsedTimeOfHouseWorks = <HouseWork, DateTime>{};
-      for (final houseWork in houseWorks) {
-        latestUsedTimeOfHouseWorks[houseWork] = houseWork.createdAt;
-      }
-
-      completedWorkLogs.maybeWhen(
-        data: (workLogs) {
-          for (final workLog in workLogs) {
-            final targetHouseWork = houseWorks.firstWhereOrNull(
-              (houseWork) => houseWork.id == workLog.houseWorkId,
-            );
-            if (targetHouseWork == null) {
-              continue;
-            }
-
-            final currentLatestUsedTime =
-                latestUsedTimeOfHouseWorks[targetHouseWork];
-            if (currentLatestUsedTime == null) {
-              latestUsedTimeOfHouseWorks[targetHouseWork] = workLog.completedAt;
-              continue;
-            }
-
-            if (currentLatestUsedTime.isAfter(workLog.completedAt)) {
-              continue;
-            }
-
-            latestUsedTimeOfHouseWorks[targetHouseWork] = workLog.completedAt;
-          }
-        },
-        orElse: () {},
-      );
-
-      return Stream.value(
-        latestUsedTimeOfHouseWorks.entries
-            .sortedBy((entry) => entry.value)
-            .reversed
-            .map((entry) => entry.key)
-            .toList(),
-      );
-    },
-    error: (error, stack) => Stream.error(error),
-    loading: Stream.empty,
-  );
-});
 
 final houseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
   final houseWorkRepositoryAsync = ref.watch(houseWorkRepositoryProvider);
