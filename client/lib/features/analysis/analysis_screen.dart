@@ -547,7 +547,9 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                                   return const Text('');
                                 }
                                 return Text(
-                                  filteredWeekdayData[value.toInt()].weekday,
+                                  filteredWeekdayData[value.toInt()]
+                                      .weekday
+                                      .displayName,
                                 );
                               },
                             ),
