@@ -13,6 +13,7 @@ import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/work_log_service.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 // 選択されたタブを管理するプロバイダー
 final selectedTabProvider = StateProvider<int>((ref) => 0);
@@ -365,30 +366,27 @@ class _QuickRegisterBottomBar extends ConsumerWidget {
       ),
       child: SafeArea(
         top: false,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: [
-            // 最近登録された家事一覧
-            ...houseWorksAsync.when(
-              data: (recentHouseWorks) {
-                if (recentHouseWorks.isEmpty) {
-                  return [const SizedBox.shrink()];
-                }
+        child: Skeletonizer(
+          enabled: houseWorksAsync.isLoading,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              // 最近登録された家事一覧
+              ...houseWorksAsync.when(
+                data: (recentHouseWorks) {
+                  if (recentHouseWorks.isEmpty) {
+                    return [const SizedBox.shrink()];
+                  }
 
-                return recentHouseWorks.map((houseWork) {
-                  return _QuickRegisterButton(houseWork: houseWork);
-                }).toList();
-              },
-              loading:
-                  () => [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: CircularProgressIndicator(),
-                    ),
-                  ],
-              error: (_, _) => [const SizedBox.shrink()],
-            ),
-          ],
+                  return recentHouseWorks.map((houseWork) {
+                    return _QuickRegisterButton(houseWork: houseWork);
+                  }).toList();
+                },
+                loading: () => List.filled(4, const _FakeQuickRegisterButton()),
+                error: (_, _) => [const SizedBox.shrink()],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -446,6 +444,39 @@ class _QuickRegisterButton extends ConsumerWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FakeQuickRegisterButton extends StatelessWidget {
+  const _FakeQuickRegisterButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 100,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 4,
+          children: [
+            Container(
+              alignment: Alignment.center,
+              width: 32,
+              height: 32,
+              child: const Text('🙇🏻‍♂️', style: TextStyle(fontSize: 24)),
+            ),
+            const Text(
+              'Fake house work',
+              style: TextStyle(fontSize: 12),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
