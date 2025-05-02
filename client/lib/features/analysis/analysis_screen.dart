@@ -422,12 +422,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
     final weekdayDataAsync = ref.watch(
       filteredWeekdayFrequenciesProvider(period: analysisPeriod),
     );
-
-    // 家事の表示・非表示の状態を取得
-    final visibilityState = ref.watch(weekdayHouseWorkVisibilityProvider);
-    final visibilityNotifier = ref.read(
-      weekdayHouseWorkVisibilityProvider.notifier,
-    );
+    final houseWorkVisibilities = ref.watch(houseWorkVisibilitiesProvider);
 
     return weekdayDataAsync.when(
       data: (weekdayData) {
@@ -487,11 +482,6 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
         // 家事を集約してリスト化（凡例用）
         final legendItems = allHouseWorks.toList();
 
-        // 家事の表示状態を初期化
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          visibilityNotifier.initializeWithHouseWorks(legendItems);
-        });
-
         // 表示・非表示の状態に基づいて、各曜日のデータをフィルタリング
         final filteredWeekdayData =
             weekdayData.map((day) {
@@ -499,7 +489,8 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
               final visibleFrequencies =
                   day.houseWorkFrequencies
                       .where(
-                        (freq) => visibilityState[freq.houseWork.id] ?? true,
+                        (freq) =>
+                            houseWorkVisibilities[freq.houseWork.id] ?? true,
                       )
                       .toList();
 
@@ -655,14 +646,15 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                               final color =
                                   houseWorkColorMap[houseWork.id] ?? colors[0];
                               final isVisible =
-                                  visibilityState[houseWork.id] ?? true;
+                                  houseWorkVisibilities[houseWork.id] ?? true;
 
                               return GestureDetector(
                                 onTap: () {
-                                  // タップ時に表示・非表示を切り替え
-                                  visibilityNotifier.toggleVisibility(
-                                    houseWork.id,
-                                  );
+                                  ref
+                                      .read(
+                                        houseWorkVisibilitiesProvider.notifier,
+                                      )
+                                      .toggle(houseWorkId: houseWork.id);
                                 },
                                 child: Opacity(
                                   opacity: isVisible ? 1.0 : 0.3,
