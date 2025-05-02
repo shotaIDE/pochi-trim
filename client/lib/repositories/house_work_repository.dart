@@ -80,6 +80,7 @@ class HouseWorkRepository {
     return null;
   }
 
+  /// すべての家事を作成日時の新しい順に取得する
   Stream<List<HouseWork>> getAll() {
     return _getHouseWorksCollection()
         .orderBy('createdBy', descending: true)

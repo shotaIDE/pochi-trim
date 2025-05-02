@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
+import 'package:house_worker/features/home/home_presenter.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
-import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:house_worker/features/settings/settings_screen.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
@@ -13,6 +13,7 @@ import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/work_log_service.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 // 選択されたタブを管理するプロバイダー
 final selectedTabProvider = StateProvider<int>((ref) => 0);
@@ -114,7 +115,7 @@ class HomeScreen extends ConsumerWidget {
           },
           child: const Icon(Icons.add),
         ),
-        bottomNavigationBar: const _ShortCutBottomBar(),
+        bottomNavigationBar: const _QuickRegisterBottomBar(),
       ),
     );
   }
@@ -341,16 +342,41 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
   }
 }
 
-class _ShortCutBottomBar extends ConsumerWidget {
-  const _ShortCutBottomBar();
+class _QuickRegisterBottomBar extends ConsumerStatefulWidget {
+  const _QuickRegisterBottomBar();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final houseWorksAsync = ref.watch(
-      houseWorksSortedByMostFrequentlyUsedProvider,
-    );
-    final workLogServiceFuture = ref.watch(workLogServiceProvider.future);
+  ConsumerState<_QuickRegisterBottomBar> createState() =>
+      _QuickRegisterBottomBarState();
+}
 
+class _QuickRegisterBottomBarState
+    extends ConsumerState<_QuickRegisterBottomBar> {
+  AsyncValue<List<HouseWork>> _sortedHouseWorksByCompletionCountAsync =
+      const AsyncValue.loading();
+
+  @override
+  void initState() {
+    super.initState();
+
+    ref.listenManual(houseWorksSortedByMostFrequentlyUsedProvider, (
+      previous,
+      next,
+    ) {
+      // 2回以降にデータが取得された場合は、何もしない
+      // UI上で頻繁に更新されてチラつくのを防ぐため
+      if (!_sortedHouseWorksByCompletionCountAsync.isLoading) {
+        return;
+      }
+
+      setState(() {
+        _sortedHouseWorksByCompletionCountAsync = next;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxHeight: 130),
       decoration: BoxDecoration(
@@ -366,83 +392,124 @@ class _ShortCutBottomBar extends ConsumerWidget {
       ),
       child: SafeArea(
         top: false,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
+        child: Skeletonizer(
+          enabled: _sortedHouseWorksByCompletionCountAsync.isLoading,
+          child: _sortedHouseWorksByCompletionCountAsync.when(
+            data: (recentHouseWorks) {
+              final items =
+                  recentHouseWorks.map((houseWork) {
+                    return _QuickRegisterButton(houseWork: houseWork);
+                  }).toList();
+
+              return ListView(
+                scrollDirection: Axis.horizontal,
+                children: items,
+              );
+            },
+            loading:
+                () => ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: List.filled(4, const _FakeQuickRegisterButton()),
+                ),
+            error:
+                (_, _) => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text(
+                      'クイック登録の取得に失敗しました。アプリを再起動し、再度お試しください。',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickRegisterButton extends ConsumerWidget {
+  const _QuickRegisterButton({required this.houseWork});
+
+  final HouseWork houseWork;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SizedBox(
+      width: 100,
+      child: InkWell(
+        onTap: () async {
+          await HapticFeedback.mediumImpact();
+
+          final workLogService = await ref.read(workLogServiceProvider.future);
+
+          if (!context.mounted) {
+            return;
+          }
+
+          // TODO(ide): 共通サービスを使用して家事ログを記録
+          await workLogService.recordWorkLog(context, houseWork.id);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
+            children: [
+              Container(
+                alignment: Alignment.center,
+                // TODO(ide): 共通化できる
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                width: 32,
+                height: 32,
+                child: Text(
+                  houseWork.icon,
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
+              Text(
+                houseWork.title,
+                style: const TextStyle(fontSize: 12),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FakeQuickRegisterButton extends StatelessWidget {
+  const _FakeQuickRegisterButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 100,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 4,
           children: [
-            // 最近登録された家事一覧
-            ...houseWorksAsync.when(
-              data: (recentHouseWorks) {
-                if (recentHouseWorks.isEmpty) {
-                  return [const SizedBox.shrink()];
-                }
-
-                return recentHouseWorks.map((houseWork) {
-                  return SizedBox(
-                    width: 100,
-                    child: InkWell(
-                      onTap: () async {
-                        await HapticFeedback.mediumImpact();
-
-                        final workLogService = await workLogServiceFuture;
-
-                        if (!context.mounted) {
-                          return;
-                        }
-
-                        // TODO(ide): 共通サービスを使用して家事ログを記録
-                        await workLogService.recordWorkLog(
-                          context,
-                          houseWork.id,
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 4,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          spacing: 4,
-                          children: [
-                            Container(
-                              alignment: Alignment.center,
-                              // TODO(ide): 共通化できる
-                              decoration: BoxDecoration(
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.surfaceContainer,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              width: 32,
-                              height: 32,
-                              child: Text(
-                                houseWork.icon,
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                            ),
-                            Text(
-                              houseWork.title,
-                              style: const TextStyle(fontSize: 12),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList();
-              },
-              loading:
-                  () => [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: CircularProgressIndicator(),
-                    ),
-                  ],
-              error: (_, _) => [const SizedBox.shrink()],
+            Container(
+              alignment: Alignment.center,
+              width: 32,
+              height: 32,
+              child: const Text('🙇🏻‍♂️', style: TextStyle(fontSize: 24)),
+            ),
+            const Text(
+              'Fake house work',
+              style: TextStyle(fontSize: 12),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              textAlign: TextAlign.center,
             ),
           ],
         ),
