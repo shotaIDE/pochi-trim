@@ -14,10 +14,6 @@ Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
   final completionCountOfHouseWorks = <HouseWork, int>{};
 
   for (final houseWork in houseWorks) {
-    completionCountOfHouseWorks[houseWork] = 0;
-  }
-
-  for (final houseWork in houseWorks) {
     final completionCount =
         completedWorkLogs
             .where((workLog) => workLog.houseWorkId == houseWork.id)

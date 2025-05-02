@@ -347,7 +347,7 @@ class _ShortCutBottomBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final houseWorksAsync = ref.read(
+    final houseWorksAsync = ref.watch(
       houseWorksSortedByMostFrequentlyUsedProvider,
     );
     final workLogServiceFuture = ref.watch(workLogServiceProvider.future);
