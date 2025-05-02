@@ -23,6 +23,8 @@ class WeekdayHouseWorkVisibilityNotifier
 
   /// 家事の表示・非表示を切り替える
   void toggleVisibility(String houseWorkId) {
+    // 正しくMapのキーとして使用するために、スプレッド演算子で既存の状態をコピーし、
+    // 特定のキーの値だけを更新する
     state = {...state, houseWorkId: !(state[houseWorkId] ?? true)};
   }
 

@@ -591,13 +591,34 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                               final index = entry.key;
                               final data = entry.value;
 
+                              // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
+                              final rodStackItems = <BarChartRodStackItem>[];
+                              double fromY = 0;
+
+                              // 表示されている家事だけを処理
+                              for (final freq in data.houseWorkFrequencies) {
+                                final houseWork = freq.houseWork;
+                                final color =
+                                    houseWorkColorMap[houseWork.id] ??
+                                    colors[0];
+                                final toY = fromY + freq.count;
+
+                                rodStackItems.add(
+                                  BarChartRodStackItem(fromY, toY, color),
+                                );
+
+                                fromY = toY;
+                              }
+
                               return BarChartGroupData(
                                 x: index,
                                 barRods: [
-                                  data.toBarChartRodData(
+                                  BarChartRodData(
+                                    toY: data.totalCount.toDouble(),
                                     width: 20,
-                                    x: index.toDouble(),
-                                    colors: colors,
+                                    color: Colors.transparent,
+                                    rodStackItems: rodStackItems,
+                                    borderRadius: BorderRadius.zero,
                                   ),
                                 ],
                               );
