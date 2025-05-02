@@ -342,15 +342,41 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
   }
 }
 
-class _QuickRegisterBottomBar extends ConsumerWidget {
+class _QuickRegisterBottomBar extends ConsumerStatefulWidget {
   const _QuickRegisterBottomBar();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final houseWorksAsync = ref.watch(
-      houseWorksSortedByMostFrequentlyUsedProvider,
-    );
+  ConsumerState<_QuickRegisterBottomBar> createState() =>
+      _QuickRegisterBottomBarState();
+}
 
+class _QuickRegisterBottomBarState
+    extends ConsumerState<_QuickRegisterBottomBar> {
+  AsyncValue<List<HouseWork>> _sortedHouseWorksByCompletionCountAsync =
+      const AsyncValue.loading();
+
+  @override
+  void initState() {
+    super.initState();
+
+    ref.listenManual(houseWorksSortedByMostFrequentlyUsedProvider, (
+      previous,
+      next,
+    ) {
+      // 2回以降にデータが取得された場合は、何もしない
+      // UI上で頻繁に更新されてチラつくのを防ぐため
+      if (!_sortedHouseWorksByCompletionCountAsync.isLoading) {
+        return;
+      }
+
+      setState(() {
+        _sortedHouseWorksByCompletionCountAsync = next;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxHeight: 130),
       decoration: BoxDecoration(
@@ -367,12 +393,12 @@ class _QuickRegisterBottomBar extends ConsumerWidget {
       child: SafeArea(
         top: false,
         child: Skeletonizer(
-          enabled: houseWorksAsync.isLoading,
+          enabled: _sortedHouseWorksByCompletionCountAsync.isLoading,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
               // 最近登録された家事一覧
-              ...houseWorksAsync.when(
+              ..._sortedHouseWorksByCompletionCountAsync.when(
                 data: (recentHouseWorks) {
                   if (recentHouseWorks.isEmpty) {
                     return [const SizedBox.shrink()];
