@@ -119,17 +119,23 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
                 .toList();
 
         final workLogCountsForHouseWork =
-            houseWorks.map((houseWork) {
-              final workLogsOfTargetHouseWork = targetWorkLogs.where((workLog) {
-                return workLog.houseWorkId == houseWork.id;
-              });
+            houseWorks
+                .map((houseWork) {
+                  final workLogsOfTargetHouseWork = targetWorkLogs.where((
+                    workLog,
+                  ) {
+                    return workLog.houseWorkId == houseWork.id;
+                  });
 
-              return HouseWorkFrequency(
-                houseWork: houseWork,
-                count: workLogsOfTargetHouseWork.length,
-                color: colorOfHouseWorks[houseWork.id] ?? Colors.grey,
-              );
-            }).toList();
+                  return HouseWorkFrequency(
+                    houseWork: houseWork,
+                    count: workLogsOfTargetHouseWork.length,
+                    color: colorOfHouseWorks[houseWork.id] ?? Colors.grey,
+                  );
+                })
+                // 家事ログが1回以上記録されたものだけを表示する
+                .where((houseWorkFrequency) => houseWorkFrequency.count >= 1)
+                .toList();
 
         final sortedWorkLogCountsForHouseWork =
             workLogCountsForHouseWork
