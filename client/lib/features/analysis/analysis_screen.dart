@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_presenter.dart';
+import 'package:house_worker/features/analysis/weekday_frequency.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
@@ -422,6 +423,12 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
       filteredWeekdayFrequenciesProvider(period: analysisPeriod),
     );
 
+    // 家事の表示・非表示の状態を取得
+    final visibilityState = ref.watch(weekdayHouseWorkVisibilityProvider);
+    final visibilityNotifier = ref.read(
+      weekdayHouseWorkVisibilityProvider.notifier,
+    );
+
     return weekdayDataAsync.when(
       data: (weekdayData) {
         if (weekdayData.every((data) => data.totalCount == 0)) {
@@ -480,6 +487,44 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
         // 家事を集約してリスト化（凡例用）
         final legendItems = allHouseWorks.toList();
 
+        // 家事の表示状態を初期化
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          visibilityNotifier.initializeWithHouseWorks(legendItems);
+        });
+
+        // 表示・非表示の状態に基づいて、各曜日のデータをフィルタリング
+        final filteredWeekdayData =
+            weekdayData.map((day) {
+              // 表示する家事だけをフィルタリング
+              final visibleFrequencies =
+                  day.houseWorkFrequencies
+                      .where(
+                        (freq) => visibilityState[freq.houseWork.id] ?? true,
+                      )
+                      .toList();
+
+              // 表示する家事の合計回数を計算
+              final visibleTotalCount = visibleFrequencies.fold(
+                0,
+                (sum, freq) => sum + freq.count,
+              );
+
+              // 新しいWeekdayFrequencyオブジェクトを作成
+              return WeekdayFrequency(
+                weekday: day.weekday,
+                houseWorkFrequencies: visibleFrequencies,
+                totalCount: visibleTotalCount,
+              );
+            }).toList();
+
+        // 最大値を計算（表示されている家事のみ）
+        var maxY = 10.0; // デフォルト値
+        if (filteredWeekdayData.isNotEmpty) {
+          maxY = filteredWeekdayData
+              .map((e) => e.totalCount.toDouble())
+              .reduce((a, b) => a > b ? a : b);
+        }
+
         return Card(
           margin: const EdgeInsets.all(16),
           child: Padding(
@@ -501,9 +546,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                     child: BarChart(
                       BarChartData(
                         alignment: BarChartAlignment.spaceAround,
-                        maxY: weekdayData
-                            .map((e) => e.totalCount.toDouble())
-                            .reduce((a, b) => a > b ? a : b),
+                        maxY: maxY > 0 ? maxY : 10, // 最大値が0の場合は10を設定
                         titlesData: FlTitlesData(
                           leftTitles: const AxisTitles(
                             sideTitles: SideTitles(
@@ -517,10 +560,13 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                             sideTitles: SideTitles(
                               showTitles: true,
                               getTitlesWidget: (value, meta) {
-                                if (value < 0 || value >= weekdayData.length) {
+                                if (value < 0 ||
+                                    value >= filteredWeekdayData.length) {
                                   return const Text('');
                                 }
-                                return Text(weekdayData[value.toInt()].weekday);
+                                return Text(
+                                  filteredWeekdayData[value.toInt()].weekday,
+                                );
                               },
                             ),
                           ),
@@ -541,7 +587,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                           ),
                         ),
                         barGroups:
-                            weekdayData.asMap().entries.map((entry) {
+                            filteredWeekdayData.asMap().entries.map((entry) {
                               final index = entry.key;
                               final data = entry.value;
 
@@ -562,7 +608,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // 凡例の表示
+                // 凡例の表示（タップ可能）
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -573,7 +619,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        '凡例:',
+                        '凡例: (タップで表示/非表示を切り替え)',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -587,20 +633,34 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                             legendItems.map((houseWork) {
                               final color =
                                   houseWorkColorMap[houseWork.id] ?? colors[0];
-                              return Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 16,
-                                    height: 16,
-                                    color: color,
+                              final isVisible =
+                                  visibilityState[houseWork.id] ?? true;
+
+                              return GestureDetector(
+                                onTap: () {
+                                  // タップ時に表示・非表示を切り替え
+                                  visibilityNotifier.toggleVisibility(
+                                    houseWork.id,
+                                  );
+                                },
+                                child: Opacity(
+                                  opacity: isVisible ? 1.0 : 0.3,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 16,
+                                        height: 16,
+                                        color: color,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        houseWork.title,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    houseWork.title,
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ],
+                                ),
                               );
                             }).toList(),
                       ),

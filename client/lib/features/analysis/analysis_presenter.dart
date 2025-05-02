@@ -1,12 +1,46 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/analysis/weekday_frequency.dart';
+import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analysis_presenter.g.dart';
+
+/// 曜日分析タブで表示する家事のIDを管理するプロバイダー
+/// trueの場合は表示、falseの場合は非表示
+final weekdayHouseWorkVisibilityProvider = StateNotifierProvider<
+  WeekdayHouseWorkVisibilityNotifier,
+  Map<String, bool>
+>((ref) => WeekdayHouseWorkVisibilityNotifier());
+
+/// 曜日分析タブで表示する家事の可視性を管理するStateNotifier
+class WeekdayHouseWorkVisibilityNotifier
+    extends StateNotifier<Map<String, bool>> {
+  WeekdayHouseWorkVisibilityNotifier() : super({});
+
+  /// 家事の表示・非表示を切り替える
+  void toggleVisibility(String houseWorkId) {
+    state = {...state, houseWorkId: !(state[houseWorkId] ?? true)};
+  }
+
+  /// 家事の表示状態を取得する（デフォルトはtrue）
+  bool isVisible(String houseWorkId) {
+    return state[houseWorkId] ?? true;
+  }
+
+  /// 新しい家事リストに基づいて状態を初期化する
+  void initializeWithHouseWorks(List<HouseWork> houseWorks) {
+    final newState = <String, bool>{};
+    for (final houseWork in houseWorks) {
+      // 既存の状態を保持するか、新しい家事はデフォルトで表示する
+      newState[houseWork.id] = state[houseWork.id] ?? true;
+    }
+    state = newState;
+  }
+}
 
 @riverpod
 Future<List<WorkLog>> filteredWorkLogs(Ref ref, int period) async {
