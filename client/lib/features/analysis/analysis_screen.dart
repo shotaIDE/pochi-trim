@@ -630,7 +630,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       Wrap(
-                        spacing: 8,
+                        spacing: 4,
                         children:
                             legendItems.map((houseWork) {
                               final color =
@@ -661,7 +661,14 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                                         const SizedBox(width: 4),
                                         Text(
                                           houseWork.title,
-                                          style: const TextStyle(fontSize: 12),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            decoration:
+                                                isVisible
+                                                    ? null
+                                                    : TextDecoration
+                                                        .lineThrough,
+                                          ),
                                         ),
                                       ],
                                     ),
