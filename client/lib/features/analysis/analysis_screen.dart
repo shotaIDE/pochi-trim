@@ -639,8 +639,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       Wrap(
-                        spacing: 16,
-                        runSpacing: 8,
+                        spacing: 8,
                         children:
                             legendItems.map((houseWork) {
                               final color =
@@ -648,7 +647,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                               final isVisible =
                                   houseWorkVisibilities[houseWork.id] ?? true;
 
-                              return GestureDetector(
+                              return InkWell(
                                 onTap: () {
                                   ref
                                       .read(
@@ -658,20 +657,23 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                                 },
                                 child: Opacity(
                                   opacity: isVisible ? 1.0 : 0.3,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 16,
-                                        height: 16,
-                                        color: color,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        houseWork.title,
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    ],
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 16,
+                                          height: 16,
+                                          color: color,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          houseWork.title,
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
