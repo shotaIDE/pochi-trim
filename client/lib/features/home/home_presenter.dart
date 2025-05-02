@@ -14,54 +14,31 @@ Stream<List<WorkLog>> completedWorkLogs(Ref ref) {
 }
 
 @riverpod
-class HouseWorksSortedByMostFrequentlyUsed
-    extends _$HouseWorksSortedByMostFrequentlyUsed {
-  List<HouseWork>? _cachedSortedHouseWorksByCompletionCount;
+Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
+  final houseWorks = await ref.watch(_houseWorksFilePrivateProvider.future);
+  final completedWorkLogs = await ref.watch(
+    _completedWorkLogsFilePrivateProvider.future,
+  );
 
-  @override
-  Stream<List<HouseWork>> build() {
-    if (_cachedSortedHouseWorksByCompletionCount != null) {
-      return Stream.value(_cachedSortedHouseWorksByCompletionCount!);
-    }
+  final completionCountOfHouseWorks = <HouseWork, int>{};
 
-    final houseWorksAsync = ref.watch(_houseWorksFilePrivateProvider);
-    final completedWorkLogsAsync = ref.watch(
-      _completedWorkLogsFilePrivateProvider,
-    );
+  for (final houseWork in houseWorks) {
+    final completionCount =
+        completedWorkLogs
+            .where((workLog) => workLog.houseWorkId == houseWork.id)
+            .length;
 
-    final houseWorks = houseWorksAsync.whenOrNull(
-      data: (houseWorks) => houseWorks,
-    );
-    final completedWorkLogs = completedWorkLogsAsync.whenOrNull(
-      data: (completedWorkLogs) => completedWorkLogs,
-    );
-    if (houseWorks == null || completedWorkLogs == null) {
-      return const Stream.empty();
-    }
-
-    final completionCountOfHouseWorks = <HouseWork, int>{};
-
-    for (final houseWork in houseWorks) {
-      final completionCount =
-          completedWorkLogs
-              .where((workLog) => workLog.houseWorkId == houseWork.id)
-              .length;
-
-      completionCountOfHouseWorks[houseWork] = completionCount;
-    }
-
-    final sortedHouseWorksByCompletionCount =
-        completionCountOfHouseWorks.entries
-            .sortedBy((entry) => entry.value)
-            .reversed
-            .map((entry) => entry.key)
-            .toList();
-
-    _cachedSortedHouseWorksByCompletionCount =
-        sortedHouseWorksByCompletionCount;
-
-    return Stream.value(sortedHouseWorksByCompletionCount);
+    completionCountOfHouseWorks[houseWork] = completionCount;
   }
+
+  final sortedHouseWorksByCompletionCount =
+      completionCountOfHouseWorks.entries
+          .sortedBy((entry) => entry.value)
+          .reversed
+          .map((entry) => entry.key)
+          .toList();
+
+  return sortedHouseWorksByCompletionCount;
 }
 
 @riverpod
