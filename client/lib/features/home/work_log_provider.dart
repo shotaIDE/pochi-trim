@@ -3,16 +3,19 @@ import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-// 完了済みワークログの一覧を提供するプロバイダー
-final completedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
+part 'work_log_provider.g.dart';
+
+@riverpod
+Stream<List<WorkLog>> completedWorkLogs(Ref ref) {
   final workLogRepositoryAsync = ref.watch(workLogRepositoryProvider);
 
   return workLogRepositoryAsync.maybeWhen(
     data: (repository) => repository.getCompletedWorkLogs(),
     orElse: Stream.empty,
   );
-});
+}
 
 // 特定の家事IDに関連するワークログを取得するプロバイダー
 final FutureProviderFamily<List<WorkLog>, String>
@@ -54,7 +57,8 @@ final FutureProvider<WorkLogDeletionNotifier> workLogDeletionProvider =
       );
     });
 
-final houseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
+@riverpod
+Stream<List<HouseWork>> houseWorks(Ref ref) {
   final houseWorkRepositoryAsync = ref.watch(houseWorkRepositoryProvider);
 
   return houseWorkRepositoryAsync.maybeWhen(
@@ -63,7 +67,7 @@ final houseWorksProvider = StreamProvider<List<HouseWork>>((ref) {
             repository.getAll().map((houseWorks) => houseWorks.toList()),
     orElse: Stream.empty,
   );
-});
+}
 
 class WorkLogDeletionNotifier {
   WorkLogDeletionNotifier({required this.workLogRepository, required this.ref});
