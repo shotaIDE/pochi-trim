@@ -9,6 +9,26 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'analysis_presenter.g.dart';
 
 @riverpod
+class HouseWorkVisibilities extends _$HouseWorkVisibilities {
+  @override
+  Map<String, bool> build() {
+    return {};
+  }
+
+  void toggle({required String houseWorkId}) {
+    final newState = Map<String, bool>.from(state);
+
+    newState[houseWorkId] = !(state[houseWorkId] ?? true);
+
+    state = newState;
+  }
+
+  bool isVisible({required String houseWorkId}) {
+    return state[houseWorkId] ?? true;
+  }
+}
+
+@riverpod
 Future<List<WorkLog>> filteredWorkLogs(Ref ref, int period) async {
   final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
 

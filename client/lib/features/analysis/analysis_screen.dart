@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_presenter.dart';
+import 'package:house_worker/features/analysis/weekday_frequency.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
@@ -421,6 +422,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
     final weekdayDataAsync = ref.watch(
       filteredWeekdayFrequenciesProvider(period: analysisPeriod),
     );
+    final houseWorkVisibilities = ref.watch(houseWorkVisibilitiesProvider);
 
     return weekdayDataAsync.when(
       data: (weekdayData) {
@@ -480,6 +482,32 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
         // 家事を集約してリスト化（凡例用）
         final legendItems = allHouseWorks.toList();
 
+        // 表示・非表示の状態に基づいて、各曜日のデータをフィルタリング
+        final filteredWeekdayData =
+            weekdayData.map((day) {
+              // 表示する家事だけをフィルタリング
+              final visibleFrequencies =
+                  day.houseWorkFrequencies
+                      .where(
+                        (freq) =>
+                            houseWorkVisibilities[freq.houseWork.id] ?? true,
+                      )
+                      .toList();
+
+              // 表示する家事の合計回数を計算
+              final visibleTotalCount = visibleFrequencies.fold(
+                0,
+                (sum, freq) => sum + freq.count,
+              );
+
+              // 新しいWeekdayFrequencyオブジェクトを作成
+              return WeekdayFrequency(
+                weekday: day.weekday,
+                houseWorkFrequencies: visibleFrequencies,
+                totalCount: visibleTotalCount,
+              );
+            }).toList();
+
         return Card(
           margin: const EdgeInsets.all(16),
           child: Padding(
@@ -501,9 +529,6 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                     child: BarChart(
                       BarChartData(
                         alignment: BarChartAlignment.spaceAround,
-                        maxY: weekdayData
-                            .map((e) => e.totalCount.toDouble())
-                            .reduce((a, b) => a > b ? a : b),
                         titlesData: FlTitlesData(
                           leftTitles: const AxisTitles(
                             sideTitles: SideTitles(
@@ -517,10 +542,13 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                             sideTitles: SideTitles(
                               showTitles: true,
                               getTitlesWidget: (value, meta) {
-                                if (value < 0 || value >= weekdayData.length) {
+                                if (value < 0 ||
+                                    value >= filteredWeekdayData.length) {
                                   return const Text('');
                                 }
-                                return Text(weekdayData[value.toInt()].weekday);
+                                return Text(
+                                  filteredWeekdayData[value.toInt()].weekday,
+                                );
                               },
                             ),
                           ),
@@ -541,17 +569,38 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                           ),
                         ),
                         barGroups:
-                            weekdayData.asMap().entries.map((entry) {
+                            filteredWeekdayData.asMap().entries.map((entry) {
                               final index = entry.key;
                               final data = entry.value;
+
+                              // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
+                              final rodStackItems = <BarChartRodStackItem>[];
+                              double fromY = 0;
+
+                              // 表示されている家事だけを処理
+                              for (final freq in data.houseWorkFrequencies) {
+                                final houseWork = freq.houseWork;
+                                final color =
+                                    houseWorkColorMap[houseWork.id] ??
+                                    colors[0];
+                                final toY = fromY + freq.count;
+
+                                rodStackItems.add(
+                                  BarChartRodStackItem(fromY, toY, color),
+                                );
+
+                                fromY = toY;
+                              }
 
                               return BarChartGroupData(
                                 x: index,
                                 barRods: [
-                                  data.toBarChartRodData(
+                                  BarChartRodData(
+                                    toY: data.totalCount.toDouble(),
                                     width: 20,
-                                    x: index.toDouble(),
-                                    colors: colors,
+                                    color: Colors.transparent,
+                                    rodStackItems: rodStackItems,
+                                    borderRadius: BorderRadius.zero,
                                   ),
                                 ],
                               );
@@ -562,7 +611,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // 凡例の表示
+                // 凡例の表示（タップ可能）
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -573,7 +622,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        '凡例:',
+                        '凡例: (タップで表示/非表示を切り替え)',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -581,26 +630,50 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       Wrap(
-                        spacing: 16,
-                        runSpacing: 8,
+                        spacing: 4,
                         children:
                             legendItems.map((houseWork) {
                               final color =
                                   houseWorkColorMap[houseWork.id] ?? colors[0];
-                              return Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 16,
-                                    height: 16,
-                                    color: color,
+                              final isVisible =
+                                  houseWorkVisibilities[houseWork.id] ?? true;
+
+                              return InkWell(
+                                onTap: () {
+                                  ref
+                                      .read(
+                                        houseWorkVisibilitiesProvider.notifier,
+                                      )
+                                      .toggle(houseWorkId: houseWork.id);
+                                },
+                                child: Opacity(
+                                  opacity: isVisible ? 1.0 : 0.3,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 16,
+                                          height: 16,
+                                          color: color,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          houseWork.title,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            decoration:
+                                                isVisible
+                                                    ? null
+                                                    : TextDecoration
+                                                        .lineThrough,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    houseWork.title,
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ],
+                                ),
                               );
                             }).toList(),
                       ),
