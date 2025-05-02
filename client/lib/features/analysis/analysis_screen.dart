@@ -2,7 +2,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_presenter.dart';
-import 'package:house_worker/features/analysis/weekday_frequency.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
@@ -426,14 +425,15 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 選択された期間に基づいてフィルタリングされたデータを取得
-    final weekdayDataAsync = ref.watch(
-      filteredWeekdayFrequenciesProvider(period: analysisPeriod),
+    final statisticsAsync = ref.watch(
+      weekdayStatisticsDisplayProvider(period: analysisPeriod),
     );
-    final houseWorkVisibilities = ref.watch(houseWorkVisibilitiesProvider);
 
-    return weekdayDataAsync.when(
-      data: (weekdayData) {
-        if (weekdayData.every((data) => data.totalCount == 0)) {
+    return statisticsAsync.when(
+      data: (statistics) {
+        final weekdayFrequencies = statistics.weekdayFrequencies;
+
+        if (weekdayFrequencies.every((data) => data.totalCount == 0)) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -457,18 +457,6 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
 
         // 期間に応じたタイトルのテキストを作成
         final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
-
-        // 家事ごとの積み上げ棒グラフのための色リスト
-        final colors = [
-          Colors.blue,
-          Colors.green,
-          Colors.orange,
-          Colors.purple,
-          Colors.teal,
-          Colors.pink,
-          Colors.amber,
-          Colors.indigo,
-        ];
 
         return Card(
           margin: const EdgeInsets.all(16),
@@ -504,11 +492,12 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                             sideTitles: SideTitles(
                               showTitles: true,
                               getTitlesWidget: (value, meta) {
-                                if (value < 0 || value >= weekdayData.length) {
+                                if (value < 0 ||
+                                    value >= weekdayFrequencies.length) {
                                   return const Text('');
                                 }
                                 return Text(
-                                  weekdayData[value.toInt()]
+                                  weekdayFrequencies[value.toInt()]
                                       .weekday
                                       .displayName,
                                 );
@@ -532,7 +521,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                           ),
                         ),
                         barGroups:
-                            weekdayData.asMap().entries.map((entry) {
+                            weekdayFrequencies.asMap().entries.map((entry) {
                               final index = entry.key;
                               final data = entry.value;
 
@@ -591,22 +580,21 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                       Wrap(
                         spacing: 4,
                         children:
-                            legendItems.map((houseWork) {
-                              final color =
-                                  houseWorkColorMap[houseWork.id] ?? colors[0];
-                              final isVisible =
-                                  houseWorkVisibilities[houseWork.id] ?? true;
-
+                            statistics.houseWorkLegends.map((houseWorkLegend) {
                               return InkWell(
                                 onTap: () {
                                   ref
                                       .read(
                                         houseWorkVisibilitiesProvider.notifier,
                                       )
-                                      .toggle(houseWorkId: houseWork.id);
+                                      .toggle(
+                                        houseWorkId:
+                                            houseWorkLegend.houseWork.id,
+                                      );
                                 },
                                 child: Opacity(
-                                  opacity: isVisible ? 1.0 : 0.3,
+                                  opacity:
+                                      houseWorkLegend.isVisible ? 1.0 : 0.3,
                                   child: Padding(
                                     padding: const EdgeInsets.all(8),
                                     child: Row(
@@ -615,15 +603,15 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                                         Container(
                                           width: 16,
                                           height: 16,
-                                          color: color,
+                                          color: houseWorkLegend.color,
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          houseWork.title,
+                                          houseWorkLegend.houseWork.title,
                                           style: TextStyle(
                                             fontSize: 12,
                                             decoration:
-                                                isVisible
+                                                houseWorkLegend.isVisible
                                                     ? null
                                                     : TextDecoration
                                                         .lineThrough,

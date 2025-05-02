@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/analysis/weekday.dart';
 import 'package:house_worker/features/analysis/weekday_frequency.dart';
+import 'package:house_worker/features/analysis/weekday_statistics.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
@@ -98,7 +99,7 @@ Future<List<WorkLog>> filteredWorkLogs(Ref ref, int period) async {
 }
 
 @riverpod
-Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
+Future<WeekdayStatistics> weekdayStatisticsDisplay(
   Ref ref, {
   required int period,
 }) async {
@@ -152,6 +153,25 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
         );
       }).toList();
 
+  final houseWorksSortedByStatistics =
+      workLogCountsStatistics
+          .expand((weekdayFrequency) => weekdayFrequency.houseWorkFrequencies)
+          .map((houseWorkFrequency) => houseWorkFrequency.houseWork)
+          // 重複を排除
+          .toSet()
+          .toList();
+  final houseWorkLegends =
+      houseWorksSortedByStatistics.map((houseWork) {
+        final color = colorOfHouseWorks[houseWork.id] ?? Colors.grey;
+        final isVisible = houseWorkVisibilities[houseWork.id] ?? true;
+
+        return HouseWorkLegends(
+          houseWork: houseWork,
+          color: color,
+          isVisible: isVisible,
+        );
+      }).toList();
+
   // 表示・非表示の状態に基づいて、各曜日のデータをフィルタリング
   final filteredWeekdayData =
       workLogCountsStatistics.map((day) {
@@ -175,7 +195,10 @@ Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
         );
       }).toList();
 
-  return filteredWeekdayData;
+  return WeekdayStatistics(
+    weekdayFrequencies: filteredWeekdayData,
+    houseWorkLegends: houseWorkLegends,
+  );
 }
 
 @riverpod
