@@ -21,15 +21,14 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
 
     _, house_doc_ref = firestore_client.collection("permissions").add({})
 
-    house_doc_id = house_doc_ref.id
+    # TODO: デバッグ用のコメントアウトなので、リリース時には元に戻す
+    # house_doc_id = house_doc_ref.id
+    house_doc_id = 'default-house-id'
 
     admin_doc_ref = firestore_client.collection("permissions").document(house_doc_id).collection("admin").document(user_id)
     admin_doc_ref.set({})
 
     print(f"House document has been created: ID = {house_doc_id}, admin user = {user_id}")
-
-    # TODO: デバッグ用なので差し替える
-    house_doc_id = 'default-house-id'
 
     return {
         "houseDocId": house_doc_id,
