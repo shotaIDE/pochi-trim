@@ -349,7 +349,6 @@ class _ShortCutBottomBar extends ConsumerWidget {
     final houseWorksAsync = ref.watch(
       houseWorksSortedByMostFrequentlyUsedProvider,
     );
-    final workLogServiceFuture = ref.watch(workLogServiceProvider.future);
 
     return Container(
       constraints: const BoxConstraints(maxHeight: 130),
@@ -383,7 +382,9 @@ class _ShortCutBottomBar extends ConsumerWidget {
                       onTap: () async {
                         await HapticFeedback.mediumImpact();
 
-                        final workLogService = await workLogServiceFuture;
+                        final workLogService = await ref.read(
+                          workLogServiceProvider.future,
+                        );
 
                         if (!context.mounted) {
                           return;
