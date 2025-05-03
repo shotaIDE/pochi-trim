@@ -102,11 +102,10 @@ final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
 });
 
 // 各家事の実行頻度を取得するプロバイダー（期間フィルタリング付き）
-final FutureProviderFamily<List<HouseWorkFrequency>, int>
-filteredHouseWorkFrequencyProvider =
-    FutureProvider.family<List<HouseWorkFrequency>, int>((ref, period) async {
+final filteredHouseWorkFrequencyProvider =
+    FutureProvider<List<HouseWorkFrequency>>((ref) async {
       // フィルタリングされた家事ログのデータを待機
-      final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
+      final workLogs = await ref.watch(workLogsFilteredByPeriodProvider.future);
       final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
       // 家事IDごとにグループ化して頻度をカウント
@@ -135,11 +134,10 @@ filteredHouseWorkFrequencyProvider =
     });
 
 // 時間帯ごとの家事実行頻度を取得するプロバイダー（期間フィルタリング付き）
-final FutureProviderFamily<List<TimeSlotFrequency>, int>
-filteredTimeSlotFrequencyProvider =
-    FutureProvider.family<List<TimeSlotFrequency>, int>((ref, period) async {
+final filteredTimeSlotFrequencyProvider =
+    FutureProvider<List<TimeSlotFrequency>>((ref) async {
       // フィルタリングされた家事ログのデータを待機
-      final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
+      final workLogs = await ref.watch(workLogsFilteredByPeriodProvider.future);
       final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
       // 時間帯の定義（3時間ごと）
@@ -261,7 +259,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 case 0:
                   return _buildFrequencyAnalysis();
                 case 1:
-                  return _WeekdayAnalysisPanel(analysisPeriod: _analysisPeriod);
+                  return const _WeekdayAnalysisPanel();
                 case 2:
                   return _TimeSlotAnalysisPanel(
                     analysisPeriod: _analysisPeriod,
@@ -325,9 +323,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     return Consumer(
       builder: (context, ref, child) {
         // 選択された期間に基づいてフィルタリングされたデータを取得
-        final frequencyDataAsync = ref.watch(
-          filteredHouseWorkFrequencyProvider(_analysisPeriod),
-        );
+        final frequencyDataAsync = ref.watch(workLogsFilteredByPeriodProvider);
 
         return frequencyDataAsync.when(
           data: (frequencyData) {
@@ -412,16 +408,12 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
 }
 
 class _WeekdayAnalysisPanel extends ConsumerWidget {
-  const _WeekdayAnalysisPanel({required this.analysisPeriod});
-
-  final int analysisPeriod;
+  const _WeekdayAnalysisPanel();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 選択された期間に基づいてフィルタリングされたデータを取得
-    final statisticsFuture = ref.watch(
-      weekdayStatisticsDisplayProvider(period: analysisPeriod).future,
-    );
+    final statisticsFuture = ref.watch(weekdayStatisticsDisplayProvider.future);
 
     return FutureBuilder(
       future: statisticsFuture,
@@ -653,9 +645,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 選択された期間に基づいてフィルタリングされたデータを取得
-    final timeSlotDataAsync = ref.watch(
-      filteredTimeSlotFrequencyProvider(analysisPeriod),
-    );
+    final timeSlotDataAsync = ref.watch(filteredTimeSlotFrequencyProvider);
 
     return timeSlotDataAsync.when(
       data: (timeSlotData) {

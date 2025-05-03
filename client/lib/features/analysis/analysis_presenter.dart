@@ -48,82 +48,21 @@ class HouseWorkVisibilities extends _$HouseWorkVisibilities {
 }
 
 @riverpod
-Future<List<WorkLog>> filteredWorkLogs(Ref ref, int period) async {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
-
-  final allWorkLogs = await workLogRepository.getAllOnce();
-
-  // 現在時刻を取得
-  final now = DateTime.now();
-
-  // 期間によるフィルタリング
-  switch (period) {
-    case 0: // 今日
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = startOfDay
-          .add(const Duration(days: 1))
-          .subtract(const Duration(microseconds: 1));
-      return allWorkLogs
-          .where(
-            (log) =>
-                log.completedAt.isAfter(startOfDay) &&
-                log.completedAt.isBefore(endOfDay),
-          )
-          .toList();
-
-    case 1: // 今週
-      // 週の開始は月曜日、終了は日曜日とする
-      final currentWeekday = now.weekday;
-      final startOfWeek = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).subtract(Duration(days: currentWeekday - 1));
-      final endOfWeek = startOfWeek
-          .add(const Duration(days: 7))
-          .subtract(const Duration(microseconds: 1));
-      return allWorkLogs
-          .where(
-            (log) =>
-                log.completedAt.isAfter(startOfWeek) &&
-                log.completedAt.isBefore(endOfWeek),
-          )
-          .toList();
-
-    case 2: // 今月
-      final startOfMonth = DateTime(now.year, now.month);
-      final endOfMonth =
-          (now.month < 12)
-              ? DateTime(now.year, now.month + 1)
-              : DateTime(now.year + 1);
-      final lastDayOfMonth = endOfMonth.subtract(
-        const Duration(microseconds: 1),
-      );
-      return allWorkLogs
-          .where(
-            (log) =>
-                log.completedAt.isAfter(startOfMonth) &&
-                log.completedAt.isBefore(lastDayOfMonth),
-          )
-          .toList();
-
-    default:
-      return allWorkLogs;
-  }
+Future<List<WorkLog>> workLogsFilteredByPeriod(Ref ref) async {
+  return ref.watch(_workLogsFilteredByPeriodFilePrivateProvider.future);
 }
 
 @riverpod
-Future<WeekdayStatistics> weekdayStatisticsDisplay(
-  Ref ref, {
-  required int period,
-}) async {
+Future<WeekdayStatistics> weekdayStatisticsDisplay(Ref ref) async {
   // 順番に `.future` 値を `await` により取得すると、
   // 非同期処理の隙間で各 Provider のリスナーが存在しない状態が生まれ、
   // Riverpod によりステートが破棄され、状態がリセットされてしまう。
   // これを防ぐために、全ての Provider を `watch` してから、後で一気に `await` する。
-  final workLogsFuture = ref.watch(filteredWorkLogsProvider(period).future);
-  final houseWorkVisibilities = ref.watch(houseWorkVisibilitiesProvider);
+  final workLogsFuture = ref.watch(
+    _workLogsFilteredByPeriodFilePrivateProvider.future,
+  );
   final houseWorksFuture = ref.watch(_houseWorksFilePrivateProvider.future);
+  final houseWorkVisibilities = ref.watch(houseWorkVisibilitiesProvider);
   final colorOfHouseWorksFuture = ref.watch(
     _colorOfHouseWorksFilePrivateProvider.future,
   );
@@ -262,69 +201,16 @@ Stream<Map<String, Color>> _colorOfHouseWorksFilePrivate(Ref ref) {
 }
 
 @riverpod
-Future<List<WorkLog>> _workLogsFilteredByPeriodFilePrivate(
-  Ref ref,
-  int period,
-) async {
+Future<List<WorkLog>> _workLogsFilteredByPeriodFilePrivate(Ref ref) async {
+  final currentAnalysisPeriod = ref.watch(currentAnalysisPeriodProvider);
   final workLogRepository = ref.watch(workLogRepositoryProvider);
 
   final allWorkLogs = await workLogRepository.getAllOnce();
 
-  // 現在時刻を取得
-  final now = DateTime.now();
-
-  // 期間によるフィルタリング
-  switch (period) {
-    case 0: // 今日
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = startOfDay
-          .add(const Duration(days: 1))
-          .subtract(const Duration(microseconds: 1));
-      return allWorkLogs
-          .where(
-            (log) =>
-                log.completedAt.isAfter(startOfDay) &&
-                log.completedAt.isBefore(endOfDay),
-          )
-          .toList();
-
-    case 1: // 今週
-      // 週の開始は月曜日、終了は日曜日とする
-      final currentWeekday = now.weekday;
-      final startOfWeek = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).subtract(Duration(days: currentWeekday - 1));
-      final endOfWeek = startOfWeek
-          .add(const Duration(days: 7))
-          .subtract(const Duration(microseconds: 1));
-      return allWorkLogs
-          .where(
-            (log) =>
-                log.completedAt.isAfter(startOfWeek) &&
-                log.completedAt.isBefore(endOfWeek),
-          )
-          .toList();
-
-    case 2: // 今月
-      final startOfMonth = DateTime(now.year, now.month);
-      final endOfMonth =
-          (now.month < 12)
-              ? DateTime(now.year, now.month + 1)
-              : DateTime(now.year + 1);
-      final lastDayOfMonth = endOfMonth.subtract(
-        const Duration(microseconds: 1),
-      );
-      return allWorkLogs
-          .where(
-            (log) =>
-                log.completedAt.isAfter(startOfMonth) &&
-                log.completedAt.isBefore(lastDayOfMonth),
-          )
-          .toList();
-
-    default:
-      return allWorkLogs;
-  }
+  return allWorkLogs
+    ..where(
+      (log) =>
+          log.completedAt.isAfter(currentAnalysisPeriod.from) &&
+          log.completedAt.isBefore(currentAnalysisPeriod.to),
+    ).toList();
 }
