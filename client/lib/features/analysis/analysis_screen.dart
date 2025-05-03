@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/features/analysis/analysis_period.dart';
 import 'package:house_worker/features/analysis/analysis_presenter.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
@@ -353,7 +354,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
             }
 
             // 期間に応じたタイトルのテキストを作成
-            final periodText = _getPeriodText(analysisPeriod: _analysisPeriod);
+            final periodText = _getPeriodTextLegacy(
+              analysisPeriod: _analysisPeriod,
+            );
 
             return Card(
               margin: const EdgeInsets.all(16),
@@ -456,9 +459,6 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
           );
         }
 
-        // 期間に応じたタイトルのテキストを作成
-        final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
-
         return Card(
           margin: const EdgeInsets.all(16),
           child: Padding(
@@ -466,13 +466,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '$periodTextの曜日ごとの家事実行頻度',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                const _WeekdayAnalysisPanelTitle(),
                 const SizedBox(height: 16),
                 Expanded(
                   child: Padding(
@@ -672,7 +666,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
         }
 
         // 期間に応じたタイトルのテキストを作成
-        final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
+        final periodText = _getPeriodTextLegacy(analysisPeriod: analysisPeriod);
 
         // 家事ごとの積み上げ棒グラフのための色リスト
         final colors = [
@@ -848,8 +842,34 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
   }
 }
 
-/// 選択されている期間に応じたテキストを返す
-String _getPeriodText({required int analysisPeriod}) {
+class _WeekdayAnalysisPanelTitle extends ConsumerWidget {
+  const _WeekdayAnalysisPanelTitle();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analysisPeriod = ref.watch(currentAnalysisPeriodProvider);
+
+    final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
+
+    return Text(
+      '$periodTextの曜日ごとの家事実行頻度',
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    );
+  }
+}
+
+String _getPeriodText({required AnalysisPeriod analysisPeriod}) {
+  switch (analysisPeriod) {
+    case AnalysisPeriodToday _:
+      return '今日';
+    case AnalysisPeriodCurrentWeek _:
+      return '今週';
+    case AnalysisPeriodCurrentMonth _:
+      return '今月';
+  }
+}
+
+String _getPeriodTextLegacy({required int analysisPeriod}) {
   switch (analysisPeriod) {
     case 0:
       return '今日';
