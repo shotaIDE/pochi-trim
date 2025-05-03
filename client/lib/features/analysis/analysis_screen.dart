@@ -419,220 +419,196 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 選択された期間に基づいてフィルタリングされたデータを取得
-    final statisticsAsync = ref.watch(
+    final statistics = ref.watch(
       weekdayStatisticsDisplayProvider(period: analysisPeriod),
     );
 
-    return statisticsAsync.when(
-      data: (statistics) {
-        final weekdayFrequencies = statistics.weekdayFrequencies;
+    final weekdayFrequencies = statistics.weekdayFrequencies;
 
-        if (weekdayFrequencies.every((data) => data.totalCount == 0)) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.calendar_today, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  '家事ログがありません',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  '家事を完了すると、ここに分析結果が表示されます',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+    if (weekdayFrequencies.every((data) => data.totalCount == 0)) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.calendar_today, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              '家事ログがありません',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-          );
-        }
+            SizedBox(height: 8),
+            Text(
+              '家事を完了すると、ここに分析結果が表示されます',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
 
-        // 期間に応じたタイトルのテキストを作成
-        final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
+    // 期間に応じたタイトルのテキストを作成
+    final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
 
-        return Card(
-          margin: const EdgeInsets.all(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$periodTextの曜日ごとの家事実行頻度',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 16, right: 16),
-                    child: BarChart(
-                      BarChartData(
-                        alignment: BarChartAlignment.spaceAround,
-                        titlesData: FlTitlesData(
-                          leftTitles: const AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: 30,
-                            ),
-                          ),
-                          rightTitles: const AxisTitles(),
-                          topTitles: const AxisTitles(),
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              getTitlesWidget: (value, meta) {
-                                if (value < 0 ||
-                                    value >= weekdayFrequencies.length) {
-                                  return const Text('');
-                                }
-                                return Text(
-                                  weekdayFrequencies[value.toInt()]
-                                      .weekday
-                                      .displayName,
-                                );
-                              },
-                            ),
-                          ),
+    return Card(
+      margin: const EdgeInsets.all(16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$periodTextの曜日ごとの家事実行頻度',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16, right: 16),
+                child: BarChart(
+                  BarChartData(
+                    alignment: BarChartAlignment.spaceAround,
+                    titlesData: FlTitlesData(
+                      leftTitles: const AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 30,
                         ),
-                        gridData: const FlGridData(
-                          horizontalInterval: 4,
-                          drawVerticalLine: false,
+                      ),
+                      rightTitles: const AxisTitles(),
+                      topTitles: const AxisTitles(),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            if (value < 0 ||
+                                value >= weekdayFrequencies.length) {
+                              return const Text('');
+                            }
+                            return Text(
+                              weekdayFrequencies[value.toInt()]
+                                  .weekday
+                                  .displayName,
+                            );
+                          },
                         ),
-                        borderData: FlBorderData(
-                          show: true,
-                          border: Border(
-                            left: BorderSide(
-                              color: Theme.of(context).dividerColor,
-                            ),
-                            bottom: BorderSide(
-                              color: Theme.of(context).dividerColor,
-                            ),
-                          ),
-                        ),
-                        barGroups:
-                            weekdayFrequencies.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final data = entry.value;
-
-                              // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
-                              final rodStackItems = <BarChartRodStackItem>[];
-                              double fromY = 0;
-
-                              // 表示されている家事だけを処理
-                              for (final freq in data.houseWorkFrequencies) {
-                                final toY = fromY + freq.count;
-
-                                rodStackItems.add(
-                                  BarChartRodStackItem(fromY, toY, freq.color),
-                                );
-
-                                fromY = toY;
-                              }
-
-                              return BarChartGroupData(
-                                x: index,
-                                barRods: [
-                                  BarChartRodData(
-                                    toY: data.totalCount.toDouble(),
-                                    width: 20,
-                                    color: Colors.transparent,
-                                    rodStackItems: rodStackItems,
-                                    borderRadius: BorderRadius.zero,
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                        rotationQuarterTurns: 1,
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // 凡例の表示（タップ可能）
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withAlpha(26), // 0.1 * 255 = 約26
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '凡例: (タップで表示/非表示を切り替え)',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                    gridData: const FlGridData(
+                      horizontalInterval: 4,
+                      drawVerticalLine: false,
+                    ),
+                    borderData: FlBorderData(
+                      show: true,
+                      border: Border(
+                        left: BorderSide(color: Theme.of(context).dividerColor),
+                        bottom: BorderSide(
+                          color: Theme.of(context).dividerColor,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 4,
-                        children:
-                            statistics.houseWorkLegends.map((houseWorkLegend) {
-                              return InkWell(
-                                onTap: () {
-                                  ref
-                                      .read(
-                                        houseWorkVisibilitiesProvider.notifier,
-                                      )
-                                      .toggle(
-                                        houseWorkId:
-                                            houseWorkLegend.houseWork.id,
-                                      );
-                                },
-                                child: Opacity(
-                                  opacity:
-                                      houseWorkLegend.isVisible ? 1.0 : 0.3,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          width: 16,
-                                          height: 16,
-                                          color: houseWorkLegend.color,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          houseWorkLegend.houseWork.title,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            decoration:
-                                                houseWorkLegend.isVisible
-                                                    ? null
-                                                    : TextDecoration
-                                                        .lineThrough,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                      ),
-                    ],
+                    ),
+                    barGroups:
+                        weekdayFrequencies.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final data = entry.value;
+
+                          // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
+                          final rodStackItems = <BarChartRodStackItem>[];
+                          double fromY = 0;
+
+                          // 表示されている家事だけを処理
+                          for (final freq in data.houseWorkFrequencies) {
+                            final toY = fromY + freq.count;
+
+                            rodStackItems.add(
+                              BarChartRodStackItem(fromY, toY, freq.color),
+                            );
+
+                            fromY = toY;
+                          }
+
+                          return BarChartGroupData(
+                            x: index,
+                            barRods: [
+                              BarChartRodData(
+                                toY: data.totalCount.toDouble(),
+                                width: 20,
+                                color: Colors.transparent,
+                                rodStackItems: rodStackItems,
+                                borderRadius: BorderRadius.zero,
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                    rotationQuarterTurns: 1,
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
-      loading: () {
-        return const Center(child: CircularProgressIndicator());
-      },
-      error:
-          (error, stackTrace) => Center(
-            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-          ),
+            const SizedBox(height: 16),
+            // 凡例の表示（タップ可能）
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey.withAlpha(26), // 0.1 * 255 = 約26
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '凡例: (タップで表示/非表示を切り替え)',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 4,
+                    children:
+                        statistics.houseWorkLegends.map((houseWorkLegend) {
+                          return InkWell(
+                            onTap: () {
+                              ref
+                                  .read(houseWorkVisibilitiesProvider.notifier)
+                                  .toggle(
+                                    houseWorkId: houseWorkLegend.houseWork.id,
+                                  );
+                            },
+                            child: Opacity(
+                              opacity: houseWorkLegend.isVisible ? 1.0 : 0.3,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 16,
+                                      height: 16,
+                                      color: houseWorkLegend.color,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      houseWorkLegend.houseWork.title,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        decoration:
+                                            houseWorkLegend.isVisible
+                                                ? null
+                                                : TextDecoration.lineThrough,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

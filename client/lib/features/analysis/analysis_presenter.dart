@@ -99,16 +99,23 @@ Future<List<WorkLog>> filteredWorkLogs(Ref ref, int period) async {
 }
 
 @riverpod
-Future<WeekdayStatistics> weekdayStatisticsDisplay(
-  Ref ref, {
-  required int period,
-}) async {
-  final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
+WeekdayStatistics weekdayStatisticsDisplay(Ref ref, {required int period}) {
+  final workLogsAsync = ref.watch(filteredWorkLogsProvider(period));
   final houseWorkVisibilities = ref.watch(houseWorkVisibilitiesProvider);
-  final houseWorks = await ref.watch(_houseWorksFilePrivateProvider.future);
-  final colorOfHouseWorks = await ref.watch(
-    _colorOfHouseWorksFilePrivateProvider.future,
+  final houseWorksAsync = ref.watch(_houseWorksFilePrivateProvider);
+  final colorOfHouseWorksAsync = ref.watch(
+    _colorOfHouseWorksFilePrivateProvider,
   );
+
+  final workLogs = workLogsAsync.whenOrNull(data: (value) => value);
+  final houseWorks = houseWorksAsync.whenOrNull(data: (value) => value);
+  final colorOfHouseWorks = colorOfHouseWorksAsync.whenOrNull(
+    data: (value) => value,
+  );
+  if (workLogs == null || houseWorks == null || colorOfHouseWorks == null) {
+    // TODO(ide): エラーハンドリングを追加する
+    throw Exception('データの取得に失敗しました');
+  }
 
   final workLogCountsStatistics =
       Weekday.values.map((weekday) {
