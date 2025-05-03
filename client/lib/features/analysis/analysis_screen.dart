@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_period.dart';
 import 'package:house_worker/features/analysis/analysis_presenter.dart';
+import 'package:house_worker/features/analysis/statistics.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
@@ -533,79 +534,83 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // 凡例の表示（タップ可能）
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withAlpha(26), // 0.1 * 255 = 約26
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '凡例: (タップで表示/非表示を切り替え)',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 4,
-                        children:
-                            statistics.houseWorkLegends.map((houseWorkLegend) {
-                              return InkWell(
-                                onTap: () {
-                                  ref
-                                      .read(
-                                        houseWorkVisibilitiesProvider.notifier,
-                                      )
-                                      .toggle(
-                                        houseWorkId:
-                                            houseWorkLegend.houseWork.id,
-                                      );
-                                },
-                                child: Opacity(
-                                  opacity:
-                                      houseWorkLegend.isVisible ? 1.0 : 0.3,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          width: 16,
-                                          height: 16,
-                                          color: houseWorkLegend.color,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          houseWorkLegend.houseWork.title,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            decoration:
-                                                houseWorkLegend.isVisible
-                                                    ? null
-                                                    : TextDecoration
-                                                        .lineThrough,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                      ),
-                    ],
-                  ),
+                _Legends(
+                  legends: statistics.houseWorkLegends,
+                  onTap: (houseWorkId) {
+                    ref
+                        .read(houseWorkVisibilitiesProvider.notifier)
+                        .toggle(houseWorkId: houseWorkId);
+                  },
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class _Legends extends StatelessWidget {
+  const _Legends({required this.legends, required this.onTap});
+
+  final List<HouseWorkLegends> legends;
+  final void Function(String houseWorkId) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.grey.withAlpha(26), // 0.1 * 255 = 約26
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '凡例: (タップで表示/非表示を切り替え)',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 4,
+            children:
+                legends.map((legend) {
+                  return InkWell(
+                    onTap: () => onTap(legend.houseWork.id),
+                    child: Opacity(
+                      opacity: legend.isVisible ? 1.0 : 0.3,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 16,
+                              height: 16,
+                              color: legend.color,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              legend.houseWork.title,
+                              style: TextStyle(
+                                fontSize: 12,
+                                decoration:
+                                    legend.isVisible
+                                        ? null
+                                        : TextDecoration.lineThrough,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+          ),
+        ],
+      ),
     );
   }
 }
