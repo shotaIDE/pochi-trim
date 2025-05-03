@@ -13,8 +13,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analysis_presenter.g.dart';
 
-// TODO(ide): keepAlive = false にできないか？
-@Riverpod(keepAlive: true)
+@riverpod
 class HouseWorkVisibilities extends _$HouseWorkVisibilities {
   @override
   Map<String, bool> build() {
@@ -104,12 +103,20 @@ Future<WeekdayStatistics> weekdayStatisticsDisplay(
   Ref ref, {
   required int period,
 }) async {
-  final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
+  // 順番に `.future` 値を `await` により取得すると、
+  // 非同期処理の隙間で各 Provider のリスナーが存在しない状態が生まれ、
+  // Riverpod によりステートが破棄され、状態がリセットされてしまう。
+  // これを防ぐために、全ての Provider を `watch` してから、後で一気に `await` する。
+  final workLogsFuture = ref.watch(filteredWorkLogsProvider(period).future);
   final houseWorkVisibilities = ref.watch(houseWorkVisibilitiesProvider);
-  final houseWorks = await ref.watch(_houseWorksFilePrivateProvider.future);
-  final colorOfHouseWorks = await ref.watch(
+  final houseWorksFuture = ref.watch(_houseWorksFilePrivateProvider.future);
+  final colorOfHouseWorksFuture = ref.watch(
     _colorOfHouseWorksFilePrivateProvider.future,
   );
+
+  final workLogs = await workLogsFuture;
+  final houseWorks = await houseWorksFuture;
+  final colorOfHouseWorks = await colorOfHouseWorksFuture;
 
   final workLogCountsStatistics =
       Weekday.values.map((weekday) {
