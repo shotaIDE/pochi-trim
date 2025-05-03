@@ -324,7 +324,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     return Consumer(
       builder: (context, ref, child) {
         // 選択された期間に基づいてフィルタリングされたデータを取得
-        final frequencyDataAsync = ref.watch(workLogsFilteredByPeriodProvider);
+        final frequencyDataAsync = ref.watch(
+          filteredHouseWorkFrequencyProvider,
+        );
 
         return frequencyDataAsync.when(
           data: (frequencyData) {
