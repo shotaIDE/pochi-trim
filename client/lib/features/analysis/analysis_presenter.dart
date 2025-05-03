@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_period.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
+import 'package:house_worker/features/analysis/statistics.dart';
 import 'package:house_worker/features/analysis/weekday.dart';
 import 'package:house_worker/features/analysis/weekday_frequency.dart';
-import 'package:house_worker/features/analysis/weekday_statistics.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
@@ -158,6 +158,117 @@ Future<WeekdayStatistics> weekdayStatisticsDisplay(Ref ref) async {
 
   return WeekdayStatistics(
     weekdayFrequencies: filteredWeekdayData,
+    houseWorkLegends: houseWorkLegends,
+  );
+}
+
+@riverpod
+Future<TimeSlotStatistics> currentTimeSlotStatistics(Ref ref) async {
+  final workLogsFuture = ref.watch(workLogsFilteredByPeriodProvider.future);
+  final houseWorksFuture = ref.watch(_houseWorksFilePrivateProvider.future);
+  final houseWorkVisibilities = ref.watch(houseWorkVisibilitiesProvider);
+  final colorOfHouseWorksFuture = ref.watch(
+    _colorOfHouseWorksFilePrivateProvider.future,
+  );
+
+  final workLogs = await workLogsFuture;
+  final houseWorks = await houseWorksFuture;
+  final colorOfHouseWorks = await colorOfHouseWorksFuture;
+
+  // 時間帯の定義（3時間ごと）
+  final timeSlots = [
+    '0-3時',
+    '3-6時',
+    '6-9時',
+    '9-12時',
+    '12-15時',
+    '15-18時',
+    '18-21時',
+    '21-24時',
+  ];
+
+  final workLogCountsStatistics = List.generate(8, (timeSlotIndex) {
+    final targetWorkLogs =
+        workLogs
+            .where((workLog) => workLog.completedAt.hour ~/ 3 == timeSlotIndex)
+            .toList();
+
+    final workLogCountsForHouseWork =
+        houseWorks
+            .map((houseWork) {
+              final workLogsOfTargetHouseWork = targetWorkLogs.where((workLog) {
+                return workLog.houseWorkId == houseWork.id;
+              });
+
+              return HouseWorkFrequency(
+                houseWork: houseWork,
+                count: workLogsOfTargetHouseWork.length,
+                color: colorOfHouseWorks[houseWork.id] ?? Colors.grey,
+              );
+            })
+            // 家事ログが1回以上記録されたものだけを表示する
+            .where((houseWorkFrequency) => houseWorkFrequency.count >= 1)
+            .toList();
+
+    final sortedWorkLogCountsForHouseWork =
+        workLogCountsForHouseWork
+            .sortedBy((workLogCount) => workLogCount.count)
+            .reversed
+            .toList();
+
+    final totalCount = targetWorkLogs.length;
+
+    return TimeSlotFrequency(
+      timeSlot: timeSlots[timeSlotIndex],
+      houseWorkFrequencies: sortedWorkLogCountsForHouseWork,
+      totalCount: totalCount,
+    );
+  });
+
+  final houseWorksSortedByStatistics =
+      workLogCountsStatistics
+          .expand((weekdayFrequency) => weekdayFrequency.houseWorkFrequencies)
+          .map((houseWorkFrequency) => houseWorkFrequency.houseWork)
+          // 重複を排除
+          .toSet()
+          .toList();
+  final houseWorkLegends =
+      houseWorksSortedByStatistics.map((houseWork) {
+        final color = colorOfHouseWorks[houseWork.id] ?? Colors.grey;
+        final isVisible = houseWorkVisibilities[houseWork.id] ?? true;
+
+        return HouseWorkLegends(
+          houseWork: houseWork,
+          color: color,
+          isVisible: isVisible,
+        );
+      }).toList();
+
+  // 表示・非表示の状態に基づいて、各時間帯のデータをフィルタリング
+  final filteredTimeSlotData =
+      workLogCountsStatistics.map((timeSlotFrequency) {
+        final visibleFrequencies =
+            timeSlotFrequency.houseWorkFrequencies
+                .where(
+                  (freq) => houseWorkVisibilities[freq.houseWork.id] ?? true,
+                )
+                .toList();
+
+        // 表示する家事の合計回数を計算
+        final visibleTotalCount = visibleFrequencies.fold(
+          0,
+          (sum, freq) => sum + freq.count,
+        );
+
+        return TimeSlotFrequency(
+          timeSlot: timeSlotFrequency.timeSlot,
+          houseWorkFrequencies: visibleFrequencies,
+          totalCount: visibleTotalCount,
+        );
+      }).toList();
+
+  return TimeSlotStatistics(
+    timeSlotFrequencies: filteredTimeSlotData,
     houseWorkLegends: houseWorkLegends,
   );
 }

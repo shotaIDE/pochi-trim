@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_period.dart';
 import 'package:house_worker/features/analysis/analysis_presenter.dart';
+import 'package:house_worker/features/analysis/statistics.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
@@ -135,75 +136,6 @@ final filteredHouseWorkFrequencyProvider =
       return result;
     });
 
-// 時間帯ごとの家事実行頻度を取得するプロバイダー（期間フィルタリング付き）
-final filteredTimeSlotFrequencyProvider =
-    FutureProvider<List<TimeSlotFrequency>>((ref) async {
-      // フィルタリングされた家事ログのデータを待機
-      final workLogs = await ref.watch(workLogsFilteredByPeriodProvider.future);
-      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-
-      // 時間帯の定義（3時間ごと）
-      final timeSlots = [
-        '0-3時',
-        '3-6時',
-        '6-9時',
-        '9-12時',
-        '12-15時',
-        '15-18時',
-        '18-21時',
-        '21-24時',
-      ];
-
-      // 時間帯ごと、家事IDごとにグループ化して頻度をカウント
-      final timeSlotMap = <int, Map<String, int>>{};
-      // 各時間帯の初期化
-      for (var i = 0; i < 8; i++) {
-        timeSlotMap[i] = <String, int>{};
-      }
-
-      // 家事ログを時間帯と家事IDでグループ化
-      for (final workLog in workLogs) {
-        final hour = workLog.completedAt.hour;
-        final timeSlotIndex = hour ~/ 3; // 0-7のインデックス（3時間ごとの区分）
-        final houseWorkId = workLog.houseWorkId;
-
-        timeSlotMap[timeSlotIndex]![houseWorkId] =
-            (timeSlotMap[timeSlotIndex]![houseWorkId] ?? 0) + 1;
-      }
-
-      // TimeSlotFrequencyのリストを作成
-      final result = <TimeSlotFrequency>[];
-      for (var i = 0; i < 8; i++) {
-        final houseWorkFrequencies = <HouseWorkFrequency>[];
-        var totalCount = 0;
-
-        // 各家事IDごとの頻度を取得
-        for (final entry in timeSlotMap[i]!.entries) {
-          final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
-
-          if (houseWork != null) {
-            houseWorkFrequencies.add(
-              HouseWorkFrequency(houseWork: houseWork, count: entry.value),
-            );
-            totalCount += entry.value;
-          }
-        }
-
-        // 頻度の高い順にソート
-        houseWorkFrequencies.sort((a, b) => b.count.compareTo(a.count));
-
-        result.add(
-          TimeSlotFrequency(
-            timeSlot: timeSlots[i],
-            houseWorkFrequencies: houseWorkFrequencies,
-            totalCount: totalCount,
-          ),
-        );
-      }
-
-      return result;
-    });
-
 /// 分析画面
 ///
 /// 家事の実行頻度や曜日ごとの頻度分析を表示する
@@ -264,9 +196,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 case 1:
                   return const _WeekdayAnalysisPanel();
                 case 2:
-                  return _TimeSlotAnalysisPanel(
-                    analysisPeriod: _analysisPeriodLegacy,
-                  );
+                  return const _TimeSlotAnalysisPanel();
                 default:
                   return _buildFrequencyAnalysis();
               }
@@ -464,7 +394,6 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 選択された期間に基づいてフィルタリングされたデータを取得
     final statisticsFuture = ref.watch(weekdayStatisticsDisplayProvider.future);
 
     return FutureBuilder(
@@ -603,73 +532,13 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // 凡例の表示（タップ可能）
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withAlpha(26), // 0.1 * 255 = 約26
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '凡例: (タップで表示/非表示を切り替え)',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 4,
-                        children:
-                            statistics.houseWorkLegends.map((houseWorkLegend) {
-                              return InkWell(
-                                onTap: () {
-                                  ref
-                                      .read(
-                                        houseWorkVisibilitiesProvider.notifier,
-                                      )
-                                      .toggle(
-                                        houseWorkId:
-                                            houseWorkLegend.houseWork.id,
-                                      );
-                                },
-                                child: Opacity(
-                                  opacity:
-                                      houseWorkLegend.isVisible ? 1.0 : 0.3,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          width: 16,
-                                          height: 16,
-                                          color: houseWorkLegend.color,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          houseWorkLegend.houseWork.title,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            decoration:
-                                                houseWorkLegend.isVisible
-                                                    ? null
-                                                    : TextDecoration
-                                                        .lineThrough,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                      ),
-                    ],
-                  ),
+                _Legends(
+                  legends: statistics.houseWorkLegends,
+                  onTap: (houseWorkId) {
+                    ref
+                        .read(houseWorkVisibilitiesProvider.notifier)
+                        .toggle(houseWorkId: houseWorkId);
+                  },
                 ),
               ],
             ),
@@ -681,18 +550,34 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
 }
 
 class _TimeSlotAnalysisPanel extends ConsumerWidget {
-  const _TimeSlotAnalysisPanel({required this.analysisPeriod});
-
-  final int analysisPeriod;
+  const _TimeSlotAnalysisPanel();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 選択された期間に基づいてフィルタリングされたデータを取得
-    final timeSlotDataAsync = ref.watch(filteredTimeSlotFrequencyProvider);
+    final statisticsFuture = ref.watch(
+      currentTimeSlotStatisticsProvider.future,
+    );
 
-    return timeSlotDataAsync.when(
-      data: (timeSlotData) {
-        if (timeSlotData.every((data) => data.totalCount == 0)) {
+    return FutureBuilder(
+      future: statisticsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              'エラーが発生しました。画面を再読み込みしてください。',
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        final statistics = snapshot.data;
+        if (statistics == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final timeSlotFrequencies = statistics.timeSlotFrequencies;
+
+        if (timeSlotFrequencies.every((data) => data.totalCount == 0)) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -714,40 +599,6 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
           );
         }
 
-        // 期間に応じたタイトルのテキストを作成
-        final periodText = _getPeriodTextLegacy(analysisPeriod: analysisPeriod);
-
-        // 家事ごとの積み上げ棒グラフのための色リスト
-        final colors = [
-          Colors.blue,
-          Colors.green,
-          Colors.orange,
-          Colors.purple,
-          Colors.teal,
-          Colors.pink,
-          Colors.amber,
-          Colors.indigo,
-        ];
-
-        // 凡例データの収集
-        final allHouseWorks = <HouseWork>{};
-        final houseWorkColorMap = <String, Color>{};
-
-        // すべての家事を収集し、それぞれに色を割り当てる
-        for (final slot in timeSlotData) {
-          for (var i = 0; i < slot.houseWorkFrequencies.length; i++) {
-            final houseWork = slot.houseWorkFrequencies[i].houseWork;
-            allHouseWorks.add(houseWork);
-            if (!houseWorkColorMap.containsKey(houseWork.id)) {
-              houseWorkColorMap[houseWork.id] =
-                  colors[houseWorkColorMap.length % colors.length];
-            }
-          }
-        }
-
-        // 家事を集約してリスト化（凡例用）
-        final legendItems = allHouseWorks.toList();
-
         return Card(
           margin: const EdgeInsets.all(16),
           child: Padding(
@@ -755,13 +606,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '$periodTextの時間帯ごとの家事実行頻度',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                const _TimeSlotAnalysisPanelTitle(),
                 const SizedBox(height: 16),
                 Expanded(
                   child: Padding(
@@ -769,7 +614,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                     child: BarChart(
                       BarChartData(
                         alignment: BarChartAlignment.spaceAround,
-                        maxY: timeSlotData
+                        maxY: timeSlotFrequencies
                             .map((e) => e.totalCount.toDouble())
                             .reduce((a, b) => a > b ? a : b),
                         titlesData: FlTitlesData(
@@ -785,11 +630,12 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                             sideTitles: SideTitles(
                               showTitles: true,
                               getTitlesWidget: (value, meta) {
-                                if (value < 0 || value >= timeSlotData.length) {
+                                if (value < 0 ||
+                                    value >= timeSlotFrequencies.length) {
                                   return const Text('');
                                 }
                                 return Text(
-                                  timeSlotData[value.toInt()].timeSlot,
+                                  timeSlotFrequencies[value.toInt()].timeSlot,
                                 );
                               },
                             ),
@@ -811,17 +657,34 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                           ),
                         ),
                         barGroups:
-                            timeSlotData.asMap().entries.map((entry) {
+                            timeSlotFrequencies.asMap().entries.map((entry) {
                               final index = entry.key;
                               final data = entry.value;
+
+                              // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
+                              final rodStackItems = <BarChartRodStackItem>[];
+                              double fromY = 0;
+
+                              // 表示されている家事だけを処理
+                              for (final freq in data.houseWorkFrequencies) {
+                                final toY = fromY + freq.count;
+
+                                rodStackItems.add(
+                                  BarChartRodStackItem(fromY, toY, freq.color),
+                                );
+
+                                fromY = toY;
+                              }
 
                               return BarChartGroupData(
                                 x: index,
                                 barRods: [
-                                  data.toBarChartRodData(
+                                  BarChartRodData(
+                                    toY: data.totalCount.toDouble(),
                                     width: 20,
-                                    x: index.toDouble(),
-                                    colors: colors,
+                                    color: Colors.transparent,
+                                    rodStackItems: rodStackItems,
+                                    borderRadius: BorderRadius.zero,
                                   ),
                                 ],
                               );
@@ -832,61 +695,19 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // 凡例の表示
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withAlpha(26), // 0.1 * 255 = 約26
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '凡例:',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 16,
-                        runSpacing: 8,
-                        children:
-                            legendItems.map((houseWork) {
-                              final color =
-                                  houseWorkColorMap[houseWork.id] ?? colors[0];
-                              return Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 16,
-                                    height: 16,
-                                    color: color,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    houseWork.title,
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                      ),
-                    ],
-                  ),
+                _Legends(
+                  legends: statistics.houseWorkLegends,
+                  onTap: (houseWorkId) {
+                    ref
+                        .read(houseWorkVisibilitiesProvider.notifier)
+                        .toggle(houseWorkId: houseWorkId);
+                  },
                 ),
               ],
             ),
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, stackTrace) => Center(
-            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-          ),
     );
   }
 }
@@ -907,6 +728,22 @@ class _WeekdayAnalysisPanelTitle extends ConsumerWidget {
   }
 }
 
+class _TimeSlotAnalysisPanelTitle extends ConsumerWidget {
+  const _TimeSlotAnalysisPanelTitle();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analysisPeriod = ref.watch(currentAnalysisPeriodProvider);
+
+    final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
+
+    return Text(
+      '$periodTextの時間帯ごとの家事実行頻度',
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    );
+  }
+}
+
 String _getPeriodText({required AnalysisPeriod analysisPeriod}) {
   switch (analysisPeriod) {
     case AnalysisPeriodToday _:
@@ -915,6 +752,70 @@ String _getPeriodText({required AnalysisPeriod analysisPeriod}) {
       return '今週';
     case AnalysisPeriodCurrentMonth _:
       return '今月';
+  }
+}
+
+class _Legends extends StatelessWidget {
+  const _Legends({required this.legends, required this.onTap});
+
+  final List<HouseWorkLegends> legends;
+  final void Function(String houseWorkId) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.grey.withAlpha(26), // 0.1 * 255 = 約26
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '凡例: (タップで表示/非表示を切り替え)',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 4,
+            children:
+                legends.map((legend) {
+                  return InkWell(
+                    onTap: () => onTap(legend.houseWork.id),
+                    child: Opacity(
+                      opacity: legend.isVisible ? 1.0 : 0.3,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 16,
+                              height: 16,
+                              color: legend.color,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              legend.houseWork.title,
+                              style: TextStyle(
+                                fontSize: 12,
+                                decoration:
+                                    legend.isVisible
+                                        ? null
+                                        : TextDecoration.lineThrough,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+          ),
+        ],
+      ),
+    );
   }
 }
 
