@@ -321,9 +321,7 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final houseWorkRepository = await ref.read(
-        houseWorkRepositoryProvider.future,
-      );
+      final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
       final currentUser = ref.read(authServiceProvider).currentUser;
 
       if (!mounted) {

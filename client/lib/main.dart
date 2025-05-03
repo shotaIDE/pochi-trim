@@ -5,9 +5,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/common/theme/app_theme.dart';
-import 'package:house_worker/features/auth/login_screen.dart';
-import 'package:house_worker/features/home/home_screen.dart';
 import 'package:house_worker/flavor_config.dart';
+import 'package:house_worker/root_screen.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:logging/logging.dart';
 
@@ -165,49 +164,6 @@ class HouseWorkerApp extends StatelessWidget {
         }
         return child!;
       },
-    );
-  }
-}
-
-class AuthWrapper extends ConsumerWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authStateProvider);
-
-    return authState.when(
-      data: (user) {
-        if (user != null) {
-          return const HomeScreen();
-        } else {
-          return const LoginScreen();
-        }
-      },
-      loading:
-          () =>
-              const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error:
-          // TODO(ide): この場合は不測の事態としてエラー収集
-          (error, stackTrace) => Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('エラーが発生しました'),
-                  const SizedBox(height: 10),
-                  Text(error.toString()),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      ref.invalidate(authStateProvider);
-                    },
-                    child: const Text('再試行'),
-                  ),
-                ],
-              ),
-            ),
-          ),
     );
   }
 }

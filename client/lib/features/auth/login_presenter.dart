@@ -1,8 +1,8 @@
 import 'package:house_worker/models/generate_my_house_exception.dart';
 import 'package:house_worker/models/sign_in_result.dart';
+import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/functions_service.dart';
-import 'package:house_worker/services/house_id_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'login_presenter.g.dart';
@@ -18,8 +18,9 @@ class LoginButtonTappedResult extends _$LoginButtonTappedResult {
     state = const AsyncValue.loading();
 
     final authService = ref.read(authServiceProvider);
+    final String userId;
     try {
-      await authService.signInAnonymously();
+      userId = await authService.signInAnonymously();
     } on SignInException catch (e, stack) {
       state = AsyncValue.error(e, stack);
       return;
@@ -33,6 +34,8 @@ class LoginButtonTappedResult extends _$LoginButtonTappedResult {
       return;
     }
 
-    await ref.read(currentHouseIdProvider.notifier).setHouseId(myHouseId);
+    await ref
+        .read(rootAppInitializedProvider.notifier)
+        .signIn(userId: userId, houseId: myHouseId);
   }
 }

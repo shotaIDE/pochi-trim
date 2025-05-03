@@ -43,12 +43,9 @@ Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
 
 @riverpod
 Stream<List<HouseWork>> _houseWorksFilePrivate(Ref ref) {
-  final houseWorkRepositoryAsync = ref.watch(houseWorkRepositoryProvider);
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
-  return houseWorkRepositoryAsync.maybeWhen(
-    data: (repository) => repository.getAll(),
-    orElse: Stream.empty,
-  );
+  return houseWorkRepository.getAll();
 }
 
 @riverpod

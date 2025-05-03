@@ -76,9 +76,7 @@ final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
 ) async {
   // 家事ログのデータを待機
   final workLogs = await ref.watch(workLogsForAnalysisProvider.future);
-  final houseWorkRepository = await ref.watch(
-    houseWorkRepositoryProvider.future,
-  );
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
   // 家事IDごとにグループ化して頻度をカウント
   final frequencyMap = <String, int>{};
@@ -109,9 +107,7 @@ filteredHouseWorkFrequencyProvider =
     FutureProvider.family<List<HouseWorkFrequency>, int>((ref, period) async {
       // フィルタリングされた家事ログのデータを待機
       final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
-      final houseWorkRepository = await ref.watch(
-        houseWorkRepositoryProvider.future,
-      );
+      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
       // 家事IDごとにグループ化して頻度をカウント
       final frequencyMap = <String, int>{};
@@ -144,9 +140,7 @@ filteredTimeSlotFrequencyProvider =
     FutureProvider.family<List<TimeSlotFrequency>, int>((ref, period) async {
       // フィルタリングされた家事ログのデータを待機
       final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
-      final houseWorkRepository = await ref.watch(
-        houseWorkRepositoryProvider.future,
-      );
+      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
       // 時間帯の定義（3時間ごと）
       final timeSlots = [
@@ -632,7 +626,9 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () {
+        return const Center(child: CircularProgressIndicator());
+      },
       error:
           (error, stackTrace) => Center(
             child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),

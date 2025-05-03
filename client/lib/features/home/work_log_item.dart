@@ -10,10 +10,8 @@ import 'package:intl/intl.dart';
 
 // WorkLogに対応するHouseWorkを取得するプロバイダー
 final FutureProviderFamily<HouseWork?, WorkLog> _houseWorkForLogProvider =
-    FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) async {
-      final houseWorkRepository = await ref.watch(
-        houseWorkRepositoryProvider.future,
-      );
+    FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
+      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
       return houseWorkRepository.getByIdOnce(workLog.houseWorkId);
     });

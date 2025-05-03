@@ -203,13 +203,9 @@ Future<WeekdayStatistics> weekdayStatisticsDisplay(
 
 @riverpod
 Stream<List<HouseWork>> _houseWorksFilePrivate(Ref ref) {
-  final houseWorkRepositoryAsync = ref.watch(houseWorkRepositoryProvider);
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
-  return houseWorkRepositoryAsync.when(
-    data: (repository) => repository.getAll(),
-    error: (error, stack) => Stream.error(error),
-    loading: Stream.empty,
-  );
+  return houseWorkRepository.getAll();
 }
 
 @riverpod
