@@ -3,27 +3,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/no_house_id_error.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
+import 'package:house_worker/root_app_session.dart';
+import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/auth_service.dart';
-import 'package:house_worker/services/house_id_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'work_log_service.g.dart';
 
 @riverpod
-Future<WorkLogService> workLogService(Ref ref) async {
-  final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
+WorkLogService workLogService(Ref ref) {
+  final appSession = ref.watch(rootAppInitializedProvider);
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
-  final houseId = await ref.watch(currentHouseIdProvider.future);
-  if (houseId == null) {
-    throw NoHouseIdError();
-  }
 
-  return WorkLogService(
-    workLogRepository: workLogRepository,
-    authService: authService,
-    currentHouseId: houseId,
-    ref: ref,
-  );
+  switch (appSession) {
+    case final AppSessionSignedIn signedInSession:
+      final houseId = signedInSession.currentHouseId;
+
+      return WorkLogService(
+        workLogRepository: workLogRepository,
+        authService: authService,
+        currentHouseId: houseId,
+        ref: ref,
+      );
+    case AppSessionNotSignedIn _:
+      throw NoHouseIdError();
+    case AppSessionLoading _:
+      throw NoHouseIdError();
+  }
 }
 
 /// 家事ログに関する共通操作を提供するサービスクラス

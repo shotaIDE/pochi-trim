@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/no_house_id_error.dart';
-import 'package:house_worker/services/house_id_provider.dart';
+import 'package:house_worker/root_app_session.dart';
+import 'package:house_worker/root_presenter.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -11,13 +12,17 @@ part 'house_work_repository.g.dart';
 final _logger = Logger('HouseWorkRepository');
 
 @riverpod
-Future<HouseWorkRepository> houseWorkRepository(Ref ref) async {
-  final houseId = await ref.watch(currentHouseIdProvider.future);
-  if (houseId == null) {
-    throw NoHouseIdError();
-  }
+HouseWorkRepository houseWorkRepository(Ref ref) {
+  final appSession = ref.watch(rootAppInitializedProvider);
 
-  return HouseWorkRepository(houseId: houseId);
+  switch (appSession) {
+    case final AppSessionSignedIn signedInSession:
+      return HouseWorkRepository(houseId: signedInSession.currentHouseId);
+    case AppSessionNotSignedIn _:
+      throw NoHouseIdError();
+    case AppSessionLoading _:
+      throw NoHouseIdError();
+  }
 }
 
 /// 家事リポジトリ

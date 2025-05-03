@@ -27,7 +27,7 @@ class AuthService {
   Stream<firebase_auth.User?> get authStateChanges =>
       _firebaseAuth.authStateChanges();
 
-  Future<void> signInAnonymously() async {
+  Future<String> signInAnonymously() async {
     final firebase_auth.UserCredential userCredential;
     try {
       userCredential = await _firebaseAuth.signInAnonymously();
@@ -43,6 +43,8 @@ class AuthService {
     }
 
     _logger.info('ユーザーがログインしました。UID: ${user.uid}');
+
+    return user.uid;
   }
 
   Future<void> signOut() async {

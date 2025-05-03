@@ -1,18 +1,26 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/features/analysis/analysis_period.dart';
 import 'package:house_worker/features/analysis/analysis_presenter.dart';
-import 'package:house_worker/features/analysis/weekday_frequency.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
+import 'package:intl/intl.dart';
 
 // 家事ごとの頻度分析のためのデータクラス
 class HouseWorkFrequency {
-  HouseWorkFrequency({required this.houseWork, required this.count});
+  HouseWorkFrequency({
+    required this.houseWork,
+    required this.count,
+    // TODO(ide): デフォルト引数を廃止する
+    this.color = Colors.grey,
+  });
+
   final HouseWork houseWork;
   final int count;
+  final Color color;
 }
 
 // 時間帯別の家事実行頻度のためのデータクラス
@@ -58,8 +66,8 @@ class TimeSlotFrequency {
 }
 
 // 家事ログの取得と分析のためのプロバイダー
-final workLogsForAnalysisProvider = FutureProvider<List<WorkLog>>((ref) async {
-  final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
+final workLogsForAnalysisProvider = FutureProvider<List<WorkLog>>((ref) {
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
 
   return workLogRepository.getAllOnce();
 });
@@ -70,9 +78,7 @@ final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
 ) async {
   // 家事ログのデータを待機
   final workLogs = await ref.watch(workLogsForAnalysisProvider.future);
-  final houseWorkRepository = await ref.watch(
-    houseWorkRepositoryProvider.future,
-  );
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
   // 家事IDごとにグループ化して頻度をカウント
   final frequencyMap = <String, int>{};
@@ -98,14 +104,11 @@ final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
 });
 
 // 各家事の実行頻度を取得するプロバイダー（期間フィルタリング付き）
-final FutureProviderFamily<List<HouseWorkFrequency>, int>
-filteredHouseWorkFrequencyProvider =
-    FutureProvider.family<List<HouseWorkFrequency>, int>((ref, period) async {
+final filteredHouseWorkFrequencyProvider =
+    FutureProvider<List<HouseWorkFrequency>>((ref) async {
       // フィルタリングされた家事ログのデータを待機
-      final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
-      final houseWorkRepository = await ref.watch(
-        houseWorkRepositoryProvider.future,
-      );
+      final workLogs = await ref.watch(workLogsFilteredByPeriodProvider.future);
+      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
       // 家事IDごとにグループ化して頻度をカウント
       final frequencyMap = <String, int>{};
@@ -133,14 +136,11 @@ filteredHouseWorkFrequencyProvider =
     });
 
 // 時間帯ごとの家事実行頻度を取得するプロバイダー（期間フィルタリング付き）
-final FutureProviderFamily<List<TimeSlotFrequency>, int>
-filteredTimeSlotFrequencyProvider =
-    FutureProvider.family<List<TimeSlotFrequency>, int>((ref, period) async {
+final filteredTimeSlotFrequencyProvider =
+    FutureProvider<List<TimeSlotFrequency>>((ref) async {
       // フィルタリングされた家事ログのデータを待機
-      final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
-      final houseWorkRepository = await ref.watch(
-        houseWorkRepositoryProvider.future,
-      );
+      final workLogs = await ref.watch(workLogsFilteredByPeriodProvider.future);
+      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
       // 時間帯の定義（3時間ごと）
       final timeSlots = [
@@ -224,14 +224,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   /// 0: 今日
   /// 1: 今週
   /// 2: 今月
-  var _analysisPeriod = 1; // デフォルトは「今週」
-
-  // 分析期間の選択肢
-  final _periodItems = [
-    const DropdownMenuItem<int>(value: 0, child: Text('今日')),
-    const DropdownMenuItem<int>(value: 1, child: Text('今週')),
-    const DropdownMenuItem<int>(value: 2, child: Text('今月')),
-  ];
+  var _analysisPeriodLegacy = 1; // デフォルトは「今週」
 
   @override
   Widget build(BuildContext context) {
@@ -248,8 +241,16 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       ),
       body: Column(
         children: [
-          // 分析期間の切り替えUI
-          _buildAnalysisPeriodSwitcher(),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: _AnalysisPeriodSwitcher(
+              onPeriodChangedLegacy: (period) {
+                setState(() {
+                  _analysisPeriodLegacy = period;
+                });
+              },
+            ),
+          ),
 
           // 分析方式の切り替えUI
           _buildAnalysisModeSwitcher(),
@@ -261,39 +262,15 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 case 0:
                   return _buildFrequencyAnalysis();
                 case 1:
-                  return _WeekdayAnalysisPanel(analysisPeriod: _analysisPeriod);
+                  return const _WeekdayAnalysisPanel();
                 case 2:
                   return _TimeSlotAnalysisPanel(
-                    analysisPeriod: _analysisPeriod,
+                    analysisPeriod: _analysisPeriodLegacy,
                   );
                 default:
                   return _buildFrequencyAnalysis();
               }
             }(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 分析期間の切り替えUIを構築
-  Widget _buildAnalysisPeriodSwitcher() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          const Text('分析期間: ', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(width: 8),
-          DropdownButton<int>(
-            value: _analysisPeriod,
-            items: _periodItems,
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  _analysisPeriod = value;
-                });
-              }
-            },
           ),
         ],
       ),
@@ -326,7 +303,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       builder: (context, ref, child) {
         // 選択された期間に基づいてフィルタリングされたデータを取得
         final frequencyDataAsync = ref.watch(
-          filteredHouseWorkFrequencyProvider(_analysisPeriod),
+          filteredHouseWorkFrequencyProvider,
         );
 
         return frequencyDataAsync.when(
@@ -357,7 +334,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
             }
 
             // 期間に応じたタイトルのテキストを作成
-            final periodText = _getPeriodText(analysisPeriod: _analysisPeriod);
+            final periodText = _getPeriodTextLegacy(
+              analysisPeriod: _analysisPeriodLegacy,
+            );
 
             return Card(
               margin: const EdgeInsets.all(16),
@@ -411,22 +390,103 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   }
 }
 
-class _WeekdayAnalysisPanel extends ConsumerWidget {
-  const _WeekdayAnalysisPanel({required this.analysisPeriod});
+class _AnalysisPeriodSwitcher extends ConsumerWidget {
+  const _AnalysisPeriodSwitcher({required this.onPeriodChangedLegacy});
 
-  final int analysisPeriod;
+  final void Function(int period) onPeriodChangedLegacy;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analysisPeriod = ref.watch(currentAnalysisPeriodProvider);
+
+    final dropdownButton = DropdownButton<int>(
+      value: _getPeriodValue(analysisPeriod),
+      items: const [
+        DropdownMenuItem(value: 0, child: Text('今日')),
+        DropdownMenuItem(value: 1, child: Text('今週')),
+        DropdownMenuItem(value: 2, child: Text('今月')),
+      ],
+      onChanged: (value) {
+        if (value == null) {
+          return;
+        }
+
+        final period = _getPeriod(value);
+        ref.read(currentAnalysisPeriodProvider.notifier).setPeriod(period);
+      },
+    );
+
+    final dateTimeFormat = DateFormat('yyyy/MM/dd');
+    final periodText = Text(
+      '${dateTimeFormat.format(analysisPeriod.from)}'
+      '- ${dateTimeFormat.format(analysisPeriod.to)}',
+    );
+
+    return Row(
+      spacing: 8,
+      children: [
+        const Text('分析期間: ', style: TextStyle(fontWeight: FontWeight.bold)),
+        dropdownButton,
+        periodText,
+      ],
+    );
+  }
+
+  int _getPeriodValue(AnalysisPeriod analysisPeriod) {
+    switch (analysisPeriod) {
+      case AnalysisPeriodToday _:
+        return 0;
+      case AnalysisPeriodCurrentWeek _:
+        return 1;
+      case AnalysisPeriodCurrentMonth _:
+        return 2;
+    }
+  }
+
+  AnalysisPeriod _getPeriod(int value) {
+    final current = DateTime.now();
+
+    switch (value) {
+      case 0:
+        return AnalysisPeriodTodayGenerator.fromCurrentDate(current);
+      case 1:
+        return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(current);
+      case 2:
+        return AnalysisPeriodCurrentMonthGenerator.fromCurrentDate(current);
+      default:
+        throw ArgumentError('Invalid value: $value');
+    }
+  }
+}
+
+class _WeekdayAnalysisPanel extends ConsumerWidget {
+  const _WeekdayAnalysisPanel();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 選択された期間に基づいてフィルタリングされたデータを取得
-    final weekdayDataAsync = ref.watch(
-      filteredWeekdayFrequenciesProvider(period: analysisPeriod),
-    );
-    final houseWorkVisibilities = ref.watch(houseWorkVisibilitiesProvider);
+    final statisticsFuture = ref.watch(weekdayStatisticsDisplayProvider.future);
 
-    return weekdayDataAsync.when(
-      data: (weekdayData) {
-        if (weekdayData.every((data) => data.totalCount == 0)) {
+    return FutureBuilder(
+      future: statisticsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              'エラーが発生しました。画面を再読み込みしてください。',
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        final statistics = snapshot.data;
+        if (statistics == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final weekdayFrequencies = statistics.weekdayFrequencies;
+
+        if (weekdayFrequencies.every((data) => data.totalCount == 0)) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -448,66 +508,6 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
           );
         }
 
-        // 期間に応じたタイトルのテキストを作成
-        final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
-
-        // 家事ごとの積み上げ棒グラフのための色リスト
-        final colors = [
-          Colors.blue,
-          Colors.green,
-          Colors.orange,
-          Colors.purple,
-          Colors.teal,
-          Colors.pink,
-          Colors.amber,
-          Colors.indigo,
-        ];
-
-        // 凡例データの収集
-        final allHouseWorks = <HouseWork>{};
-        final houseWorkColorMap = <String, Color>{};
-
-        // すべての家事を収集し、それぞれに色を割り当てる
-        for (final day in weekdayData) {
-          for (var i = 0; i < day.houseWorkFrequencies.length; i++) {
-            final houseWork = day.houseWorkFrequencies[i].houseWork;
-            allHouseWorks.add(houseWork);
-            if (!houseWorkColorMap.containsKey(houseWork.id)) {
-              houseWorkColorMap[houseWork.id] =
-                  colors[houseWorkColorMap.length % colors.length];
-            }
-          }
-        }
-
-        // 家事を集約してリスト化（凡例用）
-        final legendItems = allHouseWorks.toList();
-
-        // 表示・非表示の状態に基づいて、各曜日のデータをフィルタリング
-        final filteredWeekdayData =
-            weekdayData.map((day) {
-              // 表示する家事だけをフィルタリング
-              final visibleFrequencies =
-                  day.houseWorkFrequencies
-                      .where(
-                        (freq) =>
-                            houseWorkVisibilities[freq.houseWork.id] ?? true,
-                      )
-                      .toList();
-
-              // 表示する家事の合計回数を計算
-              final visibleTotalCount = visibleFrequencies.fold(
-                0,
-                (sum, freq) => sum + freq.count,
-              );
-
-              // 新しいWeekdayFrequencyオブジェクトを作成
-              return WeekdayFrequency(
-                weekday: day.weekday,
-                houseWorkFrequencies: visibleFrequencies,
-                totalCount: visibleTotalCount,
-              );
-            }).toList();
-
         return Card(
           margin: const EdgeInsets.all(16),
           child: Padding(
@@ -515,13 +515,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '$periodTextの曜日ごとの家事実行頻度',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                const _WeekdayAnalysisPanelTitle(),
                 const SizedBox(height: 16),
                 Expanded(
                   child: Padding(
@@ -543,11 +537,13 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                               showTitles: true,
                               getTitlesWidget: (value, meta) {
                                 if (value < 0 ||
-                                    value >= filteredWeekdayData.length) {
+                                    value >= weekdayFrequencies.length) {
                                   return const Text('');
                                 }
                                 return Text(
-                                  filteredWeekdayData[value.toInt()].weekday,
+                                  weekdayFrequencies[value.toInt()]
+                                      .weekday
+                                      .displayName,
                                 );
                               },
                             ),
@@ -569,7 +565,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                           ),
                         ),
                         barGroups:
-                            filteredWeekdayData.asMap().entries.map((entry) {
+                            weekdayFrequencies.asMap().entries.map((entry) {
                               final index = entry.key;
                               final data = entry.value;
 
@@ -579,14 +575,10 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
 
                               // 表示されている家事だけを処理
                               for (final freq in data.houseWorkFrequencies) {
-                                final houseWork = freq.houseWork;
-                                final color =
-                                    houseWorkColorMap[houseWork.id] ??
-                                    colors[0];
                                 final toY = fromY + freq.count;
 
                                 rodStackItems.add(
-                                  BarChartRodStackItem(fromY, toY, color),
+                                  BarChartRodStackItem(fromY, toY, freq.color),
                                 );
 
                                 fromY = toY;
@@ -632,22 +624,21 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                       Wrap(
                         spacing: 4,
                         children:
-                            legendItems.map((houseWork) {
-                              final color =
-                                  houseWorkColorMap[houseWork.id] ?? colors[0];
-                              final isVisible =
-                                  houseWorkVisibilities[houseWork.id] ?? true;
-
+                            statistics.houseWorkLegends.map((houseWorkLegend) {
                               return InkWell(
                                 onTap: () {
                                   ref
                                       .read(
                                         houseWorkVisibilitiesProvider.notifier,
                                       )
-                                      .toggle(houseWorkId: houseWork.id);
+                                      .toggle(
+                                        houseWorkId:
+                                            houseWorkLegend.houseWork.id,
+                                      );
                                 },
                                 child: Opacity(
-                                  opacity: isVisible ? 1.0 : 0.3,
+                                  opacity:
+                                      houseWorkLegend.isVisible ? 1.0 : 0.3,
                                   child: Padding(
                                     padding: const EdgeInsets.all(8),
                                     child: Row(
@@ -656,15 +647,15 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                                         Container(
                                           width: 16,
                                           height: 16,
-                                          color: color,
+                                          color: houseWorkLegend.color,
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          houseWork.title,
+                                          houseWorkLegend.houseWork.title,
                                           style: TextStyle(
                                             fontSize: 12,
                                             decoration:
-                                                isVisible
+                                                houseWorkLegend.isVisible
                                                     ? null
                                                     : TextDecoration
                                                         .lineThrough,
@@ -685,11 +676,6 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, stackTrace) => Center(
-            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-          ),
     );
   }
 }
@@ -702,9 +688,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 選択された期間に基づいてフィルタリングされたデータを取得
-    final timeSlotDataAsync = ref.watch(
-      filteredTimeSlotFrequencyProvider(analysisPeriod),
-    );
+    final timeSlotDataAsync = ref.watch(filteredTimeSlotFrequencyProvider);
 
     return timeSlotDataAsync.when(
       data: (timeSlotData) {
@@ -731,7 +715,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
         }
 
         // 期間に応じたタイトルのテキストを作成
-        final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
+        final periodText = _getPeriodTextLegacy(analysisPeriod: analysisPeriod);
 
         // 家事ごとの積み上げ棒グラフのための色リスト
         final colors = [
@@ -907,8 +891,34 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
   }
 }
 
-/// 選択されている期間に応じたテキストを返す
-String _getPeriodText({required int analysisPeriod}) {
+class _WeekdayAnalysisPanelTitle extends ConsumerWidget {
+  const _WeekdayAnalysisPanelTitle();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analysisPeriod = ref.watch(currentAnalysisPeriodProvider);
+
+    final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
+
+    return Text(
+      '$periodTextの曜日ごとの家事実行頻度',
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    );
+  }
+}
+
+String _getPeriodText({required AnalysisPeriod analysisPeriod}) {
+  switch (analysisPeriod) {
+    case AnalysisPeriodToday _:
+      return '今日';
+    case AnalysisPeriodCurrentWeek _:
+      return '今週';
+    case AnalysisPeriodCurrentMonth _:
+      return '今月';
+  }
+}
+
+String _getPeriodTextLegacy({required int analysisPeriod}) {
   switch (analysisPeriod) {
     case 0:
       return '今日';

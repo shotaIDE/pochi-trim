@@ -7,18 +7,16 @@ final FutureProviderFamily<List<WorkLog>, String>
 workLogsByHouseWorkIdProvider = FutureProvider.family<List<WorkLog>, String>((
   ref,
   houseWorkId,
-) async {
-  final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
+) {
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
 
   return workLogRepository.getWorkLogsByHouseWork(houseWorkId);
 });
 
 // タイトルでワークログを検索するプロバイダー
 final FutureProviderFamily<List<WorkLog>, String> workLogsByTitleProvider =
-    FutureProvider.family<List<WorkLog>, String>((ref, title) async {
-      final workLogRepository = await ref.watch(
-        workLogRepositoryProvider.future,
-      );
+    FutureProvider.family<List<WorkLog>, String>((ref, title) {
+      final workLogRepository = ref.watch(workLogRepositoryProvider);
 
       return workLogRepository.getWorkLogsByTitle(title);
     });
@@ -30,17 +28,16 @@ final deletedWorkLogProvider = StateProvider<WorkLog?>((ref) => null);
 final undoDeleteTimerProvider = StateProvider<int?>((ref) => null);
 
 // ワークログ削除処理を行うプロバイダー
-final FutureProvider<WorkLogDeletionNotifier> workLogDeletionProvider =
-    FutureProvider((ref) async {
-      final workLogRepository = await ref.watch(
-        workLogRepositoryProvider.future,
-      );
+final Provider<WorkLogDeletionNotifier> workLogDeletionProvider = Provider((
+  ref,
+) {
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
 
-      return WorkLogDeletionNotifier(
-        workLogRepository: workLogRepository,
-        ref: ref,
-      );
-    });
+  return WorkLogDeletionNotifier(
+    workLogRepository: workLogRepository,
+    ref: ref,
+  );
+});
 
 class WorkLogDeletionNotifier {
   WorkLogDeletionNotifier({required this.workLogRepository, required this.ref});

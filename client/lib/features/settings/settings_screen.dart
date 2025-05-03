@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/user.dart' as app_user;
 import 'package:house_worker/repositories/user_repository.dart';
+import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -483,6 +484,10 @@ class SettingsScreen extends ConsumerWidget {
                 onPressed: () async {
                   try {
                     await ref.read(authServiceProvider).signOut();
+                    await ref
+                        .read(rootAppInitializedProvider.notifier)
+                        .signOut();
+
                     if (context.mounted) {
                       Navigator.pop(context); // ダイアログを閉じる
                       Navigator.pop(context); // 設定画面を閉じる

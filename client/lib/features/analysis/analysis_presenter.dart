@@ -1,12 +1,31 @@
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/features/analysis/analysis_period.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
+import 'package:house_worker/features/analysis/weekday.dart';
 import 'package:house_worker/features/analysis/weekday_frequency.dart';
+import 'package:house_worker/features/analysis/weekday_statistics.dart';
+import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analysis_presenter.g.dart';
+
+@riverpod
+class CurrentAnalysisPeriod extends _$CurrentAnalysisPeriod {
+  @override
+  AnalysisPeriod build() {
+    return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(DateTime.now());
+  }
+
+  // ignore: use_setters_to_change_properties
+  void setPeriod(AnalysisPeriod period) {
+    state = period;
+  }
+}
 
 @riverpod
 class HouseWorkVisibilities extends _$HouseWorkVisibilities {
@@ -29,129 +48,169 @@ class HouseWorkVisibilities extends _$HouseWorkVisibilities {
 }
 
 @riverpod
-Future<List<WorkLog>> filteredWorkLogs(Ref ref, int period) async {
-  final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
-
-  final allWorkLogs = await workLogRepository.getAllOnce();
-
-  // 現在時刻を取得
-  final now = DateTime.now();
-
-  // 期間によるフィルタリング
-  switch (period) {
-    case 0: // 今日
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = startOfDay
-          .add(const Duration(days: 1))
-          .subtract(const Duration(microseconds: 1));
-      return allWorkLogs
-          .where(
-            (log) =>
-                log.completedAt.isAfter(startOfDay) &&
-                log.completedAt.isBefore(endOfDay),
-          )
-          .toList();
-
-    case 1: // 今週
-      // 週の開始は月曜日、終了は日曜日とする
-      final currentWeekday = now.weekday;
-      final startOfWeek = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).subtract(Duration(days: currentWeekday - 1));
-      final endOfWeek = startOfWeek
-          .add(const Duration(days: 7))
-          .subtract(const Duration(microseconds: 1));
-      return allWorkLogs
-          .where(
-            (log) =>
-                log.completedAt.isAfter(startOfWeek) &&
-                log.completedAt.isBefore(endOfWeek),
-          )
-          .toList();
-
-    case 2: // 今月
-      final startOfMonth = DateTime(now.year, now.month);
-      final endOfMonth =
-          (now.month < 12)
-              ? DateTime(now.year, now.month + 1)
-              : DateTime(now.year + 1);
-      final lastDayOfMonth = endOfMonth.subtract(
-        const Duration(microseconds: 1),
-      );
-      return allWorkLogs
-          .where(
-            (log) =>
-                log.completedAt.isAfter(startOfMonth) &&
-                log.completedAt.isBefore(lastDayOfMonth),
-          )
-          .toList();
-
-    default:
-      return allWorkLogs;
-  }
+Future<List<WorkLog>> workLogsFilteredByPeriod(Ref ref) async {
+  return ref.watch(_workLogsFilteredByPeriodFilePrivateProvider.future);
 }
 
 @riverpod
-Future<List<WeekdayFrequency>> filteredWeekdayFrequencies(
-  Ref ref, {
-  required int period,
-}) async {
-  // フィルタリングされた家事ログのデータを待機
-  final workLogs = await ref.watch(filteredWorkLogsProvider(period).future);
-  final houseWorkRepository = await ref.watch(
-    houseWorkRepositoryProvider.future,
+Future<WeekdayStatistics> weekdayStatisticsDisplay(Ref ref) async {
+  // 順番に `.future` 値を `await` により取得すると、
+  // 非同期処理の隙間で各 Provider のリスナーが存在しない状態が生まれ、
+  // Riverpod によりステートが破棄され、状態がリセットされてしまう。
+  // これを防ぐために、全ての Provider を `watch` してから、後で一気に `await` する。
+  final workLogsFuture = ref.watch(
+    _workLogsFilteredByPeriodFilePrivateProvider.future,
+  );
+  final houseWorksFuture = ref.watch(_houseWorksFilePrivateProvider.future);
+  final houseWorkVisibilities = ref.watch(houseWorkVisibilitiesProvider);
+  final colorOfHouseWorksFuture = ref.watch(
+    _colorOfHouseWorksFilePrivateProvider.future,
   );
 
-  // 曜日名の配列（インデックスは0が日曜日）
-  final weekdayNames = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
+  final workLogs = await workLogsFuture;
+  final houseWorks = await houseWorksFuture;
+  final colorOfHouseWorks = await colorOfHouseWorksFuture;
 
-  // 曜日ごと、家事IDごとにグループ化して頻度をカウント
-  final weekdayMap = <int, Map<String, int>>{};
-  // 各曜日の初期化
-  for (var i = 0; i < 7; i++) {
-    weekdayMap[i] = <String, int>{};
-  }
+  final workLogCountsStatistics =
+      Weekday.values.map((weekday) {
+        final targetWorkLogs =
+            workLogs
+                .where(
+                  (workLog) => workLog.completedAt.weekday == weekday.value,
+                )
+                .toList();
 
-  // 家事ログを曜日と家事IDでグループ化
-  for (final workLog in workLogs) {
-    final weekday = workLog.completedAt.weekday % 7; // 0-6の値（0が日曜日）
-    final houseWorkId = workLog.houseWorkId;
+        final workLogCountsForHouseWork =
+            houseWorks
+                .map((houseWork) {
+                  final workLogsOfTargetHouseWork = targetWorkLogs.where((
+                    workLog,
+                  ) {
+                    return workLog.houseWorkId == houseWork.id;
+                  });
 
-    weekdayMap[weekday]![houseWorkId] =
-        (weekdayMap[weekday]![houseWorkId] ?? 0) + 1;
-  }
+                  return HouseWorkFrequency(
+                    houseWork: houseWork,
+                    count: workLogsOfTargetHouseWork.length,
+                    color: colorOfHouseWorks[houseWork.id] ?? Colors.grey,
+                  );
+                })
+                // 家事ログが1回以上記録されたものだけを表示する
+                .where((houseWorkFrequency) => houseWorkFrequency.count >= 1)
+                .toList();
 
-  // WeekdayFrequencyのリストを作成
-  final result = <WeekdayFrequency>[];
-  for (var i = 0; i < 7; i++) {
-    final houseWorkFrequencies = <HouseWorkFrequency>[];
-    var totalCount = 0;
+        final sortedWorkLogCountsForHouseWork =
+            workLogCountsForHouseWork
+                .sortedBy((workLogCount) => workLogCount.count)
+                .reversed
+                .toList();
 
-    // 各家事IDごとの頻度を取得
-    for (final entry in weekdayMap[i]!.entries) {
-      final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
+        final totalCount = targetWorkLogs.length;
 
-      if (houseWork != null) {
-        houseWorkFrequencies.add(
-          HouseWorkFrequency(houseWork: houseWork, count: entry.value),
+        return WeekdayFrequency(
+          weekday: weekday,
+          houseWorkFrequencies: sortedWorkLogCountsForHouseWork,
+          totalCount: totalCount,
         );
-        totalCount += entry.value;
+      }).toList();
+
+  final houseWorksSortedByStatistics =
+      workLogCountsStatistics
+          .expand((weekdayFrequency) => weekdayFrequency.houseWorkFrequencies)
+          .map((houseWorkFrequency) => houseWorkFrequency.houseWork)
+          // 重複を排除
+          .toSet()
+          .toList();
+  final houseWorkLegends =
+      houseWorksSortedByStatistics.map((houseWork) {
+        final color = colorOfHouseWorks[houseWork.id] ?? Colors.grey;
+        final isVisible = houseWorkVisibilities[houseWork.id] ?? true;
+
+        return HouseWorkLegends(
+          houseWork: houseWork,
+          color: color,
+          isVisible: isVisible,
+        );
+      }).toList();
+
+  // 表示・非表示の状態に基づいて、各曜日のデータをフィルタリング
+  final filteredWeekdayData =
+      workLogCountsStatistics.map((day) {
+        final visibleFrequencies =
+            day.houseWorkFrequencies
+                .where(
+                  (freq) => houseWorkVisibilities[freq.houseWork.id] ?? true,
+                )
+                .toList();
+
+        // 表示する家事の合計回数を計算
+        final visibleTotalCount = visibleFrequencies.fold(
+          0,
+          (sum, freq) => sum + freq.count,
+        );
+
+        return WeekdayFrequency(
+          weekday: day.weekday,
+          houseWorkFrequencies: visibleFrequencies,
+          totalCount: visibleTotalCount,
+        );
+      }).toList();
+
+  return WeekdayStatistics(
+    weekdayFrequencies: filteredWeekdayData,
+    houseWorkLegends: houseWorkLegends,
+  );
+}
+
+@riverpod
+Stream<List<HouseWork>> _houseWorksFilePrivate(Ref ref) {
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+
+  return houseWorkRepository.getAll();
+}
+
+@riverpod
+Stream<Map<String, Color>> _colorOfHouseWorksFilePrivate(Ref ref) {
+  final houseWorksAsync = ref.watch(_houseWorksFilePrivateProvider);
+
+  final colors = [
+    Colors.blue,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+    Colors.teal,
+    Colors.pink,
+    Colors.amber,
+    Colors.indigo,
+  ];
+
+  return houseWorksAsync.when(
+    data: (houseWorks) {
+      final colorsOfHouseWorks = <String, Color>{};
+
+      for (final houseWork in houseWorks) {
+        colorsOfHouseWorks[houseWork.id] =
+            colors[colorsOfHouseWorks.length % colors.length];
       }
-    }
 
-    // 頻度の高い順にソート
-    houseWorkFrequencies.sort((a, b) => b.count.compareTo(a.count));
+      return Stream.value(colorsOfHouseWorks);
+    },
+    error: (error, stack) => Stream.error(error),
+    loading: Stream.empty,
+  );
+}
 
-    result.add(
-      WeekdayFrequency(
-        weekday: weekdayNames[i],
-        houseWorkFrequencies: houseWorkFrequencies,
-        totalCount: totalCount,
-      ),
-    );
-  }
+@riverpod
+Future<List<WorkLog>> _workLogsFilteredByPeriodFilePrivate(Ref ref) async {
+  final currentAnalysisPeriod = ref.watch(currentAnalysisPeriodProvider);
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
 
-  return result;
+  final allWorkLogs = await workLogRepository.getAllOnce();
+
+  return allWorkLogs
+    ..where(
+      (log) =>
+          log.completedAt.isAfter(currentAnalysisPeriod.from) &&
+          log.completedAt.isBefore(currentAnalysisPeriod.to),
+    ).toList();
 }

@@ -10,10 +10,8 @@ import 'package:intl/intl.dart';
 
 // WorkLogに対応するHouseWorkを取得するプロバイダー
 final FutureProviderFamily<HouseWork?, WorkLog> _houseWorkForLogProvider =
-    FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) async {
-      final houseWorkRepository = await ref.watch(
-        houseWorkRepositoryProvider.future,
-      );
+    FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
+      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
       return houseWorkRepository.getByIdOnce(workLog.houseWorkId);
     });
@@ -51,7 +49,7 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
       direction: DismissDirection.endToStart,
       onDismissed: (direction) async {
         // ワークログ削除処理
-        final workLogDeletion = await ref.read(workLogDeletionProvider.future);
+        final workLogDeletion = ref.read(workLogDeletionProvider);
         await workLogDeletion.deleteWorkLog(widget.workLog);
 
         if (!context.mounted) {
@@ -69,9 +67,7 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
             action: SnackBarAction(
               label: '元に戻す',
               onPressed: () async {
-                final workLogDeletion = await ref.read(
-                  workLogDeletionProvider.future,
-                );
+                final workLogDeletion = ref.read(workLogDeletionProvider);
                 await workLogDeletion.undoDelete();
               },
             ),
@@ -137,8 +133,8 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
                           onPressed: () async {
                             await HapticFeedback.mediumImpact();
 
-                            final workLogService = await ref.read(
-                              workLogServiceProvider.future,
+                            final workLogService = ref.read(
+                              workLogServiceProvider,
                             );
 
                             if (!context.mounted) {
