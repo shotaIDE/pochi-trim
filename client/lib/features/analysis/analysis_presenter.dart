@@ -162,76 +162,83 @@ Future<WeekdayStatistics> weekdayStatisticsDisplay(Ref ref) async {
   );
 }
 
-// 時間帯ごとの家事実行頻度を取得するプロバイダー（期間フィルタリング付き）
-final filteredTimeSlotFrequencyProvider =
-    FutureProvider<List<TimeSlotFrequency>>((ref) async {
-      // フィルタリングされた家事ログのデータを待機
-      final workLogsFuture = ref.watch(workLogsFilteredByPeriodProvider.future);
-      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+/// 時間帯ごとの家事実行頻度を取得するプロバイダー（期間フィルタリング付き）
+@riverpod
+Future<List<TimeSlotFrequency>> filteredTimeSlotFrequency(Ref ref) async {
+  // 非同期処理の状態リセットを防ぐために、全てのプロバイダーを先に `watch` してから後で `await` する
+  final workLogsFuture = ref.watch(workLogsFilteredByPeriodProvider.future);
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
-      final workLogs = await workLogsFuture;
+  final workLogs = await workLogsFuture;
 
-      // 時間帯の定義（3時間ごと）
-      final timeSlots = [
-        '0-3時',
-        '3-6時',
-        '6-9時',
-        '9-12時',
-        '12-15時',
-        '15-18時',
-        '18-21時',
-        '21-24時',
-      ];
+  // 時間帯の定義（3時間ごと）
+  final timeSlots = [
+    '0-3時',
+    '3-6時',
+    '6-9時',
+    '9-12時',
+    '12-15時',
+    '15-18時',
+    '18-21時',
+    '21-24時',
+  ];
 
-      // 時間帯ごと、家事IDごとにグループ化して頻度をカウント
-      final timeSlotMap = <int, Map<String, int>>{};
-      // 各時間帯の初期化
-      for (var i = 0; i < 8; i++) {
-        timeSlotMap[i] = <String, int>{};
-      }
+  // 時間帯ごと、家事IDごとにグループ化して頻度をカウント
+  final timeSlotMap = Map.fromEntries(
+    List.generate(8, (i) => MapEntry(i, <String, int>{})),
+  );
 
-      // 家事ログを時間帯と家事IDでグループ化
-      for (final workLog in workLogs) {
-        final hour = workLog.completedAt.hour;
-        final timeSlotIndex = hour ~/ 3; // 0-7のインデックス（3時間ごとの区分）
-        final houseWorkId = workLog.houseWorkId;
+  // 家事ログを時間帯と家事IDでグループ化
+  for (final workLog in workLogs) {
+    final hour = workLog.completedAt.hour;
+    final timeSlotIndex = hour ~/ 3; // 0-7のインデックス（3時間ごとの区分）
+    final houseWorkId = workLog.houseWorkId;
 
-        timeSlotMap[timeSlotIndex]![houseWorkId] =
-            (timeSlotMap[timeSlotIndex]![houseWorkId] ?? 0) + 1;
-      }
+    timeSlotMap[timeSlotIndex]![houseWorkId] =
+        (timeSlotMap[timeSlotIndex]![houseWorkId] ?? 0) + 1;
+  }
 
-      // TimeSlotFrequencyのリストを作成
-      final result = <TimeSlotFrequency>[];
-      for (var i = 0; i < 8; i++) {
-        final houseWorkFrequencies = <HouseWorkFrequency>[];
-        var totalCount = 0;
+  // 各時間帯ごとにTimeSlotFrequencyを作成
+  final result = await Future.wait(
+    List.generate(8, (i) async {
+      // 各家事IDごとの頻度を取得
+      final houseWorkFrequenciesFutures = timeSlotMap[i]!.entries.map((
+        entry,
+      ) async {
+        final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
+        if (houseWork == null) return null;
 
-        // 各家事IDごとの頻度を取得
-        for (final entry in timeSlotMap[i]!.entries) {
-          final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
+        return HouseWorkFrequency(houseWork: houseWork, count: entry.value);
+      });
 
-          if (houseWork != null) {
-            houseWorkFrequencies.add(
-              HouseWorkFrequency(houseWork: houseWork, count: entry.value),
-            );
-            totalCount += entry.value;
-          }
-        }
+      // 非同期処理の結果を待機
+      final houseWorkFrequenciesWithNull = await Future.wait(
+        houseWorkFrequenciesFutures,
+      );
 
-        // 頻度の高い順にソート
-        houseWorkFrequencies.sort((a, b) => b.count.compareTo(a.count));
+      // nullでない結果だけをフィルタリング
+      final houseWorkFrequencies =
+          houseWorkFrequenciesWithNull.whereType<HouseWorkFrequency>().toList();
 
-        result.add(
-          TimeSlotFrequency(
-            timeSlot: timeSlots[i],
-            houseWorkFrequencies: houseWorkFrequencies,
-            totalCount: totalCount,
-          ),
-        );
-      }
+      // 頻度の高い順にソート
+      houseWorkFrequencies.sortBy((freq) => -freq.count);
 
-      return result;
-    });
+      // 合計回数を計算
+      final totalCount = houseWorkFrequencies.fold(
+        0,
+        (sum, freq) => sum + freq.count,
+      );
+
+      return TimeSlotFrequency(
+        timeSlot: timeSlots[i],
+        houseWorkFrequencies: houseWorkFrequencies,
+        totalCount: totalCount,
+      );
+    }),
+  );
+
+  return result;
+}
 
 @riverpod
 Stream<List<HouseWork>> _houseWorksFilePrivate(Ref ref) {
