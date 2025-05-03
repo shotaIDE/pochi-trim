@@ -13,6 +13,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analysis_presenter.g.dart';
 
+// TODO(ide): keepAlive = false にできないか？
 @Riverpod(keepAlive: true)
 class HouseWorkVisibilities extends _$HouseWorkVisibilities {
   @override
