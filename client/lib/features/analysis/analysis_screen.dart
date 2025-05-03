@@ -395,7 +395,6 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 選択された期間に基づいてフィルタリングされたデータを取得
     final statisticsFuture = ref.watch(weekdayStatisticsDisplayProvider.future);
 
     return FutureBuilder(
@@ -618,12 +617,30 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 選択された期間に基づいてフィルタリングされたデータを取得
-    final timeSlotDataAsync = ref.watch(filteredTimeSlotFrequencyProvider);
+    final statisticsFuture = ref.watch(
+      currentTimeSlotStatisticsProvider.future,
+    );
 
-    return timeSlotDataAsync.when(
-      data: (timeSlotData) {
-        if (timeSlotData.every((data) => data.totalCount == 0)) {
+    return FutureBuilder(
+      future: statisticsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              'エラーが発生しました。画面を再読み込みしてください。',
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        final statistics = snapshot.data;
+        if (statistics == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final timeSlotFrequencies = statistics.timeSlotFrequencies;
+
+        if (timeSlotFrequencies.every((data) => data.totalCount == 0)) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -665,7 +682,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
         final houseWorkColorMap = <String, Color>{};
 
         // すべての家事を収集し、それぞれに色を割り当てる
-        for (final slot in timeSlotData) {
+        for (final slot in timeSlotFrequencies) {
           for (var i = 0; i < slot.houseWorkFrequencies.length; i++) {
             final houseWork = slot.houseWorkFrequencies[i].houseWork;
             allHouseWorks.add(houseWork);
@@ -700,7 +717,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                     child: BarChart(
                       BarChartData(
                         alignment: BarChartAlignment.spaceAround,
-                        maxY: timeSlotData
+                        maxY: timeSlotFrequencies
                             .map((e) => e.totalCount.toDouble())
                             .reduce((a, b) => a > b ? a : b),
                         titlesData: FlTitlesData(
@@ -716,11 +733,12 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                             sideTitles: SideTitles(
                               showTitles: true,
                               getTitlesWidget: (value, meta) {
-                                if (value < 0 || value >= timeSlotData.length) {
+                                if (value < 0 ||
+                                    value >= timeSlotFrequencies.length) {
                                   return const Text('');
                                 }
                                 return Text(
-                                  timeSlotData[value.toInt()].timeSlot,
+                                  timeSlotFrequencies[value.toInt()].timeSlot,
                                 );
                               },
                             ),
@@ -742,7 +760,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                           ),
                         ),
                         barGroups:
-                            timeSlotData.asMap().entries.map((entry) {
+                            timeSlotFrequencies.asMap().entries.map((entry) {
                               final index = entry.key;
                               final data = entry.value;
 
@@ -813,11 +831,6 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, stackTrace) => Center(
-            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-          ),
     );
   }
 }
