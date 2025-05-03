@@ -162,6 +162,77 @@ Future<WeekdayStatistics> weekdayStatisticsDisplay(Ref ref) async {
   );
 }
 
+// 時間帯ごとの家事実行頻度を取得するプロバイダー（期間フィルタリング付き）
+final filteredTimeSlotFrequencyProvider =
+    FutureProvider<List<TimeSlotFrequency>>((ref) async {
+      // フィルタリングされた家事ログのデータを待機
+      final workLogsFuture = ref.watch(workLogsFilteredByPeriodProvider.future);
+      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+
+      final workLogs = await workLogsFuture;
+
+      // 時間帯の定義（3時間ごと）
+      final timeSlots = [
+        '0-3時',
+        '3-6時',
+        '6-9時',
+        '9-12時',
+        '12-15時',
+        '15-18時',
+        '18-21時',
+        '21-24時',
+      ];
+
+      // 時間帯ごと、家事IDごとにグループ化して頻度をカウント
+      final timeSlotMap = <int, Map<String, int>>{};
+      // 各時間帯の初期化
+      for (var i = 0; i < 8; i++) {
+        timeSlotMap[i] = <String, int>{};
+      }
+
+      // 家事ログを時間帯と家事IDでグループ化
+      for (final workLog in workLogs) {
+        final hour = workLog.completedAt.hour;
+        final timeSlotIndex = hour ~/ 3; // 0-7のインデックス（3時間ごとの区分）
+        final houseWorkId = workLog.houseWorkId;
+
+        timeSlotMap[timeSlotIndex]![houseWorkId] =
+            (timeSlotMap[timeSlotIndex]![houseWorkId] ?? 0) + 1;
+      }
+
+      // TimeSlotFrequencyのリストを作成
+      final result = <TimeSlotFrequency>[];
+      for (var i = 0; i < 8; i++) {
+        final houseWorkFrequencies = <HouseWorkFrequency>[];
+        var totalCount = 0;
+
+        // 各家事IDごとの頻度を取得
+        for (final entry in timeSlotMap[i]!.entries) {
+          final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
+
+          if (houseWork != null) {
+            houseWorkFrequencies.add(
+              HouseWorkFrequency(houseWork: houseWork, count: entry.value),
+            );
+            totalCount += entry.value;
+          }
+        }
+
+        // 頻度の高い順にソート
+        houseWorkFrequencies.sort((a, b) => b.count.compareTo(a.count));
+
+        result.add(
+          TimeSlotFrequency(
+            timeSlot: timeSlots[i],
+            houseWorkFrequencies: houseWorkFrequencies,
+            totalCount: totalCount,
+          ),
+        );
+      }
+
+      return result;
+    });
+
 @riverpod
 Stream<List<HouseWork>> _houseWorksFilePrivate(Ref ref) {
   final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
