@@ -20,12 +20,9 @@ final selectedTabProvider = StateProvider<int>((ref) => 0);
 
 // 予定家事一覧を提供するプロバイダー
 final plannedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
-  final workLogRepositoryAsync = ref.watch(workLogRepositoryProvider);
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
 
-  return workLogRepositoryAsync.maybeWhen(
-    data: (repository) => repository.getIncompleteWorkLogs(),
-    orElse: Stream.empty,
-  );
+  return workLogRepository.getIncompleteWorkLogs();
 });
 
 // WorkLogに対応するHouseWorkを取得するプロバイダー
@@ -172,8 +169,8 @@ class _PlannedWorkLogsTab extends ConsumerWidget {
                   // 家事を完了としてマーク
                   final userId = ref.read(authServiceProvider).currentUser?.uid;
                   if (userId != null) {
-                    final workLogRepository = await ref.read(
-                      workLogRepositoryProvider.future,
+                    final workLogRepository = ref.read(
+                      workLogRepositoryProvider,
                     );
                     await workLogRepository.completeWorkLog(workLog, userId);
                   }
@@ -439,7 +436,7 @@ class _QuickRegisterButton extends ConsumerWidget {
         onTap: () async {
           await HapticFeedback.mediumImpact();
 
-          final workLogService = await ref.read(workLogServiceProvider.future);
+          final workLogService = ref.read(workLogServiceProvider);
 
           if (!context.mounted) {
             return;

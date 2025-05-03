@@ -35,7 +35,7 @@ class HouseWorkVisibilities extends _$HouseWorkVisibilities {
 
 @riverpod
 Future<List<WorkLog>> filteredWorkLogs(Ref ref, int period) async {
-  final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
 
   final allWorkLogs = await workLogRepository.getAllOnce();
 

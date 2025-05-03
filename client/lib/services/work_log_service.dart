@@ -11,9 +11,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'work_log_service.g.dart';
 
 @riverpod
-Future<WorkLogService> workLogService(Ref ref) async {
+WorkLogService workLogService(Ref ref) {
   final appSession = ref.watch(rootAppInitializedProvider);
-  final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
 
   switch (appSession) {

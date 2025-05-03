@@ -64,8 +64,8 @@ class TimeSlotFrequency {
 }
 
 // 家事ログの取得と分析のためのプロバイダー
-final workLogsForAnalysisProvider = FutureProvider<List<WorkLog>>((ref) async {
-  final workLogRepository = await ref.watch(workLogRepositoryProvider.future);
+final workLogsForAnalysisProvider = FutureProvider<List<WorkLog>>((ref) {
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
 
   return workLogRepository.getAllOnce();
 });

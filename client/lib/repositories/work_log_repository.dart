@@ -12,7 +12,7 @@ part 'work_log_repository.g.dart';
 final _logger = Logger('WorkLogRepository');
 
 @riverpod
-Future<WorkLogRepository> workLogRepository(Ref ref) async {
+WorkLogRepository workLogRepository(Ref ref) {
   final appSession = ref.watch(rootAppInitializedProvider);
 
   switch (appSession) {

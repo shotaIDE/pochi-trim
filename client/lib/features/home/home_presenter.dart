@@ -50,10 +50,7 @@ Stream<List<HouseWork>> _houseWorksFilePrivate(Ref ref) {
 
 @riverpod
 Stream<List<WorkLog>> _completedWorkLogsFilePrivate(Ref ref) {
-  final workLogRepositoryAsync = ref.watch(workLogRepositoryProvider);
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
 
-  return workLogRepositoryAsync.maybeWhen(
-    data: (repository) => repository.getCompletedWorkLogs(),
-    orElse: Stream.empty,
-  );
+  return workLogRepository.getCompletedWorkLogs();
 }
