@@ -32,4 +32,8 @@ class RootAppInitialized extends _$RootAppInitialized {
   Future<void> signIn({required String userId, required String houseId}) async {
     state = AppSession.signedIn(userId: userId, currentHouseId: houseId);
   }
+
+  Future<void> signOut() async {
+    state = AppSession.notSignedIn();
+  }
 }
