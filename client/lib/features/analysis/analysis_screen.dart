@@ -7,6 +7,7 @@ import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
+import 'package:intl/intl.dart';
 
 // 家事ごとの頻度分析のためのデータクラス
 class HouseWorkFrequency {
@@ -415,11 +416,18 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
       },
     );
 
+    final dateTimeFormat = DateFormat('yyyy/MM/dd');
+    final periodText = Text(
+      '${dateTimeFormat.format(analysisPeriod.from)}'
+      '- ${dateTimeFormat.format(analysisPeriod.to)}',
+    );
+
     return Row(
+      spacing: 8,
       children: [
         const Text('分析期間: ', style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(width: 8),
         dropdownButton,
+        periodText,
       ],
     );
   }

@@ -18,7 +18,7 @@ part 'analysis_presenter.g.dart';
 class CurrentAnalysisPeriod extends _$CurrentAnalysisPeriod {
   @override
   AnalysisPeriod build() {
-    return AnalysisPeriodTodayGenerator.fromCurrentDate(DateTime.now());
+    return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(DateTime.now());
   }
 
   // ignore: use_setters_to_change_properties
