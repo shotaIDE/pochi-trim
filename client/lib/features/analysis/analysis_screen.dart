@@ -223,14 +223,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   /// 0: 今日
   /// 1: 今週
   /// 2: 今月
-  var _analysisPeriod = 1; // デフォルトは「今週」
-
-  // 分析期間の選択肢
-  final _periodItems = [
-    const DropdownMenuItem<int>(value: 0, child: Text('今日')),
-    const DropdownMenuItem<int>(value: 1, child: Text('今週')),
-    const DropdownMenuItem<int>(value: 2, child: Text('今月')),
-  ];
+  var _analysisPeriodLegacy = 1; // デフォルトは「今週」
 
   @override
   Widget build(BuildContext context) {
@@ -247,8 +240,16 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       ),
       body: Column(
         children: [
-          // 分析期間の切り替えUI
-          _buildAnalysisPeriodSwitcher(),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: _AnalysisPeriodSwitcher(
+              onPeriodChangedLegacy: (period) {
+                setState(() {
+                  _analysisPeriodLegacy = period;
+                });
+              },
+            ),
+          ),
 
           // 分析方式の切り替えUI
           _buildAnalysisModeSwitcher(),
@@ -263,36 +264,12 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                   return const _WeekdayAnalysisPanel();
                 case 2:
                   return _TimeSlotAnalysisPanel(
-                    analysisPeriod: _analysisPeriod,
+                    analysisPeriod: _analysisPeriodLegacy,
                   );
                 default:
                   return _buildFrequencyAnalysis();
               }
             }(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 分析期間の切り替えUIを構築
-  Widget _buildAnalysisPeriodSwitcher() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          const Text('分析期間: ', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(width: 8),
-          DropdownButton<int>(
-            value: _analysisPeriod,
-            items: _periodItems,
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  _analysisPeriod = value;
-                });
-              }
-            },
           ),
         ],
       ),
@@ -357,7 +334,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
 
             // 期間に応じたタイトルのテキストを作成
             final periodText = _getPeriodTextLegacy(
-              analysisPeriod: _analysisPeriod,
+              analysisPeriod: _analysisPeriodLegacy,
             );
 
             return Card(
@@ -409,6 +386,68 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         );
       },
     );
+  }
+}
+
+class _AnalysisPeriodSwitcher extends ConsumerWidget {
+  const _AnalysisPeriodSwitcher({required this.onPeriodChangedLegacy});
+
+  final void Function(int period) onPeriodChangedLegacy;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analysisPeriod = ref.watch(currentAnalysisPeriodProvider);
+
+    final dropdownButton = DropdownButton<int>(
+      value: _getPeriodValue(analysisPeriod),
+      items: const [
+        DropdownMenuItem(value: 0, child: Text('今日')),
+        DropdownMenuItem(value: 1, child: Text('今週')),
+        DropdownMenuItem(value: 2, child: Text('今月')),
+      ],
+      onChanged: (value) {
+        if (value == null) {
+          return;
+        }
+
+        final period = _getPeriod(value);
+        ref.read(currentAnalysisPeriodProvider.notifier).setPeriod(period);
+      },
+    );
+
+    return Row(
+      children: [
+        const Text('分析期間: ', style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(width: 8),
+        dropdownButton,
+      ],
+    );
+  }
+
+  int _getPeriodValue(AnalysisPeriod analysisPeriod) {
+    switch (analysisPeriod) {
+      case AnalysisPeriodToday _:
+        return 0;
+      case AnalysisPeriodCurrentWeek _:
+        return 1;
+      case AnalysisPeriodCurrentMonth _:
+        return 2;
+    }
+  }
+
+  AnalysisPeriod _getPeriod(int value) {
+    final current = DateTime.now();
+
+    switch (value) {
+      case 0:
+        return AnalysisPeriodTodayGenerator.fromCurrentDate(current);
+      case 1:
+        return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(current);
+      case 2:
+        return AnalysisPeriodCurrentMonthGenerator.fromCurrentDate(current);
+      default:
+        throw ArgumentError('Invalid value: $value');
+    }
   }
 }
 
