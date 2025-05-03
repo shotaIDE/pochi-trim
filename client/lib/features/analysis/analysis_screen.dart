@@ -419,12 +419,27 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 選択された期間に基づいてフィルタリングされたデータを取得
-    final statisticsAsync = ref.watch(
-      weekdayStatisticsDisplayProvider(period: analysisPeriod),
+    final statisticsFuture = ref.watch(
+      weekdayStatisticsDisplayProvider(period: analysisPeriod).future,
     );
 
-    return statisticsAsync.when(
-      data: (statistics) {
+    return FutureBuilder(
+      future: statisticsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              'エラーが発生しました。画面を再読み込みしてください。',
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        final statistics = snapshot.data;
+        if (statistics == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         final weekdayFrequencies = statistics.weekdayFrequencies;
 
         if (weekdayFrequencies.every((data) => data.totalCount == 0)) {
@@ -626,13 +641,6 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
           ),
         );
       },
-      loading: () {
-        return const Center(child: CircularProgressIndicator());
-      },
-      error:
-          (error, stackTrace) => Center(
-            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-          ),
     );
   }
 }
