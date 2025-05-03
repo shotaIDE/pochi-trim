@@ -196,9 +196,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 case 1:
                   return const _WeekdayAnalysisPanel();
                 case 2:
-                  return _TimeSlotAnalysisPanel(
-                    analysisPeriod: _analysisPeriodLegacy,
-                  );
+                  return const _TimeSlotAnalysisPanel();
                 default:
                   return _buildFrequencyAnalysis();
               }
@@ -552,9 +550,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
 }
 
 class _TimeSlotAnalysisPanel extends ConsumerWidget {
-  const _TimeSlotAnalysisPanel({required this.analysisPeriod});
-
-  final int analysisPeriod;
+  const _TimeSlotAnalysisPanel();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -603,40 +599,6 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
           );
         }
 
-        // 期間に応じたタイトルのテキストを作成
-        final periodText = _getPeriodTextLegacy(analysisPeriod: analysisPeriod);
-
-        // 家事ごとの積み上げ棒グラフのための色リスト
-        final colors = [
-          Colors.blue,
-          Colors.green,
-          Colors.orange,
-          Colors.purple,
-          Colors.teal,
-          Colors.pink,
-          Colors.amber,
-          Colors.indigo,
-        ];
-
-        // 凡例データの収集
-        final allHouseWorks = <HouseWork>{};
-        final houseWorkColorMap = <String, Color>{};
-
-        // すべての家事を収集し、それぞれに色を割り当てる
-        for (final slot in timeSlotFrequencies) {
-          for (var i = 0; i < slot.houseWorkFrequencies.length; i++) {
-            final houseWork = slot.houseWorkFrequencies[i].houseWork;
-            allHouseWorks.add(houseWork);
-            if (!houseWorkColorMap.containsKey(houseWork.id)) {
-              houseWorkColorMap[houseWork.id] =
-                  colors[houseWorkColorMap.length % colors.length];
-            }
-          }
-        }
-
-        // 家事を集約してリスト化（凡例用）
-        final legendItems = allHouseWorks.toList();
-
         return Card(
           margin: const EdgeInsets.all(16),
           child: Padding(
@@ -644,13 +606,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '$periodTextの時間帯ごとの家事実行頻度',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                const _TimeSlotAnalysisPanelTitle(),
                 const SizedBox(height: 16),
                 Expanded(
                   child: Padding(
@@ -705,13 +661,30 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                               final index = entry.key;
                               final data = entry.value;
 
+                              // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
+                              final rodStackItems = <BarChartRodStackItem>[];
+                              double fromY = 0;
+
+                              // 表示されている家事だけを処理
+                              for (final freq in data.houseWorkFrequencies) {
+                                final toY = fromY + freq.count;
+
+                                rodStackItems.add(
+                                  BarChartRodStackItem(fromY, toY, freq.color),
+                                );
+
+                                fromY = toY;
+                              }
+
                               return BarChartGroupData(
                                 x: index,
                                 barRods: [
-                                  data.toBarChartRodData(
+                                  BarChartRodData(
+                                    toY: data.totalCount.toDouble(),
                                     width: 20,
-                                    x: index.toDouble(),
-                                    colors: colors,
+                                    color: Colors.transparent,
+                                    rodStackItems: rodStackItems,
+                                    borderRadius: BorderRadius.zero,
                                   ),
                                 ],
                               );
@@ -752,6 +725,33 @@ class _WeekdayAnalysisPanelTitle extends ConsumerWidget {
       '$periodTextの曜日ごとの家事実行頻度',
       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
     );
+  }
+}
+
+class _TimeSlotAnalysisPanelTitle extends ConsumerWidget {
+  const _TimeSlotAnalysisPanelTitle();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analysisPeriod = ref.watch(currentAnalysisPeriodProvider);
+
+    final periodText = _getPeriodText(analysisPeriod: analysisPeriod);
+
+    return Text(
+      '$periodTextの時間帯ごとの家事実行頻度',
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    );
+  }
+}
+
+String _getPeriodText({required AnalysisPeriod analysisPeriod}) {
+  switch (analysisPeriod) {
+    case AnalysisPeriodToday _:
+      return '今日';
+    case AnalysisPeriodCurrentWeek _:
+      return '今週';
+    case AnalysisPeriodCurrentMonth _:
+      return '今月';
   }
 }
 
@@ -816,17 +816,6 @@ class _Legends extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-String _getPeriodText({required AnalysisPeriod analysisPeriod}) {
-  switch (analysisPeriod) {
-    case AnalysisPeriodToday _:
-      return '今日';
-    case AnalysisPeriodCurrentWeek _:
-      return '今週';
-    case AnalysisPeriodCurrentMonth _:
-      return '今月';
   }
 }
 
