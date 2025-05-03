@@ -333,8 +333,12 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
       value: _getPeriodValue(analysisPeriod),
       items: const [
         DropdownMenuItem(value: 0, child: Text('今日')),
-        DropdownMenuItem(value: 1, child: Text('今週')),
-        DropdownMenuItem(value: 2, child: Text('今月')),
+        DropdownMenuItem(value: 1, child: Text('昨日')),
+        DropdownMenuItem(value: 2, child: Text('今週')),
+        DropdownMenuItem(value: 3, child: Text('今月')),
+        DropdownMenuItem(value: 4, child: Text('過去1週間')),
+        DropdownMenuItem(value: 5, child: Text('過去2週間')),
+        DropdownMenuItem(value: 6, child: Text('過去1ヶ月')),
       ],
       onChanged: (value) {
         if (value == null) {
@@ -366,10 +370,18 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
     switch (analysisPeriod) {
       case AnalysisPeriodToday _:
         return 0;
-      case AnalysisPeriodCurrentWeek _:
+      case AnalysisPeriodYesterday _:
         return 1;
-      case AnalysisPeriodCurrentMonth _:
+      case AnalysisPeriodCurrentWeek _:
         return 2;
+      case AnalysisPeriodCurrentMonth _:
+        return 3;
+      case AnalysisPeriodPastWeek _:
+        return 4;
+      case AnalysisPeriodPastTwoWeeks _:
+        return 5;
+      case AnalysisPeriodPastMonth _:
+        return 6;
     }
   }
 
@@ -380,9 +392,17 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
       case 0:
         return AnalysisPeriodTodayGenerator.fromCurrentDate(current);
       case 1:
-        return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(current);
+        return AnalysisPeriodYesterdayGenerator.fromCurrentDate(current);
       case 2:
+        return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(current);
+      case 3:
         return AnalysisPeriodCurrentMonthGenerator.fromCurrentDate(current);
+      case 4:
+        return AnalysisPeriodPastWeekGenerator.fromCurrentDate(current);
+      case 5:
+        return AnalysisPeriodPastTwoWeeksGenerator.fromCurrentDate(current);
+      case 6:
+        return AnalysisPeriodPastMonthGenerator.fromCurrentDate(current);
       default:
         throw ArgumentError('Invalid value: $value');
     }
@@ -748,10 +768,18 @@ String _getPeriodText({required AnalysisPeriod analysisPeriod}) {
   switch (analysisPeriod) {
     case AnalysisPeriodToday _:
       return '今日';
+    case AnalysisPeriodYesterday _:
+      return '昨日';
     case AnalysisPeriodCurrentWeek _:
       return '今週';
     case AnalysisPeriodCurrentMonth _:
       return '今月';
+    case AnalysisPeriodPastWeek _:
+      return '過去1週間';
+    case AnalysisPeriodPastTwoWeeks _:
+      return '過去2週間';
+    case AnalysisPeriodPastMonth _:
+      return '過去1ヶ月';
   }
 }
 

@@ -8,14 +8,30 @@ sealed class AnalysisPeriod with _$AnalysisPeriod {
 
   factory AnalysisPeriod.today({required DateTime from, required DateTime to}) =
       AnalysisPeriodToday;
+  factory AnalysisPeriod.yesterday({
+    required DateTime from,
+    required DateTime to,
+  }) = AnalysisPeriodYesterday;
   factory AnalysisPeriod.currentWeek({
     required DateTime from,
     required DateTime to,
   }) = AnalysisPeriodCurrentWeek;
+  factory AnalysisPeriod.pastWeek({
+    required DateTime from,
+    required DateTime to,
+  }) = AnalysisPeriodPastWeek;
+  factory AnalysisPeriod.pastTwoWeeks({
+    required DateTime from,
+    required DateTime to,
+  }) = AnalysisPeriodPastTwoWeeks;
   factory AnalysisPeriod.currentMonth({
     required DateTime from,
     required DateTime to,
   }) = AnalysisPeriodCurrentMonth;
+  factory AnalysisPeriod.pastMonth({
+    required DateTime from,
+    required DateTime to,
+  }) = AnalysisPeriodPastMonth;
 
   @override
   final DateTime from;
@@ -53,6 +69,60 @@ extension AnalysisPeriodCurrentWeekGenerator on AnalysisPeriodCurrentWeek {
   }
 }
 
+extension AnalysisPeriodYesterdayGenerator on AnalysisPeriodYesterday {
+  static AnalysisPeriod fromCurrentDate(DateTime current) {
+    final startOfYesterday = DateTime(
+      current.year,
+      current.month,
+      current.day,
+    ).subtract(const Duration(days: 1));
+    final endOfYesterday = DateTime(
+      current.year,
+      current.month,
+      current.day,
+    ).subtract(const Duration(microseconds: 1));
+
+    return AnalysisPeriod.yesterday(from: startOfYesterday, to: endOfYesterday);
+  }
+}
+
+extension AnalysisPeriodPastWeekGenerator on AnalysisPeriodPastWeek {
+  static AnalysisPeriod fromCurrentDate(DateTime current) {
+    final endOfToday = DateTime(
+      current.year,
+      current.month,
+      current.day,
+    ).add(const Duration(days: 1)).subtract(const Duration(microseconds: 1));
+    final startOfPastWeek = DateTime(
+      current.year,
+      current.month,
+      current.day,
+    ).subtract(const Duration(days: 6));
+
+    return AnalysisPeriod.pastWeek(from: startOfPastWeek, to: endOfToday);
+  }
+}
+
+extension AnalysisPeriodPastTwoWeeksGenerator on AnalysisPeriodPastTwoWeeks {
+  static AnalysisPeriod fromCurrentDate(DateTime current) {
+    final endOfToday = DateTime(
+      current.year,
+      current.month,
+      current.day,
+    ).add(const Duration(days: 1)).subtract(const Duration(microseconds: 1));
+    final startOfPastTwoWeeks = DateTime(
+      current.year,
+      current.month,
+      current.day,
+    ).subtract(const Duration(days: 13));
+
+    return AnalysisPeriod.pastTwoWeeks(
+      from: startOfPastTwoWeeks,
+      to: endOfToday,
+    );
+  }
+}
+
 extension AnalysisPeriodCurrentMonthGenerator on AnalysisPeriodCurrentMonth {
   static AnalysisPeriod fromCurrentDate(DateTime current) {
     final startOfCurrentMonth = DateTime(current.year, current.month);
@@ -68,5 +138,24 @@ extension AnalysisPeriodCurrentMonthGenerator on AnalysisPeriodCurrentMonth {
       from: startOfCurrentMonth,
       to: endOfCurrentMonth,
     );
+  }
+}
+
+extension AnalysisPeriodPastMonthGenerator on AnalysisPeriodPastMonth {
+  static AnalysisPeriod fromCurrentDate(DateTime current) {
+    final endOfToday = DateTime(
+      current.year,
+      current.month,
+      current.day,
+    ).add(const Duration(days: 1)).subtract(const Duration(microseconds: 1));
+
+    // 過去30日間を計算
+    final startOfPastMonth = DateTime(
+      current.year,
+      current.month,
+      current.day,
+    ).subtract(const Duration(days: 29));
+
+    return AnalysisPeriod.pastMonth(from: startOfPastMonth, to: endOfToday);
   }
 }
