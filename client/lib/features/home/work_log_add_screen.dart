@@ -362,22 +362,22 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
       return;
     }
 
-    // 保存成功メッセージを表示
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            widget.existingHouseWork != null ? '家事を更新しました' : '家事を登録しました',
-          ),
-        ),
-      );
-
-      // 一覧画面に戻る（更新フラグをtrueにして渡す）
-      Navigator.of(context).pop(true);
+    if (!mounted) {
+      return;
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          widget.existingHouseWork != null ? '家事を更新しました' : '家事を登録しました',
+        ),
+      ),
+    );
+
+    // 一覧画面に戻る（更新フラグをtrueにして渡す）
+    Navigator.of(context).pop(true);
   }
 
-  /// Pro版へのアップグレードを促すダイアログを表示
   Future<void> _showProUpgradeDialog(String message) async {
     await showDialog<void>(
       context: context,
