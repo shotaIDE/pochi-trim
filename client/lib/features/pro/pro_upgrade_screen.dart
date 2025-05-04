@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/exceptions/purchase_exception.dart';
+import 'package:house_worker/models/purchase_exception.dart';
 import 'package:house_worker/services/purchase_pro_result.dart';
 
 /// Pro版へのアップグレード画面
