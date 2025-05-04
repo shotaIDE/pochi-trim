@@ -1,4 +1,3 @@
-import 'package:house_worker/exceptions/purchase_exception.dart';
 import 'package:house_worker/root_app_session.dart';
 import 'package:house_worker/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -14,26 +13,7 @@ class PurchaseProResult extends _$PurchaseProResult {
   }
 
   Future<bool> purchasePro() async {
-    final bool isSucceeded;
-    try {
-      // TODO(ide): RevenueCatを使用して課金処理を実行
-      // 現在はRevenueCatのライブラリがないため、モック実装
-      // 実際の実装では以下のようなコードになる
-      // final purchaseResult = await Purchases.purchaseProduct('pro_version');
-      // if (purchaseResult.customerInfo.entitlements.active.containsKey('pro_access')) {
-      //   // 課金成功時の処理
-      // }
-
-      // TODO(ide): モック実装。常に成功するとする
-      isSucceeded = true;
-    } catch (e) {
-      // エラーハンドリング
-      throw PurchaseException();
-    }
-
-    if (!isSucceeded) {
-      return false;
-    }
+    // TODO(ide): RevenueCatを使用して課金処理を実行
 
     // アプリケーションのセッション状態を更新
     final appSession = ref.read(rootAppInitializedProvider);

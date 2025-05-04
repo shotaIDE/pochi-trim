@@ -82,12 +82,12 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
                 children: [
                   Text('購入することで', style: TextStyle(fontSize: 12)),
                   TextButton(
-                    onPressed: null, // TODO: 利用規約画面に遷移
+                    onPressed: null, // TODO(ide): 利用規約画面に遷移
                     child: Text('利用規約', style: TextStyle(fontSize: 12)),
                   ),
                   Text('と', style: TextStyle(fontSize: 12)),
                   TextButton(
-                    onPressed: null, // TODO: プライバシーポリシー画面に遷移
+                    onPressed: null, // TODO(ide): プライバシーポリシー画面に遷移
                     child: Text('プライバシーポリシー', style: TextStyle(fontSize: 12)),
                   ),
                   Text('に同意したことになります', style: TextStyle(fontSize: 12)),

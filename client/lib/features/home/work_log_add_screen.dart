@@ -349,9 +349,7 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
 
       try {
         // プレゼンターを使用して家事を保存
-        await ref
-            .read(addHouseWorkPresenterProvider.notifier)
-            .saveHouseWork(houseWork);
+        ref.read(saveHouseWorkResultProvider(houseWork));
 
         // 保存成功メッセージを表示
         if (mounted) {
@@ -369,7 +367,7 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
       } on MaxHouseWorkLimitExceededException catch (e) {
         // 家事登録制限エラーの処理
         if (mounted) {
-          _showProUpgradeDialog(e.message);
+          await _showProUpgradeDialog(e.message);
         }
       } on FirebaseException catch (e) {
         // その他のエラー時の処理
