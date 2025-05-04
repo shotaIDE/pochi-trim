@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/purchase_exception.dart';
 import 'package:house_worker/services/purchase_pro_result.dart';
 
-/// Pro版へのアップグレード画面
 class ProUpgradeScreen extends ConsumerStatefulWidget {
   const ProUpgradeScreen({super.key});
 
@@ -26,7 +25,6 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
         child: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ヘッダー部分
             Center(
               child: Icon(
                 Icons.workspace_premium,
@@ -42,15 +40,12 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
               ),
             ),
             SizedBox(height: 32),
-
             _FeatureItem(
               icon: Icons.check_circle,
               title: '家事の登録件数が無制限に',
               description: 'フリー版では最大10件までの家事しか登録できませんが、Pro版では無制限に登録できます。',
             ),
             SizedBox(height: 16),
-
-            // 将来的な特典（現在は実装されていない）
             _FeatureItem(
               icon: Icons.lock_clock,
               title: '今後追加される機能も使い放題',
@@ -58,8 +53,6 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
               isComingSoon: true,
             ),
             SizedBox(height: 32),
-
-            // 価格表示
             Center(
               child: Text(
                 '¥980（買い切り）',
@@ -74,30 +67,8 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
               ),
             ),
             SizedBox(height: 32),
-
-            // 購入ボタン
             _PurchaseButton(),
             SizedBox(height: 24),
-
-            // 利用規約とプライバシーポリシー
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('購入することで', style: TextStyle(fontSize: 12)),
-                  TextButton(
-                    onPressed: null, // TODO(ide): 利用規約画面に遷移
-                    child: Text('利用規約', style: TextStyle(fontSize: 12)),
-                  ),
-                  Text('と', style: TextStyle(fontSize: 12)),
-                  TextButton(
-                    onPressed: null, // TODO(ide): プライバシーポリシー画面に遷移
-                    child: Text('プライバシーポリシー', style: TextStyle(fontSize: 12)),
-                  ),
-                  Text('に同意したことになります', style: TextStyle(fontSize: 12)),
-                ],
-              ),
-            ),
           ],
         ),
       ),
