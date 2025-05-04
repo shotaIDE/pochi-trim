@@ -26,14 +26,44 @@ class RootAppInitialized extends _$RootAppInitialized {
         // TODO(ide): 開発用。本番リリース時には削除する
         'default-house-id';
 
-    state = AppSession.signedIn(userId: userId, currentHouseId: houseId);
+    // Pro版の状態を取得
+    final isPremium =
+        await preferenceService.getBool(PreferenceKey.isPremium) ?? false;
+
+    state = AppSession.signedIn(
+      userId: userId,
+      currentHouseId: houseId,
+      isPremium: isPremium,
+    );
   }
 
   Future<void> signIn({required String userId, required String houseId}) async {
-    state = AppSession.signedIn(userId: userId, currentHouseId: houseId);
+    final preferenceService = ref.read(preferenceServiceProvider);
+    final isPremium =
+        await preferenceService.getBool(PreferenceKey.isPremium) ?? false;
+
+    state = AppSession.signedIn(
+      userId: userId,
+      currentHouseId: houseId,
+      isPremium: isPremium,
+    );
   }
 
   Future<void> signOut() async {
     state = AppSession.notSignedIn();
+  }
+
+  // Pro版にアップグレードするメソッド
+  Future<void> upgradeToPro() async {
+    if (state is AppSessionSignedIn) {
+      final currentState = state as AppSessionSignedIn;
+
+      // Preferenceに保存
+      final preferenceService = ref.read(preferenceServiceProvider);
+      await preferenceService.setBool(PreferenceKey.isPremium, value: true);
+
+      // 状態を更新
+      state = currentState.copyWith(isPremium: true);
+    }
   }
 }
