@@ -3,8 +3,10 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/exceptions/max_house_work_limit_exceeded_exception.dart';
+import 'package:house_worker/features/home/add_house_work_presenter.dart';
+import 'package:house_worker/features/pro/pro_upgrade_screen.dart';
 import 'package:house_worker/models/house_work.dart';
-import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
 
 // ランダムな絵文字を生成するためのリスト
@@ -321,7 +323,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
       final currentUser = ref.read(authServiceProvider).currentUser;
 
       if (!mounted) {
@@ -347,8 +348,10 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
       );
 
       try {
-        // 家事を保存
-        await houseWorkRepository.save(houseWork);
+        // プレゼンターを使用して家事を保存
+        await ref
+            .read(addHouseWorkPresenterProvider.notifier)
+            .saveHouseWork(houseWork);
 
         // 保存成功メッセージを表示
         if (mounted) {
@@ -363,8 +366,13 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
           // 一覧画面に戻る（更新フラグをtrueにして渡す）
           Navigator.of(context).pop(true);
         }
+      } on MaxHouseWorkLimitExceededException catch (e) {
+        // 家事登録制限エラーの処理
+        if (mounted) {
+          _showProUpgradeDialog(e.message);
+        }
       } on FirebaseException catch (e) {
-        // エラー時の処理
+        // その他のエラー時の処理
         if (mounted) {
           ScaffoldMessenger.of(
             context,
@@ -372,5 +380,34 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
         }
       }
     }
+  }
+
+  /// Pro版へのアップグレードを促すダイアログを表示
+  Future<void> _showProUpgradeDialog(String message) async {
+    await showDialog<void>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('制限に達しました'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('キャンセル'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (context) => const ProUpgradeScreen(),
+                    ),
+                  );
+                },
+                child: const Text('Pro版にアップグレード'),
+              ),
+            ],
+          ),
+    );
   }
 }
