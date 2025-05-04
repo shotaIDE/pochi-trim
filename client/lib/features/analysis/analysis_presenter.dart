@@ -319,9 +319,10 @@ Future<List<WorkLog>> _workLogsFilteredByPeriodFilePrivate(Ref ref) async {
   final allWorkLogs = await workLogRepository.getAllOnce();
 
   return allWorkLogs
-    ..where(
-      (log) =>
-          log.completedAt.isAfter(currentAnalysisPeriod.from) &&
-          log.completedAt.isBefore(currentAnalysisPeriod.to),
-    ).toList();
+      .where(
+        (log) =>
+            log.completedAt.isAfter(currentAnalysisPeriod.from) &&
+            log.completedAt.isBefore(currentAnalysisPeriod.to),
+      )
+      .toList();
 }
