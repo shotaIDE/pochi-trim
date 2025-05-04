@@ -11,17 +11,17 @@ part 'add_house_work_presenter.g.dart';
 @riverpod
 Future<String> saveHouseWorkResult(Ref ref, HouseWork houseWork) async {
   final appSession = ref.read(rootAppInitializedProvider);
-  final bool isPremium;
+  final bool isPro;
   switch (appSession) {
     case AppSessionSignedIn():
-      isPremium = appSession.isPremium;
+      isPro = appSession.isPro;
     case AppSessionNotSignedIn():
-      isPremium = false;
+      isPro = false;
     case AppSessionLoading():
-      isPremium = false;
+      isPro = false;
   }
 
-  if (!isPremium) {
+  if (!isPro) {
     final houseWorks = await ref.read(houseWorkRepositoryProvider).getAllOnce();
     if (houseWorks.length >= 10) {
       throw MaxHouseWorkLimitExceededException();

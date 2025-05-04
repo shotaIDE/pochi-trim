@@ -27,25 +27,25 @@ class RootAppInitialized extends _$RootAppInitialized {
         'default-house-id';
 
     // Pro版の状態を取得
-    final isPremium =
+    final isPro =
         await preferenceService.getBool(PreferenceKey.isPremium) ?? false;
 
     state = AppSession.signedIn(
       userId: userId,
       currentHouseId: houseId,
-      isPremium: isPremium,
+      isPro: isPro,
     );
   }
 
   Future<void> signIn({required String userId, required String houseId}) async {
     final preferenceService = ref.read(preferenceServiceProvider);
-    final isPremium =
+    final isPro =
         await preferenceService.getBool(PreferenceKey.isPremium) ?? false;
 
     state = AppSession.signedIn(
       userId: userId,
       currentHouseId: houseId,
-      isPremium: isPremium,
+      isPro: isPro,
     );
   }
 
@@ -63,7 +63,7 @@ class RootAppInitialized extends _$RootAppInitialized {
       await preferenceService.setBool(PreferenceKey.isPremium, value: true);
 
       // 状態を更新
-      state = currentState.copyWith(isPremium: true);
+      state = currentState.copyWith(isPro: true);
     }
   }
 }

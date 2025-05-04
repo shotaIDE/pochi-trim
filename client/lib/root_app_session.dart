@@ -9,7 +9,7 @@ sealed class AppSession with _$AppSession {
   factory AppSession.signedIn({
     required String userId,
     required String currentHouseId,
-    required bool isPremium,
+    required bool isPro,
   }) = AppSessionSignedIn;
   factory AppSession.notSignedIn() = AppSessionNotSignedIn;
   factory AppSession.loading() = AppSessionLoading;
