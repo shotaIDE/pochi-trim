@@ -364,10 +364,12 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
           // 一覧画面に戻る（更新フラグをtrueにして渡す）
           Navigator.of(context).pop(true);
         }
-      } on MaxHouseWorkLimitExceededException catch (e) {
+      } on MaxHouseWorkLimitExceededException {
         // 家事登録制限エラーの処理
         if (mounted) {
-          await _showProUpgradeDialog(e.message);
+          await _showProUpgradeDialog(
+            'フリー版では最大10件までの家事しか登録できません。Pro版にアップグレードすると、無制限に家事を登録できます。',
+          );
         }
       } on FirebaseException catch (e) {
         // その他のエラー時の処理
