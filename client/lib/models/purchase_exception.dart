@@ -1,0 +1,1 @@
+class PurchaseException implements Exception {}

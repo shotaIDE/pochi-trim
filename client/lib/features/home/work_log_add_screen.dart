@@ -1,10 +1,11 @@
 import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/features/home/add_house_work_presenter.dart';
+import 'package:house_worker/features/pro/pro_upgrade_screen.dart';
 import 'package:house_worker/models/house_work.dart';
-import 'package:house_worker/repositories/house_work_repository.dart';
+import 'package:house_worker/models/max_house_work_limit_exceeded_exception.dart';
 import 'package:house_worker/services/auth_service.dart';
 
 // ランダムな絵文字を生成するためのリスト
@@ -320,57 +321,88 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
   }
 
   Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
-      final currentUser = ref.read(authServiceProvider).currentUser;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
+    final currentUser = ref.read(authServiceProvider).currentUser;
+
+    if (!mounted) {
+      return;
+    }
+
+    if (currentUser == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('ユーザー情報が取得できませんでした')));
+      return;
+    }
+
+    // 新しい家事を作成
+    final houseWork = HouseWork(
+      id: widget.existingHouseWork?.id ?? '', // 編集時は既存のID、新規作成時は空文字列
+      title: _titleController.text,
+      icon: _icon,
+      createdAt: widget.existingHouseWork?.createdAt ?? DateTime.now(),
+      createdBy: widget.existingHouseWork?.createdBy ?? currentUser.uid,
+      isRecurring: _isRecurring,
+      recurringIntervalMs: _isRecurring ? _recurringIntervalMs : null,
+    );
+
+    try {
+      await ref.read(saveHouseWorkResultProvider(houseWork).future);
+    } on MaxHouseWorkLimitExceededException {
       if (!mounted) {
         return;
       }
 
-      if (currentUser == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('ユーザー情報が取得できませんでした')));
-        return;
-      }
-
-      // 新しい家事を作成
-      final houseWork = HouseWork(
-        id: widget.existingHouseWork?.id ?? '', // 編集時は既存のID、新規作成時は空文字列
-        title: _titleController.text,
-        icon: _icon,
-        createdAt: widget.existingHouseWork?.createdAt ?? DateTime.now(),
-        createdBy: widget.existingHouseWork?.createdBy ?? currentUser.uid,
-        isRecurring: _isRecurring,
-        recurringIntervalMs: _isRecurring ? _recurringIntervalMs : null,
+      await _showProUpgradeDialog(
+        'フリー版では最大10件までの家事しか登録できません。Pro版にアップグレードすると、無制限に家事を登録できます。',
       );
-
-      try {
-        // 家事を保存
-        await houseWorkRepository.save(houseWork);
-
-        // 保存成功メッセージを表示
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                widget.existingHouseWork != null ? '家事を更新しました' : '家事を登録しました',
-              ),
-            ),
-          );
-
-          // 一覧画面に戻る（更新フラグをtrueにして渡す）
-          Navigator.of(context).pop(true);
-        }
-      } on FirebaseException catch (e) {
-        // エラー時の処理
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('エラーが発生しました: $e')));
-        }
-      }
+      return;
     }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          widget.existingHouseWork != null ? '家事を更新しました' : '家事を登録しました',
+        ),
+      ),
+    );
+
+    // 一覧画面に戻る（更新フラグをtrueにして渡す）
+    Navigator.of(context).pop(true);
+  }
+
+  Future<void> _showProUpgradeDialog(String message) async {
+    await showDialog<void>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('制限に達しました'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('キャンセル'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (context) => const ProUpgradeScreen(),
+                    ),
+                  );
+                },
+                child: const Text('Pro版にアップグレード'),
+              ),
+            ],
+          ),
+    );
   }
 }

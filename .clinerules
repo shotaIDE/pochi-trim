@@ -1,5 +1,10 @@
 # House Worker プロジェクトコーディングルール
 
+## ディレクトリ構成
+
+- `lib/` 以下は、アプリケーションのコードを配置する
+- `lib/models/` 以下は、ドメインモデルを配置する。UIに依存しない純粋なデータ構造や、UIに依存しないException、Errorなどを配置する
+
 ## 状態管理
 
 ### Riverpod の使用
@@ -29,6 +34,11 @@ final data2 = await data2Future;
 
 ## コード構造とスタイル
 
+### スタイル
+
+- 早期リターンを使用して、ネストを減らす
+- try-catch 文は、throw する可能性のある処理のみを囲み、できるだけ小さなスコープで使用する
+
 ### 関数型プログラミングの活用
 
 - コレクション操作には `map`, `where`, `fold`, `expand` などの関数型メソッドを使用する
@@ -44,8 +54,9 @@ final data2 = await data2Future;
 
 ### コメント
 
+- コードの意図や目的を明確にする必要がある場合のみにコメントを追加する。コードの内容が明確な場合はコメントを避ける
+- 特に重要な注意点や落とし穴については、理由も含めて詳細に記述する
 - コメントは日本語で記述する
-- 特に重要な注意点や落とし穴については理由も含めて詳細に記述する
 
 ### 命名規則
 
@@ -81,3 +92,37 @@ final data2 = await data2Future;
 - コンテンツが多くなる可能性がある場合は、`SingleChildScrollView`を使用してスクロール可能にする
 - デバイスの安全領域を考慮したパディングを追加する
   - 例: `EdgeInsets.only(left: 16 + MediaQuery.of(context).viewPadding.left, ...)`
+
+### UI コンポーネント
+
+- 構築処理が長くなる場合は、ウィジェットをクラスとして分割し、可読性を高める。
+
+例:
+
+```dart
+class MyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _Header(),
+        _Content(),
+      ],
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Text('Header');
+  }
+}
+
+class _Content extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Text('Content');
+  }
+}
+```

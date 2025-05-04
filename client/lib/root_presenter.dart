@@ -26,14 +26,38 @@ class RootAppInitialized extends _$RootAppInitialized {
         // TODO(ide): 開発用。本番リリース時には削除する
         'default-house-id';
 
-    state = AppSession.signedIn(userId: userId, currentHouseId: houseId);
+    // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
+    const isPro = false;
+
+    state = AppSession.signedIn(
+      userId: userId,
+      currentHouseId: houseId,
+      isPro: isPro,
+    );
   }
 
   Future<void> signIn({required String userId, required String houseId}) async {
-    state = AppSession.signedIn(userId: userId, currentHouseId: houseId);
+    // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
+    const isPro = false;
+
+    state = AppSession.signedIn(
+      userId: userId,
+      currentHouseId: houseId,
+      isPro: isPro,
+    );
   }
 
   Future<void> signOut() async {
     state = AppSession.notSignedIn();
+  }
+
+  Future<void> upgradeToPro() async {
+    if (state is! AppSessionSignedIn) {
+      return;
+    }
+
+    final currentState = state as AppSessionSignedIn;
+
+    state = currentState.copyWith(isPro: true);
   }
 }
