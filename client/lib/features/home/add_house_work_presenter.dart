@@ -26,7 +26,6 @@ Future<String> saveHouseWorkResult(Ref ref, HouseWork houseWork) async {
   }
 
   if (!isPremium) {
-    // Pro版でない場合、家事の数を確認
     final houseWorks = await ref.read(houseWorkRepositoryProvider).getAllOnce();
     if (houseWorks.length >= 10) {
       throw MaxHouseWorkLimitExceededException();
