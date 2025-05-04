@@ -27,11 +27,11 @@
 
 ### データモデル
 
-- `AppSession.signedIn`モデルに`isPremium`フラグが追加し、これを活用する
-- Pro 版購入時に、ユーザーの`isPremium`フラグを`true`に更新する
+- アプリケーションの状態管理のために`AppSession.signedIn`モデルに`isPremium`フラグを追加する
+- Pro 版購入時に、このフラグを`true`に更新する
 
 ```dart
-// 関連部分
+// AppSession モデルの変更部分（追加予定）
 @freezed
 sealed class AppSession with _$AppSession {
   const AppSession._();
@@ -39,7 +39,7 @@ sealed class AppSession with _$AppSession {
   factory AppSession.signedIn({
     required String userId,
     required String currentHouseId,
-    required bool isPremium, // Pro版フラグ
+    @Default(false) bool isPremium, // Pro版フラグを追加
   }) = AppSessionSignedIn;
   factory AppSession.notSignedIn() = AppSessionNotSignedIn;
   factory AppSession.loading() = AppSessionLoading;
@@ -54,25 +54,75 @@ sealed class AppSession with _$AppSession {
   3. 登録数が 10 件以上の場合、エラーメッセージを表示し Pro 版へのアップグレードを促す
 
 ```dart
-// 疑似コード
-Future<String> saveHouseWork(HouseWork houseWork) async {
-  final user = await userRepository.getUserByUid(currentUserId);
-
-  if (!user.isPremium) {
-    final houseWorks = await houseWorkRepository.getAllOnce();
-    if (houseWorks.length >= 10) {
-      throw MaxHouseWorkLimitExceededError();
-    }
+// 疑似コード - プレゼンターでの実装例
+@riverpod
+class AddHouseWorkPresenter extends _$AddHouseWorkPresenter {
+  @override
+  FutureOr<void> build() {
+    // 初期化処理
   }
 
-  return houseWorkRepository.save(houseWork);
+  Future<void> saveHouseWork(HouseWork houseWork) async {
+    // セッションからPro版かどうかを確認
+    final appSession = ref.read(rootAppInitializedProvider);
+    final isPremium = switch (appSession) {
+      AppSessionSignedIn(:final isPremium) => isPremium,
+      _ => false,
+    };
+
+    if (!isPremium) {
+      // Pro版でない場合、家事の数を確認
+      final houseWorks = await ref.read(houseWorkRepositoryProvider).getAllOnce();
+      if (houseWorks.length >= 10) {
+        throw MaxHouseWorkLimitExceededException();
+      }
+    }
+
+    // 家事を保存
+    await ref.read(houseWorkRepositoryProvider).save(houseWork);
+  }
 }
 ```
 
 ### 課金処理
 
-- 課金処理には、RevenueCat のライブラリ purchases_flutter を使用する
-- 課金処理が完了したら、Firestore 上のユーザードキュメントの`isPremium`フラグを更新する
+- 課金処理には、RevenueCat のライブラリ`purchases_flutter`を使用する
+- 課金処理が完了したら、アプリケーションの`AppSession`の`isPremium`フラグを更新する
+
+```dart
+// 疑似コード - 課金サービスの実装例
+class PurchaseService {
+  final Ref _ref;
+
+  PurchaseService(this._ref);
+
+  Future<bool> purchasePro() async {
+    try {
+      // RevenueCatを使用して課金処理を実行
+      final purchaseResult = await Purchases.purchaseProduct('pro_version');
+
+      if (purchaseResult.customerInfo.entitlements.active.containsKey('pro_access')) {
+        // 課金成功時の処理
+
+        // アプリケーションのセッション状態を更新
+        final appSession = _ref.read(rootAppInitializedProvider);
+        if (appSession is AppSessionSignedIn) {
+          _ref.read(rootPresenterProvider.notifier).updateSession(
+            appSession.copyWith(isPremium: true),
+          );
+        }
+
+        return true;
+      }
+    } catch (e) {
+      // エラーハンドリング
+      throw PurchaseException('Pro版の購入に失敗しました: $e');
+    }
+
+    return false;
+  }
+}
+```
 
 ### UI 要素
 
@@ -102,13 +152,28 @@ Future<String> saveHouseWork(HouseWork houseWork) async {
 
 ## エラーハンドリング
 
-### MaxHouseWorkLimitExceededError
+### MaxHouseWorkLimitExceededException
 
-フリー版ユーザーが家事登録制限（10 件）に達した場合に発生するエラー。
+フリー版ユーザーが家事登録制限（10 件）に達した場合に発生する例外。
 
 ```dart
 class MaxHouseWorkLimitExceededException implements Exception {
   final String message = 'フリー版では最大10件までの家事しか登録できません。Pro版にアップグレードすると、無制限に家事を登録できます。';
+
+  @override
+  String toString() => message;
+}
+```
+
+### PurchaseException
+
+課金処理中にエラーが発生した場合に投げられる例外。
+
+```dart
+class PurchaseException implements Exception {
+  final String message;
+
+  PurchaseException(this.message);
 
   @override
   String toString() => message;
