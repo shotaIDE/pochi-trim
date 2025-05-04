@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/add_house_work_presenter.dart';
@@ -322,63 +321,59 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
   }
 
   Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      final currentUser = ref.read(authServiceProvider).currentUser;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
+    final currentUser = ref.read(authServiceProvider).currentUser;
+
+    if (!mounted) {
+      return;
+    }
+
+    if (currentUser == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('ユーザー情報が取得できませんでした')));
+      return;
+    }
+
+    // 新しい家事を作成
+    final houseWork = HouseWork(
+      id: widget.existingHouseWork?.id ?? '', // 編集時は既存のID、新規作成時は空文字列
+      title: _titleController.text,
+      icon: _icon,
+      createdAt: widget.existingHouseWork?.createdAt ?? DateTime.now(),
+      createdBy: widget.existingHouseWork?.createdBy ?? currentUser.uid,
+      isRecurring: _isRecurring,
+      recurringIntervalMs: _isRecurring ? _recurringIntervalMs : null,
+    );
+
+    try {
+      await ref.read(saveHouseWorkResultProvider(houseWork).future);
+    } on MaxHouseWorkLimitExceededException {
       if (!mounted) {
         return;
       }
 
-      if (currentUser == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('ユーザー情報が取得できませんでした')));
-        return;
-      }
+      await _showProUpgradeDialog(
+        'フリー版では最大10件までの家事しか登録できません。Pro版にアップグレードすると、無制限に家事を登録できます。',
+      );
+      return;
+    }
 
-      // 新しい家事を作成
-      final houseWork = HouseWork(
-        id: widget.existingHouseWork?.id ?? '', // 編集時は既存のID、新規作成時は空文字列
-        title: _titleController.text,
-        icon: _icon,
-        createdAt: widget.existingHouseWork?.createdAt ?? DateTime.now(),
-        createdBy: widget.existingHouseWork?.createdBy ?? currentUser.uid,
-        isRecurring: _isRecurring,
-        recurringIntervalMs: _isRecurring ? _recurringIntervalMs : null,
+    // 保存成功メッセージを表示
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.existingHouseWork != null ? '家事を更新しました' : '家事を登録しました',
+          ),
+        ),
       );
 
-      try {
-        // プレゼンターを使用して家事を保存
-        ref.read(saveHouseWorkResultProvider(houseWork));
-
-        // 保存成功メッセージを表示
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                widget.existingHouseWork != null ? '家事を更新しました' : '家事を登録しました',
-              ),
-            ),
-          );
-
-          // 一覧画面に戻る（更新フラグをtrueにして渡す）
-          Navigator.of(context).pop(true);
-        }
-      } on MaxHouseWorkLimitExceededException {
-        // 家事登録制限エラーの処理
-        if (mounted) {
-          await _showProUpgradeDialog(
-            'フリー版では最大10件までの家事しか登録できません。Pro版にアップグレードすると、無制限に家事を登録できます。',
-          );
-        }
-      } on FirebaseException catch (e) {
-        // その他のエラー時の処理
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('エラーが発生しました: $e')));
-        }
-      }
+      // 一覧画面に戻る（更新フラグをtrueにして渡す）
+      Navigator.of(context).pop(true);
     }
   }
 
