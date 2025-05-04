@@ -182,6 +182,8 @@ class PurchaseException implements Exception {
 
 ## テスト計画
 
+### 機能テスト
+
 1. フリー版ユーザーの家事登録制限テスト
 
    - 9 件登録時：正常に登録できることを確認
@@ -200,3 +202,285 @@ class PurchaseException implements Exception {
 4. UI 表示テスト
    - フリー版ユーザー：Pro 版へのアップグレード動線が適切に表示されることを確認
    - Pro 版ユーザー：Pro 版の状態が正しく表示されることを確認
+
+### テストコード実装計画
+
+#### モデルテスト
+
+```dart
+// AppSessionのテスト
+void main() {
+  group('AppSession Tests', () {
+    test('AppSessionSignedIn should default isPremium to false', () {
+      final session = AppSession.signedIn(
+        userId: 'test-user',
+        currentHouseId: 'test-house',
+      );
+
+      expect(session.isPremium, isFalse);
+    });
+  });
+}
+```
+
+#### プレゼンターテスト
+
+```dart
+// AddHouseWorkPresenterのテスト
+@GenerateMocks([HouseWorkRepository])
+void main() {
+  late MockHouseWorkRepository mockRepository;
+  late ProviderContainer container;
+
+  setUp(() {
+    mockRepository = MockHouseWorkRepository();
+    container = ProviderContainer(
+      overrides: [
+        houseWorkRepositoryProvider.overrideWithValue(mockRepository),
+      ],
+    );
+  });
+
+  tearDown(() {
+    container.dispose();
+  });
+
+  group('AddHouseWorkPresenter Tests', () {
+    test('フリー版ユーザーが0件の場合、家事を登録できる', () async {
+      // ...
+    });
+
+    test('フリー版ユーザーが1件の場合、家事を登録できる', () async {
+      // セットアップ
+      when(mockRepository.getAllOnce()).thenAnswer((_) async => List.generate(9, (i) =>
+        HouseWork(
+          id: 'id-$i',
+          title: 'Test $i',
+          icon: '🏠',
+          createdAt: DateTime.now(),
+          createdBy: 'test-user',
+          isRecurring: false,
+        )
+      ));
+
+      when(mockRepository.save(any)).thenAnswer((_) async => 'new-id');
+
+      // テスト対象のプレゼンターを取得
+      final presenter = container.read(addHouseWorkPresenterProvider.notifier);
+
+      // 実行
+      final newHouseWork = HouseWork(
+        id: '',
+        title: 'New HouseWork',
+        icon: '🧹',
+        createdAt: DateTime.now(),
+        createdBy: 'test-user',
+        isRecurring: false,
+      );
+
+      // 例外が発生しないことを確認
+      await expectLater(
+        () => presenter.saveHouseWork(newHouseWork),
+        returnsNormally,
+      );
+
+      // リポジトリのsaveメソッドが呼ばれたことを確認
+      verify(mockRepository.save(any)).called(1);
+    });
+
+    test('フリー版ユーザーが9件の場合、家事を登録できる', () async {
+      // ...
+    });
+
+    test('フリー版ユーザーが10件の場合、家事を登録できない', () async {
+      // セットアップ
+      when(mockRepository.getAllOnce()).thenAnswer((_) async => List.generate(10, (i) =>
+        HouseWork(
+          id: 'id-$i',
+          title: 'Test $i',
+          icon: '🏠',
+          createdAt: DateTime.now(),
+          createdBy: 'test-user',
+          isRecurring: false,
+        )
+      ));
+
+      // テスト対象のプレゼンターを取得
+      final presenter = container.read(addHouseWorkPresenterProvider.notifier);
+
+      // 実行と検証
+      final newHouseWork = HouseWork(
+        id: '',
+        title: 'New HouseWork',
+        icon: '🧹',
+        createdAt: DateTime.now(),
+        createdBy: 'test-user',
+        isRecurring: false,
+      );
+
+      // MaxHouseWorkLimitExceededExceptionがスローされることを確認
+      await expectLater(
+        () => presenter.saveHouseWork(newHouseWork),
+        throwsA(isA<MaxHouseWorkLimitExceededException>()),
+      );
+
+      // リポジトリのsaveメソッドが呼ばれないことを確認
+      verifyNever(mockRepository.save(any));
+    });
+
+    test('フリー版ユーザーが11件の場合、家事を登録できない', () async {
+      // ...
+    });
+
+    test('Pro版ユーザーは0件の場合、家事を登録できる', () async {
+      // セットアップ - Pro版ユーザーのセッションをモック
+      container = ProviderContainer(
+        overrides: [
+          houseWorkRepositoryProvider.overrideWithValue(mockRepository),
+          rootAppInitializedProvider.overrideWithValue(
+            AppSession.signedIn(
+              userId: 'test-user',
+              currentHouseId: 'test-house',
+              isPremium: true, // Pro版ユーザー
+            ),
+          ),
+        ],
+      );
+
+      // 10件以上の家事が既に存在する状況をセットアップ
+      when(mockRepository.getAllOnce()).thenAnswer((_) async => List.generate(20, (i) =>
+        HouseWork(
+          id: 'id-$i',
+          title: 'Test $i',
+          icon: '🏠',
+          createdAt: DateTime.now(),
+          createdBy: 'test-user',
+          isRecurring: false,
+        )
+      ));
+
+      when(mockRepository.save(any)).thenAnswer((_) async => 'new-id');
+
+      // テスト対象のプレゼンターを取得
+      final presenter = container.read(addHouseWorkPresenterProvider.notifier);
+
+      // 実行
+      final newHouseWork = HouseWork(
+        id: '',
+        title: 'New HouseWork',
+        icon: '🧹',
+        createdAt: DateTime.now(),
+        createdBy: 'test-user',
+        isRecurring: false,
+      );
+
+      // 例外が発生しないことを確認
+      await expectLater(
+        () => presenter.saveHouseWork(newHouseWork),
+        returnsNormally,
+      );
+
+      // getAllOnceが呼ばれないことを確認（Pro版ユーザーは制限チェックをスキップ）
+      verifyNever(mockRepository.getAllOnce());
+
+      // リポジトリのsaveメソッドが呼ばれたことを確認
+      verify(mockRepository.save(any)).called(1);
+    });
+
+    test('Pro版ユーザーは1件の場合、家事を登録できる', () async {
+      // ...
+    });
+
+    test('Pro版ユーザーは9件の場合、家事を登録できる', () async {
+      // ...
+    });
+
+    test('Pro版ユーザーは10件の場合、家事を登録できる', () async {
+      // ...
+    });
+
+    test('Pro版ユーザーは11件の場合、家事を登録できる', () async {
+      // ...
+    });
+  });
+}
+```
+
+#### UI テスト
+
+```dart
+// Pro版アップグレード画面のテスト
+void main() {
+  testWidgets('Pro版アップグレード画面が正しく表示される', (WidgetTester tester) async {
+    // テスト用のProviderContainerを作成
+    final container = ProviderContainer(
+      overrides: [
+        // 必要なプロバイダーのオーバーライド
+      ],
+    );
+
+    // 画面をレンダリング
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: ProUpgradeScreen(),
+        ),
+      ),
+    );
+
+    // 画面の要素が正しく表示されていることを確認
+    expect(find.text('Pro版にアップグレード'), findsOneWidget);
+    expect(find.text('家事の登録件数が無制限に'), findsOneWidget);
+    expect(find.byType(ElevatedButton), findsOneWidget); // 購入ボタン
+
+    // 価格が表示されていることを確認
+    expect(find.textContaining('¥'), findsOneWidget);
+
+    // 利用規約とプライバシーポリシーへのリンクが表示されていることを確認
+    expect(find.text('利用規約'), findsOneWidget);
+    expect(find.text('プライバシーポリシー'), findsOneWidget);
+  });
+
+  testWidgets('家事登録制限エラー時にPro版へのアップグレード案内が表示される', (WidgetTester tester) async {
+    // テスト用のProviderContainerを作成
+    final mockPresenter = MockAddHouseWorkPresenter();
+    when(mockPresenter.saveHouseWork(any))
+      .thenThrow(MaxHouseWorkLimitExceededException());
+
+    final container = ProviderContainer(
+      overrides: [
+        addHouseWorkPresenterProvider.overrideWith(
+          (ref) => mockPresenter,
+        ),
+      ],
+    );
+
+    // 画面をレンダリング
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: AddHouseWorkScreen(),
+        ),
+      ),
+    );
+
+    // フォームに入力
+    await tester.enterText(find.byType(TextField).first, 'テスト家事');
+
+    // 保存ボタンをタップ
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+
+    // エラーダイアログが表示されることを確認
+    expect(find.text('フリー版では最大10件までの家事しか登録できません。Pro版にアップグレードすると、無制限に家事を登録できます。'), findsOneWidget);
+
+    // Pro版へのアップグレードボタンが表示されることを確認
+    expect(find.text('Pro版にアップグレード'), findsOneWidget);
+
+    // キャンセルボタンが表示されることを確認
+    expect(find.text('キャンセル'), findsOneWidget);
+  });
+}
+```
