@@ -8,10 +8,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'add_house_work_presenter.g.dart';
 
-/// 家事を保存する
-///
-/// フリー版ユーザーの場合、家事の登録数が10件以上の場合は
-/// [MaxHouseWorkLimitExceededException]をスローする
 @riverpod
 Future<String> saveHouseWorkResult(Ref ref, HouseWork houseWork) async {
   final appSession = ref.read(rootAppInitializedProvider);
