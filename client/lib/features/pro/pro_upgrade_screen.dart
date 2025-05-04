@@ -16,9 +16,14 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Pro版にアップグレード')),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.all(24),
-        child: Column(
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 24 + MediaQuery.of(context).viewPadding.left,
+          top: 24,
+          right: 24 + MediaQuery.of(context).viewPadding.right,
+          bottom: 24 + MediaQuery.of(context).viewPadding.bottom,
+        ),
+        child: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ヘッダー部分
@@ -38,7 +43,6 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
             ),
             SizedBox(height: 32),
 
-            // 特典リスト
             _FeatureItem(
               icon: Icons.check_circle,
               title: '家事の登録件数が無制限に',
@@ -119,7 +123,14 @@ class _FeatureItem extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 24, color: isComingSoon ? Colors.grey : Colors.green),
+        Icon(
+          icon,
+          size: 24,
+          color:
+              isComingSoon
+                  ? Theme.of(context).colorScheme.onSurface.withAlpha(100)
+                  : Colors.green,
+        ),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
@@ -127,12 +138,19 @@ class _FeatureItem extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isComingSoon ? Colors.grey : Colors.black,
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color:
+                            isComingSoon
+                                ? Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withAlpha(100)
+                                : Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
                   if (isComingSoon) ...[
@@ -143,12 +161,17 @@ class _FeatureItem extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.grey[200],
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Text(
+                      child: Text(
                         '近日公開',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withAlpha(100),
+                        ),
                       ),
                     ),
                   ],
@@ -159,7 +182,12 @@ class _FeatureItem extends StatelessWidget {
                 description,
                 style: TextStyle(
                   fontSize: 14,
-                  color: isComingSoon ? Colors.grey : Colors.black87,
+                  color:
+                      isComingSoon
+                          ? Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withAlpha(100)
+                          : Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],
