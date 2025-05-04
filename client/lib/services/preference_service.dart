@@ -11,16 +11,6 @@ PreferenceService preferenceService(Ref ref) {
 }
 
 class PreferenceService {
-  Future<bool?> getBool(PreferenceKey key) {
-    final preferences = SharedPreferencesAsync();
-    return preferences.getBool(key.name);
-  }
-
-  Future<void> setBool(PreferenceKey key, {required bool value}) async {
-    final preferences = SharedPreferencesAsync();
-    await preferences.setBool(key.name, value);
-  }
-
   Future<String?> getString(PreferenceKey key) {
     final preferences = SharedPreferencesAsync();
     return preferences.getString(key.name);

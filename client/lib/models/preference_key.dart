@@ -1,1 +1,1 @@
-enum PreferenceKey { currentHouseId, isPremium }
+enum PreferenceKey { currentHouseId }

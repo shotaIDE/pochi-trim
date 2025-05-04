@@ -26,9 +26,8 @@ class RootAppInitialized extends _$RootAppInitialized {
         // TODO(ide): 開発用。本番リリース時には削除する
         'default-house-id';
 
-    // Pro版の状態を取得
-    final isPro =
-        await preferenceService.getBool(PreferenceKey.isPremium) ?? false;
+    // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
+    const isPro = false;
 
     state = AppSession.signedIn(
       userId: userId,
@@ -38,9 +37,8 @@ class RootAppInitialized extends _$RootAppInitialized {
   }
 
   Future<void> signIn({required String userId, required String houseId}) async {
-    final preferenceService = ref.read(preferenceServiceProvider);
-    final isPro =
-        await preferenceService.getBool(PreferenceKey.isPremium) ?? false;
+    // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
+    const isPro = false;
 
     state = AppSession.signedIn(
       userId: userId,
@@ -53,17 +51,13 @@ class RootAppInitialized extends _$RootAppInitialized {
     state = AppSession.notSignedIn();
   }
 
-  // Pro版にアップグレードするメソッド
   Future<void> upgradeToPro() async {
-    if (state is AppSessionSignedIn) {
-      final currentState = state as AppSessionSignedIn;
-
-      // Preferenceに保存
-      final preferenceService = ref.read(preferenceServiceProvider);
-      await preferenceService.setBool(PreferenceKey.isPremium, value: true);
-
-      // 状態を更新
-      state = currentState.copyWith(isPro: true);
+    if (state is! AppSessionSignedIn) {
+      return;
     }
+
+    final currentState = state as AppSessionSignedIn;
+
+    state = currentState.copyWith(isPro: true);
   }
 }
