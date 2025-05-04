@@ -619,111 +619,112 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
           );
         }
 
-        return Card(
-          margin: const EdgeInsets.all(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _TimeSlotAnalysisPanelTitle(),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 16, right: 16),
-                    child: BarChart(
-                      BarChartData(
-                        alignment: BarChartAlignment.spaceAround,
-                        maxY: timeSlotFrequencies
-                            .map((e) => e.totalCount.toDouble())
-                            .reduce((a, b) => a > b ? a : b),
-                        titlesData: FlTitlesData(
-                          leftTitles: const AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: 30,
-                            ),
-                          ),
-                          rightTitles: const AxisTitles(),
-                          topTitles: const AxisTitles(),
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              getTitlesWidget: (value, meta) {
-                                if (value < 0 ||
-                                    value >= timeSlotFrequencies.length) {
-                                  return const Text('');
-                                }
-                                return Text(
-                                  timeSlotFrequencies[value.toInt()].timeSlot,
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        gridData: const FlGridData(
-                          horizontalInterval: 4,
-                          drawVerticalLine: false,
-                        ),
-                        borderData: FlBorderData(
-                          show: true,
-                          border: Border(
-                            left: BorderSide(
-                              color: Theme.of(context).dividerColor,
-                            ),
-                            bottom: BorderSide(
-                              color: Theme.of(context).dividerColor,
-                            ),
-                          ),
-                        ),
-                        barGroups:
-                            timeSlotFrequencies.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final data = entry.value;
-
-                              // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
-                              final rodStackItems = <BarChartRodStackItem>[];
-                              double fromY = 0;
-
-                              // 表示されている家事だけを処理
-                              for (final freq in data.houseWorkFrequencies) {
-                                final toY = fromY + freq.count;
-
-                                rodStackItems.add(
-                                  BarChartRodStackItem(fromY, toY, freq.color),
-                                );
-
-                                fromY = toY;
-                              }
-
-                              return BarChartGroupData(
-                                x: index,
-                                barRods: [
-                                  BarChartRodData(
-                                    toY: data.totalCount.toDouble(),
-                                    width: 20,
-                                    color: Colors.transparent,
-                                    rodStackItems: rodStackItems,
-                                    borderRadius: BorderRadius.zero,
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                        rotationQuarterTurns: 1,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _Legends(
-                  legends: statistics.houseWorkLegends,
-                  onTap: (houseWorkId) {
-                    ref
-                        .read(houseWorkVisibilitiesProvider.notifier)
-                        .toggle(houseWorkId: houseWorkId);
+        final barChart = BarChart(
+          BarChartData(
+            alignment: BarChartAlignment.spaceAround,
+            maxY: timeSlotFrequencies
+                .map((e) => e.totalCount.toDouble())
+                .reduce((a, b) => a > b ? a : b),
+            titlesData: FlTitlesData(
+              leftTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: true, reservedSize: 30),
+              ),
+              rightTitles: const AxisTitles(),
+              topTitles: const AxisTitles(),
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  getTitlesWidget: (value, meta) {
+                    if (value < 0 || value >= timeSlotFrequencies.length) {
+                      return const Text('');
+                    }
+                    return Text(timeSlotFrequencies[value.toInt()].timeSlot);
                   },
                 ),
-              ],
+              ),
+            ),
+            gridData: const FlGridData(
+              horizontalInterval: 4,
+              drawVerticalLine: false,
+            ),
+            borderData: FlBorderData(
+              show: true,
+              border: Border(
+                left: BorderSide(color: Theme.of(context).dividerColor),
+                bottom: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+            ),
+            barGroups:
+                timeSlotFrequencies.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final data = entry.value;
+
+                  // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
+                  final rodStackItems = <BarChartRodStackItem>[];
+                  double fromY = 0;
+
+                  // 表示されている家事だけを処理
+                  for (final freq in data.houseWorkFrequencies) {
+                    final toY = fromY + freq.count;
+
+                    rodStackItems.add(
+                      BarChartRodStackItem(fromY, toY, freq.color),
+                    );
+
+                    fromY = toY;
+                  }
+
+                  return BarChartGroupData(
+                    x: index,
+                    barRods: [
+                      BarChartRodData(
+                        toY: data.totalCount.toDouble(),
+                        width: 20,
+                        color: Colors.transparent,
+                        rodStackItems: rodStackItems,
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ],
+                  );
+                }).toList(),
+            rotationQuarterTurns: 1,
+          ),
+        );
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 16 + MediaQuery.of(context).viewPadding.left,
+            top: 16,
+            right: 16 + MediaQuery.of(context).viewPadding.right,
+            bottom: 16 + MediaQuery.of(context).viewPadding.bottom,
+          ),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 16,
+                children: [
+                  const _TimeSlotAnalysisPanelTitle(),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16, right: 16),
+                    child: SizedBox(
+                      // TODO(ide): 固定サイズじゃなくしたい
+                      height: 500,
+                      child: barChart,
+                    ),
+                  ),
+                  _Legends(
+                    legends: statistics.houseWorkLegends,
+                    onTap: (houseWorkId) {
+                      ref
+                          .read(houseWorkVisibilitiesProvider.notifier)
+                          .toggle(houseWorkId: houseWorkId);
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         );
