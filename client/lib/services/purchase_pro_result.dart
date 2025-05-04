@@ -4,7 +4,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'purchase_pro_result.g.dart';
 
-/// Pro版の購入処理を行うサービスクラス
 @riverpod
 class PurchaseProResult extends _$PurchaseProResult {
   @override
@@ -15,7 +14,6 @@ class PurchaseProResult extends _$PurchaseProResult {
   Future<bool> purchasePro() async {
     // TODO(ide): RevenueCatを使用して課金処理を実行
 
-    // アプリケーションのセッション状態を更新
     final appSession = ref.read(rootAppInitializedProvider);
     if (appSession is AppSessionSignedIn) {
       await ref.read(rootAppInitializedProvider.notifier).upgradeToPro();
