@@ -28,6 +28,5 @@ Future<String> saveHouseWorkResult(Ref ref, HouseWork houseWork) async {
     }
   }
 
-  // 家事を保存
   return ref.read(houseWorkRepositoryProvider).save(houseWork);
 }
