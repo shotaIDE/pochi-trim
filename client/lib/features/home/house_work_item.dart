@@ -81,15 +81,18 @@ class HouseWorkItem extends StatelessWidget {
 
     // completeButtonPart の高さに他のウィジェットの高さを合わせるために IntrinsicHeight を使用
     final item = IntrinsicHeight(
-      child: Row(
-        children: [
-          Expanded(child: completeButtonPart),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: verticalDivider,
-          ),
-          moveToDashboardPart,
-        ],
+      child: ColoredBox(
+        color: Theme.of(context).colorScheme.surface,
+        child: Row(
+          children: [
+            Expanded(child: completeButtonPart),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: verticalDivider,
+            ),
+            moveToDashboardPart,
+          ],
+        ),
       ),
     );
 
