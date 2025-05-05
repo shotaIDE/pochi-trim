@@ -19,7 +19,7 @@ class HouseWorkItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final deleteIcon = Icon(
       Icons.delete,
-      color: Theme.of(context).colorScheme.onSurface,
+      color: Theme.of(context).colorScheme.onError,
     );
 
     final doCompleteIcon = Icon(
@@ -102,7 +102,7 @@ class HouseWorkItem extends StatelessWidget {
     return Dismissible(
       key: Key('houseWork-${houseWork.id}'),
       background: Container(
-        color: Colors.red,
+        color: Theme.of(context).colorScheme.error,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         child: deleteIcon,
