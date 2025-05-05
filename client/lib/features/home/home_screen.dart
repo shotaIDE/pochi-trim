@@ -11,20 +11,12 @@ import 'package:house_worker/features/settings/settings_screen.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
-import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/work_log_service.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 // 選択されたタブを管理するプロバイダー
 final selectedTabProvider = StateProvider<int>((ref) => 0);
-
-// 予定家事一覧を提供するプロバイダー
-final plannedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
-
-  return workLogRepository.getIncompleteWorkLogs();
-});
 
 // WorkLogに対応するHouseWorkを取得するプロバイダー
 final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
@@ -113,79 +105,6 @@ class HomeScreen extends ConsumerWidget {
         ),
         bottomNavigationBar: const _QuickRegisterBottomBar(),
       ),
-    );
-  }
-}
-
-// これから行う予定家事一覧のタブ
-class _PlannedWorkLogsTab extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final plannedWorkLogsAsync = ref.watch(plannedWorkLogsProvider);
-
-    return plannedWorkLogsAsync.when(
-      data: (workLogs) {
-        if (workLogs.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.calendar_today, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  '予定されている家事はありません',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  '家事を追加すると、ここに表示されます',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: () async {
-            // プロバイダーを更新して最新のデータを取得
-            ref.invalidate(plannedWorkLogsProvider);
-          },
-          child: ListView.builder(
-            itemCount: workLogs.length,
-            itemBuilder: (context, index) {
-              final workLog = workLogs[index];
-              return WorkLogItem(
-                workLog: workLog,
-                onTap: () {
-                  // 家事ダッシュボード画面に遷移
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder:
-                          (context) => WorkLogDashboardScreen(workLog: workLog),
-                    ),
-                  );
-                },
-                onComplete: () async {
-                  // 家事を完了としてマーク
-                  final userId = ref.read(authServiceProvider).currentUser?.uid;
-                  if (userId != null) {
-                    final workLogRepository = ref.read(
-                      workLogRepositoryProvider,
-                    );
-                    await workLogRepository.completeWorkLog(workLog, userId);
-                  }
-                },
-              );
-            },
-          ),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, stackTrace) => Center(
-            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-          ),
     );
   }
 }

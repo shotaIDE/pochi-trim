@@ -152,12 +152,6 @@ class WorkLogRepository {
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
-  /// 未完了の家事ログを取得する
-  Stream<List<WorkLog>> getIncompleteWorkLogs() {
-    // TODO(ide): 未完了のクエリを実装する
-    return getCompletedWorkLogs();
-  }
-
   /// 完了済みの家事ログを取得するストリーム
   Stream<List<WorkLog>> getCompletedWorkLogs() {
     return _getWorkLogsCollection()
