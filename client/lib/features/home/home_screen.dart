@@ -162,7 +162,33 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
           initialItemCount: _currentWorkLogs.length,
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () {
+        final dummyHouseWorkItem = WorkLogItem(
+          workLogIncludedHouseWork: WorkLogIncludedHouseWork(
+            id: 'dummyId',
+            houseWork: HouseWork(
+              id: 'dummyHouseWorkId',
+              title: 'Dummy House Work',
+              icon: '🏠',
+              createdAt: DateTime.now(),
+              createdBy: 'DummyUser',
+              isRecurring: false,
+            ),
+            completedAt: DateTime.now(),
+            completedBy: 'dummyUser',
+          ),
+          onTap: () {},
+          onComplete: () {},
+        );
+
+        return Skeletonizer(
+          child: ListView.separated(
+            itemCount: 10,
+            itemBuilder: (context, index) => dummyHouseWorkItem,
+            separatorBuilder: (_, _) => const Divider(),
+          ),
+        );
+      },
       error:
           (error, stackTrace) => Center(
             child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
