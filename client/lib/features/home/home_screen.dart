@@ -150,21 +150,13 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
           );
         }
 
-        return RefreshIndicator(
-          onRefresh: () async {
-            // プロバイダーを更新して最新のデータを取得
-            ref
-              ..invalidate(completedWorkLogsProvider)
-              ..invalidate(houseWorksSortedByMostFrequentlyUsedProvider);
+        return AnimatedList(
+          key: _listKey,
+          initialItemCount: _currentWorkLogs.length,
+          itemBuilder: (context, index, animation) {
+            final workLog = _currentWorkLogs[index];
+            return _buildAnimatedItem(context, workLog, animation);
           },
-          child: AnimatedList(
-            key: _listKey,
-            initialItemCount: _currentWorkLogs.length,
-            itemBuilder: (context, index, animation) {
-              final workLog = _currentWorkLogs[index];
-              return _buildAnimatedItem(context, workLog, animation);
-            },
-          ),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -175,7 +167,6 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
     );
   }
 
-  // 新しいアイテムのアニメーション付きウィジェット
   Widget _buildAnimatedItem(
     BuildContext context,
     WorkLog workLog,
@@ -185,7 +176,7 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
       sizeFactor: animation,
       child: SlideTransition(
         position: Tween<Offset>(
-          begin: const Offset(0, -1), // 右からスライドイン
+          begin: const Offset(0, -1),
           end: Offset.zero,
         ).animate(
           CurvedAnimation(parent: animation, curve: Curves.easeOutQuart),
@@ -195,7 +186,6 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
           child: WorkLogItem(
             workLog: workLog,
             onTap: () {
-              // 家事ダッシュボード画面に遷移
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder:
