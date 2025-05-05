@@ -48,14 +48,17 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
       onLongPress: () {
         // TODO(ide): 実装
       },
-      child: Row(
-        children: [
-          completedDateTimeText,
-          const SizedBox(width: 16),
-          houseWorkIcon,
-          const SizedBox(width: 12),
-          Expanded(child: houseWorkTitleText),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            completedDateTimeText,
+            const SizedBox(width: 16),
+            houseWorkIcon,
+            const SizedBox(width: 12),
+            Expanded(child: houseWorkTitleText),
+          ],
+        ),
       ),
     );
 
@@ -122,7 +125,10 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
       child: Row(
         children: [
           Expanded(child: completedContentPart),
-          verticalDivider,
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: verticalDivider,
+          ),
           duplicatePart,
         ],
       ),
