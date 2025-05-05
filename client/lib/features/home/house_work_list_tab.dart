@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/house_work_item.dart';
 import 'package:house_worker/features/home/house_work_list_presenter.dart';
 import 'package:house_worker/models/house_work.dart';
-import 'package:house_worker/services/work_log_service.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HouseWorkListTab extends ConsumerStatefulWidget {
@@ -78,15 +77,9 @@ class _HouseWorkListTabState extends ConsumerState<HouseWorkListTab> {
 
             return HouseWorkItem(
               houseWork: houseWork,
-              onLeftTap: () async {
-                await _recordWorkLog(houseWork: houseWork);
-              },
-              onRightTap: () async {
-                await _moveToWorkLogDashboard(houseWork: houseWork);
-              },
-              onDelete: () async {
-                await _deleteHouseWork(houseWork: houseWork);
-              },
+              onLeftTap: () => _onCompleteTapped(houseWork),
+              onRightTap: () => _onWorkLogDashboardTapped(houseWork),
+              onDelete: () => _onDeleteTapped(houseWork),
             );
           },
           separatorBuilder: (context, index) => const Divider(height: 1),
@@ -95,17 +88,32 @@ class _HouseWorkListTabState extends ConsumerState<HouseWorkListTab> {
     );
   }
 
-  Future<void> _recordWorkLog({required HouseWork houseWork}) async {
-    final workLogService = ref.read(workLogServiceProvider);
+  Future<void> _onCompleteTapped(HouseWork houseWork) async {
+    final result = await ref.read(
+      onCompleteHouseWorkTappedResultProvider(houseWork).future,
+    );
 
-    await workLogService.recordWorkLog(context, houseWork.id);
+    if (!mounted) {
+      return;
+    }
+
+    if (!result) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事の記録に失敗しました。しばらくしてから再度お試しください')),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事を記録しました')));
   }
 
-  Future<void> _moveToWorkLogDashboard({required HouseWork houseWork}) async {
+  Future<void> _onWorkLogDashboardTapped(HouseWork houseWork) async {
     // TODO(ide): 家事ダッシュボードに遷移
   }
 
-  Future<void> _deleteHouseWork({required HouseWork houseWork}) async {
+  Future<void> _onDeleteTapped(HouseWork houseWork) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder:
@@ -129,7 +137,7 @@ class _HouseWorkListTabState extends ConsumerState<HouseWorkListTab> {
       return;
     }
 
-    final success = await ref.read(
+    final isSucceeded = await ref.read(
       deleteHouseWorkProvider(houseWork.id).future,
     );
 
@@ -137,7 +145,7 @@ class _HouseWorkListTabState extends ConsumerState<HouseWorkListTab> {
       return;
     }
 
-    if (!success) {
+    if (!isSucceeded) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('家事の削除に失敗しました。しばらくしてから再度お試しください')),
       );

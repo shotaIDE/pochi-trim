@@ -137,13 +137,25 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
                               workLogServiceProvider,
                             );
 
+                            final isSucceeded = await workLogService
+                                .recordWorkLog(
+                                  houseWorkId: widget.workLog.houseWorkId,
+                                );
+
                             if (!context.mounted) {
                               return;
                             }
 
-                            await workLogService.recordWorkLog(
-                              context,
-                              widget.workLog.houseWorkId,
+                            // TODO(ide): 共通化できる
+                            if (!isSucceeded) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('家事の記録に失敗しました。')),
+                              );
+                              return;
+                            }
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('家事を記録しました')),
                             );
                           },
                         ),

@@ -438,12 +438,25 @@ class _QuickRegisterButton extends ConsumerWidget {
 
           final workLogService = ref.read(workLogServiceProvider);
 
+          final isSucceeded = await workLogService.recordWorkLog(
+            houseWorkId: houseWork.id,
+          );
+
           if (!context.mounted) {
             return;
           }
 
-          // TODO(ide): 共通サービスを使用して家事ログを記録
-          await workLogService.recordWorkLog(context, houseWork.id);
+          // TODO(ide): 共通化
+          if (!isSucceeded) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('家事の登録に失敗しました。しばらくしてから再度お試しください')),
+            );
+            return;
+          }
+
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('家事を登録しました')));
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
