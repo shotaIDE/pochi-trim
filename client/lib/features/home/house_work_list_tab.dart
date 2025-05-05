@@ -49,9 +49,10 @@ class _HouseWorkListTabState extends ConsumerState<HouseWorkListTab> {
 
         if (houseWorks == null) {
           return Skeletonizer(
-            child: ListView.builder(
+            child: ListView.separated(
               itemCount: 10,
               itemBuilder: (context, index) => const _SkeletonHouseWorkItem(),
+              separatorBuilder: (_, _) => const _Divider(),
             ),
           );
         }
@@ -84,7 +85,7 @@ class _HouseWorkListTabState extends ConsumerState<HouseWorkListTab> {
               onDelete: () => _onDeleteTapped(houseWork),
             );
           },
-          separatorBuilder: (context, index) => const Divider(height: 1),
+          separatorBuilder: (_, _) => const _Divider(),
         );
       },
     );
@@ -208,5 +209,14 @@ class _SkeletonHouseWorkItem extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Divider(height: 1);
   }
 }
