@@ -6,6 +6,7 @@ import 'package:house_worker/features/home/home_presenter.dart';
 import 'package:house_worker/features/home/house_work_list_tab.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
+import 'package:house_worker/features/home/work_log_included_house_work.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
 import 'package:house_worker/features/settings/settings_screen.dart';
 import 'package:house_worker/models/house_work.dart';
@@ -118,13 +119,15 @@ class _CompletedWorkLogsTab extends ConsumerStatefulWidget {
 
 class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
   final _listKey = GlobalKey<AnimatedListState>();
-  List<WorkLog> _currentWorkLogs = [];
+  List<WorkLogIncludedHouseWork> _currentWorkLogs = [];
 
   @override
   Widget build(BuildContext context) {
-    final completedWorkLogsAsync = ref.watch(completedWorkLogsProvider);
+    final workLogsIncludedHouseWorkAsync = ref.watch(
+      workLogsIncludedHouseWorkProvider,
+    );
 
-    return completedWorkLogsAsync.when(
+    return workLogsIncludedHouseWorkAsync.when(
       data: (workLogs) {
         // 新しい家事ログが追加された場合のアニメーション処理
         _handleListChanges(workLogs);
@@ -152,11 +155,11 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
 
         return AnimatedList(
           key: _listKey,
-          initialItemCount: _currentWorkLogs.length,
           itemBuilder: (context, index, animation) {
             final workLog = _currentWorkLogs[index];
             return _buildAnimatedItem(context, workLog, animation);
           },
+          initialItemCount: _currentWorkLogs.length,
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -169,7 +172,7 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
 
   Widget _buildAnimatedItem(
     BuildContext context,
-    WorkLog workLog,
+    WorkLogIncludedHouseWork workLogIncludedHouseWork,
     Animation<double> animation,
   ) {
     return SizeTransition(
@@ -184,12 +187,14 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
         child: FadeTransition(
           opacity: animation,
           child: WorkLogItem(
-            workLog: workLog,
+            workLogIncludedHouseWork: workLogIncludedHouseWork,
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder:
-                      (context) => WorkLogDashboardScreen(workLog: workLog),
+                      (context) => WorkLogDashboardScreen(
+                        workLog: workLogIncludedHouseWork.toWorkLog(),
+                      ),
                 ),
               );
             },
@@ -200,9 +205,8 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
   }
 
   // リスト変更を処理し、必要に応じてアニメーション
-  void _handleListChanges(List<WorkLog> newWorkLogs) {
+  void _handleListChanges(List<WorkLogIncludedHouseWork> newWorkLogs) {
     if (_currentWorkLogs.isEmpty) {
-      // 初回ロード時は単純に一括設定
       setState(() {
         _currentWorkLogs = List.from(newWorkLogs);
       });
@@ -210,19 +214,19 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
     }
 
     // 新しく追加されたアイテムを検出
-    for (final newLog in newWorkLogs) {
+    for (final newWorkLog in newWorkLogs) {
       final existingIndex = _currentWorkLogs.indexWhere(
-        (log) => log.id == newLog.id,
+        (log) => log.id == newWorkLog.id,
       );
       if (existingIndex == -1) {
         // 新しいログを追加してアニメーション
-        _currentWorkLogs.insert(0, newLog); // 最新のログを先頭に追加
+        _currentWorkLogs.insert(0, newWorkLog); // 最新のログを先頭に追加
         _listKey.currentState?.insertItem(0);
       }
     }
 
     // 削除されたアイテムを検出（必要に応じて）
-    final toRemove = <WorkLog>[];
+    final toRemove = <WorkLogIncludedHouseWork>[];
     for (final existingLog in _currentWorkLogs) {
       if (!newWorkLogs.any((log) => log.id == existingLog.id)) {
         toRemove.add(existingLog);
