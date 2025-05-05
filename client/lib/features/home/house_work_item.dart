@@ -56,9 +56,15 @@ class HouseWorkItem extends StatelessWidget {
       ),
     );
 
-    final verticalDivider = ColoredBox(
-      color: Theme.of(context).dividerColor.withAlpha(100),
-      child: const SizedBox(width: 1, height: 40),
+    final verticalDivider = Column(
+      children: [
+        Expanded(
+          child: ColoredBox(
+            color: Theme.of(context).dividerColor.withAlpha(100),
+            child: const SizedBox(width: 1),
+          ),
+        ),
+      ],
     );
 
     const dashboardIcon = Icon(Icons.chevron_right);
@@ -73,13 +79,13 @@ class HouseWorkItem extends StatelessWidget {
       ),
     );
 
-    // moveToDashboardPart を左側と同じ高さにするために IntrinsicHeight を使用
+    // completeButtonPart の高さに他のウィジェットの高さを合わせるために IntrinsicHeight を使用
     final item = IntrinsicHeight(
       child: Row(
         children: [
           Expanded(child: completeButtonPart),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             child: verticalDivider,
           ),
           moveToDashboardPart,
