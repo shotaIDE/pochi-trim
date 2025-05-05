@@ -59,15 +59,15 @@ class HouseWorkItem extends StatelessWidget {
     const dashboardIcon = Icon(Icons.chevron_right);
     final moveToDashboardPart = InkWell(
       onTap: () => onRightTap(houseWork),
-      child: dashboardIcon,
+      child: const SizedBox(
+        height: 72,
+        child: Padding(padding: EdgeInsets.all(16), child: dashboardIcon),
+      ),
     );
 
     final item = Row(
-      children: [
-        Expanded(child: completeButtonPart),
-        const VerticalDivider(),
-        moveToDashboardPart,
-      ],
+      spacing: 16,
+      children: [Expanded(child: completeButtonPart), moveToDashboardPart],
     );
 
     return Dismissible(
