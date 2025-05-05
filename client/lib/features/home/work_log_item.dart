@@ -111,10 +111,10 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
     return Dismissible(
       key: Key('workLog-${widget.workLogIncludedHouseWork.id}'),
       background: Container(
-        color: Colors.red,
+        color: Theme.of(context).colorScheme.error,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: Icon(Icons.delete, color: Theme.of(context).colorScheme.onError),
       ),
       direction: DismissDirection.endToStart,
       onDismissed: (_) => widget.onDelete(widget.workLogIncludedHouseWork),
