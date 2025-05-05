@@ -64,17 +64,43 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
                 // WorkLogは常に完了しているので以下の条件分岐は不要
                 // const isCompleted = true;
 
-                const doCompleteIcon = Icon(Icons.check_circle_outline);
-                final doCompletePart = InkWell(
+                const completedIcon = Icon(Icons.check_circle);
+                final houseWorkIcon = Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  width: 40,
+                  height: 40,
+                  margin: const EdgeInsets.only(right: 12),
+                  child: Text(icon, style: const TextStyle(fontSize: 24)),
+                );
+                final houseWorkTitleText = Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+                final completedDateTimeText = _CompletedDateText(
+                  completedAt: widget.workLog.completedAt,
+                );
+                final completedContentPart = InkWell(
                   onTap: () {
                     // TODO(ide): 実装
                   },
-                  child: const Column(
+                  child: Row(
                     children: [
+                      completedIcon,
+                      const SizedBox(width: 12),
+                      houseWorkIcon,
+                      const SizedBox(width: 8),
                       Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: doCompleteIcon,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 4,
+                          children: [houseWorkTitleText, completedDateTimeText],
                         ),
                       ),
                     ],
@@ -92,98 +118,59 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
                   ],
                 );
 
-                final houseWorkIcon = Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  width: 40,
-                  height: 40,
-                  margin: const EdgeInsets.only(right: 12),
-                  child: Text(icon, style: const TextStyle(fontSize: 24)),
+                final duplicateIcon = Icon(
+                  Icons.copy,
+                  color: Theme.of(context).colorScheme.onSurface,
                 );
+                final duplicatePart = Tooltip(
+                  message: 'この家事を記録する',
+                  child: InkWell(
+                    onTap: () async {
+                      await HapticFeedback.mediumImpact();
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // completeButtonPart の高さに他のウィジェットの高さを合わせるために IntrinsicHeight を使用
-                    IntrinsicHeight(
-                      child: Row(
-                        children: [
-                          doCompletePart,
-                          verticalDivider,
-                          Expanded(
-                            child: Text(
-                              title,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          // 記録ボタンを追加
-                          IconButton(
-                            icon: const Icon(Icons.add_circle_outline),
-                            tooltip: 'この家事を記録する',
-                            onPressed: () async {
-                              await HapticFeedback.mediumImpact();
+                      final workLogService = ref.read(workLogServiceProvider);
 
-                              final workLogService = ref.read(
-                                workLogServiceProvider,
-                              );
+                      final isSucceeded = await workLogService.recordWorkLog(
+                        houseWorkId: widget.workLog.houseWorkId,
+                      );
 
-                              final isSucceeded = await workLogService
-                                  .recordWorkLog(
-                                    houseWorkId: widget.workLog.houseWorkId,
-                                  );
+                      if (!context.mounted) {
+                        return;
+                      }
 
-                              if (!context.mounted) {
-                                return;
-                              }
+                      // TODO(ide): 共通化できる
+                      if (!isSucceeded) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('家事の記録に失敗しました。')),
+                        );
+                        return;
+                      }
 
-                              // TODO(ide): 共通化できる
-                              if (!isSucceeded) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('家事の記録に失敗しました。'),
-                                  ),
-                                );
-                                return;
-                              }
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('家事を記録しました')),
-                              );
-                            },
-                          ),
-                          // 完了ボタンは不要（WorkLogは既に完了しているため）
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('家事を記録しました')),
+                      );
+                    },
+                    child: Column(
                       children: [
-                        Flexible(
-                          child: _CompletedDateText(
-                            completedAt: widget.workLog.completedAt,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            '実行者: ${widget.workLog.completedBy}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: duplicateIcon,
                           ),
                         ),
                       ],
                     ),
-                  ],
+                  ),
+                );
+
+                return IntrinsicHeight(
+                  child: Row(
+                    children: [
+                      Expanded(child: completedContentPart),
+                      verticalDivider,
+                      duplicatePart,
+                    ],
+                  ),
                 );
               },
             ),
