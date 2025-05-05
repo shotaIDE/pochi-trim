@@ -122,15 +122,56 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
   List<WorkLogIncludedHouseWork> _currentWorkLogs = [];
 
   @override
+  void initState() {
+    super.initState();
+
+    // WorkLogの変更を監視
+    ref.listenManual(workLogsIncludedHouseWorkProvider, (_, next) {
+      next.maybeWhen(data: _handleListChanges, orElse: () {});
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final workLogsIncludedHouseWorkAsync = ref.watch(
-      workLogsIncludedHouseWorkProvider,
+    final workLogsIncludedHouseWorkFuture = ref.watch(
+      workLogsIncludedHouseWorkProvider.future,
     );
 
-    return workLogsIncludedHouseWorkAsync.when(
-      data: (workLogs) {
-        // 新しい家事ログが追加された場合のアニメーション処理
-        _handleListChanges(workLogs);
+    return FutureBuilder(
+      future: workLogsIncludedHouseWorkFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text('エラーが発生しました: ${snapshot.error}'));
+        }
+
+        final workLogs = snapshot.data;
+        if (workLogs == null) {
+          final dummyHouseWorkItem = WorkLogItem(
+            workLogIncludedHouseWork: WorkLogIncludedHouseWork(
+              id: 'dummyId',
+              houseWork: HouseWork(
+                id: 'dummyHouseWorkId',
+                title: 'Dummy House Work',
+                icon: '🏠',
+                createdAt: DateTime.now(),
+                createdBy: 'DummyUser',
+                isRecurring: false,
+              ),
+              completedAt: DateTime.now(),
+              completedBy: 'dummyUser',
+            ),
+            onTap: () {},
+            onComplete: () {},
+          );
+
+          return Skeletonizer(
+            child: ListView.separated(
+              itemCount: 10,
+              itemBuilder: (context, index) => dummyHouseWorkItem,
+              separatorBuilder: (_, _) => const Divider(),
+            ),
+          );
+        }
 
         if (workLogs.isEmpty) {
           return const Center(
@@ -162,37 +203,6 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
           initialItemCount: _currentWorkLogs.length,
         );
       },
-      loading: () {
-        final dummyHouseWorkItem = WorkLogItem(
-          workLogIncludedHouseWork: WorkLogIncludedHouseWork(
-            id: 'dummyId',
-            houseWork: HouseWork(
-              id: 'dummyHouseWorkId',
-              title: 'Dummy House Work',
-              icon: '🏠',
-              createdAt: DateTime.now(),
-              createdBy: 'DummyUser',
-              isRecurring: false,
-            ),
-            completedAt: DateTime.now(),
-            completedBy: 'dummyUser',
-          ),
-          onTap: () {},
-          onComplete: () {},
-        );
-
-        return Skeletonizer(
-          child: ListView.separated(
-            itemCount: 10,
-            itemBuilder: (context, index) => dummyHouseWorkItem,
-            separatorBuilder: (_, _) => const Divider(),
-          ),
-        );
-      },
-      error:
-          (error, stackTrace) => Center(
-            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-          ),
     );
   }
 
