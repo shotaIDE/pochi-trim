@@ -48,10 +48,24 @@ class _HouseWorkListTabState extends ConsumerState<HouseWorkListTab> {
         final houseWorks = snapshot.data;
 
         if (houseWorks == null) {
+          final dummyHouseWorkItem = HouseWorkItem(
+            houseWork: HouseWork(
+              id: 'dummyId',
+              title: 'Dummy House Work',
+              icon: '🏠',
+              createdAt: DateTime.now(),
+              createdBy: 'DummyUser',
+              isRecurring: false,
+            ),
+            onCompleteTap: (_) {},
+            onMoveTap: (_) {},
+            onDelete: (_) {},
+          );
+
           return Skeletonizer(
             child: ListView.separated(
               itemCount: 10,
-              itemBuilder: (context, index) => const _SkeletonHouseWorkItem(),
+              itemBuilder: (context, index) => dummyHouseWorkItem,
               separatorBuilder: (_, _) => const _Divider(),
             ),
           );
@@ -173,42 +187,6 @@ class _HouseWorkListTabState extends ConsumerState<HouseWorkListTab> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('家事を削除しました')));
-  }
-}
-
-class _SkeletonHouseWorkItem extends StatelessWidget {
-  const _SkeletonHouseWorkItem();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              width: 40,
-              height: 40,
-              margin: const EdgeInsets.only(right: 12),
-              child: const Text('🏠', style: TextStyle(fontSize: 24)),
-            ),
-            const Expanded(
-              child: Text(
-                'サンプル家事',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-            const Icon(Icons.chevron_right),
-          ],
-        ),
-      ),
-    );
   }
 }
 
