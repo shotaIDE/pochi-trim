@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/house_work_item.dart';
 import 'package:house_worker/features/home/house_work_list_presenter.dart';
+import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/models/house_work.dart';
+import 'package:house_worker/models/work_log.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HouseWorkListTab extends ConsumerStatefulWidget {
@@ -110,7 +112,22 @@ class _HouseWorkListTabState extends ConsumerState<HouseWorkListTab> {
   }
 
   Future<void> _onWorkLogDashboardTapped(HouseWork houseWork) async {
-    // TODO(ide): 家事ダッシュボードに遷移
+    if (!mounted) {
+      return;
+    }
+
+    final workLog = WorkLog(
+      id: '',
+      houseWorkId: houseWork.id,
+      completedAt: DateTime.now(),
+      completedBy: '',
+    );
+
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => WorkLogDashboardScreen(workLog: workLog),
+      ),
+    );
   }
 
   Future<void> _onDeleteTapped(HouseWork houseWork) async {
