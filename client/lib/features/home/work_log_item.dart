@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/work_log_included_house_work.dart';
 import 'package:house_worker/features/home/work_log_provider.dart';
-import 'package:house_worker/services/work_log_service.dart';
 import 'package:intl/intl.dart';
 
 class WorkLogItem extends ConsumerStatefulWidget {
   const WorkLogItem({
     super.key,
     required this.workLogIncludedHouseWork,
-    required this.onTap,
-    this.onComplete,
+    required this.onDuplicate,
+    required this.onLongPress,
   });
 
   final WorkLogIncludedHouseWork workLogIncludedHouseWork;
-  final VoidCallback onTap;
-  final VoidCallback? onComplete;
+  final void Function(WorkLogIncludedHouseWork) onDuplicate;
+  final void Function(WorkLogIncludedHouseWork) onLongPress;
 
   @override
   ConsumerState<WorkLogItem> createState() => _WorkLogItemState();
@@ -45,9 +43,7 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
       completedAt: widget.workLogIncludedHouseWork.completedAt,
     );
     final completedContentPart = GestureDetector(
-      onLongPress: () {
-        // TODO(ide): 実装
-      },
+      onLongPress: () => widget.onLongPress(widget.workLogIncludedHouseWork),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
@@ -80,31 +76,7 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
     final duplicatePart = Tooltip(
       message: 'この家事を再度記録する',
       child: InkWell(
-        onTap: () async {
-          await HapticFeedback.mediumImpact();
-
-          final workLogService = ref.read(workLogServiceProvider);
-
-          final isSucceeded = await workLogService.recordWorkLog(
-            houseWorkId: widget.workLogIncludedHouseWork.id,
-          );
-
-          if (!context.mounted) {
-            return;
-          }
-
-          // TODO(ide): 共通化できる
-          if (!isSucceeded) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('家事の記録に失敗しました。')));
-            return;
-          }
-
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('家事を記録しました')));
-        },
+        onTap: () => widget.onDuplicate(widget.workLogIncludedHouseWork),
         child: ColoredBox(
           color: Theme.of(context).colorScheme.surfaceContainer,
           child: Column(
