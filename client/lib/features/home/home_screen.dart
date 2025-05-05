@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/home/home_presenter.dart';
+import 'package:house_worker/features/home/house_work_list_tab.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
@@ -10,20 +11,12 @@ import 'package:house_worker/features/settings/settings_screen.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
-import 'package:house_worker/repositories/work_log_repository.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/work_log_service.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 // 選択されたタブを管理するプロバイダー
 final selectedTabProvider = StateProvider<int>((ref) => 0);
-
-// 予定家事一覧を提供するプロバイダー
-final plannedWorkLogsProvider = StreamProvider<List<WorkLog>>((ref) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
-
-  return workLogRepository.getIncompleteWorkLogs();
-});
 
 // WorkLogに対応するHouseWorkを取得するプロバイダー
 final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
@@ -86,15 +79,15 @@ class HomeScreen extends ConsumerWidget {
               ref.read(selectedTabProvider.notifier).state = index;
             },
             tabs: const [
-              Tab(icon: Icon(Icons.calendar_today), text: '予定家事'),
+              Tab(icon: Icon(Icons.home_work), text: '家事一覧'),
               Tab(icon: Icon(Icons.task_alt), text: '完了家事'),
             ],
           ),
         ),
         body: TabBarView(
           children: [
-            // これから行う予定家事一覧のタブ
-            _PlannedWorkLogsTab(),
+            // 家事一覧タブ
+            const HouseWorkListTab(),
             // 完了した家事ログ一覧のタブ
             _CompletedWorkLogsTab(),
           ],
@@ -112,79 +105,6 @@ class HomeScreen extends ConsumerWidget {
         ),
         bottomNavigationBar: const _QuickRegisterBottomBar(),
       ),
-    );
-  }
-}
-
-// これから行う予定家事一覧のタブ
-class _PlannedWorkLogsTab extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final plannedWorkLogsAsync = ref.watch(plannedWorkLogsProvider);
-
-    return plannedWorkLogsAsync.when(
-      data: (workLogs) {
-        if (workLogs.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.calendar_today, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  '予定されている家事はありません',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  '家事を追加すると、ここに表示されます',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: () async {
-            // プロバイダーを更新して最新のデータを取得
-            ref.invalidate(plannedWorkLogsProvider);
-          },
-          child: ListView.builder(
-            itemCount: workLogs.length,
-            itemBuilder: (context, index) {
-              final workLog = workLogs[index];
-              return WorkLogItem(
-                workLog: workLog,
-                onTap: () {
-                  // 家事ダッシュボード画面に遷移
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder:
-                          (context) => WorkLogDashboardScreen(workLog: workLog),
-                    ),
-                  );
-                },
-                onComplete: () async {
-                  // 家事を完了としてマーク
-                  final userId = ref.read(authServiceProvider).currentUser?.uid;
-                  if (userId != null) {
-                    final workLogRepository = ref.read(
-                      workLogRepositoryProvider,
-                    );
-                    await workLogRepository.completeWorkLog(workLog, userId);
-                  }
-                },
-              );
-            },
-          ),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, stackTrace) => Center(
-            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-          ),
     );
   }
 }
@@ -438,12 +358,25 @@ class _QuickRegisterButton extends ConsumerWidget {
 
           final workLogService = ref.read(workLogServiceProvider);
 
+          final isSucceeded = await workLogService.recordWorkLog(
+            houseWorkId: houseWork.id,
+          );
+
           if (!context.mounted) {
             return;
           }
 
-          // TODO(ide): 共通サービスを使用して家事ログを記録
-          await workLogService.recordWorkLog(context, houseWork.id);
+          // TODO(ide): 共通化
+          if (!isSucceeded) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('家事の登録に失敗しました。しばらくしてから再度お試しください')),
+            );
+            return;
+          }
+
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('家事を登録しました')));
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),

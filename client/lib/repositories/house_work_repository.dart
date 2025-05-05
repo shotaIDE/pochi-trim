@@ -32,17 +32,9 @@ class HouseWorkRepository {
 
   final String _houseId;
 
-  // ハウスIDを指定して家事コレクションの参照を取得
-  CollectionReference _getHouseWorksCollection() {
-    return FirebaseFirestore.instance
-        .collection('houses')
-        .doc(_houseId)
-        .collection('houseWorks');
-  }
-
   /// 家事を保存する
   Future<String> save(HouseWork houseWork) async {
-    final houseWorksCollection = _getHouseWorksCollection();
+    final houseWorksCollection = _getAllCollectionReference();
 
     if (houseWork.id.isEmpty) {
       // 新規家事の場合
@@ -68,7 +60,7 @@ class HouseWorkRepository {
   }
 
   Stream<HouseWork?> getById(String houseWorkId) {
-    return _getHouseWorksCollection().doc(houseWorkId).snapshots().map((doc) {
+    return _getAllCollectionReference().doc(houseWorkId).snapshots().map((doc) {
       if (doc.exists) {
         return HouseWork.fromFirestore(doc);
       }
@@ -78,7 +70,7 @@ class HouseWorkRepository {
 
   /// IDを指定して家事を取得する
   Future<HouseWork?> getByIdOnce(String houseWorkId) async {
-    final doc = await _getHouseWorksCollection().doc(houseWorkId).get();
+    final doc = await _getAllCollectionReference().doc(houseWorkId).get();
     if (doc.exists) {
       return HouseWork.fromFirestore(doc);
     }
@@ -87,21 +79,20 @@ class HouseWorkRepository {
 
   /// すべての家事を作成日時の新しい順に取得する
   Stream<List<HouseWork>> getAll() {
-    return _getHouseWorksCollection()
-        .orderBy('createdBy', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map(HouseWork.fromFirestore).toList());
+    return _getAllQuerySortedByCreatedAtDescending().snapshots().map(
+      (snapshot) => snapshot.docs.map(HouseWork.fromFirestore).toList(),
+    );
   }
 
   Future<List<HouseWork>> getAllOnce() async {
-    final querySnapshot = await _getHouseWorksCollection().get();
+    final querySnapshot = await _getAllQuerySortedByCreatedAtDescending().get();
     return querySnapshot.docs.map(HouseWork.fromFirestore).toList();
   }
 
   /// 家事を削除する
   Future<bool> delete(String id) async {
     try {
-      await _getHouseWorksCollection().doc(id).delete();
+      await _getAllCollectionReference().doc(id).delete();
       return true;
     } on FirebaseException catch (e) {
       _logger.warning('家事削除エラー', e);
@@ -111,7 +102,7 @@ class HouseWorkRepository {
 
   /// すべての家事を削除する
   Future<void> deleteAll() async {
-    final querySnapshot = await _getHouseWorksCollection().get();
+    final querySnapshot = await _getAllCollectionReference().get();
     final batch = FirebaseFirestore.instance.batch();
 
     for (final doc in querySnapshot.docs) {
@@ -124,7 +115,7 @@ class HouseWorkRepository {
   /// 共有されている家事を取得する
   Future<List<HouseWork>> getSharedHouseWorks() async {
     final querySnapshot =
-        await _getHouseWorksCollection()
+        await _getAllCollectionReference()
             .where('isShared', isEqualTo: true)
             .orderBy('priority', descending: true)
             .get();
@@ -135,7 +126,7 @@ class HouseWorkRepository {
   /// 繰り返し設定がある家事を取得する
   Future<List<HouseWork>> getRecurringHouseWorks() async {
     final querySnapshot =
-        await _getHouseWorksCollection()
+        await _getAllCollectionReference()
             .where('isRecurring', isEqualTo: true)
             .orderBy('priority', descending: true)
             .get();
@@ -146,7 +137,7 @@ class HouseWorkRepository {
   /// タイトルで家事を検索する
   Future<List<HouseWork>> getHouseWorksByTitle(String title) async {
     final querySnapshot =
-        await _getHouseWorksCollection()
+        await _getAllCollectionReference()
             .where('title', isEqualTo: title)
             .orderBy('createdAt', descending: true)
             .get();
@@ -157,11 +148,22 @@ class HouseWorkRepository {
   /// 特定のユーザーが作成した家事を取得する
   Future<List<HouseWork>> getHouseWorksByUser(String userId) async {
     final querySnapshot =
-        await _getHouseWorksCollection()
+        await _getAllCollectionReference()
             .where('createdBy', isEqualTo: userId)
             .orderBy('createdAt', descending: true)
             .get();
 
     return querySnapshot.docs.map(HouseWork.fromFirestore).toList();
+  }
+
+  Query<Object?> _getAllQuerySortedByCreatedAtDescending() {
+    return _getAllCollectionReference().orderBy('createdAt', descending: true);
+  }
+
+  CollectionReference _getAllCollectionReference() {
+    return FirebaseFirestore.instance
+        .collection('houses')
+        .doc(_houseId)
+        .collection('houseWorks');
   }
 }

@@ -3,7 +3,7 @@
 ## ディレクトリ構成
 
 - `lib/` 以下は、アプリケーションのコードを配置する
-- `lib/models/` 以下は、ドメインモデルを配置する。UIに依存しない純粋なデータ構造や、UIに依存しないException、Errorなどを配置する
+- `lib/models/` 以下は、ドメインモデルを配置する。UI に依存しない純粋なデータ構造や、UI に依存しない Exception、Error などを配置する
 
 ## 状態管理
 
@@ -95,7 +95,7 @@ final data2 = await data2Future;
 
 ### UI コンポーネント
 
-- 構築処理が長くなる場合は、ウィジェットをクラスとして分割し、可読性を高める。
+- 構築処理が長くなりネストが深くなる場合は、ウィジェットをクラスとして分割し、可読性を高める。
 
 例:
 
@@ -125,4 +125,23 @@ class _Content extends StatelessWidget {
     return Text('Content');
   }
 }
+```
+
+- 複雑な画面では、ウィジェットのローカル変数への格納 → 余白をつけて組み立て、の 2 ステップで処理を分ける
+
+```dart
+// ウィジェットのローカル変数への格納
+const firstText = Text('1st');
+const secondText = Text('2nd');
+
+// 余白をつけて組み立て
+final body = Column(
+  children: const [
+    firstText,
+    Padding(
+      padding: EdgeInsets.only(top: 16),
+      child: secondText,
+    ),
+  ],
+);
 ```
