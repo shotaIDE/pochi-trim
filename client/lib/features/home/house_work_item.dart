@@ -22,7 +22,10 @@ class HouseWorkItem extends StatelessWidget {
       color: Theme.of(context).colorScheme.onSurface,
     );
 
-    // TODO(ide): 共通化できそう
+    final doCompleteIcon = Icon(
+      Icons.check_circle_outline,
+      color: Theme.of(context).colorScheme.onSurface,
+    );
     final houseWorkIcon = Container(
       alignment: Alignment.center,
       decoration: BoxDecoration(
@@ -31,7 +34,6 @@ class HouseWorkItem extends StatelessWidget {
       ),
       width: 40,
       height: 40,
-      margin: const EdgeInsets.only(right: 12),
       child: Text(houseWork.icon, style: const TextStyle(fontSize: 24)),
     );
     final houseWorkTitleText = Text(
@@ -43,7 +45,13 @@ class HouseWorkItem extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
-          children: [houseWorkIcon, Expanded(child: houseWorkTitleText)],
+          children: [
+            doCompleteIcon,
+            const SizedBox(width: 16),
+            houseWorkIcon,
+            const SizedBox(width: 12),
+            Expanded(child: houseWorkTitleText),
+          ],
         ),
       ),
     );
@@ -55,7 +63,11 @@ class HouseWorkItem extends StatelessWidget {
     );
 
     final item = Row(
-      children: [Expanded(child: completeButtonPart), moveToDashboardPart],
+      children: [
+        Expanded(child: completeButtonPart),
+        const VerticalDivider(),
+        moveToDashboardPart,
+      ],
     );
 
     return Dismissible(
