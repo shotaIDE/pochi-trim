@@ -80,8 +80,8 @@ class _HouseWorkListTabState extends ConsumerState<HouseWorkListTab> {
 
             return HouseWorkItem(
               houseWork: houseWork,
-              onLeftTap: _onCompleteTapped,
-              onRightTap: _onWorkLogDashboardTapped,
+              onCompleteTap: _onCompleteTapped,
+              onMoveTap: _onWorkLogDashboardTapped,
               onDelete: _onDeleteTapped,
             );
           },

@@ -5,14 +5,14 @@ class HouseWorkItem extends StatelessWidget {
   const HouseWorkItem({
     super.key,
     required this.houseWork,
-    required this.onLeftTap,
-    required this.onRightTap,
+    required this.onCompleteTap,
+    required this.onMoveTap,
     required this.onDelete,
   });
 
   final HouseWork houseWork;
-  final void Function(HouseWork) onLeftTap;
-  final void Function(HouseWork) onRightTap;
+  final void Function(HouseWork) onCompleteTap;
+  final void Function(HouseWork) onMoveTap;
   final void Function(HouseWork) onDelete;
 
   @override
@@ -41,7 +41,7 @@ class HouseWorkItem extends StatelessWidget {
       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
     );
     final completeButtonPart = InkWell(
-      onTap: () => onLeftTap(houseWork),
+      onTap: () => onCompleteTap(houseWork),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -69,7 +69,7 @@ class HouseWorkItem extends StatelessWidget {
 
     const dashboardIcon = Icon(Icons.chevron_right);
     final moveToDashboardPart = InkWell(
-      onTap: () => onRightTap(houseWork),
+      onTap: () => onMoveTap(houseWork),
       child: const Column(
         children: [
           Expanded(
