@@ -48,118 +48,115 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
       ),
       direction: DismissDirection.endToStart,
       onDismissed: (_) => _onDelete(),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: houseWorkAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Text('エラー: $err'),
-          data: (houseWork) {
-            // HouseWorkがnullの場合は代替表示
-            final icon = houseWork?.icon ?? '📝';
-            final title = houseWork?.title ?? '不明な家事';
+      child: houseWorkAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Text('エラー: $err'),
+        data: (houseWork) {
+          // HouseWorkがnullの場合は代替表示
+          final icon = houseWork?.icon ?? '📝';
+          final title = houseWork?.title ?? '不明な家事';
 
-            final houseWorkIcon = Container(
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              width: 40,
-              height: 40,
-              child: Text(icon, style: const TextStyle(fontSize: 24)),
-            );
-            final houseWorkTitleText = Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            );
-            final completedDateTimeText = _CompletedDateText(
-              completedAt: widget.workLog.completedAt,
-            );
-            final completedContentPart = GestureDetector(
-              onLongPress: () {
-                // TODO(ide): 実装
-              },
-              child: Row(
-                children: [
-                  completedDateTimeText,
-                  const SizedBox(width: 16),
-                  houseWorkIcon,
-                  const SizedBox(width: 12),
-                  Expanded(child: houseWorkTitleText),
-                ],
-              ),
-            );
-
-            final verticalDivider = Column(
+          final houseWorkIcon = Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            width: 40,
+            height: 40,
+            child: Text(icon, style: const TextStyle(fontSize: 24)),
+          );
+          final houseWorkTitleText = Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          );
+          final completedDateTimeText = _CompletedDateText(
+            completedAt: widget.workLog.completedAt,
+          );
+          final completedContentPart = GestureDetector(
+            onLongPress: () {
+              // TODO(ide): 実装
+            },
+            child: Row(
               children: [
-                Expanded(
-                  child: ColoredBox(
-                    color: Theme.of(context).dividerColor.withAlpha(100),
-                    child: const SizedBox(width: 1),
-                  ),
-                ),
+                completedDateTimeText,
+                const SizedBox(width: 16),
+                houseWorkIcon,
+                const SizedBox(width: 12),
+                Expanded(child: houseWorkTitleText),
               ],
-            );
+            ),
+          );
 
-            final duplicateIcon = Icon(
-              Icons.copy,
-              color: Theme.of(context).colorScheme.onSurface,
-            );
-            final duplicatePart = Tooltip(
-              message: 'この家事を再度記録する',
-              child: InkWell(
-                onTap: () async {
-                  await HapticFeedback.mediumImpact();
-
-                  final workLogService = ref.read(workLogServiceProvider);
-
-                  final isSucceeded = await workLogService.recordWorkLog(
-                    houseWorkId: widget.workLog.houseWorkId,
-                  );
-
-                  if (!context.mounted) {
-                    return;
-                  }
-
-                  // TODO(ide): 共通化できる
-                  if (!isSucceeded) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('家事の記録に失敗しました。')),
-                    );
-                    return;
-                  }
-
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('家事を記録しました')));
-                },
+          final verticalDivider = Column(
+            children: [
+              Expanded(
                 child: ColoredBox(
-                  color: Theme.of(context).colorScheme.surfaceContainer,
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: duplicateIcon,
-                        ),
-                      ),
-                    ],
-                  ),
+                  color: Theme.of(context).dividerColor.withAlpha(100),
+                  child: const SizedBox(width: 1),
                 ),
               ),
-            );
+            ],
+          );
 
-            return IntrinsicHeight(
-              child: Row(
-                children: [
-                  Expanded(child: completedContentPart),
-                  verticalDivider,
-                  duplicatePart,
-                ],
+          final duplicateIcon = Icon(
+            Icons.copy,
+            color: Theme.of(context).colorScheme.onSurface,
+          );
+          final duplicatePart = Tooltip(
+            message: 'この家事を再度記録する',
+            child: InkWell(
+              onTap: () async {
+                await HapticFeedback.mediumImpact();
+
+                final workLogService = ref.read(workLogServiceProvider);
+
+                final isSucceeded = await workLogService.recordWorkLog(
+                  houseWorkId: widget.workLog.houseWorkId,
+                );
+
+                if (!context.mounted) {
+                  return;
+                }
+
+                // TODO(ide): 共通化できる
+                if (!isSucceeded) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('家事の記録に失敗しました。')),
+                  );
+                  return;
+                }
+
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('家事を記録しました')));
+              },
+              child: ColoredBox(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: duplicateIcon,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+
+          return IntrinsicHeight(
+            child: Row(
+              children: [
+                Expanded(child: completedContentPart),
+                verticalDivider,
+                duplicatePart,
+              ],
+            ),
+          );
+        },
       ),
     );
   }
