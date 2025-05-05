@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:house_worker/models/house_work.dart';
 
 class HouseWorkItem extends StatelessWidget {
@@ -12,9 +11,9 @@ class HouseWorkItem extends StatelessWidget {
   });
 
   final HouseWork houseWork;
-  final VoidCallback onLeftTap;
-  final VoidCallback onRightTap;
-  final VoidCallback onDelete;
+  final void Function(HouseWork) onLeftTap;
+  final void Function(HouseWork) onRightTap;
+  final void Function(HouseWork) onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +39,7 @@ class HouseWorkItem extends StatelessWidget {
       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
     );
     final completeButtonPart = InkWell(
-      onTap: () async {
-        await HapticFeedback.mediumImpact();
-        onLeftTap();
-      },
+      onTap: () => onLeftTap(houseWork),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -54,10 +50,7 @@ class HouseWorkItem extends StatelessWidget {
 
     const dashboardIcon = Icon(Icons.chevron_right);
     final moveToDashboardPart = InkWell(
-      onTap: () async {
-        await HapticFeedback.mediumImpact();
-        onRightTap();
-      },
+      onTap: () => onRightTap(houseWork),
       child: dashboardIcon,
     );
 
@@ -75,7 +68,8 @@ class HouseWorkItem extends StatelessWidget {
       ),
       direction: DismissDirection.endToStart,
       confirmDismiss: (direction) async {
-        onDelete();
+        onDelete(houseWork);
+
         return false;
       },
       child: item,
