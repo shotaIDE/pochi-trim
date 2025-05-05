@@ -34,7 +34,10 @@ class HouseWorkItem extends StatelessWidget {
       ),
       width: 40,
       height: 40,
-      child: Text(houseWork.icon, style: const TextStyle(fontSize: 24)),
+      child: Text(
+        houseWork.icon,
+        style: Theme.of(context).textTheme.headlineSmall,
+      ),
     );
     final houseWorkTitleText = Text(
       houseWork.title,

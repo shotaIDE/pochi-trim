@@ -239,7 +239,7 @@ class _QuickRegisterButton extends ConsumerWidget {
                 height: 32,
                 child: Text(
                   houseWork.icon,
-                  style: const TextStyle(fontSize: 24),
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
               Text(

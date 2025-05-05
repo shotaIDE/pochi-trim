@@ -34,7 +34,10 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
       ),
       width: 40,
       height: 40,
-      child: Text(houseWork.icon, style: const TextStyle(fontSize: 24)),
+      child: Text(
+        houseWork.icon,
+        style: Theme.of(context).textTheme.headlineSmall,
+      ),
     );
     final houseWorkTitleText = Text(
       houseWork.title,
@@ -132,17 +135,18 @@ class _CompletedDateText extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('yyyy/MM/dd');
     final timeFormat = DateFormat('HH:mm');
+    final color = Theme.of(context).colorScheme.onSurface.withAlpha(100);
 
     return Column(
       children: [
         Text(
           dateFormat.format(completedAt ?? DateTime.now()),
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
+          style: TextStyle(fontSize: 14, color: color),
           overflow: TextOverflow.ellipsis,
         ),
         Text(
           timeFormat.format(completedAt ?? DateTime.now()),
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
+          style: TextStyle(fontSize: 14, color: color),
           overflow: TextOverflow.ellipsis,
         ),
       ],
