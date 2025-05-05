@@ -41,7 +41,7 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
     );
     final houseWorkTitleText = Text(
       houseWork.title,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      style: Theme.of(context).textTheme.titleMedium,
     );
     final completedDateTimeText = _CompletedDateText(
       completedAt: widget.workLogIncludedHouseWork.completedAt,
@@ -141,12 +141,16 @@ class _CompletedDateText extends StatelessWidget {
       children: [
         Text(
           dateFormat.format(completedAt ?? DateTime.now()),
-          style: TextStyle(fontSize: 14, color: color),
+          style: Theme.of(
+            context,
+          ).textTheme.labelMedium!.copyWith(color: color),
           overflow: TextOverflow.ellipsis,
         ),
         Text(
           timeFormat.format(completedAt ?? DateTime.now()),
-          style: TextStyle(fontSize: 14, color: color),
+          style: Theme.of(
+            context,
+          ).textTheme.labelMedium!.copyWith(color: color),
           overflow: TextOverflow.ellipsis,
         ),
       ],
