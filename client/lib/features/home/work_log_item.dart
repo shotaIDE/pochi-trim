@@ -129,7 +129,7 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
 class _CompletedDateText extends StatelessWidget {
   const _CompletedDateText({required this.completedAt});
 
-  final DateTime? completedAt;
+  final DateTime completedAt;
 
   @override
   Widget build(BuildContext context) {
@@ -140,14 +140,14 @@ class _CompletedDateText extends StatelessWidget {
     return Column(
       children: [
         Text(
-          dateFormat.format(completedAt ?? DateTime.now()),
+          dateFormat.format(completedAt),
           style: Theme.of(
             context,
           ).textTheme.labelMedium!.copyWith(color: color),
           overflow: TextOverflow.ellipsis,
         ),
         Text(
-          timeFormat.format(completedAt ?? DateTime.now()),
+          timeFormat.format(completedAt),
           style: Theme.of(
             context,
           ).textTheme.labelMedium!.copyWith(color: color),
