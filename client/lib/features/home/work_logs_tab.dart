@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_included_house_work.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
+import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:house_worker/features/home/work_logs_presenter.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/services/work_log_service.dart';
@@ -125,6 +126,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
             workLogIncludedHouseWork: workLogIncludedHouseWork,
             onDuplicate: _onDuplicate,
             onLongPress: _onLongPress,
+            onDelete: _onDelete,
           ),
         ),
       ),
@@ -216,6 +218,40 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
             (context) => WorkLogDashboardScreen(
               workLog: workLogIncludedHouseWork.toWorkLog(),
             ),
+      ),
+    );
+  }
+
+  Future<void> _onDelete(
+    WorkLogIncludedHouseWork workLogIncludedHouseWork,
+  ) async {
+    final workLogDeletion = ref.read(workLogDeletionProvider);
+
+    await workLogDeletion.deleteWorkLog(workLogIncludedHouseWork.toWorkLog());
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.delete, color: Colors.white),
+            SizedBox(width: 12),
+            Expanded(child: Text('家事ログを削除しました')),
+          ],
+        ),
+        action: SnackBarAction(
+          label: '元に戻す',
+          onPressed: () async {
+            final workLogDeletion = ref.read(workLogDeletionProvider);
+            await workLogDeletion.undoDelete();
+          },
+        ),
+        duration: const Duration(seconds: 5),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/work_log_included_house_work.dart';
-import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:intl/intl.dart';
 
 class WorkLogItem extends ConsumerStatefulWidget {
@@ -10,11 +9,13 @@ class WorkLogItem extends ConsumerStatefulWidget {
     required this.workLogIncludedHouseWork,
     required this.onDuplicate,
     required this.onLongPress,
+    required this.onDelete,
   });
 
   final WorkLogIncludedHouseWork workLogIncludedHouseWork;
   final void Function(WorkLogIncludedHouseWork) onDuplicate;
   final void Function(WorkLogIncludedHouseWork) onLongPress;
+  final void Function(WorkLogIncludedHouseWork) onDelete;
 
   @override
   ConsumerState<WorkLogItem> createState() => _WorkLogItemState();
@@ -116,42 +117,8 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       direction: DismissDirection.endToStart,
-      onDismissed: (_) => _onDelete(),
+      onDismissed: (_) => widget.onDelete(widget.workLogIncludedHouseWork),
       child: body,
-    );
-  }
-
-  Future<void> _onDelete() async {
-    final workLogDeletion = ref.read(workLogDeletionProvider);
-
-    await workLogDeletion.deleteWorkLog(
-      widget.workLogIncludedHouseWork.toWorkLog(),
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(Icons.delete, color: Colors.white),
-            SizedBox(width: 12),
-            Expanded(child: Text('家事ログを削除しました')),
-          ],
-        ),
-        action: SnackBarAction(
-          label: '元に戻す',
-          onPressed: () async {
-            final workLogDeletion = ref.read(workLogDeletionProvider);
-            await workLogDeletion.undoDelete();
-          },
-        ),
-        duration: const Duration(seconds: 5),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
     );
   }
 }
