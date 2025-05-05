@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/home/home_presenter.dart';
-import 'package:house_worker/features/home/house_work_list_tab.dart';
+import 'package:house_worker/features/home/house_works_tab.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/features/home/work_logs_tab.dart';
 import 'package:house_worker/features/settings/settings_screen.dart';
@@ -83,7 +83,7 @@ class HomeScreen extends ConsumerWidget {
             ],
           ),
         ),
-        body: const TabBarView(children: [HouseWorkListTab(), WorkLogsTab()]),
+        body: const TabBarView(children: [HouseWorksTab(), WorkLogsTab()]),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             // 家事追加画面に直接遷移
