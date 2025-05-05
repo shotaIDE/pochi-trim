@@ -125,7 +125,6 @@ class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
   void initState() {
     super.initState();
 
-    // WorkLogの変更を監視
     ref.listenManual(workLogsIncludedHouseWorkProvider, (_, next) {
       next.maybeWhen(data: _handleListChanges, orElse: () {});
     });
