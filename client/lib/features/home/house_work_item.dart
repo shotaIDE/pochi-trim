@@ -41,7 +41,7 @@ class HouseWorkItem extends StatelessWidget {
     );
     final houseWorkTitleText = Text(
       houseWork.title,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      style: Theme.of(context).textTheme.titleMedium,
     );
     final completeButtonPart = InkWell(
       onTap: () => onCompleteTap(houseWork),
