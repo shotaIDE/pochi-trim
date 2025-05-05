@@ -56,18 +56,35 @@ class HouseWorkItem extends StatelessWidget {
       ),
     );
 
+    final verticalDivider = ColoredBox(
+      color: Theme.of(context).dividerColor.withAlpha(100),
+      child: const SizedBox(width: 1, height: 40),
+    );
+
     const dashboardIcon = Icon(Icons.chevron_right);
     final moveToDashboardPart = InkWell(
       onTap: () => onRightTap(houseWork),
-      child: const SizedBox(
-        height: 72,
-        child: Padding(padding: EdgeInsets.all(16), child: dashboardIcon),
+      child: const Column(
+        children: [
+          Expanded(
+            child: Padding(padding: EdgeInsets.all(16), child: dashboardIcon),
+          ),
+        ],
       ),
     );
 
-    final item = Row(
-      spacing: 16,
-      children: [Expanded(child: completeButtonPart), moveToDashboardPart],
+    // moveToDashboardPart を左側と同じ高さにするために IntrinsicHeight を使用
+    final item = IntrinsicHeight(
+      child: Row(
+        children: [
+          Expanded(child: completeButtonPart),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: verticalDivider,
+          ),
+          moveToDashboardPart,
+        ],
+      ),
     );
 
     return Dismissible(
