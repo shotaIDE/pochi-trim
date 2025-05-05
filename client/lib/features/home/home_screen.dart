@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/home/home_presenter.dart';
+import 'package:house_worker/features/home/house_work_list_tab.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
@@ -86,15 +87,15 @@ class HomeScreen extends ConsumerWidget {
               ref.read(selectedTabProvider.notifier).state = index;
             },
             tabs: const [
-              Tab(icon: Icon(Icons.calendar_today), text: '予定家事'),
+              Tab(icon: Icon(Icons.home_work), text: '家事一覧'),
               Tab(icon: Icon(Icons.task_alt), text: '完了家事'),
             ],
           ),
         ),
         body: TabBarView(
           children: [
-            // これから行う予定家事一覧のタブ
-            _PlannedWorkLogsTab(),
+            // 家事一覧タブ
+            const HouseWorkListTab(),
             // 完了した家事ログ一覧のタブ
             _CompletedWorkLogsTab(),
           ],
