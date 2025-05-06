@@ -19,7 +19,7 @@ class HouseWorkItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final deleteIcon = Icon(
       Icons.delete,
-      color: Theme.of(context).colorScheme.onSurface,
+      color: Theme.of(context).colorScheme.onError,
     );
 
     final doCompleteIcon = Icon(
@@ -34,11 +34,14 @@ class HouseWorkItem extends StatelessWidget {
       ),
       width: 40,
       height: 40,
-      child: Text(houseWork.icon, style: const TextStyle(fontSize: 24)),
+      child: Text(
+        houseWork.icon,
+        style: Theme.of(context).textTheme.headlineSmall,
+      ),
     );
     final houseWorkTitleText = Text(
       houseWork.title,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      style: Theme.of(context).textTheme.titleMedium,
     );
     final completeButtonPart = InkWell(
       onTap: () => onCompleteTap(houseWork),
@@ -99,7 +102,7 @@ class HouseWorkItem extends StatelessWidget {
     return Dismissible(
       key: Key('houseWork-${houseWork.id}'),
       background: Container(
-        color: Colors.red,
+        color: Theme.of(context).colorScheme.error,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         child: deleteIcon,

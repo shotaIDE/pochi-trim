@@ -4,7 +4,7 @@ import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/services/work_log_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'house_work_list_presenter.g.dart';
+part 'house_works_presenter.g.dart';
 
 // TODO(ide): 複数のPresenterに定義されているので、共通化する
 @riverpod

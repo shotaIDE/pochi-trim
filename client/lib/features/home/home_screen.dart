@@ -3,10 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/home/home_presenter.dart';
-import 'package:house_worker/features/home/house_work_list_tab.dart';
+import 'package:house_worker/features/home/house_works_tab.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
-import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
-import 'package:house_worker/features/home/work_log_item.dart';
+import 'package:house_worker/features/home/work_logs_tab.dart';
 import 'package:house_worker/features/settings/settings_screen.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
@@ -79,19 +78,24 @@ class HomeScreen extends ConsumerWidget {
               ref.read(selectedTabProvider.notifier).state = index;
             },
             tabs: const [
-              Tab(icon: Icon(Icons.home_work), text: '家事一覧'),
-              Tab(icon: Icon(Icons.task_alt), text: '完了家事'),
+              Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 8,
+                  children: [Icon(Icons.home), Text('家事')],
+                ),
+              ),
+              Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 8,
+                  children: [Icon(Icons.check_circle), Text('ログ')],
+                ),
+              ),
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            // 家事一覧タブ
-            const HouseWorkListTab(),
-            // 完了した家事ログ一覧のタブ
-            _CompletedWorkLogsTab(),
-          ],
-        ),
+        body: const TabBarView(children: [HouseWorksTab(), WorkLogsTab()]),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             // 家事追加画面に直接遷移
@@ -106,154 +110,6 @@ class HomeScreen extends ConsumerWidget {
         bottomNavigationBar: const _QuickRegisterBottomBar(),
       ),
     );
-  }
-}
-
-// 完了した家事ログ一覧のタブ
-class _CompletedWorkLogsTab extends ConsumerStatefulWidget {
-  @override
-  ConsumerState<_CompletedWorkLogsTab> createState() =>
-      _CompletedWorkLogsTabState();
-}
-
-class _CompletedWorkLogsTabState extends ConsumerState<_CompletedWorkLogsTab> {
-  final _listKey = GlobalKey<AnimatedListState>();
-  List<WorkLog> _currentWorkLogs = [];
-
-  @override
-  Widget build(BuildContext context) {
-    final completedWorkLogsAsync = ref.watch(completedWorkLogsProvider);
-
-    return completedWorkLogsAsync.when(
-      data: (workLogs) {
-        // 新しい家事ログが追加された場合のアニメーション処理
-        _handleListChanges(workLogs);
-
-        if (workLogs.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.task_alt, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  '完了した家事ログはありません',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  '家事を完了すると、ここに表示されます',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: () async {
-            // プロバイダーを更新して最新のデータを取得
-            ref
-              ..invalidate(completedWorkLogsProvider)
-              ..invalidate(houseWorksSortedByMostFrequentlyUsedProvider);
-          },
-          child: AnimatedList(
-            key: _listKey,
-            initialItemCount: _currentWorkLogs.length,
-            itemBuilder: (context, index, animation) {
-              final workLog = _currentWorkLogs[index];
-              return _buildAnimatedItem(context, workLog, animation);
-            },
-          ),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, stackTrace) => Center(
-            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-          ),
-    );
-  }
-
-  // 新しいアイテムのアニメーション付きウィジェット
-  Widget _buildAnimatedItem(
-    BuildContext context,
-    WorkLog workLog,
-    Animation<double> animation,
-  ) {
-    return SizeTransition(
-      sizeFactor: animation,
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, -1), // 右からスライドイン
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeOutQuart),
-        ),
-        child: FadeTransition(
-          opacity: animation,
-          child: WorkLogItem(
-            workLog: workLog,
-            onTap: () {
-              // 家事ダッシュボード画面に遷移
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder:
-                      (context) => WorkLogDashboardScreen(workLog: workLog),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  // リスト変更を処理し、必要に応じてアニメーション
-  void _handleListChanges(List<WorkLog> newWorkLogs) {
-    if (_currentWorkLogs.isEmpty) {
-      // 初回ロード時は単純に一括設定
-      setState(() {
-        _currentWorkLogs = List.from(newWorkLogs);
-      });
-      return;
-    }
-
-    // 新しく追加されたアイテムを検出
-    for (final newLog in newWorkLogs) {
-      final existingIndex = _currentWorkLogs.indexWhere(
-        (log) => log.id == newLog.id,
-      );
-      if (existingIndex == -1) {
-        // 新しいログを追加してアニメーション
-        _currentWorkLogs.insert(0, newLog); // 最新のログを先頭に追加
-        _listKey.currentState?.insertItem(0);
-      }
-    }
-
-    // 削除されたアイテムを検出（必要に応じて）
-    final toRemove = <WorkLog>[];
-    for (final existingLog in _currentWorkLogs) {
-      if (!newWorkLogs.any((log) => log.id == existingLog.id)) {
-        toRemove.add(existingLog);
-      }
-    }
-
-    // 削除アニメーション（必要に応じて）
-    for (final logToRemove in toRemove) {
-      final index = _currentWorkLogs.indexOf(logToRemove);
-      if (index != -1) {
-        final removedItem = _currentWorkLogs.removeAt(index);
-        _listKey.currentState?.removeItem(
-          index,
-          (context, animation) => _buildAnimatedItem(
-            context,
-            removedItem,
-            animation.drive(Tween(begin: 1, end: 0)),
-          ),
-        );
-      }
-    }
   }
 }
 
@@ -395,7 +251,7 @@ class _QuickRegisterButton extends ConsumerWidget {
                 height: 32,
                 child: Text(
                   houseWork.icon,
-                  style: const TextStyle(fontSize: 24),
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
               Text(

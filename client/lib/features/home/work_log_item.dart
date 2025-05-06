@@ -1,32 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/home/work_log_provider.dart';
-import 'package:house_worker/models/house_work.dart';
-import 'package:house_worker/models/work_log.dart';
-import 'package:house_worker/repositories/house_work_repository.dart';
-import 'package:house_worker/services/work_log_service.dart';
+import 'package:house_worker/features/home/work_log_included_house_work.dart';
 import 'package:intl/intl.dart';
-
-// WorkLogに対応するHouseWorkを取得するプロバイダー
-final FutureProviderFamily<HouseWork?, WorkLog> _houseWorkForLogProvider =
-    FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
-      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-
-      return houseWorkRepository.getByIdOnce(workLog.houseWorkId);
-    });
 
 class WorkLogItem extends ConsumerStatefulWidget {
   const WorkLogItem({
     super.key,
-    required this.workLog,
-    required this.onTap,
-    this.onComplete,
+    required this.workLogIncludedHouseWork,
+    required this.onDuplicate,
+    required this.onLongPress,
+    required this.onDelete,
   });
 
-  final WorkLog workLog;
-  final VoidCallback onTap;
-  final VoidCallback? onComplete;
+  final WorkLogIncludedHouseWork workLogIncludedHouseWork;
+  final void Function(WorkLogIncludedHouseWork) onDuplicate;
+  final void Function(WorkLogIncludedHouseWork) onLongPress;
+  final void Function(WorkLogIncludedHouseWork) onDelete;
 
   @override
   ConsumerState<WorkLogItem> createState() => _WorkLogItemState();
@@ -35,162 +24,104 @@ class WorkLogItem extends ConsumerStatefulWidget {
 class _WorkLogItemState extends ConsumerState<WorkLogItem> {
   @override
   Widget build(BuildContext context) {
-    // WorkLogに関連するHouseWorkを取得
-    final houseWorkAsync = ref.watch(_houseWorkForLogProvider(widget.workLog));
+    final houseWork = widget.workLogIncludedHouseWork.houseWork;
 
-    return Dismissible(
-      key: Key('workLog-${widget.workLog.id}'),
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(Icons.delete, color: Colors.white),
+    final houseWorkIcon = Container(
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(8),
       ),
-      direction: DismissDirection.endToStart,
-      onDismissed: (direction) async {
-        // ワークログ削除処理
-        final workLogDeletion = ref.read(workLogDeletionProvider);
-        await workLogDeletion.deleteWorkLog(widget.workLog);
+      width: 40,
+      height: 40,
+      child: Text(
+        houseWork.icon,
+        style: Theme.of(context).textTheme.headlineSmall,
+      ),
+    );
+    final houseWorkTitleText = Text(
+      houseWork.title,
+      style: Theme.of(context).textTheme.titleMedium,
+    );
+    final completedDateTimeText = _CompletedDateText(
+      completedAt: widget.workLogIncludedHouseWork.completedAt,
+    );
+    final completedContentPart = GestureDetector(
+      onLongPress: () => widget.onLongPress(widget.workLogIncludedHouseWork),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            completedDateTimeText,
+            const SizedBox(width: 16),
+            houseWorkIcon,
+            const SizedBox(width: 12),
+            Expanded(child: houseWorkTitleText),
+          ],
+        ),
+      ),
+    );
 
-        if (!context.mounted) {
-          return;
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.delete, color: Colors.white),
-                SizedBox(width: 12),
-                Expanded(child: Text('家事ログを削除しました')),
-              ],
-            ),
-            action: SnackBarAction(
-              label: '元に戻す',
-              onPressed: () async {
-                final workLogDeletion = ref.read(workLogDeletionProvider);
-                await workLogDeletion.undoDelete();
-              },
-            ),
-            duration: const Duration(seconds: 5),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+    final verticalDivider = Column(
+      children: [
+        Expanded(
+          child: ColoredBox(
+            color: Theme.of(context).dividerColor.withAlpha(100),
+            child: const SizedBox(width: 1),
           ),
-        );
-      },
-      child: Card(
-        elevation: 2,
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: InkWell(
-          onTap: widget.onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: houseWorkAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Text('エラー: $err'),
-              data: (houseWork) {
-                // HouseWorkがnullの場合は代替表示
-                final icon = houseWork?.icon ?? '📝';
-                final title = houseWork?.title ?? '不明な家事';
-                // WorkLogは常に完了しているので以下の条件分岐は不要
-                // const isCompleted = true;
+        ),
+      ],
+    );
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        // アイコンを表示
-                        Container(
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color:
-                                Theme.of(context).colorScheme.surfaceContainer,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          width: 40,
-                          height: 40,
-                          margin: const EdgeInsets.only(right: 12),
-                          child: Text(
-                            icon,
-                            style: const TextStyle(fontSize: 24),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        // 記録ボタンを追加
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline),
-                          tooltip: 'この家事を記録する',
-                          onPressed: () async {
-                            await HapticFeedback.mediumImpact();
-
-                            final workLogService = ref.read(
-                              workLogServiceProvider,
-                            );
-
-                            final isSucceeded = await workLogService
-                                .recordWorkLog(
-                                  houseWorkId: widget.workLog.houseWorkId,
-                                );
-
-                            if (!context.mounted) {
-                              return;
-                            }
-
-                            // TODO(ide): 共通化できる
-                            if (!isSucceeded) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('家事の記録に失敗しました。')),
-                              );
-                              return;
-                            }
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('家事を記録しました')),
-                            );
-                          },
-                        ),
-                        // 完了ボタンは不要（WorkLogは既に完了しているため）
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: _CompletedDateText(
-                            completedAt: widget.workLog.completedAt,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            '実行者: ${widget.workLog.completedBy}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
-            ),
+    final duplicateIcon = Icon(
+      Icons.copy,
+      color: Theme.of(context).colorScheme.onSurface,
+    );
+    final duplicatePart = Tooltip(
+      message: 'この家事を再度記録する',
+      child: InkWell(
+        onTap: () => widget.onDuplicate(widget.workLogIncludedHouseWork),
+        child: ColoredBox(
+          color: Theme.of(context).colorScheme.surfaceContainer,
+          child: Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: duplicateIcon,
+                ),
+              ),
+            ],
           ),
         ),
       ),
+    );
+
+    final body = IntrinsicHeight(
+      child: Row(
+        children: [
+          Expanded(child: completedContentPart),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: verticalDivider,
+          ),
+          duplicatePart,
+        ],
+      ),
+    );
+
+    // TODO(ide): `Dismissible` を共通化
+    return Dismissible(
+      key: Key('workLog-${widget.workLogIncludedHouseWork.id}'),
+      background: Container(
+        color: Theme.of(context).colorScheme.error,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: Icon(Icons.delete, color: Theme.of(context).colorScheme.onError),
+      ),
+      direction: DismissDirection.endToStart,
+      onDismissed: (_) => widget.onDelete(widget.workLogIncludedHouseWork),
+      child: body,
     );
   }
 }
@@ -198,15 +129,31 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
 class _CompletedDateText extends StatelessWidget {
   const _CompletedDateText({required this.completedAt});
 
-  final DateTime? completedAt;
+  final DateTime completedAt;
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('yyyy/MM/dd HH:mm');
-    return Text(
-      '完了: ${dateFormat.format(completedAt ?? DateTime.now())}',
-      style: const TextStyle(fontSize: 14, color: Colors.grey),
-      overflow: TextOverflow.ellipsis,
+    final dateFormat = DateFormat('yyyy/MM/dd');
+    final timeFormat = DateFormat('HH:mm');
+    final color = Theme.of(context).colorScheme.onSurface.withAlpha(100);
+
+    return Column(
+      children: [
+        Text(
+          dateFormat.format(completedAt),
+          style: Theme.of(
+            context,
+          ).textTheme.labelMedium!.copyWith(color: color),
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          timeFormat.format(completedAt),
+          style: Theme.of(
+            context,
+          ).textTheme.labelMedium!.copyWith(color: color),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }

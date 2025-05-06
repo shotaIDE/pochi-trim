@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/house_work_item.dart';
-import 'package:house_worker/features/home/house_work_list_presenter.dart';
+import 'package:house_worker/features/home/house_works_presenter.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class HouseWorkListTab extends ConsumerStatefulWidget {
-  const HouseWorkListTab({super.key});
+class HouseWorksTab extends ConsumerStatefulWidget {
+  const HouseWorksTab({super.key});
 
   @override
-  ConsumerState<HouseWorkListTab> createState() => _HouseWorkListTabState();
+  ConsumerState<HouseWorksTab> createState() => _HouseWorksTabState();
 }
 
-class _HouseWorkListTabState extends ConsumerState<HouseWorkListTab> {
+class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
   @override
   Widget build(BuildContext context) {
     final houseWorksFuture = ref.watch(houseWorksProvider.future);
