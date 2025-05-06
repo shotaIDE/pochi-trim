@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
-import 'package:house_worker/services/work_log_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'house_works_presenter.g.dart';
@@ -12,13 +11,6 @@ Stream<List<HouseWork>> houseWorks(Ref ref) {
   final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
   return houseWorkRepository.getAll();
-}
-
-@riverpod
-Future<bool> onCompleteHouseWorkTappedResult(Ref ref, HouseWork houseWork) {
-  final workLogService = ref.read(workLogServiceProvider);
-
-  return workLogService.recordWorkLog(houseWorkId: houseWork.id);
 }
 
 @riverpod

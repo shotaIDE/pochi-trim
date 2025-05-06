@@ -121,7 +121,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         body: TabBarView(
           children: [
-            HouseWorksTab(onHouseWorkCompleted: _highlightWorkLogsTabItem),
+            HouseWorksTab(onCompleteButtonTap: _onCompleteHouseWorkButtonTap),
             const WorkLogsTab(),
           ],
         ),
@@ -131,6 +131,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
+    final result = await ref.read(
+      onCompleteHouseWorkTappedResultProvider(houseWork).future,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    if (!result) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事の記録に失敗しました。しばらくしてから再度お試しください')),
+      );
+      return;
+    }
+
+    _highlightWorkLogsTabItem();
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事を記録しました')));
   }
 
   void _highlightWorkLogsTabItem() {

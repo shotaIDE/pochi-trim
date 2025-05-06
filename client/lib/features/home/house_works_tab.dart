@@ -8,9 +8,9 @@ import 'package:house_worker/models/work_log.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HouseWorksTab extends ConsumerStatefulWidget {
-  const HouseWorksTab({super.key, required this.onHouseWorkCompleted});
+  const HouseWorksTab({super.key, required this.onCompleteButtonTap});
 
-  final VoidCallback onHouseWorkCompleted;
+  final void Function(HouseWork) onCompleteButtonTap;
 
   @override
   ConsumerState<HouseWorksTab> createState() => _HouseWorksTabState();
@@ -96,7 +96,7 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
 
             return HouseWorkItem(
               houseWork: houseWork,
-              onCompleteTap: _onCompleteTapped,
+              onCompleteTap: widget.onCompleteButtonTap,
               onMoveTap: _onWorkLogDashboardTapped,
               onDelete: _onDeleteTapped,
             );
@@ -105,29 +105,6 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
         );
       },
     );
-  }
-
-  Future<void> _onCompleteTapped(HouseWork houseWork) async {
-    final result = await ref.read(
-      onCompleteHouseWorkTappedResultProvider(houseWork).future,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    if (!result) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事の記録に失敗しました。しばらくしてから再度お試しください')),
-      );
-      return;
-    }
-
-    widget.onHouseWorkCompleted();
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('家事を記録しました')));
   }
 
   Future<void> _onWorkLogDashboardTapped(HouseWork houseWork) async {
