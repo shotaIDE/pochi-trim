@@ -121,17 +121,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         body: TabBarView(
           children: [
-            HouseWorksTab(onHouseWorkCompleted: _onHouseWorkCompleted),
+            HouseWorksTab(onHouseWorkCompleted: _highlightWorkLogsTabItem),
             const WorkLogsTab(),
           ],
         ),
         floatingActionButton: addHouseWorkButton,
-        bottomNavigationBar: const _QuickRegisterBottomBar(),
+        bottomNavigationBar: _QuickRegisterBottomBar(
+          onTap: _onQuickRegisterButtonPressed,
+        ),
       ),
     );
   }
 
-  void _onHouseWorkCompleted() {
+  void _highlightWorkLogsTabItem() {
     setState(() {
       _isLogTabHighlighted = true;
     });
@@ -144,10 +146,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
     });
   }
+
+  Future<void> _onQuickRegisterButtonPressed(HouseWork houseWork) async {
+    await HapticFeedback.mediumImpact();
+
+    final workLogService = ref.read(workLogServiceProvider);
+
+    final isSucceeded = await workLogService.recordWorkLog(
+      houseWorkId: houseWork.id,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    // TODO(ide): 共通化
+    if (!isSucceeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事の登録に失敗しました。しばらくしてから再度お試しください')),
+      );
+      return;
+    }
+
+    final selectedTab = ref.read(selectedTabProvider);
+    if (selectedTab == 0) {
+      // 家事タブが選択されている場合は、ログタブの方に家事の登録が完了したことを通知する
+      _highlightWorkLogsTabItem();
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事を登録しました')));
+  }
 }
 
 class _QuickRegisterBottomBar extends ConsumerStatefulWidget {
-  const _QuickRegisterBottomBar();
+  const _QuickRegisterBottomBar({required this.onTap});
+
+  final void Function(HouseWork) onTap;
 
   @override
   ConsumerState<_QuickRegisterBottomBar> createState() =>
@@ -202,7 +238,10 @@ class _QuickRegisterBottomBarState
             data: (recentHouseWorks) {
               final items =
                   recentHouseWorks.map((houseWork) {
-                    return _QuickRegisterButton(houseWork: houseWork);
+                    return _QuickRegisterButton(
+                      houseWork: houseWork,
+                      onTap: (houseWork) => widget.onTap(houseWork),
+                    );
                   }).toList();
 
               return ListView(
@@ -233,40 +272,17 @@ class _QuickRegisterBottomBarState
 }
 
 class _QuickRegisterButton extends ConsumerWidget {
-  const _QuickRegisterButton({required this.houseWork});
+  const _QuickRegisterButton({required this.houseWork, required this.onTap});
 
   final HouseWork houseWork;
+  final void Function(HouseWork) onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
       width: 100,
       child: InkWell(
-        onTap: () async {
-          await HapticFeedback.mediumImpact();
-
-          final workLogService = ref.read(workLogServiceProvider);
-
-          final isSucceeded = await workLogService.recordWorkLog(
-            houseWorkId: houseWork.id,
-          );
-
-          if (!context.mounted) {
-            return;
-          }
-
-          // TODO(ide): 共通化
-          if (!isSucceeded) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('家事の登録に失敗しました。しばらくしてから再度お試しください')),
-            );
-            return;
-          }
-
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('家事を登録しました')));
-        },
+        onTap: () => onTap(houseWork),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           child: Column(
