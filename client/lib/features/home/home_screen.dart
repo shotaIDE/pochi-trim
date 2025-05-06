@@ -78,8 +78,20 @@ class HomeScreen extends ConsumerWidget {
               ref.read(selectedTabProvider.notifier).state = index;
             },
             tabs: const [
-              Tab(icon: Icon(Icons.home_work), text: '家事一覧'),
-              Tab(icon: Icon(Icons.task_alt), text: '完了家事'),
+              Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 8,
+                  children: [Icon(Icons.home), Text('家事')],
+                ),
+              ),
+              Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 8,
+                  children: [Icon(Icons.check_circle), Text('ログ')],
+                ),
+              ),
             ],
           ),
         ),
