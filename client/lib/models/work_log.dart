@@ -17,7 +17,6 @@ abstract class WorkLog with _$WorkLog {
 
   const WorkLog._();
 
-  // Firestoreからのデータ変換
   factory WorkLog.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data()! as Map<String, dynamic>;
     return WorkLog(
