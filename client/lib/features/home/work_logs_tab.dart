@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_included_house_work.dart';
@@ -7,12 +6,13 @@ import 'package:house_worker/features/home/work_log_item.dart';
 import 'package:house_worker/features/home/work_log_provider.dart';
 import 'package:house_worker/features/home/work_logs_presenter.dart';
 import 'package:house_worker/models/house_work.dart';
-import 'package:house_worker/services/work_log_service.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 // 完了した家事ログ一覧のタブ
 class WorkLogsTab extends ConsumerStatefulWidget {
-  const WorkLogsTab({super.key});
+  const WorkLogsTab({super.key, required this.onDuplicateButtonTap});
+
+  final void Function(WorkLogIncludedHouseWork) onDuplicateButtonTap;
 
   @override
   ConsumerState<WorkLogsTab> createState() => _WorkLogsTabState();
@@ -125,7 +125,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
           opacity: animation,
           child: WorkLogItem(
             workLogIncludedHouseWork: workLogIncludedHouseWork,
-            onDuplicate: _onDuplicate,
+            onDuplicate: widget.onDuplicateButtonTap,
             onLongPress: _onLongPress,
             onDelete: _onDelete,
           ),
@@ -178,35 +178,6 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
         );
       }
     }
-  }
-
-  Future<void> _onDuplicate(
-    WorkLogIncludedHouseWork workLogIncludedHouseWork,
-  ) async {
-    // TODO(ide): ここでの処理は、Presenterに移動する
-    await HapticFeedback.mediumImpact();
-
-    final workLogService = ref.read(workLogServiceProvider);
-
-    final isSucceeded = await workLogService.recordWorkLog(
-      houseWorkId: workLogIncludedHouseWork.id,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    // TODO(ide): 共通化できる
-    if (!isSucceeded) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('家事の記録に失敗しました。')));
-      return;
-    }
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('家事を記録しました')));
   }
 
   Future<void> _onLongPress(

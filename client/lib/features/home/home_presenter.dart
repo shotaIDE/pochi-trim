@@ -1,9 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/features/home/work_log_included_house_work.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
+import 'package:house_worker/services/work_log_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_presenter.g.dart';
@@ -34,6 +36,28 @@ Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
           .toList();
 
   return sortedHouseWorksByCompletionCount;
+}
+
+@riverpod
+Future<bool> onCompleteHouseWorkButtonTappedResult(
+  Ref ref,
+  HouseWork houseWork,
+) {
+  final workLogService = ref.read(workLogServiceProvider);
+
+  return workLogService.recordWorkLog(houseWorkId: houseWork.id);
+}
+
+@riverpod
+Future<bool> onDuplicateWorkLogButtonTappedResult(
+  Ref ref,
+  WorkLogIncludedHouseWork workLogIncludedHouseWork,
+) {
+  final workLogService = ref.read(workLogServiceProvider);
+
+  return workLogService.recordWorkLog(
+    houseWorkId: workLogIncludedHouseWork.houseWork.id,
+  );
 }
 
 @riverpod

@@ -148,3 +148,4 @@ final body = Column(
 
 - 色はテーマとして定義されたもの利用する。例: `Theme.of(context).colorScheme.primary`
 - テキストのスタイルはテキストテーマとして定義されたものを利用する。例: `Theme.of(context).textTheme.headline6`
+- ボタンにはツールチップを追加し、アクセシビリティを考慮する

@@ -5,12 +5,12 @@ import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/home/home_presenter.dart';
 import 'package:house_worker/features/home/house_works_tab.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
+import 'package:house_worker/features/home/work_log_included_house_work.dart';
 import 'package:house_worker/features/home/work_logs_tab.dart';
 import 'package:house_worker/features/settings/settings_screen.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
-import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/work_log_service.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -25,96 +25,214 @@ final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
       return houseWorkRepository.getByIdOnce(workLog.houseWorkId);
     });
 
-// 家事をもとに新しいWorkLogを作成するための便利なプロバイダー
-// TODO(ide): これが本当に必要か確認
-final ProviderFamily<WorkLog, HouseWork> workLogForHouseWorkProvider =
-    Provider.family<WorkLog, HouseWork>((ref, houseWork) {
-      return WorkLog(
-        id: '',
-        houseWorkId: houseWork.id,
-        completedAt: DateTime.now(),
-        completedBy: ref.read(authServiceProvider).currentUser?.uid ?? '',
-      );
-    });
-
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // 選択されているタブを取得
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  var _isLogTabHighlighted = false;
+
+  @override
+  Widget build(BuildContext context) {
     final selectedTab = ref.watch(selectedTabProvider);
+
+    const titleText = Text('記録');
+
+    final analysisButton = IconButton(
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (context) => const AnalysisScreen()),
+        );
+      },
+      tooltip: '分析を表示する',
+      icon: const Icon(Icons.analytics),
+    );
+    final settingsButton = IconButton(
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (context) => const SettingsScreen()),
+        );
+      },
+      tooltip: '設定を表示する',
+      icon: const Icon(Icons.settings),
+    );
+
+    const homeWorksTabItem = Tooltip(
+      message: '登録されている家事を表示する',
+      child: Tab(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8,
+          children: [Icon(Icons.list_alt), Text('家事')],
+        ),
+      ),
+    );
+    final workLogsTabItem = Tooltip(
+      message: '完了した家事ログを表示する',
+      child: AnimatedContainer(
+        // TODO(ide): 文字サイズが変わった時にも固定サイズで問題ないか？
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        duration: const Duration(milliseconds: 250),
+        color:
+            _isLogTabHighlighted
+                ? Theme.of(context).highlightColor
+                : Colors.transparent,
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8,
+          children: [Icon(Icons.check_circle), Text('ログ')],
+        ),
+      ),
+    );
+    final tabBar = TabBar(
+      onTap: (index) {
+        ref.read(selectedTabProvider.notifier).state = index;
+      },
+      tabs: [homeWorksTabItem, workLogsTabItem],
+    );
+
+    final addHouseWorkButton = FloatingActionButton(
+      tooltip: '家事を追加する',
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<bool?>(
+            builder: (context) => const HouseWorkAddScreen(),
+          ),
+        );
+      },
+      child: const Icon(Icons.add),
+    );
 
     return DefaultTabController(
       length: 2,
       initialIndex: selectedTab,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('家事ログ'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.analytics),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) => const AnalysisScreen(),
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) => const SettingsScreen(),
-                  ),
-                );
-              },
-            ),
+          title: titleText,
+          actions: [analysisButton, settingsButton],
+          bottom: tabBar,
+        ),
+        body: TabBarView(
+          children: [
+            HouseWorksTab(onCompleteButtonTap: _onCompleteHouseWorkButtonTap),
+            WorkLogsTab(onDuplicateButtonTap: _onDuplicateWorkLogButtonTap),
           ],
-          bottom: TabBar(
-            onTap: (index) {
-              ref.read(selectedTabProvider.notifier).state = index;
-            },
-            tabs: const [
-              Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 8,
-                  children: [Icon(Icons.home), Text('家事')],
-                ),
-              ),
-              Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 8,
-                  children: [Icon(Icons.check_circle), Text('ログ')],
-                ),
-              ),
-            ],
-          ),
         ),
-        body: const TabBarView(children: [HouseWorksTab(), WorkLogsTab()]),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // 家事追加画面に直接遷移
-            Navigator.of(context).push(
-              MaterialPageRoute<bool?>(
-                builder: (context) => const HouseWorkAddScreen(),
-              ),
-            );
-          },
-          child: const Icon(Icons.add),
+        floatingActionButton: addHouseWorkButton,
+        bottomNavigationBar: _QuickRegisterBottomBar(
+          onTap: _onQuickRegisterButtonPressed,
         ),
-        bottomNavigationBar: const _QuickRegisterBottomBar(),
       ),
     );
+  }
+
+  Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
+    await HapticFeedback.mediumImpact();
+
+    final result = await ref.read(
+      onCompleteHouseWorkButtonTappedResultProvider(houseWork).future,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    if (!result) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+      );
+      return;
+    }
+
+    _highlightWorkLogsTabItem();
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
+  }
+
+  Future<void> _onDuplicateWorkLogButtonTap(
+    WorkLogIncludedHouseWork workLogIncludedHouseWork,
+  ) async {
+    await HapticFeedback.mediumImpact();
+
+    final isSucceeded = await ref.read(
+      onDuplicateWorkLogButtonTappedResultProvider(
+        workLogIncludedHouseWork,
+      ).future,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    // TODO(ide): 共通化できる
+    if (!isSucceeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
+  }
+
+  Future<void> _onQuickRegisterButtonPressed(HouseWork houseWork) async {
+    await HapticFeedback.mediumImpact();
+
+    final workLogService = ref.read(workLogServiceProvider);
+
+    final isSucceeded = await workLogService.recordWorkLog(
+      houseWorkId: houseWork.id,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    // TODO(ide): 共通化
+    if (!isSucceeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+      );
+      return;
+    }
+
+    final selectedTab = ref.read(selectedTabProvider);
+    if (selectedTab == 0) {
+      // 家事タブが選択されている場合は、ログタブの方に家事の登録が完了したことを通知する
+      _highlightWorkLogsTabItem();
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
+  }
+
+  void _highlightWorkLogsTabItem() {
+    setState(() {
+      _isLogTabHighlighted = true;
+    });
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _isLogTabHighlighted = false;
+        });
+      }
+    });
   }
 }
 
 class _QuickRegisterBottomBar extends ConsumerStatefulWidget {
-  const _QuickRegisterBottomBar();
+  const _QuickRegisterBottomBar({required this.onTap});
+
+  final void Function(HouseWork) onTap;
 
   @override
   ConsumerState<_QuickRegisterBottomBar> createState() =>
@@ -169,7 +287,10 @@ class _QuickRegisterBottomBarState
             data: (recentHouseWorks) {
               final items =
                   recentHouseWorks.map((houseWork) {
-                    return _QuickRegisterButton(houseWork: houseWork);
+                    return _QuickRegisterButton(
+                      houseWork: houseWork,
+                      onTap: (houseWork) => widget.onTap(houseWork),
+                    );
                   }).toList();
 
               return ListView(
@@ -200,40 +321,17 @@ class _QuickRegisterBottomBarState
 }
 
 class _QuickRegisterButton extends ConsumerWidget {
-  const _QuickRegisterButton({required this.houseWork});
+  const _QuickRegisterButton({required this.houseWork, required this.onTap});
 
   final HouseWork houseWork;
+  final void Function(HouseWork) onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
       width: 100,
       child: InkWell(
-        onTap: () async {
-          await HapticFeedback.mediumImpact();
-
-          final workLogService = ref.read(workLogServiceProvider);
-
-          final isSucceeded = await workLogService.recordWorkLog(
-            houseWorkId: houseWork.id,
-          );
-
-          if (!context.mounted) {
-            return;
-          }
-
-          // TODO(ide): 共通化
-          if (!isSucceeded) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('家事の登録に失敗しました。しばらくしてから再度お試しください')),
-            );
-            return;
-          }
-
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('家事を登録しました')));
-        },
+        onTap: () => onTap(houseWork),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           child: Column(
