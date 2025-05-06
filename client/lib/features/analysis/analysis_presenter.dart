@@ -42,6 +42,21 @@ class HouseWorkVisibilities extends _$HouseWorkVisibilities {
     state = newState;
   }
 
+  Future<void> showOnlyOne({required String houseWorkId}) async {
+    final houseWorks = await ref.read(_houseWorksFilePrivateProvider.future);
+
+    final newStateMapEntries = houseWorks.map((houseWork) {
+      if (houseWork.id == houseWorkId) {
+        return MapEntry(houseWork.id, true);
+      }
+
+      return MapEntry(houseWork.id, false);
+    });
+    final newState = Map<String, bool>.fromEntries(newStateMapEntries);
+
+    state = newState;
+  }
+
   bool isVisible({required String houseWorkId}) {
     return state[houseWorkId] ?? true;
   }
