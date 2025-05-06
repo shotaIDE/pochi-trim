@@ -51,60 +51,71 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final selectedTab = ref.watch(selectedTabProvider);
 
+    const titleText = Text('記録');
+
+    final analysisButton = IconButton(
+      icon: const Icon(Icons.analytics),
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (context) => const AnalysisScreen()),
+        );
+      },
+    );
+    final settingsButton = IconButton(
+      icon: const Icon(Icons.settings),
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (context) => const SettingsScreen()),
+        );
+      },
+    );
+
+    const homeWorksTabItem = Tab(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 8,
+        children: [Icon(Icons.list_alt), Text('家事')],
+      ),
+    );
+    final workLogsTabItem = AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      color:
+          _isLogTabHighlighted
+              ? Theme.of(context).highlightColor
+              : Colors.transparent,
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 8,
+        children: [Icon(Icons.check_circle), Text('ログ')],
+      ),
+    );
+    final tabBar = TabBar(
+      onTap: (index) {
+        ref.read(selectedTabProvider.notifier).state = index;
+      },
+      tabs: [homeWorksTabItem, workLogsTabItem],
+    );
+
+    final addHouseWorkButton = FloatingActionButton(
+      tooltip: '家事を追加',
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<bool?>(
+            builder: (context) => const HouseWorkAddScreen(),
+          ),
+        );
+      },
+      child: const Icon(Icons.add),
+    );
+
     return DefaultTabController(
       length: 2,
       initialIndex: selectedTab,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('家事ログ'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.analytics),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) => const AnalysisScreen(),
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) => const SettingsScreen(),
-                  ),
-                );
-              },
-            ),
-          ],
-          bottom: TabBar(
-            onTap: (index) {
-              ref.read(selectedTabProvider.notifier).state = index;
-            },
-            tabs: [
-              const Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 8,
-                  children: [Icon(Icons.home), Text('家事')],
-                ),
-              ),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                color:
-                    _isLogTabHighlighted
-                        ? Theme.of(context).highlightColor
-                        : Colors.transparent,
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 8,
-                  children: [Icon(Icons.check_circle), Text('ログ')],
-                ),
-              ),
-            ],
-          ),
+          title: titleText,
+          actions: [analysisButton, settingsButton],
+          bottom: tabBar,
         ),
         body: TabBarView(
           children: [
@@ -112,17 +123,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const WorkLogsTab(),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // 家事追加画面に直接遷移
-            Navigator.of(context).push(
-              MaterialPageRoute<bool?>(
-                builder: (context) => const HouseWorkAddScreen(),
-              ),
-            );
-          },
-          child: const Icon(Icons.add),
-        ),
+        floatingActionButton: addHouseWorkButton,
         bottomNavigationBar: const _QuickRegisterBottomBar(),
       ),
     );
