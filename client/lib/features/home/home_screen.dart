@@ -11,7 +11,6 @@ import 'package:house_worker/features/settings/settings_screen.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
-import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/work_log_service.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -24,18 +23,6 @@ final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
       final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
 
       return houseWorkRepository.getByIdOnce(workLog.houseWorkId);
-    });
-
-// 家事をもとに新しいWorkLogを作成するための便利なプロバイダー
-// TODO(ide): これが本当に必要か確認
-final ProviderFamily<WorkLog, HouseWork> workLogForHouseWorkProvider =
-    Provider.family<WorkLog, HouseWork>((ref, houseWork) {
-      return WorkLog(
-        id: '',
-        houseWorkId: houseWork.id,
-        completedAt: DateTime.now(),
-        completedBy: ref.read(authServiceProvider).currentUser?.uid ?? '',
-      );
     });
 
 class HomeScreen extends ConsumerStatefulWidget {
