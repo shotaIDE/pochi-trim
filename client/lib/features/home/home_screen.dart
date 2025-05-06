@@ -5,6 +5,7 @@ import 'package:house_worker/features/analysis/analysis_screen.dart';
 import 'package:house_worker/features/home/home_presenter.dart';
 import 'package:house_worker/features/home/house_works_tab.dart';
 import 'package:house_worker/features/home/work_log_add_screen.dart';
+import 'package:house_worker/features/home/work_log_included_house_work.dart';
 import 'package:house_worker/features/home/work_logs_tab.dart';
 import 'package:house_worker/features/settings/settings_screen.dart';
 import 'package:house_worker/models/house_work.dart';
@@ -122,7 +123,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         body: TabBarView(
           children: [
             HouseWorksTab(onCompleteButtonTap: _onCompleteHouseWorkButtonTap),
-            const WorkLogsTab(),
+            WorkLogsTab(onDuplicateButtonTap: _onDuplicateWorkLogButtonTap),
           ],
         ),
         floatingActionButton: addHouseWorkButton,
@@ -134,8 +135,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
+    await HapticFeedback.mediumImpact();
+
     final result = await ref.read(
-      onCompleteHouseWorkTappedResultProvider(houseWork).future,
+      onCompleteHouseWorkButtonTappedResultProvider(houseWork).future,
     );
 
     if (!mounted) {
@@ -150,6 +153,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     _highlightWorkLogsTabItem();
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事を記録しました')));
+  }
+
+  Future<void> _onDuplicateWorkLogButtonTap(
+    WorkLogIncludedHouseWork workLogIncludedHouseWork,
+  ) async {
+    await HapticFeedback.mediumImpact();
+
+    final isSucceeded = await ref.read(
+      onDuplicateWorkLogButtonTappedResultProvider(
+        workLogIncludedHouseWork,
+      ).future,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    // TODO(ide): 共通化できる
+    if (!isSucceeded) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('家事の記録に失敗しました。')));
+      return;
+    }
 
     ScaffoldMessenger.of(
       context,
