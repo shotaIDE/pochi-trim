@@ -57,7 +57,6 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
               icon: '🏠',
               createdAt: DateTime.now(),
               createdBy: 'DummyUser',
-              isRecurring: false,
             ),
             onCompleteTap: (_) {},
             onMoveTap: (_) {},

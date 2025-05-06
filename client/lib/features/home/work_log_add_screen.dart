@@ -86,8 +86,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
   late final TextEditingController _titleController;
 
   var _icon = '🏠';
-  var _isRecurring = false;
-  int? _recurringIntervalMs;
 
   @override
   void initState() {
@@ -97,8 +95,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
       final hw = widget.existingHouseWork!;
       _titleController = TextEditingController(text: hw.title);
       _icon = hw.icon;
-      _isRecurring = hw.isRecurring;
-      _recurringIntervalMs = hw.recurringIntervalMs;
     } else {
       _titleController = TextEditingController();
       _icon = getRandomEmoji(); // デフォルトでランダムな絵文字を設定
@@ -165,30 +161,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-
-              // 繰り返し設定
-              SwitchListTile(
-                title: const Text('定期的な家事'),
-                subtitle: const Text('定期的に行う家事の場合はONにしてください'),
-                value: _isRecurring,
-                onChanged: (value) {
-                  setState(() {
-                    _isRecurring = value;
-                  });
-                },
-              ),
-
-              // 繰り返し設定が有効な場合に間隔を選択できるようにする
-              if (_isRecurring) ...[
-                const SizedBox(height: 8),
-                ListTile(
-                  title: const Text('繰り返し間隔'),
-                  subtitle: Text(_getRecurringIntervalText()),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: _selectRecurringInterval,
-                ),
-              ],
 
               const SizedBox(height: 24),
 
@@ -262,64 +234,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
     }
   }
 
-  String _getRecurringIntervalText() {
-    if (_recurringIntervalMs == null) {
-      return '設定なし';
-    }
-
-    // ミリ秒を適切な単位に変換
-    final days = _recurringIntervalMs! ~/ (1000 * 60 * 60 * 24);
-    if (days > 0) {
-      return '$days日ごと';
-    }
-
-    final hours = _recurringIntervalMs! ~/ (1000 * 60 * 60);
-    if (hours > 0) {
-      return '$hours時間ごと';
-    }
-
-    final minutes = _recurringIntervalMs! ~/ (1000 * 60);
-    return '$minutes分ごと';
-  }
-
-  Future<void> _selectRecurringInterval() async {
-    // 簡易的な期間選択ダイアログを表示
-    final intervals = [
-      {'label': '毎日', 'value': 1000 * 60 * 60 * 24},
-      {'label': '2日ごと', 'value': 1000 * 60 * 60 * 24 * 2},
-      {'label': '3日ごと', 'value': 1000 * 60 * 60 * 24 * 3},
-      {'label': '1週間ごと', 'value': 1000 * 60 * 60 * 24 * 7},
-      {'label': '2週間ごと', 'value': 1000 * 60 * 60 * 24 * 14},
-      {'label': '1ヶ月ごと', 'value': 1000 * 60 * 60 * 24 * 30},
-    ];
-
-    final selectedInterval = await showDialog<int>(
-      context: context,
-      builder:
-          (context) => SimpleDialog(
-            title: const Text('繰り返し間隔'),
-            children:
-                intervals
-                    .map(
-                      (interval) => SimpleDialogOption(
-                        onPressed:
-                            () => Navigator.of(
-                              context,
-                            ).pop(interval['value']! as int),
-                        child: Text(interval['label']! as String),
-                      ),
-                    )
-                    .toList(),
-          ),
-    );
-
-    if (selectedInterval != null) {
-      setState(() {
-        _recurringIntervalMs = selectedInterval;
-      });
-    }
-  }
-
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -345,8 +259,6 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
       icon: _icon,
       createdAt: widget.existingHouseWork?.createdAt ?? DateTime.now(),
       createdBy: widget.existingHouseWork?.createdBy ?? currentUser.uid,
-      isRecurring: _isRecurring,
-      recurringIntervalMs: _isRecurring ? _recurringIntervalMs : null,
     );
 
     try {

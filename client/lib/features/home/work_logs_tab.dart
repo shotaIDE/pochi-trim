@@ -55,7 +55,6 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
                 icon: '🏠',
                 createdAt: DateTime.now(),
                 createdBy: 'DummyUser',
-                isRecurring: false,
               ),
               completedAt: DateTime.now(),
               completedBy: 'dummyUser',
