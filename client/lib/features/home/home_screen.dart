@@ -147,7 +147,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     if (!result) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事の記録に失敗しました。しばらくしてから再度お試しください')),
+        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
       );
       return;
     }
@@ -156,7 +156,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('家事を記録しました')));
+    ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
   }
 
   Future<void> _onDuplicateWorkLogButtonTap(
@@ -176,29 +176,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     // TODO(ide): 共通化できる
     if (!isSucceeded) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('家事の記録に失敗しました。')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+      );
       return;
     }
 
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('家事を記録しました')));
-  }
-
-  void _highlightWorkLogsTabItem() {
-    setState(() {
-      _isLogTabHighlighted = true;
-    });
-
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        setState(() {
-          _isLogTabHighlighted = false;
-        });
-      }
-    });
+    ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
   }
 
   Future<void> _onQuickRegisterButtonPressed(HouseWork houseWork) async {
@@ -217,7 +203,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // TODO(ide): 共通化
     if (!isSucceeded) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事の登録に失敗しました。しばらくしてから再度お試しください')),
+        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
       );
       return;
     }
@@ -230,7 +216,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('家事を登録しました')));
+    ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
+  }
+
+  void _highlightWorkLogsTabItem() {
+    setState(() {
+      _isLogTabHighlighted = true;
+    });
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _isLogTabHighlighted = false;
+        });
+      }
+    });
   }
 }
 
