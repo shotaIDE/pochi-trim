@@ -8,7 +8,9 @@ import 'package:house_worker/models/work_log.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HouseWorksTab extends ConsumerStatefulWidget {
-  const HouseWorksTab({super.key});
+  const HouseWorksTab({super.key, required this.onHouseWorkCompleted});
+
+  final VoidCallback onHouseWorkCompleted;
 
   @override
   ConsumerState<HouseWorksTab> createState() => _HouseWorksTabState();
@@ -120,6 +122,8 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
       );
       return;
     }
+
+    widget.onHouseWorkCompleted();
 
     ScaffoldMessenger.of(
       context,

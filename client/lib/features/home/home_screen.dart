@@ -37,11 +37,18 @@ final ProviderFamily<WorkLog, HouseWork> workLogForHouseWorkProvider =
       );
     });
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  var _isLogTabHighlighted = false;
+
+  @override
+  Widget build(BuildContext context) {
     // 選択されているタブを取得
     final selectedTab = ref.watch(selectedTabProvider);
 
@@ -77,8 +84,8 @@ class HomeScreen extends ConsumerWidget {
             onTap: (index) {
               ref.read(selectedTabProvider.notifier).state = index;
             },
-            tabs: const [
-              Tab(
+            tabs: [
+              const Tab(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   spacing: 8,
@@ -86,16 +93,37 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               Tab(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 8,
-                  children: [Icon(Icons.check_circle), Text('ログ')],
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                        _isLogTabHighlighted
+                            ? Theme.of(
+                              context,
+                            ).colorScheme.primary.withAlpha(100)
+                            : Colors.transparent,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 8,
+                    children: [Icon(Icons.check_circle), Text('ログ')],
+                  ),
                 ),
               ),
             ],
           ),
         ),
-        body: const TabBarView(children: [HouseWorksTab(), WorkLogsTab()]),
+        body: TabBarView(
+          children: [
+            HouseWorksTab(onHouseWorkCompleted: _onHouseWorkCompleted),
+            const WorkLogsTab(),
+          ],
+        ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             // 家事追加画面に直接遷移
@@ -110,6 +138,20 @@ class HomeScreen extends ConsumerWidget {
         bottomNavigationBar: const _QuickRegisterBottomBar(),
       ),
     );
+  }
+
+  void _onHouseWorkCompleted() {
+    setState(() {
+      _isLogTabHighlighted = true;
+    });
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _isLogTabHighlighted = false;
+        });
+      }
+    });
   }
 }
 
