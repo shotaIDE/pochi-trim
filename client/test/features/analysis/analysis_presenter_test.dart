@@ -67,5 +67,11 @@ void main() {
         expect(visibilities['house-work-2'], isFalse);
       });
     });
+
+    group('フォーカスとアンフォーカス', () {
+      test('家事をフォーカスすると、フォーカスした家事が表示状態となり、それ以外の家事が非表示状態になること', () {
+        // TODO(ide): 実装
+      });
+    });
   });
 }
