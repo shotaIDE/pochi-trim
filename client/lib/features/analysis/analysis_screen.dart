@@ -828,6 +828,7 @@ class _Legends extends StatelessWidget {
                 legends.map((legend) {
                   return InkWell(
                     onTap: () => onTap(legend.houseWork.id),
+                    onLongPress: () => onLongPress(legend.houseWork.id),
                     child: Opacity(
                       opacity: legend.isVisible ? 1.0 : 0.3,
                       child: Padding(
