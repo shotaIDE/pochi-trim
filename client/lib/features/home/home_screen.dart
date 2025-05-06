@@ -92,27 +92,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [Icon(Icons.home), Text('家事')],
                 ),
               ),
-              Tab(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color:
-                        _isLogTabHighlighted
-                            ? Theme.of(
-                              context,
-                            ).colorScheme.primary.withAlpha(100)
-                            : Colors.transparent,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    spacing: 8,
-                    children: [Icon(Icons.check_circle), Text('ログ')],
-                  ),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                // TODO(ide): 高さがこれでいいか？
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                color:
+                    _isLogTabHighlighted
+                        ? Theme.of(context).colorScheme.secondary.withAlpha(100)
+                        : Colors.transparent,
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 8,
+                  children: [Icon(Icons.check_circle), Text('ログ')],
                 ),
               ),
             ],
