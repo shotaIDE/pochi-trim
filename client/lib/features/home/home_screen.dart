@@ -49,7 +49,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 選択されているタブを取得
     final selectedTab = ref.watch(selectedTabProvider);
 
     return DefaultTabController(
@@ -94,11 +93,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
-                // TODO(ide): 高さがこれでいいか？
-                padding: const EdgeInsets.symmetric(vertical: 12),
                 color:
                     _isLogTabHighlighted
-                        ? Theme.of(context).colorScheme.secondary.withAlpha(100)
+                        ? Theme.of(context).highlightColor
                         : Colors.transparent,
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
