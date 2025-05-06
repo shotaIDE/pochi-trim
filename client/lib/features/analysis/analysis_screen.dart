@@ -433,9 +433,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final weekdayFrequencies = statistics.weekdayFrequencies;
-
-        if (weekdayFrequencies.every((data) => data.totalCount == 0)) {
+        if (statistics.houseWorkLegends.isEmpty) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -456,6 +454,8 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
             ),
           );
         }
+
+        final weekdayFrequencies = statistics.weekdayFrequencies;
 
         final barChart = BarChart(
           BarChartData(
@@ -601,9 +601,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final timeSlotFrequencies = statistics.timeSlotFrequencies;
-
-        if (timeSlotFrequencies.every((data) => data.totalCount == 0)) {
+        if (statistics.houseWorkLegends.isEmpty) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -624,6 +622,8 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
             ),
           );
         }
+
+        final timeSlotFrequencies = statistics.timeSlotFrequencies;
 
         final barChart = BarChart(
           BarChartData(
