@@ -78,6 +78,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
     final workLogsTabItem = AnimatedContainer(
+      // TODO(ide): 文字サイズが変わった時にも固定サイズで問題ないか？
+      padding: const EdgeInsets.symmetric(vertical: 12),
       duration: const Duration(milliseconds: 250),
       color:
           _isLogTabHighlighted
