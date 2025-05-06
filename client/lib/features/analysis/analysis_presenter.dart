@@ -29,6 +29,9 @@ class CurrentAnalysisPeriod extends _$CurrentAnalysisPeriod {
 
 @riverpod
 class HouseWorkVisibilities extends _$HouseWorkVisibilities {
+  String? _focusingHouseWorkId;
+  Map<String, bool> _stateBeforeFocus = {};
+
   @override
   Map<String, bool> build() {
     return {};
@@ -42,7 +45,18 @@ class HouseWorkVisibilities extends _$HouseWorkVisibilities {
     state = newState;
   }
 
-  Future<void> showOnlyOne({required String houseWorkId}) async {
+  Future<void> focusOrUnfocus({required String houseWorkId}) async {
+    if (_focusingHouseWorkId == houseWorkId) {
+      final newState = Map<String, bool>.from(_stateBeforeFocus);
+
+      _focusingHouseWorkId = null;
+      _stateBeforeFocus = {};
+
+      state = newState;
+
+      return;
+    }
+
     final houseWorks = await ref.read(_houseWorksFilePrivateProvider.future);
 
     final newStateMapEntries = houseWorks.map((houseWork) {
@@ -53,6 +67,9 @@ class HouseWorkVisibilities extends _$HouseWorkVisibilities {
       return MapEntry(houseWork.id, false);
     });
     final newState = Map<String, bool>.fromEntries(newStateMapEntries);
+
+    _focusingHouseWorkId = houseWorkId;
+    _stateBeforeFocus = Map<String, bool>.from(state);
 
     state = newState;
   }

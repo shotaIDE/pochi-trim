@@ -562,7 +562,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                     onLongPress: (houseWorkId) {
                       ref
                           .read(houseWorkVisibilitiesProvider.notifier)
-                          .showOnlyOne(houseWorkId: houseWorkId);
+                          .focusOrUnfocus(houseWorkId: houseWorkId);
                     },
                   ),
                 ],
@@ -731,7 +731,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                     onLongPress: (houseWorkId) {
                       ref
                           .read(houseWorkVisibilitiesProvider.notifier)
-                          .showOnlyOne(houseWorkId: houseWorkId);
+                          .focusOrUnfocus(houseWorkId: houseWorkId);
                     },
                   ),
                 ],
