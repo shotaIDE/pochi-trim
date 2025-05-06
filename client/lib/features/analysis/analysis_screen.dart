@@ -480,6 +480,16 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                 ),
               ),
             ),
+            barTouchData: BarTouchData(
+              handleBuiltInTouches: false,
+              touchCallback: (FlTouchEvent event, barTouchResponse) {
+                final touchedBarGroup = barTouchResponse?.spot?.touchedBarGroup;
+                final touchedStackItem =
+                    barTouchResponse?.spot?.touchedStackItem;
+                debugPrint('TouchedBarGroup: $touchedBarGroup');
+                debugPrint('TouchedStackItem: $touchedStackItem');
+              },
+            ),
             gridData: const FlGridData(
               horizontalInterval: 4,
               drawVerticalLine: false,
