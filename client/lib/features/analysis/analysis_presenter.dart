@@ -29,6 +29,9 @@ class CurrentAnalysisPeriod extends _$CurrentAnalysisPeriod {
 
 @riverpod
 class HouseWorkVisibilities extends _$HouseWorkVisibilities {
+  String? _focusingHouseWorkId;
+  Map<String, bool> _stateBeforeFocus = {};
+
   @override
   Map<String, bool> build() {
     return {};
@@ -42,8 +45,42 @@ class HouseWorkVisibilities extends _$HouseWorkVisibilities {
     state = newState;
   }
 
-  bool isVisible({required String houseWorkId}) {
-    return state[houseWorkId] ?? true;
+  /// 特定の凡例にフォーカスを当てるか、または、フォーカスを解除する
+  ///
+  /// フォーカスを当てると、他の凡例は非表示になる。
+  Future<void> focusOrUnfocus({required String houseWorkId}) async {
+    if (_focusingHouseWorkId == houseWorkId) {
+      // すでにフォーカスしている場合は、フォーカスを解除する
+      final newState = Map<String, bool>.from(_stateBeforeFocus);
+
+      _focusingHouseWorkId = null;
+      _stateBeforeFocus = {};
+
+      state = newState;
+
+      return;
+    }
+
+    final houseWorks = await ref.read(_houseWorksFilePrivateProvider.future);
+
+    final newStateMapEntries = houseWorks.map((houseWork) {
+      if (houseWork.id == houseWorkId) {
+        return MapEntry(houseWork.id, true);
+      }
+
+      return MapEntry(houseWork.id, false);
+    });
+    final newState = Map<String, bool>.fromEntries(newStateMapEntries);
+
+    if (_focusingHouseWorkId == null) {
+      // 元々フォーカスがなかった場合にのみ、直前の状態を復元できるように保存しておく
+      // 元々フォーカスがあった場合は、フォーカス状態より前の状態に復元したいので、ここでは状態を保存しない
+      _stateBeforeFocus = Map<String, bool>.from(state);
+    }
+
+    _focusingHouseWorkId = houseWorkId;
+
+    state = newState;
   }
 }
 

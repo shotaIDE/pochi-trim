@@ -433,9 +433,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final weekdayFrequencies = statistics.weekdayFrequencies;
-
-        if (weekdayFrequencies.every((data) => data.totalCount == 0)) {
+        if (statistics.houseWorkLegends.isEmpty) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -456,6 +454,8 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
             ),
           );
         }
+
+        final weekdayFrequencies = statistics.weekdayFrequencies;
 
         final barChart = BarChart(
           BarChartData(
@@ -559,6 +559,11 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                           .read(houseWorkVisibilitiesProvider.notifier)
                           .toggle(houseWorkId: houseWorkId);
                     },
+                    onLongPress: (houseWorkId) {
+                      ref
+                          .read(houseWorkVisibilitiesProvider.notifier)
+                          .focusOrUnfocus(houseWorkId: houseWorkId);
+                    },
                   ),
                 ],
               ),
@@ -596,9 +601,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final timeSlotFrequencies = statistics.timeSlotFrequencies;
-
-        if (timeSlotFrequencies.every((data) => data.totalCount == 0)) {
+        if (statistics.houseWorkLegends.isEmpty) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -619,6 +622,8 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
             ),
           );
         }
+
+        final timeSlotFrequencies = statistics.timeSlotFrequencies;
 
         final barChart = BarChart(
           BarChartData(
@@ -723,6 +728,11 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                           .read(houseWorkVisibilitiesProvider.notifier)
                           .toggle(houseWorkId: houseWorkId);
                     },
+                    onLongPress: (houseWorkId) {
+                      ref
+                          .read(houseWorkVisibilitiesProvider.notifier)
+                          .focusOrUnfocus(houseWorkId: houseWorkId);
+                    },
                   ),
                 ],
               ),
@@ -786,10 +796,15 @@ String _getPeriodText({required AnalysisPeriod analysisPeriod}) {
 }
 
 class _Legends extends StatelessWidget {
-  const _Legends({required this.legends, required this.onTap});
+  const _Legends({
+    required this.legends,
+    required this.onTap,
+    required this.onLongPress,
+  });
 
   final List<HouseWorkLegends> legends;
   final void Function(String houseWorkId) onTap;
+  final void Function(String houseWorkId) onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -803,7 +818,7 @@ class _Legends extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '凡例: (タップで表示/非表示を切り替え)',
+            '凡例: (タップで表示/非表示を切り替え、ロングタップでその項目のみ表示)',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
           const SizedBox(height: 8),
@@ -813,6 +828,7 @@ class _Legends extends StatelessWidget {
                 legends.map((legend) {
                   return InkWell(
                     onTap: () => onTap(legend.houseWork.id),
+                    onLongPress: () => onLongPress(legend.houseWork.id),
                     child: Opacity(
                       opacity: legend.isVisible ? 1.0 : 0.3,
                       child: Padding(
