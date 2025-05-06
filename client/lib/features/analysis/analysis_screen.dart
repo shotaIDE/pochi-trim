@@ -481,13 +481,41 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
               ),
             ),
             barTouchData: BarTouchData(
-              handleBuiltInTouches: false,
+              touchTooltipData: BarTouchTooltipData(
+                getTooltipColor:
+                    (_) => Theme.of(context).colorScheme.surfaceContainerHigh,
+                getTooltipItem: (
+                  BarChartGroupData group,
+                  int groupIndex,
+                  BarChartRodData rod,
+                  int rodIndex,
+                ) {
+                  return BarTooltipItem(
+                    '${rod.toY.toInt()} 回',
+                    Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  );
+                },
+              ),
+              handleBuiltInTouches: true,
               touchCallback: (FlTouchEvent event, barTouchResponse) {
-                final touchedBarGroup = barTouchResponse?.spot?.touchedBarGroup;
-                final touchedStackItem =
-                    barTouchResponse?.spot?.touchedStackItem;
-                debugPrint('TouchedBarGroup: $touchedBarGroup');
-                debugPrint('TouchedStackItem: $touchedStackItem');
+                final spot = barTouchResponse?.spot;
+                if (spot == null ||
+                    !(event is FlTapDownEvent || event is FlTapUpEvent)) {
+                  return;
+                }
+
+                final touchedBarGroupIndex = spot.touchedBarGroupIndex;
+                final touchedRodDataIndex = spot.touchedRodDataIndex;
+                final touchedStackItemIndex = spot.touchedStackItemIndex;
+
+                debugPrint(
+                  'Event: $event, '
+                  'TouchedBarGroup: $touchedBarGroupIndex, '
+                  'TouchedRodData: $touchedRodDataIndex, '
+                  'TouchedStackItem: $touchedStackItemIndex',
+                );
               },
             ),
             gridData: const FlGridData(
@@ -532,6 +560,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                         borderRadius: BorderRadius.zero,
                       ),
                     ],
+                    // showingTooltipIndicators: [0],
                   );
                 }).toList(),
             rotationQuarterTurns: 1,
