@@ -1,11 +1,11 @@
 enum Weekday {
-  monday(value: 0),
-  tuesday(value: 1),
-  wednesday(value: 2),
-  thursday(value: 3),
-  friday(value: 4),
-  saturday(value: 5),
-  sunday(value: 6);
+  monday(value: DateTime.monday),
+  tuesday(value: DateTime.tuesday),
+  wednesday(value: DateTime.wednesday),
+  thursday(value: DateTime.thursday),
+  friday(value: DateTime.friday),
+  saturday(value: DateTime.saturday),
+  sunday(value: DateTime.sunday);
 
   const Weekday({required this.value});
 
