@@ -55,41 +55,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     const titleText = Text('記録');
 
     final analysisButton = IconButton(
-      icon: const Icon(Icons.analytics),
       onPressed: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (context) => const AnalysisScreen()),
         );
       },
+      tooltip: '分析を表示する',
+      icon: const Icon(Icons.analytics),
     );
     final settingsButton = IconButton(
-      icon: const Icon(Icons.settings),
       onPressed: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (context) => const SettingsScreen()),
         );
       },
+      tooltip: '設定を表示する',
+      icon: const Icon(Icons.settings),
     );
 
-    const homeWorksTabItem = Tab(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 8,
-        children: [Icon(Icons.list_alt), Text('家事')],
+    const homeWorksTabItem = Tooltip(
+      message: '登録されている家事を表示する',
+      child: Tab(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8,
+          children: [Icon(Icons.list_alt), Text('家事')],
+        ),
       ),
     );
-    final workLogsTabItem = AnimatedContainer(
-      // TODO(ide): 文字サイズが変わった時にも固定サイズで問題ないか？
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      duration: const Duration(milliseconds: 250),
-      color:
-          _isLogTabHighlighted
-              ? Theme.of(context).highlightColor
-              : Colors.transparent,
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 8,
-        children: [Icon(Icons.check_circle), Text('ログ')],
+    final workLogsTabItem = Tooltip(
+      message: '完了した家事ログを表示する',
+      child: AnimatedContainer(
+        // TODO(ide): 文字サイズが変わった時にも固定サイズで問題ないか？
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        duration: const Duration(milliseconds: 250),
+        color:
+            _isLogTabHighlighted
+                ? Theme.of(context).highlightColor
+                : Colors.transparent,
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8,
+          children: [Icon(Icons.check_circle), Text('ログ')],
+        ),
       ),
     );
     final tabBar = TabBar(
