@@ -108,7 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
 
     final addHouseWorkButton = FloatingActionButton(
-      tooltip: '家事を追加',
+      tooltip: '家事を追加する',
       onPressed: () {
         Navigator.of(context).push(
           MaterialPageRoute<bool?>(
