@@ -5,6 +5,7 @@ part 'user_profile.freezed.dart';
 
 @freezed
 abstract class UserProfile with _$UserProfile {
+  // TODO(ide): 匿名ユーザーかどうかを判定できるようにする
   const factory UserProfile({
     required String id,
     required String? displayName,

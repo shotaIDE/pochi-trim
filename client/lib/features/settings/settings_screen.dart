@@ -89,10 +89,15 @@ class SettingsScreen extends ConsumerWidget {
     UserProfile userProfile,
     WidgetRef ref,
   ) {
+    final displayName = userProfile.displayName;
     return ListTile(
       leading: const Icon(Icons.person),
       title: const Text('ユーザー名'),
-      subtitle: Text(userProfile.displayName ?? '未設定'),
+      subtitle: Text(displayName ?? 'ゲスト'),
+      onTap:
+          displayName == null
+              ? () => _showAnonymousUserInfoDialog(context)
+              : null,
     );
   }
 
