@@ -525,9 +525,15 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
               ),
               handleBuiltInTouches: true,
               touchCallback: (FlTouchEvent event, barTouchResponse) {
+                if (event is FlTapUpEvent) {
+                  setState(() {
+                    _touchedPosition = null;
+                  });
+                  return;
+                }
+
                 final spot = barTouchResponse?.spot;
-                if (spot == null ||
-                    !(event is FlTapDownEvent || event is FlTapUpEvent)) {
+                if (spot == null || event is! FlTapDownEvent) {
                   return;
                 }
 
@@ -535,7 +541,13 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
                 final touchedRodDataIndex = spot.touchedRodDataIndex;
                 final touchedStackItemIndex = spot.touchedStackItemIndex;
 
-                // TODO(ide): ここでStateを更新する
+                setState(() {
+                  _touchedPosition = BarChartTouchedPosition(
+                    groupIndex: touchedBarGroupIndex,
+                    rodDataIndex: touchedRodDataIndex,
+                    stackItemIndex: touchedStackItemIndex,
+                  );
+                });
 
                 debugPrint(
                   'Event: $event, '
