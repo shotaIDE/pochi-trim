@@ -9,21 +9,11 @@ import 'package:house_worker/features/home/work_log_included_house_work.dart';
 import 'package:house_worker/features/home/work_logs_tab.dart';
 import 'package:house_worker/features/settings/settings_screen.dart';
 import 'package:house_worker/models/house_work.dart';
-import 'package:house_worker/models/work_log.dart';
-import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/services/work_log_service.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 // 選択されたタブを管理するプロバイダー
 final selectedTabProvider = StateProvider<int>((ref) => 0);
-
-// WorkLogに対応するHouseWorkを取得するプロバイダー
-final FutureProviderFamily<HouseWork?, WorkLog> houseWorkForWorkLogProvider =
-    FutureProvider.family<HouseWork?, WorkLog>((ref, workLog) {
-      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-
-      return houseWorkRepository.getByIdOnce(workLog.houseWorkId);
-    });
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
