@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_period.dart';
 import 'package:house_worker/features/analysis/analysis_presenter.dart';
+import 'package:house_worker/features/analysis/bar_chart_touched_position.dart';
 import 'package:house_worker/features/analysis/statistics.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
@@ -409,11 +410,19 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   }
 }
 
-class _WeekdayAnalysisPanel extends ConsumerWidget {
+class _WeekdayAnalysisPanel extends ConsumerStatefulWidget {
   const _WeekdayAnalysisPanel();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_WeekdayAnalysisPanel> createState() =>
+      _WeekdayAnalysisPanelState();
+}
+
+class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
+  BarChartTouchedPosition? _touchedPosition;
+
+  @override
+  Widget build(BuildContext context) {
     final statisticsFuture = ref.watch(weekdayStatisticsDisplayProvider.future);
 
     return FutureBuilder(
@@ -480,6 +489,76 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                 ),
               ),
             ),
+            barTouchData: BarTouchData(
+              touchTooltipData: BarTouchTooltipData(
+                tooltipMargin: -40,
+                getTooltipColor:
+                    (_) => Theme.of(context).colorScheme.surfaceContainerHigh,
+                getTooltipItem: (
+                  BarChartGroupData group,
+                  int groupIndex,
+                  BarChartRodData rod,
+                  int rodIndex,
+                ) {
+                  final touchedPosition = _touchedPosition;
+                  if (touchedPosition == null) {
+                    return null;
+                  }
+
+                  final touchedFrequency =
+                      weekdayFrequencies[touchedPosition.groupIndex];
+                  final totalCount = touchedFrequency.totalCount;
+                  final touchedHouseWorkFrequency =
+                      touchedFrequency.houseWorkFrequencies[touchedPosition
+                          .stackItemIndex];
+                  final touchedHouseWorkName =
+                      touchedHouseWorkFrequency.houseWork.title;
+                  final touchedHouseWorkCount = touchedHouseWorkFrequency.count;
+
+                  return BarTooltipItem(
+                    '$touchedHouseWorkCount / $totalCount\n'
+                    '$touchedHouseWorkName / 合計',
+                    Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  );
+                },
+              ),
+              handleBuiltInTouches: true,
+              touchCallback: (FlTouchEvent event, barTouchResponse) {
+                if (event is! FlTapDownEvent) {
+                  return;
+                }
+
+                final spot = barTouchResponse?.spot;
+                if (spot == null) {
+                  setState(() {
+                    _touchedPosition = null;
+                  });
+
+                  return;
+                }
+
+                final touchedBarGroupIndex = spot.touchedBarGroupIndex;
+                final touchedRodDataIndex = spot.touchedRodDataIndex;
+                final touchedStackItemIndex = spot.touchedStackItemIndex;
+
+                setState(() {
+                  _touchedPosition = BarChartTouchedPosition(
+                    groupIndex: touchedBarGroupIndex,
+                    rodDataIndex: touchedRodDataIndex,
+                    stackItemIndex: touchedStackItemIndex,
+                  );
+                });
+
+                debugPrint(
+                  'Event: $event, '
+                  'TouchedBarGroup: $touchedBarGroupIndex, '
+                  'TouchedRodData: $touchedRodDataIndex, '
+                  'TouchedStackItem: $touchedStackItemIndex',
+                );
+              },
+            ),
             gridData: const FlGridData(
               horizontalInterval: 4,
               drawVerticalLine: false,
@@ -494,14 +573,14 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
             barGroups:
                 weekdayFrequencies.asMap().entries.map((entry) {
                   final index = entry.key;
-                  final data = entry.value;
+                  final frequency = entry.value;
 
                   // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
                   final rodStackItems = <BarChartRodStackItem>[];
                   double fromY = 0;
 
                   // 表示されている家事だけを処理
-                  for (final freq in data.houseWorkFrequencies) {
+                  for (final freq in frequency.houseWorkFrequencies) {
                     final toY = fromY + freq.count;
 
                     rodStackItems.add(
@@ -511,17 +590,27 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                     fromY = toY;
                   }
 
+                  final List<int> showingTooltipIndicators;
+                  final touchedPosition = _touchedPosition;
+                  if (touchedPosition != null &&
+                      touchedPosition.groupIndex == index) {
+                    showingTooltipIndicators = [touchedPosition.rodDataIndex];
+                  } else {
+                    showingTooltipIndicators = [];
+                  }
+
                   return BarChartGroupData(
                     x: index,
                     barRods: [
                       BarChartRodData(
-                        toY: data.totalCount.toDouble(),
+                        toY: frequency.totalCount.toDouble(),
                         width: 20,
                         color: Colors.transparent,
                         rodStackItems: rodStackItems,
                         borderRadius: BorderRadius.zero,
                       ),
                     ],
+                    showingTooltipIndicators: showingTooltipIndicators,
                   );
                 }).toList(),
             rotationQuarterTurns: 1,
