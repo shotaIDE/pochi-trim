@@ -1,37 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/models/user.dart' as app_user;
-import 'package:house_worker/repositories/user_repository.dart';
+import 'package:house_worker/models/user_profile.dart';
 import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/auth_service.dart';
-import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// ロガーの設定
-final _logger = Logger('SettingsScreen');
-
-// 現在のユーザー情報を取得するプロバイダー
-final AutoDisposeFutureProvider<app_user.User?> currentUserProvider =
-    FutureProvider.autoDispose<app_user.User?>((ref) async {
-      final authService = ref.watch(authServiceProvider);
-      final userRepository = ref.watch(userRepositoryProvider);
-
-      final currentUser = authService.currentUser;
-      if (currentUser != null) {
-        try {
-          final user = await userRepository.getUserByUid(currentUser.uid);
-          _logger.info('ユーザー情報を取得しました: ${user?.name}');
-          return user;
-        } on Exception catch (e) {
-          _logger.warning('ユーザー情報の取得に失敗しました: $e');
-          return null;
-        }
-      }
-      return null;
-    });
 
 // アプリのバージョン情報を取得するプロバイダー
 final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
@@ -43,63 +17,25 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(currentUserProvider);
+    final userProfileAsync = ref.watch(currentUserProfileProvider);
     final packageInfoAsync = ref.watch(packageInfoProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('設定')),
-      body: userAsync.when(
-        data: (user) {
-          // 認証サービスから現在のFirebaseユーザーを取得
-          final authService = ref.watch(authServiceProvider);
-          final firebaseUser = authService.currentUser;
-
-          // ユーザーがnullの場合（匿名ユーザーなど）
-          if (user == null && firebaseUser != null) {
-            // 匿名ユーザー情報を表示するためのリストビュー
-            return ListView(
-              children: [
-                // ユーザー情報セクション
-                _buildSectionHeader(context, 'ユーザー情報'),
-                _buildAnonymousUserInfoTile(context, firebaseUser),
-
-                const Divider(),
-
-                // アプリ情報セクション
-                _buildSectionHeader(context, 'アプリについて'),
-                _buildReviewTile(context),
-                _buildShareAppTile(context),
-                _buildTermsOfServiceTile(context),
-                _buildPrivacyPolicyTile(context),
-                _buildLicenseTile(context),
-
-                // デバッグセクション
-                _buildSectionHeader(context, 'デバッグ'),
-                _buildDebugTile(context),
-
-                // バージョン情報
-                _buildVersionInfo(context, packageInfoAsync),
-
-                const Divider(),
-
-                // アカウント管理セクション
-                _buildSectionHeader(context, 'アカウント管理'),
-                _buildLogoutTile(context, ref),
-              ],
-            );
-          } else if (user == null) {
-            return const Center(child: Text('ユーザー情報が取得できません'));
-          }
+      body: userProfileAsync.when(
+        data: (wrappedUserProfile) {
+          // 設定画面は必ずログイン済みであることを前提とする
+          final userProfile = wrappedUserProfile!;
 
           return ListView(
             children: [
               // ユーザー情報セクション
               _buildSectionHeader(context, 'ユーザー情報'),
-              _buildUserInfoTile(context, user, ref),
+              _buildUserInfoTile(context, userProfile, ref),
 
               // 家の情報セクション
               _buildSectionHeader(context, '家の情報'),
-              _buildHouseholdTile(context, user),
+              _buildHouseholdTile(context, userProfile),
               _buildShareHouseTile(context),
 
               const Divider(),
@@ -124,7 +60,7 @@ class SettingsScreen extends ConsumerWidget {
               // アカウント管理セクション
               _buildSectionHeader(context, 'アカウント管理'),
               _buildLogoutTile(context, ref),
-              _buildDeleteAccountTile(context, ref, user),
+              _buildDeleteAccountTile(context, ref, userProfile),
             ],
           );
         },
@@ -150,49 +86,21 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildUserInfoTile(
     BuildContext context,
-    app_user.User user,
+    UserProfile userProfile,
     WidgetRef ref,
   ) {
     return ListTile(
       leading: const Icon(Icons.person),
       title: const Text('ユーザー名'),
-      subtitle: Text(user.name),
-      trailing: const Icon(Icons.edit),
-      onTap: () => _showEditNameDialog(context, user, ref),
+      subtitle: Text(userProfile.displayName ?? '未設定'),
     );
   }
 
-  Widget _buildAnonymousUserInfoTile(
-    BuildContext context,
-    firebase_auth.User firebaseUser,
-  ) {
-    return Column(
-      children: [
-        ListTile(
-          leading: const Icon(Icons.person),
-          title: const Text('ユーザー名'),
-          subtitle: const Text('ゲスト'),
-          trailing: const Icon(Icons.edit),
-          onTap: () => _showAnonymousUserInfoDialog(context),
-        ),
-        ListTile(
-          leading: const Icon(Icons.perm_identity),
-          title: const Text('ユーザーID'),
-          subtitle: Text(firebaseUser.uid),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHouseholdTile(BuildContext context, app_user.User user) {
+  Widget _buildHouseholdTile(BuildContext context, UserProfile userProfile) {
     return ListTile(
       leading: const Icon(Icons.home),
       title: const Text('家の設定'),
-      subtitle: Text(
-        user.householdIds.isNotEmpty
-            ? '${user.householdIds.length}件の家に参加中'
-            : '家に参加していません',
-      ),
+      subtitle: const Text('1 件の家に参加中'),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () {
         // 家の設定画面への遷移処理
@@ -358,82 +266,12 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildDeleteAccountTile(
     BuildContext context,
     WidgetRef ref,
-    app_user.User user,
+    UserProfile userProfile,
   ) {
     return ListTile(
       leading: const Icon(Icons.delete_forever, color: Colors.red),
       title: const Text('アカウントを削除', style: TextStyle(color: Colors.red)),
-      onTap: () => _showDeleteAccountConfirmDialog(context, ref, user),
-    );
-  }
-
-  // ユーザー名編集ダイアログ
-  void _showEditNameDialog(
-    BuildContext context,
-    app_user.User user,
-    WidgetRef ref,
-  ) {
-    final nameController = TextEditingController(text: user.name);
-
-    showDialog<void>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('ユーザー名の変更'),
-            content: TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: '新しいユーザー名',
-                border: OutlineInputBorder(),
-              ),
-              autofocus: true,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('キャンセル'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  final newName = nameController.text.trim();
-                  if (newName.isNotEmpty) {
-                    // ユーザー名の更新処理
-                    final updatedUser = app_user.User(
-                      id: user.id,
-                      uid: user.uid,
-                      name: newName,
-                      email: user.email,
-                      householdIds: user.householdIds,
-                      createdAt: user.createdAt,
-                      isPremium: user.isPremium,
-                    );
-
-                    try {
-                      await ref
-                          .read(userRepositoryProvider)
-                          .updateUser(updatedUser);
-                      ref.invalidate(currentUserProvider); // プロバイダーを更新
-
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('ユーザー名を更新しました')),
-                        );
-                      }
-                    } on Exception catch (e) {
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('エラーが発生しました: $e')),
-                        );
-                      }
-                    }
-                  }
-                },
-                child: const Text('保存'),
-              ),
-            ],
-          ),
+      onTap: () => _showDeleteAccountConfirmDialog(context, ref, userProfile),
     );
   }
 
@@ -512,7 +350,7 @@ class SettingsScreen extends ConsumerWidget {
   void _showDeleteAccountConfirmDialog(
     BuildContext context,
     WidgetRef ref,
-    app_user.User user,
+    UserProfile userProfile,
   ) {
     showDialog<void>(
       context: context,
@@ -529,9 +367,6 @@ class SettingsScreen extends ConsumerWidget {
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
                 onPressed: () async {
                   try {
-                    // ユーザーデータの削除
-                    await ref.read(userRepositoryProvider).delete(user.id);
-
                     // Firebase認証からのサインアウト
                     await ref.read(authServiceProvider).signOut();
 

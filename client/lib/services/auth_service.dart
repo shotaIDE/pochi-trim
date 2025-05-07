@@ -1,17 +1,26 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/sign_in_result.dart';
-import 'package:house_worker/models/user.dart' as app_user;
-import 'package:house_worker/repositories/user_repository.dart';
+import 'package:house_worker/models/user_profile.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_service.g.dart';
 
 @riverpod
-AuthService authService(Ref ref) {
-  final userRepository = ref.watch(userRepositoryProvider);
-  return AuthService(firebase_auth.FirebaseAuth.instance, userRepository);
+AuthService authService(Ref _) {
+  return AuthService();
+}
+
+@riverpod
+Stream<UserProfile?> currentUserProfile(Ref ref) {
+  return firebase_auth.FirebaseAuth.instance.authStateChanges().map((user) {
+    if (user == null) {
+      return null;
+    }
+
+    return UserProfile.fromFirebaseAuthUser(user);
+  });
 }
 
 final authStateProvider = StreamProvider<firebase_auth.User?>((ref) {
@@ -19,18 +28,16 @@ final authStateProvider = StreamProvider<firebase_auth.User?>((ref) {
 });
 
 class AuthService {
-  AuthService(this._firebaseAuth, this._userRepository);
-  final firebase_auth.FirebaseAuth _firebaseAuth;
-  final UserRepository _userRepository;
   final _logger = Logger('AuthService');
 
   Stream<firebase_auth.User?> get authStateChanges =>
-      _firebaseAuth.authStateChanges();
+      firebase_auth.FirebaseAuth.instance.authStateChanges();
 
   Future<String> signInAnonymously() async {
     final firebase_auth.UserCredential userCredential;
     try {
-      userCredential = await _firebaseAuth.signInAnonymously();
+      userCredential =
+          await firebase_auth.FirebaseAuth.instance.signInAnonymously();
     } on firebase_auth.FirebaseAuthException catch (e) {
       _logger.warning('匿名ログインに失敗しました: $e');
 
@@ -48,39 +55,19 @@ class AuthService {
   }
 
   Future<void> signOut() async {
-    await _firebaseAuth.signOut();
+    await firebase_auth.FirebaseAuth.instance.signOut();
   }
 
-  Future<void> createUser() async {
-    final user = _firebaseAuth.currentUser;
-    if (user == null) {
-      _logger.warning('ユーザーがログインしていません。');
-      return;
-    }
-
-    final existingUser = await _userRepository.getUserByUid(user.uid);
-
-    if (existingUser == null) {
-      final newUser = app_user.User(
-        id: '', // 新規ユーザーの場合は空文字列を指定し、Firestoreが自動的にIDを生成
-        uid: user.uid,
-        name: 'ゲスト',
-        email: user.email ?? '',
-        householdIds: [],
-        createdAt: DateTime.now(),
-      );
-
-      await _userRepository.createUser(newUser);
-    }
-  }
-
-  firebase_auth.User? get currentUser => _firebaseAuth.currentUser;
+  firebase_auth.User? get currentUser =>
+      firebase_auth.FirebaseAuth.instance.currentUser;
 
   /// 現在のユーザー情報をチェックし、ログインしている場合はUIDをログ出力します
   void checkCurrentUser() {
-    final user = _firebaseAuth.currentUser;
-    if (user != null) {
-      _logger.info('既存ユーザーがログイン中です。UID: ${user.uid}');
+    final user = firebase_auth.FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return;
     }
+
+    _logger.info('既存ユーザーがログイン中です。UID: ${user.uid}');
   }
 }
