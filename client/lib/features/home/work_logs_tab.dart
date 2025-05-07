@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_included_house_work.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
 import 'package:house_worker/features/home/work_log_provider.dart';
@@ -183,14 +182,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     WorkLogIncludedHouseWork workLogIncludedHouseWork,
   ) async {
     // TODO(ide): メニューを表示する
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder:
-            (context) => WorkLogDashboardScreen(
-              workLog: workLogIncludedHouseWork.toWorkLog(),
-            ),
-      ),
-    );
+    // ダッシュボード画面への遷移は廃止されました
   }
 
   Future<void> _onDelete(

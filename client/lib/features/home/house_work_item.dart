@@ -80,43 +80,11 @@ class _HouseWorkItemState extends State<HouseWorkItem> {
       ),
     );
 
-    final verticalDivider = Column(
-      children: [
-        Expanded(
-          child: ColoredBox(
-            color: Theme.of(context).dividerColor.withAlpha(100),
-            child: const SizedBox(width: 1),
-          ),
-        ),
-      ],
-    );
-
-    const dashboardIcon = Icon(Icons.chevron_right);
-    final moveToDashboardPart = InkWell(
-      onTap: () => widget.onMoveTap(widget.houseWork),
-      child: const Column(
-        children: [
-          Expanded(
-            child: Padding(padding: EdgeInsets.all(16), child: dashboardIcon),
-          ),
-        ],
-      ),
-    );
-
-    // completeButtonPart の高さに他のウィジェットの高さを合わせるために IntrinsicHeight を使用
+    // completeButtonPart の高さに合わせるために IntrinsicHeight を使用
     final item = IntrinsicHeight(
       child: ColoredBox(
         color: Theme.of(context).colorScheme.surfaceContainer,
-        child: Row(
-          children: [
-            Expanded(child: completeButtonPart),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: verticalDivider,
-            ),
-            moveToDashboardPart,
-          ],
-        ),
+        child: Row(children: [Expanded(child: completeButtonPart)]),
       ),
     );
 
