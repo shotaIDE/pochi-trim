@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/house_work_item.dart';
 import 'package:house_worker/features/home/house_works_presenter.dart';
-import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/models/house_work.dart';
-import 'package:house_worker/models/work_log.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HouseWorksTab extends ConsumerStatefulWidget {
@@ -59,7 +57,6 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
               createdBy: 'DummyUser',
             ),
             onCompleteTap: (_) {},
-            onMoveTap: (_) {},
             onDelete: (_) {},
           );
 
@@ -96,32 +93,12 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
             return HouseWorkItem(
               houseWork: houseWork,
               onCompleteTap: widget.onCompleteButtonTap,
-              onMoveTap: _onWorkLogDashboardTapped,
               onDelete: _onDeleteTapped,
             );
           },
           separatorBuilder: (_, _) => const _Divider(),
         );
       },
-    );
-  }
-
-  Future<void> _onWorkLogDashboardTapped(HouseWork houseWork) async {
-    if (!mounted) {
-      return;
-    }
-
-    final workLog = WorkLog(
-      id: '',
-      houseWorkId: houseWork.id,
-      completedAt: DateTime.now(),
-      completedBy: '',
-    );
-
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => WorkLogDashboardScreen(workLog: workLog),
-      ),
     );
   }
 

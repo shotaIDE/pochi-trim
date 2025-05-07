@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
 import 'package:house_worker/features/home/work_log_included_house_work.dart';
 import 'package:house_worker/features/home/work_log_item.dart';
 import 'package:house_worker/features/home/work_log_provider.dart';
@@ -59,7 +58,6 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
               completedAt: DateTime.now(),
               completedBy: 'dummyUser',
             ),
-            onLongPress: (_) {},
             onDuplicate: (_) {},
             onDelete: (_) {},
           );
@@ -125,7 +123,6 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
           child: WorkLogItem(
             workLogIncludedHouseWork: workLogIncludedHouseWork,
             onDuplicate: widget.onDuplicateButtonTap,
-            onLongPress: _onLongPress,
             onDelete: _onDelete,
           ),
         ),
@@ -177,20 +174,6 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
         );
       }
     }
-  }
-
-  Future<void> _onLongPress(
-    WorkLogIncludedHouseWork workLogIncludedHouseWork,
-  ) async {
-    // TODO(ide): メニューを表示する
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder:
-            (context) => WorkLogDashboardScreen(
-              workLog: workLogIncludedHouseWork.toWorkLog(),
-            ),
-      ),
-    );
   }
 
   Future<void> _onDelete(

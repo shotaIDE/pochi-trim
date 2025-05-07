@@ -2,17 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
 
-// 特定の家事IDに関連するワークログを取得するプロバイダー
-final FutureProviderFamily<List<WorkLog>, String>
-workLogsByHouseWorkIdProvider = FutureProvider.family<List<WorkLog>, String>((
-  ref,
-  houseWorkId,
-) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
-
-  return workLogRepository.getWorkLogsByHouseWork(houseWorkId);
-});
-
 // タイトルでワークログを検索するプロバイダー
 final FutureProviderFamily<List<WorkLog>, String> workLogsByTitleProvider =
     FutureProvider.family<List<WorkLog>, String>((ref, title) {
