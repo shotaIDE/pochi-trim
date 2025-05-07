@@ -57,7 +57,6 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
               createdBy: 'DummyUser',
             ),
             onCompleteTap: (_) {},
-            onMoveTap: (_) {},
             onDelete: (_) {},
           );
 
@@ -94,7 +93,6 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
             return HouseWorkItem(
               houseWork: houseWork,
               onCompleteTap: widget.onCompleteButtonTap,
-              onMoveTap: (_) {},
               onDelete: _onDeleteTapped,
             );
           },

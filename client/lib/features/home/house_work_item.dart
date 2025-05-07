@@ -6,13 +6,11 @@ class HouseWorkItem extends StatefulWidget {
     super.key,
     required this.houseWork,
     required this.onCompleteTap,
-    required this.onMoveTap,
     required this.onDelete,
   });
 
   final HouseWork houseWork;
   final void Function(HouseWork) onCompleteTap;
-  final void Function(HouseWork) onMoveTap;
   final void Function(HouseWork) onDelete;
 
   @override
@@ -80,12 +78,9 @@ class _HouseWorkItemState extends State<HouseWorkItem> {
       ),
     );
 
-    // completeButtonPart の高さに合わせるために IntrinsicHeight を使用
-    final item = IntrinsicHeight(
-      child: ColoredBox(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        child: Row(children: [Expanded(child: completeButtonPart)]),
-      ),
+    final item = ColoredBox(
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      child: completeButtonPart,
     );
 
     return Dismissible(
