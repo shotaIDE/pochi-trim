@@ -515,8 +515,8 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
                   final touchedHouseWorkCount = touchedHouseWorkFrequency.count;
 
                   return BarTooltipItem(
-                    '合計: $totalCount 回\n'
-                    '$touchedHouseWorkName: $touchedHouseWorkCount 回',
+                    '$touchedHouseWorkCount / $totalCount\n'
+                    '$touchedHouseWorkName / 合計',
                     Theme.of(context).textTheme.bodySmall!.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
