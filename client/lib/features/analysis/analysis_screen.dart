@@ -491,6 +491,7 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
             ),
             barTouchData: BarTouchData(
               touchTooltipData: BarTouchTooltipData(
+                tooltipMargin: -40,
                 getTooltipColor:
                     (_) => Theme.of(context).colorScheme.surfaceContainerHigh,
                 getTooltipItem: (
