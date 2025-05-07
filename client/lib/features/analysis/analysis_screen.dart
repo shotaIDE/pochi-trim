@@ -535,6 +535,8 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
                 final touchedRodDataIndex = spot.touchedRodDataIndex;
                 final touchedStackItemIndex = spot.touchedStackItemIndex;
 
+                // TODO(ide): ここでStateを更新する
+
                 debugPrint(
                   'Event: $event, '
                   'TouchedBarGroup: $touchedBarGroupIndex, '
