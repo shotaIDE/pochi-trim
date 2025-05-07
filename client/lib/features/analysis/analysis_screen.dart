@@ -526,15 +526,16 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
               ),
               handleBuiltInTouches: true,
               touchCallback: (FlTouchEvent event, barTouchResponse) {
-                if (event is FlTapUpEvent) {
-                  setState(() {
-                    _touchedPosition = null;
-                  });
+                if (event is! FlTapDownEvent) {
                   return;
                 }
 
                 final spot = barTouchResponse?.spot;
-                if (spot == null || event is! FlTapDownEvent) {
+                if (spot == null) {
+                  setState(() {
+                    _touchedPosition = null;
+                  });
+
                   return;
                 }
 
