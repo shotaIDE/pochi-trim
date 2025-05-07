@@ -409,11 +409,17 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   }
 }
 
-class _WeekdayAnalysisPanel extends ConsumerWidget {
+class _WeekdayAnalysisPanel extends ConsumerStatefulWidget {
   const _WeekdayAnalysisPanel();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_WeekdayAnalysisPanel> createState() =>
+      _WeekdayAnalysisPanelState();
+}
+
+class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
+  @override
+  Widget build(BuildContext context) {
     final statisticsFuture = ref.watch(weekdayStatisticsDisplayProvider.future);
 
     return FutureBuilder(
@@ -532,14 +538,14 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
             barGroups:
                 weekdayFrequencies.asMap().entries.map((entry) {
                   final index = entry.key;
-                  final data = entry.value;
+                  final frequency = entry.value;
 
                   // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
                   final rodStackItems = <BarChartRodStackItem>[];
                   double fromY = 0;
 
                   // 表示されている家事だけを処理
-                  for (final freq in data.houseWorkFrequencies) {
+                  for (final freq in frequency.houseWorkFrequencies) {
                     final toY = fromY + freq.count;
 
                     rodStackItems.add(
@@ -553,7 +559,7 @@ class _WeekdayAnalysisPanel extends ConsumerWidget {
                     x: index,
                     barRods: [
                       BarChartRodData(
-                        toY: data.totalCount.toDouble(),
+                        toY: frequency.totalCount.toDouble(),
                         width: 20,
                         color: Colors.transparent,
                         rodStackItems: rodStackItems,
