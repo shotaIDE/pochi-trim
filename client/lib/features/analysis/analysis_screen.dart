@@ -499,8 +499,24 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
                   BarChartRodData rod,
                   int rodIndex,
                 ) {
+                  final touchedPosition = _touchedPosition;
+                  if (touchedPosition == null) {
+                    return null;
+                  }
+
+                  final touchedFrequency =
+                      weekdayFrequencies[touchedPosition.groupIndex];
+                  final totalCount = touchedFrequency.totalCount;
+                  final touchedHouseWorkFrequency =
+                      touchedFrequency.houseWorkFrequencies[touchedPosition
+                          .stackItemIndex];
+                  final touchedHouseWorkName =
+                      touchedHouseWorkFrequency.houseWork.title;
+                  final touchedHouseWorkCount = touchedHouseWorkFrequency.count;
+
                   return BarTooltipItem(
-                    '${rod.toY.toInt()} 回',
+                    '合計: $totalCount 回\n'
+                    '$touchedHouseWorkName: $touchedHouseWorkCount 回',
                     Theme.of(context).textTheme.bodySmall!.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
