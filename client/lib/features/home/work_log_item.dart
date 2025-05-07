@@ -8,13 +8,11 @@ class WorkLogItem extends ConsumerStatefulWidget {
     super.key,
     required this.workLogIncludedHouseWork,
     required this.onDuplicate,
-    required this.onLongPress,
     required this.onDelete,
   });
 
   final WorkLogIncludedHouseWork workLogIncludedHouseWork;
   final void Function(WorkLogIncludedHouseWork) onDuplicate;
-  final void Function(WorkLogIncludedHouseWork) onLongPress;
   final void Function(WorkLogIncludedHouseWork) onDelete;
 
   @override
@@ -46,20 +44,14 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
     final completedDateTimeText = _CompletedDateText(
       completedAt: widget.workLogIncludedHouseWork.completedAt,
     );
-    final completedContentPart = GestureDetector(
-      onLongPress: () => widget.onLongPress(widget.workLogIncludedHouseWork),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            completedDateTimeText,
-            const SizedBox(width: 16),
-            houseWorkIcon,
-            const SizedBox(width: 12),
-            Expanded(child: houseWorkTitleText),
-          ],
-        ),
-      ),
+    final completedContentPart = Row(
+      children: [
+        completedDateTimeText,
+        const SizedBox(width: 16),
+        houseWorkIcon,
+        const SizedBox(width: 12),
+        Expanded(child: houseWorkTitleText),
+      ],
     );
 
     final verticalDivider = Column(
@@ -100,7 +92,12 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
     final body = IntrinsicHeight(
       child: Row(
         children: [
-          Expanded(child: completedContentPart),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: completedContentPart,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: verticalDivider,

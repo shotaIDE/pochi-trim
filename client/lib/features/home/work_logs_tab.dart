@@ -58,7 +58,6 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
               completedAt: DateTime.now(),
               completedBy: 'dummyUser',
             ),
-            onLongPress: (_) {},
             onDuplicate: (_) {},
             onDelete: (_) {},
           );
@@ -124,7 +123,6 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
           child: WorkLogItem(
             workLogIncludedHouseWork: workLogIncludedHouseWork,
             onDuplicate: widget.onDuplicateButtonTap,
-            onLongPress: _onLongPress,
             onDelete: _onDelete,
           ),
         ),
@@ -176,13 +174,6 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
         );
       }
     }
-  }
-
-  Future<void> _onLongPress(
-    WorkLogIncludedHouseWork workLogIncludedHouseWork,
-  ) async {
-    // TODO(ide): メニューを表示する
-    // ダッシュボード画面への遷移は廃止されました
   }
 
   Future<void> _onDelete(
