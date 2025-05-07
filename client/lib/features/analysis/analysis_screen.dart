@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_period.dart';
 import 'package:house_worker/features/analysis/analysis_presenter.dart';
+import 'package:house_worker/features/analysis/bar_chart_touched_position.dart';
 import 'package:house_worker/features/analysis/statistics.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
@@ -418,6 +419,8 @@ class _WeekdayAnalysisPanel extends ConsumerStatefulWidget {
 }
 
 class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
+  BarChartTouchedPosition? _touchedPosition;
+
   @override
   Widget build(BuildContext context) {
     final statisticsFuture = ref.watch(weekdayStatisticsDisplayProvider.future);
@@ -555,6 +558,15 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
                     fromY = toY;
                   }
 
+                  final List<int> showingTooltipIndicators;
+                  final touchedPosition = _touchedPosition;
+                  if (touchedPosition != null &&
+                      touchedPosition.groupIndex == index) {
+                    showingTooltipIndicators = [touchedPosition.rodDataIndex];
+                  } else {
+                    showingTooltipIndicators = [];
+                  }
+
                   return BarChartGroupData(
                     x: index,
                     barRods: [
@@ -566,7 +578,7 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
                         borderRadius: BorderRadius.zero,
                       ),
                     ],
-                    // showingTooltipIndicators: [0],
+                    showingTooltipIndicators: showingTooltipIndicators,
                   );
                 }).toList(),
             rotationQuarterTurns: 1,
