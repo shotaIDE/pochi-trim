@@ -4,16 +4,21 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'user_profile.freezed.dart';
 
 @freezed
-abstract class UserProfile with _$UserProfile {
-  // TODO(ide): 匿名ユーザーかどうかを判定できるようにする
-  const factory UserProfile({
+sealed class UserProfile with _$UserProfile {
+  const factory UserProfile.anonymous({required String id}) =
+      UserProfileAnonymous;
+  const factory UserProfile.withAccount({
     required String id,
     required String? displayName,
-  }) = _UserProfile;
+  }) = UserProfileWithAccount;
 
   const UserProfile._();
 
   factory UserProfile.fromFirebaseAuthUser(User user) {
-    return UserProfile(id: user.uid, displayName: user.displayName ?? '');
+    if (user.isAnonymous) {
+      return UserProfile.anonymous(id: user.uid);
+    }
+
+    return UserProfile.withAccount(id: user.uid, displayName: user.displayName);
   }
 }
