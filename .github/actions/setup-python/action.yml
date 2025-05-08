@@ -14,7 +14,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       shell: bash
     - name: Cache Python
-      uses: actions/cache@v5a3ec84eff668545956fd18022155c47e93e2684 # v4
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
       with:
         path: ~/.local/share/virtualenvs
         key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('Pipfile.lock') }}
