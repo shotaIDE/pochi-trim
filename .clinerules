@@ -20,7 +20,7 @@ This project is an iOS and Android application, including front-end and back-end
 
 Always use early returns to reduce nesting.
 
-Use try-catch statements to enclose only processes that may throw, and in the smallest possible scope.
+Use `try`-`catch` statements to enclose only processes that may throw, and in the smallest possible scope.
 
 Immediately delete unused code.
 
