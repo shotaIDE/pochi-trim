@@ -111,7 +111,7 @@ Add padding that takes into account the device's safe area.
 
 - Example: `EdgeInsets.only(left: 16 + MediaQuery.of(context).viewPadding.left, ...)`
 
-If construction is long and deeply nested, split widgets into classes to improve readability.
+Split widgets into classes to improve readability.
 
 Example:
 
