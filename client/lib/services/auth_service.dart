@@ -62,4 +62,76 @@ class AuthService {
 
     _logger.info('既存ユーザーがログイン中です。UID: ${user.uid}');
   }
+
+  Future<SignInResult> signInWithGoogle() async {
+    try {
+      final googleSignIn = GoogleSignIn();
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        return const SignInResult.cancelled();
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await firebase_auth.FirebaseAuth.instance
+          .signInWithCredential(credential);
+      final user = userCredential.user;
+      if (user == null) {
+        throw const SignInException.google();
+      }
+
+      _logger.info('ユーザーがGoogleアカウントでログインしました。UID: ${user.uid}');
+
+      return SignInResult.success(
+        userId: user.uid,
+        isNewUser: userCredential.additionalUserInfo?.isNewUser ?? false,
+      );
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      _logger.warning('Googleログインに失敗しました: $e');
+      throw const SignInException.google();
+    } catch (e) {
+      _logger.warning('Googleログイン中に予期せぬエラーが発生しました: $e');
+      throw const SignInException.google();
+    }
+  }
+
+  Future<void> linkWithGoogle() async {
+    final user = firebase_auth.FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw const SignInException.accountLink();
+    }
+
+    if (!user.isAnonymous) {
+      throw const SignInException.accountLink();
+    }
+
+    try {
+      final googleSignIn = GoogleSignIn();
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        return;
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      await user.linkWithCredential(credential);
+
+      _logger.info('ユーザーが匿名アカウントをGoogleアカウントと連携しました。UID: ${user.uid}');
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      _logger.warning('アカウント連携に失敗しました: $e');
+      throw const SignInException.accountLink();
+    } catch (e) {
+      _logger.warning('アカウント連携中に予期せぬエラーが発生しました: $e');
+      throw const SignInException.accountLink();
+    }
+  }
 }
