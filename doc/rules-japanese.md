@@ -6,7 +6,7 @@
 
 `client/` は、Flutter による iOS と Android クライアントアプリのコードを配置する。
 
-`./lib/models/` 以下は、ドメインモデルを配置する。UI に依存しない純粋なデータ構造や、UI に依存しない Exception、Error などを配置する。
+`./lib/models/` は、ドメインモデルを配置する。UI に依存しない純粋なデータ構造や、UI に依存しない `Exception`、`Error` などを配置する。
 
 ## インフラ
 

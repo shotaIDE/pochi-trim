@@ -6,7 +6,7 @@ This project is an iOS and Android application, including front-end and back-end
 
 `client/` is where you put the code for the iOS and Android client app written in Flutter.
 
-`./lib/models/` and below are where you put the domain model. Pure data structures that are not dependent on the UI, and exceptions and errors that are not dependent on the UI are placed here.
+`./lib/models/` is where domain models are placed. Pure data structures that are not dependent on the UI, `Exception`, `Error`, etc. that are not dependent on the UI are placed here.
 
 ## Infrastructure
 
