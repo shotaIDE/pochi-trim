@@ -7,10 +7,13 @@ part 'user_profile.freezed.dart';
 sealed class UserProfile with _$UserProfile {
   const factory UserProfile.anonymous({required String id}) =
       UserProfileAnonymous;
-  const factory UserProfile.withAccount({
+
+  const factory UserProfile.withGoogleAccount({
     required String id,
     required String? displayName,
-  }) = UserProfileWithAccount;
+    required String? email,
+    required String? photoUrl,
+  }) = UserProfileWithGoogleAccount;
 
   const UserProfile._();
 
@@ -19,6 +22,11 @@ sealed class UserProfile with _$UserProfile {
       return UserProfile.anonymous(id: user.uid);
     }
 
-    return UserProfile.withAccount(id: user.uid, displayName: user.displayName);
+    return UserProfile.withGoogleAccount(
+      id: user.uid,
+      displayName: user.displayName,
+      email: user.email,
+      photoUrl: user.photoURL,
+    );
   }
 }
