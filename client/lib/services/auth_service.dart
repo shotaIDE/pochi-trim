@@ -34,7 +34,7 @@ class AuthService {
     } on firebase_auth.FirebaseAuthException catch (e) {
       _logger.warning('匿名ログインに失敗しました: $e');
 
-      throw SignInException();
+      throw const SignInException.general();
     }
 
     final user = userCredential.user;
