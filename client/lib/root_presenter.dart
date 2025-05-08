@@ -16,6 +16,8 @@ class RootAppInitialized extends _$RootAppInitialized {
   Future<void> initialize() async {
     final userProfile = await ref.watch(currentUserProfileProvider.future);
     if (userProfile == null) {
+      state = AppSession.notSignedIn();
+
       return;
     }
 
@@ -48,6 +50,10 @@ class RootAppInitialized extends _$RootAppInitialized {
   }
 
   Future<void> signOut() async {
+    state = AppSession.loading();
+
+    await Future<void>.delayed(const Duration(seconds: 1));
+
     state = AppSession.notSignedIn();
   }
 
