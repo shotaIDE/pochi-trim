@@ -176,6 +176,8 @@ Use the text style defined in the text theme.
 
 Add tooltips to areas where users can operate, and consider accessibility.
 
+The strings to display in the UI are defined during the widget construction process.
+
 ### Screen navigation
 
 Define `MaterialPageRoute` in a static field for the screen, and use the static field and `Navigator` when transitioning to that screen.
