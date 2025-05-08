@@ -29,35 +29,19 @@ class SettingsScreen extends ConsumerWidget {
 
           return ListView(
             children: [
-              // ユーザー情報セクション
               _buildSectionHeader(context, 'ユーザー情報'),
               _buildUserInfoTile(context, userProfile, ref),
-
-              // 家の情報セクション
-              _buildSectionHeader(context, '家の情報'),
-              _buildHouseholdTile(context, userProfile),
-              _buildShareHouseTile(context),
-
               const Divider(),
-
-              // アプリ情報セクション
               _buildSectionHeader(context, 'アプリについて'),
               _buildReviewTile(context),
               _buildShareAppTile(context),
               _buildTermsOfServiceTile(context),
               _buildPrivacyPolicyTile(context),
               _buildLicenseTile(context),
-
-              // デバッグセクション
               _buildSectionHeader(context, 'デバッグ'),
               _buildDebugTile(context),
-
-              // バージョン情報
               _buildVersionInfo(context, packageInfoAsync),
-
               const Divider(),
-
-              // アカウント管理セクション
               _buildSectionHeader(context, 'アカウント管理'),
               _buildLogoutTile(context, ref),
               _buildDeleteAccountTile(context, ref, userProfile),
@@ -106,35 +90,6 @@ class SettingsScreen extends ConsumerWidget {
       title: const Text('ユーザー名'),
       subtitle: Text(subtitle),
       onTap: onTap,
-    );
-  }
-
-  Widget _buildHouseholdTile(BuildContext context, UserProfile userProfile) {
-    return ListTile(
-      leading: const Icon(Icons.home),
-      title: const Text('家の設定'),
-      subtitle: const Text('1 件の家に参加中'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        // 家の設定画面への遷移処理
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('家の設定画面は現在開発中です')));
-      },
-    );
-  }
-
-  Widget _buildShareHouseTile(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.group_add),
-      title: const Text('家を共有する'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        // 家の共有処理
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('家の共有機能は現在開発中です')));
-      },
     );
   }
 
