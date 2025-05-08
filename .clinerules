@@ -1,16 +1,16 @@
 # Architecture
 
-This project is an iOS and Android application, including front-end and back-end code
+This project is an iOS and Android application, including front-end and back-end code.
 
 ## Client app
 
-`client/` is where you put the code for the iOS and Android client app written in Flutter
+`client/` is where you put the code for the iOS and Android client app written in Flutter.
 
-`./lib/models/` and below are where you put the domain model. Pure data structures that are not dependent on the UI, and exceptions and errors that are not dependent on the UI are placed here
+`./lib/models/` and below are where you put the domain model. Pure data structures that are not dependent on the UI, and exceptions and errors that are not dependent on the UI are placed here.
 
 ## Infrastructure
 
-`infra/` is where you put the infrastructure configuration and back-end code
+`infra/` is where you put the infrastructure configuration and back-end code.
 
 # Development guide
 
@@ -18,11 +18,11 @@ This project is an iOS and Android application, including front-end and back-end
 
 ### Style
 
-Always use early returns to reduce nesting
+Always use early returns to reduce nesting.
 
-Use try-catch statements to enclose only processes that may throw, and in the smallest possible scope
+Use try-catch statements to enclose only processes that may throw, and in the smallest possible scope.
 
-Immediately delete unused code
+Immediately delete unused code.
 
 ### Maintain code consistency
 
@@ -32,47 +32,47 @@ Implement processes with similar functions in the same flow. Check whether a sim
 
 ### Maintain sufficient comments
 
-Add comments only when necessary to clarify the intent or purpose of the code. Avoid comments if the content of the code is clear
+Add comments only when necessary to clarify the intent or purpose of the code. Avoid comments if the content of the code is clear.
 
-Describe in detail, including the reasons, particularly for important points and pitfalls
+Describe in detail, including the reasons, particularly for important points and pitfalls.
 
-Write comments in Japanese
+Write comments in Japanese.
 
 ### Maintain readability of naming
 
-Name variables to clearly indicate their purpose and content
+Name variables to clearly indicate their purpose and content.
 
-Use meaningful names even for temporary variables
+Use meaningful names even for temporary variables.
 
-Use consistent naming patterns for variables that handle the same type of data
+Use consistent naming patterns for variables that handle the same type of data.
 
 ## Rules for Flutter
 
 ### Define a data model
 
-Clearly separate data models and place them in appropriate files
+Clearly separate data models and place them in appropriate files.
 
-Define an immutable data model using frozen
+Define an immutable data model using frozen.
 
 ### Utilize functional programming
 
-Use functional methods for collection operations
+Use functional methods for collection operations.
 
 - Example: `map`, `where`, `fold`, `expand`
 
-Divide complex data transformations into multiple steps to improve readability
+Divide complex data transformations into multiple steps to improve readability.
 
-When converting a collection, use a process that returns a new converted collection
+When converting a collection, use a process that returns a new converted collection.
 
-- Example: `sortedBy` in the `collection` package
+- Example: `sortedBy` in the `collection` package.
 
 ### Use Riverpod appropriately for state management
 
-Use Riverpod for state management
+Use Riverpod for state management.
 
-The provider is Define using code generation using the `@riverpod` annotation
+The provider is Define using code generation using the `@riverpod` annotation.
 
-When dealing with multiple asynchronous providers, `watch` all providers first and then `await` them later to prevent state resets
+When dealing with multiple asynchronous providers, `watch` all providers first and then `await` them later to prevent state resets.
 
 Example:
 
@@ -86,21 +86,21 @@ final data2 = await data2Future;
 
 ### Handle errors properly
 
-Catch asynchronous processing errors properly and notify the user
+Catch asynchronous processing errors properly and notify the user.
 
 ### Build UI properly
 
-Manage the visibility of UI elements with a dedicated state management class
+Manage the visibility of UI elements with a dedicated state management class.
 
 - Example: `HouseWorkVisibilities`
 
-Implement state change logic in the presenter
+Implement state change logic in the presenter.
 
-Filter data based on visibility in the provider
+Filter data based on visibility in the provider.
 
-Use `SingleChildScrollView` to make content scrollable if there is a possibility of a large amount of content
+Use `SingleChildScrollView` to make content scrollable if there is a possibility of a large amount of content.
 
-Add padding that takes into account the device's safe area
+Add padding that takes into account the device's safe area.
 
 - Example: `EdgeInsets.only(left: 16 + MediaQuery.of(context).viewPadding.left, ...)`
 
@@ -136,7 +136,7 @@ class _Content extends StatelessWidget {
 }
 ```
 
-For complex screens, separate the process into two steps: storing the widget in a local variable → assembling with margins
+For complex screens, separate the process into two steps: storing the widget in a local variable → assembling with margins.
 
 Example:
 
@@ -157,8 +157,8 @@ final body = Column(
 );
 ```
 
-Use the colors defined in the theme. Example: `Theme.of(context).colorScheme.primary`
+Use the colors defined in the theme. Example: `Theme.of(context).colorScheme.primary`.
 
-Use the text style defined in the text theme. Example: `Theme.of(context).textTheme.headline6`
+Use the text style defined in the text theme. Example: `Theme.of(context).textTheme.headline6`.
 
 Add tooltips to areas where users can operate, and consider accessibility.
