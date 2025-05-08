@@ -23,9 +23,10 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('設定')),
       body: userProfileAsync.when(
-        data: (wrappedUserProfile) {
-          // 設定画面は必ずログイン済みであることを前提とする
-          final userProfile = wrappedUserProfile!;
+        data: (userProfile) {
+          if (userProfile == null) {
+            return const Center(child: Text('ユーザー情報が取得できませんでした'));
+          }
 
           return ListView(
             children: [
