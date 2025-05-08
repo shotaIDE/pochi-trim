@@ -128,7 +128,7 @@ flutterfire config \
   --android-out="android/app/src/${DIRECTORY_NAME_FOR_ANDROID}/google-services.json"
 ```
 
-####　 Firebase プロジェクトの手動設定
+#### Firebase プロジェクトの手動設定
 
 Terraform で作成した Firebase プロジェクトに、Firebase Console から手動で以下の設定を行います。
 
