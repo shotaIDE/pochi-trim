@@ -1,0 +1,48 @@
+name: CI / Infra
+
+on:
+  pull_request:
+    branches:
+      - "main"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: ./infra
+
+jobs:
+  check-impact-functions:
+    name: Check impact for functions
+    runs-on: ubuntu-latest
+    outputs:
+      has-changed-related-files: ${{ steps.check-related-files.outputs.any_changed == 'true' }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+      - name: Check related files
+        id: check-related-files
+        uses: tj-actions/changed-files@dcc7a0cba800f454d79fff4b993e8c3555bcc0a8 # v45
+        with:
+          files: "infra/functions/**"
+  build-functions:
+    name: Build functions
+    needs: check-impact-functions
+    if: needs.check-impact-functions.outputs.has-changed-related-files == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra/functions
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Set up Python
+        uses: ./.github/actions/setup-python
+        with:
+          working-directory: ./infra/functions
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --ignore-installed -r requirements.txt
