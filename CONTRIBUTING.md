@@ -44,7 +44,7 @@ Xcode のバージョンを強制するには、以下の手順を実行して�
 
 https://qiita.com/manicmaniac/items/5294dd16cd6f835ab2d9
 
-### Firebase プロジェクト情報の追加
+### Flutter アプリへの Firebase プロジェクト構成の追加
 
 #### 事前準備
 
@@ -127,6 +127,12 @@ flutterfire config \
   --android-package-name="${APPLICATION_ID}" \
   --android-out="android/app/src/${DIRECTORY_NAME_FOR_ANDROID}/google-services.json"
 ```
+
+####　 Firebase プロジェクトの手動設定
+
+Terraform で作成した Firebase プロジェクトに、Firebase Console から手動で以下の設定を行います。
+
+- Google アナリティクスの有効化
 
 ### アイコンの設定
 
