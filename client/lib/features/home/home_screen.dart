@@ -18,6 +18,13 @@ final selectedTabProvider = StateProvider<int>((ref) => 0);
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
+  static const name = 'HomeScreen';
+
+  static MaterialPageRoute<HomeScreen> route() => MaterialPageRoute<HomeScreen>(
+    builder: (_) => const HomeScreen(),
+    settings: const RouteSettings(name: name),
+  );
+
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }

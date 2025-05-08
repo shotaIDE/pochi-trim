@@ -5,6 +5,14 @@ import 'package:house_worker/features/auth/login_presenter.dart';
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
+  static const name = 'LoginScreen';
+
+  static MaterialPageRoute<LoginScreen> route() =>
+      MaterialPageRoute<LoginScreen>(
+        builder: (_) => const LoginScreen(),
+        settings: const RouteSettings(name: name),
+      );
+
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
