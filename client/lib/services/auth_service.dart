@@ -39,7 +39,7 @@ class AuthService {
 
     final user = userCredential.user;
     if (user == null) {
-      throw SignInException();
+      throw const SignInException.general();
     }
 
     _logger.info('ユーザーがログインしました。UID: ${user.uid}');
