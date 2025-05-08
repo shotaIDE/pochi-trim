@@ -79,11 +79,16 @@ Linter やコンパイラの警告は、即時解決しなさい。
 例:
 
 ```dart
-final data1Future = ref.watch(provider1.future);
-final data2Future = ref.watch(provider2.future);
+@riverpod
+Future<String> currentUser(Ref ref) async {
+  final data1Future = ref.watch(provider1.future);
+  final data2Future = ref.watch(provider2.future);
 
-final data1 = await data1Future;
-final data2 = await data2Future;
+  final data1 = await data1Future;
+  final data2 = await data2Future;
+
+  // 後続の処理
+}
 ```
 
 ### エラーハンドリングを適切に行う

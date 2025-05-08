@@ -79,11 +79,16 @@ When dealing with multiple asynchronous providers, `watch` all providers first a
 Example:
 
 ```dart
-final data1Future = ref.watch(provider1.future);
-final data2Future = ref.watch(provider2.future);
+@riverpod
+Future<String> currentUser(Ref ref) async {
+  final data1Future = ref.watch(provider1.future);
+  final data2Future = ref.watch(provider2.future);
 
-final data1 = await data1Future;
-final data2 = await data2Future;
+  final data1 = await data1Future;
+  final data2 = await data2Future;
+
+  // subsequent process
+}
 ```
 
 ### Handle errors properly
