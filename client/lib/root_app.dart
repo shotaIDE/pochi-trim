@@ -46,7 +46,6 @@ class _RootAppState extends ConsumerState<RootApp> {
       title: 'House Worker ${FlavorConfig.instance.name}',
       theme: getLightTheme(),
       darkTheme: getDarkTheme(),
-      home: const RootApp(),
       debugShowCheckedModeBanner: !FlavorConfig.isProd,
       // `initialRoute` and `routes` are ineffective settings
       // that are set to avoid assertion errors.
