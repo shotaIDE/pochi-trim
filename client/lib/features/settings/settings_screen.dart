@@ -74,7 +74,7 @@ class SettingsScreen extends ConsumerWidget {
       case UserProfileAnonymous():
         subtitle = 'ゲスト';
         onTap = () => _showAnonymousUserInfoDialog(context);
-      case UserProfileWithAccount(displayName: final displayName):
+      case UserProfileWithGoogleAccount(displayName: final displayName):
         subtitle = displayName ?? '名前未設定';
         onTap = null;
     }
