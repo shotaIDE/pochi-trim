@@ -46,3 +46,4 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --ignore-installed -r requirements.txt
+        working-directory: ./infra/functions
