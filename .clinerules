@@ -50,11 +50,11 @@ Use consistent naming patterns for variables that handle the same type of data.
 
 ## Rules for Flutter
 
-### Define a data model
+### Defining the domain model
 
-Clearly separate data models and place them in appropriate files.
+Clearly separate the domain model and place it in the appropriate file.
 
-Define an immutable data model using `freezed`.
+Define an immutable domain model using `freezed`. Use `freezed` even when using `sealed class`.
 
 ### Utilize functional programming
 
