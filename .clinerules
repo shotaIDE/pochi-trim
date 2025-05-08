@@ -143,25 +143,27 @@ class _Content extends StatelessWidget {
 }
 ```
 
-For complex screens, separate the process into two steps: storing the widget in a local variable → assembling with margins.
+Separate the process into two steps: storing the widget in a local variable → assembling with margins.
 
 Example:
 
 ```dart
-// Storing the widget in a local variable
-const firstText = Text('1st');
-const secondText = Text('2nd');
+Widget build(BuildContext context) {
+  // Storing the widget in a local variable
+  const firstText = Text('1st');
+  const secondText = Text('2nd');
 
-// Assembling with margins
-final body = Column(
-  children: const [
-    firstText,
-    Padding(
-      padding: EdgeInsets.only(top: 16),
-      child: secondText,
-    ),
-  ],
-);
+  // Assembling with margins
+  return Column(
+    children: const [
+      firstText,
+      Padding(
+        padding: EdgeInsets.only(top: 16),
+        child: secondText,
+      ),
+    ],
+  );
+}
 ```
 
 Use the colors defined in the theme. Example: `Theme.of(context).colorScheme.primary`.

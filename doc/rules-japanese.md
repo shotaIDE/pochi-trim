@@ -143,25 +143,27 @@ class _Content extends StatelessWidget {
 }
 ```
 
-複雑な画面では、ウィジェットのローカル変数への格納 → 余白をつけて組み立て、の 2 ステップで処理を分ける。
+ウィジェットのローカル変数への格納 → 余白をつけて組み立て、の 2 ステップで処理を分ける。
 
 例:
 
 ```dart
-// ウィジェットのローカル変数への格納
-const firstText = Text('1st');
-const secondText = Text('2nd');
+Widget build(BuildContext context) {
+  // ウィジェットのローカル変数への格納
+  const firstText = Text('1st');
+  const secondText = Text('2nd');
 
-// 余白をつけて組み立て
-final body = Column(
-  children: const [
-    firstText,
-    Padding(
-      padding: EdgeInsets.only(top: 16),
-      child: secondText,
-    ),
-  ],
-);
+  // 余白をつけて組み立て
+  return = Column(
+    children: const [
+      firstText,
+      Padding(
+        padding: EdgeInsets.only(top: 16),
+        child: secondText,
+      ),
+    ],
+  );
+}
 ```
 
 色はテーマとして定義されたもの利用する。例: `Theme.of(context).colorScheme.primary`。
