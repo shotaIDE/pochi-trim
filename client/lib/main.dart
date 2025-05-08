@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -146,12 +147,17 @@ class HouseWorkerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final navigatorObservers = <NavigatorObserver>[
+      FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+    ];
+
     return MaterialApp(
       title: 'House Worker ${FlavorConfig.instance.name}',
       theme: getLightTheme(),
       darkTheme: getDarkTheme(),
       home: const AuthWrapper(),
       debugShowCheckedModeBanner: !FlavorConfig.isProd,
+      navigatorObservers: navigatorObservers,
       builder: (context, child) {
         // Flavorに応じたバナーを表示（本番環境以外）
         if (!FlavorConfig.isProd) {
