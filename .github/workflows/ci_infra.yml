@@ -16,6 +16,8 @@ defaults:
 jobs:
   check-impact-functions:
     name: Check impact for functions
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     outputs:
       has-changed-related-files: ${{ steps.check-related-files.outputs.any_changed == 'true' }}
