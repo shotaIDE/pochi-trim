@@ -35,7 +35,7 @@ class _RootAppState extends ConsumerState<RootApp> {
       case AppSessionNotSignedIn():
         initialRoutes = [LoginScreen.route()];
       case AppSessionLoading():
-        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        return Container();
     }
 
     final navigatorObservers = <NavigatorObserver>[
