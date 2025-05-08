@@ -1,164 +1,163 @@
-# アーキテクチャ
+# Architecture
 
-本プロジェクトは、iOS と Android のアプリケーションであり、フロントエンドとバックエンドのコードを含む
+This project is an iOS and Android application, including front-end and back-end code
 
-## クライアントアプリ
+## Client app
 
-`client/` は、Flutter による iOS と Android クライアントアプリのコードを配置する
+`client/` is where you put the code for the iOS and Android client app written in Flutter
 
-`./lib/models/` 以下は、ドメインモデルを配置する。UI に依存しない純粋なデータ構造や、UI に依存しない Exception、Error などを配置する
+`./lib/models/` and below are where you put the domain model. Pure data structures that are not dependent on the UI, and exceptions and errors that are not dependent on the UI are placed here
 
-## インフラ
+## Infrastructure
 
-`infra/` は、インフラ構成とバックエンドのコードを配置する
+`infra/` is where you put the infrastructure configuration and back-end code
 
-# 開発ガイド
+# Development guide
 
-## 一般的なルール
+## General rules
 
-### スタイル
+### Style
 
-早期リターンを必ず使用して、ネストを減らす
+Always use early returns to reduce nesting
 
-try-catch 文は、throw する可能性のある処理のみを囲み、できるだけ小さなスコープで使用する
+Use try-catch statements to enclose only processes that may throw, and in the smallest possible scope
 
-利用されていないコードは、即時削除する
+Immediately delete unused code
 
-### コードの一貫性を保つ
+### Maintain code consistency
 
-同様の機能を持つ処理は、同様の流れで実装する。周辺に同様の処理がすでに実装されていないかを確認し、実装されている場合はそれに従う。
+Implement processes with similar functions in the same flow. Check whether a similar process has already been implemented in the surrounding area, and follow it if it has been implemented.
 
-- 特に、データの取得・変換・フィルタリングのフローは統一する
+- In particular, standardize the flow of data acquisition, conversion, and filtering.
 
-### コメントの十分性を保つ
+### Maintain sufficient comments
 
-コードの意図や目的を明確にする必要がある場合のみにコメントを追加する。コードの内容が明確な場合はコメントを避ける
+Add comments only when necessary to clarify the intent or purpose of the code. Avoid comments if the content of the code is clear
 
-特に重要な注意点や落とし穴については、理由も含めて詳細に記述する
+Describe in detail, including the reasons, particularly for important points and pitfalls
 
-コメントは日本語で記述する
+Write comments in Japanese
 
-### 命名の可読性を保つ
+### Maintain readability of naming
 
-変数名はその目的や内容を明確に表す名前をつける
+Name variables to clearly indicate their purpose and content
 
-一時変数においても意味のある名前をつける
+Use meaningful names even for temporary variables
 
-同じ種類のデータを扱う変数には、一貫した命名パターンを使用する
+Use consistent naming patterns for variables that handle the same type of data
 
-## Flutter に関するルール
+## Rules for Flutter
 
-### データモデルを定義する
+### Define a data model
 
-データモデルは明確に分離し、適切なファイルに配置する
+Clearly separate data models and place them in appropriate files
 
-freezed を利用したイミュータブルなデータモデルを定義する
+Define an immutable data model using frozen
 
-### 関数型プログラミングを活用する
+### Utilize functional programming
 
-コレクション操作には関数型メソッドを使用する
+Use functional methods for collection operations
 
-- 例: `map`, `where`, `fold`, `expand`
+- Example: `map`, `where`, `fold`, `expand`
 
-複雑なデータ変換は複数のステップに分けて可読性を高める
+Divide complex data transformations into multiple steps to improve readability
 
-コレクションの変換時は、変換された新しいコレクションが返却される処理を使用する
+When converting a collection, use a process that returns a new converted collection
 
-- 例: `collection` パッケージの `sortedBy` など
+- Example: `sortedBy` in the `collection` package
 
-### 状態管理には Riverpod を適切に使用する
+### Use Riverpod appropriately for state management
 
-状態管理には Riverpod を使用する
+Use Riverpod for state management
 
-プロバイダーは `@riverpod` アノテーションを使用したコード生成を利用して定義する
+The provider is Define using code generation using the `@riverpod` annotation
 
-複数の非同期プロバイダーを扱う場合、状態リセットを防ぐために全てのプロバイダーを先に `watch` してから後で `await` する
+When dealing with multiple asynchronous providers, `watch` all providers first and then `await` them later to prevent state resets
 
-例:
+Example:
 
 ```dart
 final data1Future = ref.watch(provider1.future);
 final data2Future = ref.watch(provider2.future);
-
 final data1 = await data1Future;
 final data2 = await data2Future;
 ```
 
-### エラーハンドリングを適切に行う
+### Handle errors properly
 
-非同期処理のエラーは適切にキャッチし、ユーザーに通知する
+Catch asynchronous processing errors properly and notify the user
 
-### UI を適切に構築する
+### Build UI properly
 
-UI 要素の表示・非表示状態は専用の状態管理クラスで管理する
+Manage the visibility of UI elements with a dedicated state management class
 
-- 例: `HouseWorkVisibilities`
+- Example: `HouseWorkVisibilities`
 
-状態変更のロジックはプレゼンターに実装する
+Implement state change logic in the presenter
 
-表示・非表示の状態に基づいて、データをフィルタリングする処理はプロバイダー内で行う
+Filter data based on visibility in the provider
 
-コンテンツが多くなる可能性がある場合は、`SingleChildScrollView`を使用してスクロール可能にする
+Use `SingleChildScrollView` to make content scrollable if there is a possibility of a large amount of content
 
-デバイスの安全領域を考慮したパディングを追加する
+Add padding that takes into account the device's safe area
 
-- 例: `EdgeInsets.only(left: 16 + MediaQuery.of(context).viewPadding.left, ...)`
+- Example: `EdgeInsets.only(left: 16 + MediaQuery.of(context).viewPadding.left, ...)`
 
-構築処理が長くなりネストが深くなる場合は、ウィジェットをクラスとして分割し、可読性を高める。
+If construction is long and deeply nested, split widgets into classes to improve readability.
 
-例:
+Example:
 
 ```dart
 class MyWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _Header(),
-        _Content(),
-      ],
-    );
-  }
+@override
+Widget build(BuildContext context) {
+return Column(
+children: [
+_Header(),
+_Content(),
+],
+);
+}
 }
 
 class _Header extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Text('Header');
-  }
+@override
+Widget build(BuildContext context) {
+return Text('Header');
+}
 }
 
 class _Content extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Text('Content');
-  }
+@override
+Widget build(BuildContext context) {
+return Text('Content');
+}
 }
 ```
 
-複雑な画面では、ウィジェットのローカル変数への格納 → 余白をつけて組み立て、の 2 ステップで処理を分ける
+For complex screens, separate the process into two steps: storing the widget in a local variable → assembling with margins
 
-例:
+Example:
 
 ```dart
-// ウィジェットのローカル変数への格納
+// Storing the widget in a local variable
 const firstText = Text('1st');
 const secondText = Text('2nd');
 
-// 余白をつけて組み立て
+// Assembling with margins
 final body = Column(
-  children: const [
-    firstText,
-    Padding(
-      padding: EdgeInsets.only(top: 16),
-      child: secondText,
-    ),
-  ],
+children: const [
+firstText,
+Padding(
+padding: EdgeInsets.only(top: 16),
+child: secondText,
+),
+],
 );
 ```
 
-色はテーマとして定義されたもの利用する。例: `Theme.of(context).colorScheme.primary`
+Use the colors defined in the theme. Example: `Theme.of(context).colorScheme.primary`
 
-テキストのスタイルはテキストテーマとして定義されたものを利用する。例: `Theme.of(context).textTheme.headline6`
+Use the text style defined in the text theme. Example: `Theme.of(context).textTheme.headline6`
 
-ユーザーが操作できる箇所にはツールチップを追加し、アクセシビリティを考慮する
+Add tooltips to areas where users can operate, and consider accessibility.
