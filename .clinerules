@@ -18,6 +18,8 @@ This project is an iOS and Android application, including front-end and back-end
 
 ### Style
 
+Resolve linter and compiler warnings immediately.
+
 Always use early returns to reduce nesting.
 
 Use `try`-`catch` statements to enclose only processes that may throw, and in the smallest possible scope.
