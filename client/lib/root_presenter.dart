@@ -10,7 +10,7 @@ part 'root_presenter.g.dart';
 class RootAppInitialized extends _$RootAppInitialized {
   @override
   AppSession build() {
-    return AppSession.notSignedIn();
+    return AppSession.loading();
   }
 
   Future<void> initialize() async {
