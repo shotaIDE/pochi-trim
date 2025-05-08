@@ -239,13 +239,13 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
       return;
     }
 
-    final currentUser = ref.read(authServiceProvider).currentUser;
+    final userProfile = await ref.read(currentUserProfileProvider.future);
 
     if (!mounted) {
       return;
     }
 
-    if (currentUser == null) {
+    if (userProfile == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('ユーザー情報が取得できませんでした')));
@@ -258,7 +258,7 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
       title: _titleController.text,
       icon: _icon,
       createdAt: widget.existingHouseWork?.createdAt ?? DateTime.now(),
-      createdBy: widget.existingHouseWork?.createdBy ?? currentUser.uid,
+      createdBy: userProfile.id,
     );
 
     try {

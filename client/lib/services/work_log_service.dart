@@ -47,8 +47,8 @@ class WorkLogService {
   final Ref ref;
 
   Future<bool> recordWorkLog({required String houseWorkId}) async {
-    final currentUser = authService.currentUser;
-    if (currentUser == null) {
+    final userProfile = await ref.read(currentUserProfileProvider.future);
+    if (userProfile == null) {
       return false;
     }
 
@@ -56,7 +56,7 @@ class WorkLogService {
       id: '', // 新規登録のため空文字列
       houseWorkId: houseWorkId,
       completedAt: DateTime.now(),
-      completedBy: currentUser.uid,
+      completedBy: userProfile.id,
     );
 
     try {

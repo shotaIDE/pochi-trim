@@ -23,15 +23,8 @@ Stream<UserProfile?> currentUserProfile(Ref ref) {
   });
 }
 
-final authStateProvider = StreamProvider<firebase_auth.User?>((ref) {
-  return ref.watch(authServiceProvider).authStateChanges;
-});
-
 class AuthService {
   final _logger = Logger('AuthService');
-
-  Stream<firebase_auth.User?> get authStateChanges =>
-      firebase_auth.FirebaseAuth.instance.authStateChanges();
 
   Future<String> signInAnonymously() async {
     final firebase_auth.UserCredential userCredential;
@@ -57,9 +50,6 @@ class AuthService {
   Future<void> signOut() async {
     await firebase_auth.FirebaseAuth.instance.signOut();
   }
-
-  firebase_auth.User? get currentUser =>
-      firebase_auth.FirebaseAuth.instance.currentUser;
 
   /// 現在のユーザー情報をチェックし、ログインしている場合はUIDをログ出力します
   void checkCurrentUser() {

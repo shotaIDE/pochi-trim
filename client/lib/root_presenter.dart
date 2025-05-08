@@ -14,8 +14,8 @@ class RootAppInitialized extends _$RootAppInitialized {
   }
 
   Future<void> initialize() async {
-    final userId = ref.watch(authServiceProvider).currentUser?.uid;
-    if (userId == null) {
+    final userProfile = await ref.watch(currentUserProfileProvider.future);
+    if (userProfile == null) {
       return;
     }
 
@@ -30,7 +30,7 @@ class RootAppInitialized extends _$RootAppInitialized {
     const isPro = false;
 
     state = AppSession.signedIn(
-      userId: userId,
+      userId: userProfile.id,
       currentHouseId: houseId,
       isPro: isPro,
     );
