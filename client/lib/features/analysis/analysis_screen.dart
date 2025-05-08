@@ -143,6 +143,14 @@ final filteredHouseWorkFrequencyProvider =
 class AnalysisScreen extends StatefulWidget {
   const AnalysisScreen({super.key});
 
+  static const name = 'AnalysisScreen';
+
+  static MaterialPageRoute<AnalysisScreen> route() =>
+      MaterialPageRoute<AnalysisScreen>(
+        builder: (_) => const AnalysisScreen(),
+        settings: const RouteSettings(name: name),
+      );
+
   @override
   State<AnalysisScreen> createState() => _AnalysisScreenState();
 }

@@ -15,6 +15,14 @@ final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
+  static const name = 'SettingsScreen';
+
+  static MaterialPageRoute<SettingsScreen> route() =>
+      MaterialPageRoute<SettingsScreen>(
+        builder: (_) => const SettingsScreen(),
+        settings: const RouteSettings(name: name),
+      );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfileAsync = ref.watch(currentUserProfileProvider);

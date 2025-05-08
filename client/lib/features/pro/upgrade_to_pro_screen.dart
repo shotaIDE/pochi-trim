@@ -3,14 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/purchase_exception.dart';
 import 'package:house_worker/services/purchase_pro_result.dart';
 
-class ProUpgradeScreen extends ConsumerStatefulWidget {
-  const ProUpgradeScreen({super.key});
+class UpgradeToProScreen extends ConsumerStatefulWidget {
+  const UpgradeToProScreen({super.key});
+
+  static const name = 'UpgradeToProScreen';
+
+  static MaterialPageRoute<UpgradeToProScreen> route() =>
+      MaterialPageRoute<UpgradeToProScreen>(
+        builder: (_) => const UpgradeToProScreen(),
+        settings: const RouteSettings(name: name),
+      );
 
   @override
-  ConsumerState<ProUpgradeScreen> createState() => _ProUpgradeScreenState();
+  ConsumerState<UpgradeToProScreen> createState() => _ProUpgradeScreenState();
 }
 
-class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
+class _ProUpgradeScreenState extends ConsumerState<UpgradeToProScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

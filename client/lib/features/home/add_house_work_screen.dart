@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/home/add_house_work_presenter.dart';
-import 'package:house_worker/features/pro/pro_upgrade_screen.dart';
+import 'package:house_worker/features/pro/upgrade_to_pro_screen.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/max_house_work_limit_exceeded_exception.dart';
 import 'package:house_worker/services/auth_service.dart';
@@ -68,20 +68,28 @@ String getRandomEmoji() {
   return _emojiList[random.nextInt(_emojiList.length)];
 }
 
-class HouseWorkAddScreen extends ConsumerStatefulWidget {
-  const HouseWorkAddScreen({super.key, this.existingHouseWork});
+class AddHouseWorkScreen extends ConsumerStatefulWidget {
+  const AddHouseWorkScreen({super.key, this.existingHouseWork});
 
   // 既存の家事から新しい家事を作成するためのファクトリコンストラクタ
-  factory HouseWorkAddScreen.fromExistingHouseWork(HouseWork houseWork) {
-    return HouseWorkAddScreen(existingHouseWork: houseWork);
+  factory AddHouseWorkScreen.fromExistingHouseWork(HouseWork houseWork) {
+    return AddHouseWorkScreen(existingHouseWork: houseWork);
   }
+
+  static const name = 'AddHouseWorkScreen';
+
+  static MaterialPageRoute<AddHouseWorkScreen> route() =>
+      MaterialPageRoute<AddHouseWorkScreen>(
+        builder: (_) => const AddHouseWorkScreen(),
+        settings: const RouteSettings(name: name),
+      );
   final HouseWork? existingHouseWork;
 
   @override
-  ConsumerState<HouseWorkAddScreen> createState() => _HouseWorkAddScreenState();
+  ConsumerState<AddHouseWorkScreen> createState() => _HouseWorkAddScreenState();
 }
 
-class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
+class _HouseWorkAddScreenState extends ConsumerState<AddHouseWorkScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
 
@@ -305,11 +313,7 @@ class _HouseWorkAddScreenState extends ConsumerState<HouseWorkAddScreen> {
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (context) => const ProUpgradeScreen(),
-                    ),
-                  );
+                  Navigator.of(context).push(UpgradeToProScreen.route());
                 },
                 child: const Text('Pro版にアップグレード'),
               ),

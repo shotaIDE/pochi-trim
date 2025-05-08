@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/analysis/analysis_screen.dart';
+import 'package:house_worker/features/home/add_house_work_screen.dart';
 import 'package:house_worker/features/home/home_presenter.dart';
 import 'package:house_worker/features/home/house_works_tab.dart';
-import 'package:house_worker/features/home/work_log_add_screen.dart';
 import 'package:house_worker/features/home/work_log_included_house_work.dart';
 import 'package:house_worker/features/home/work_logs_tab.dart';
 import 'package:house_worker/features/settings/settings_screen.dart';
@@ -40,18 +40,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final analysisButton = IconButton(
       onPressed: () {
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (context) => const AnalysisScreen()),
-        );
+        Navigator.of(context).push(AnalysisScreen.route());
       },
       tooltip: '分析を表示する',
       icon: const Icon(Icons.analytics),
     );
     final settingsButton = IconButton(
       onPressed: () {
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (context) => const SettingsScreen()),
-        );
+        Navigator.of(context).push(SettingsScreen.route());
       },
       tooltip: '設定を表示する',
       icon: const Icon(Icons.settings),
@@ -94,11 +90,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final addHouseWorkButton = FloatingActionButton(
       tooltip: '家事を追加する',
       onPressed: () {
-        Navigator.of(context).push(
-          MaterialPageRoute<bool?>(
-            builder: (context) => const HouseWorkAddScreen(),
-          ),
-        );
+        Navigator.of(context).push(AddHouseWorkScreen.route());
       },
       child: const Icon(Icons.add),
     );
