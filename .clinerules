@@ -166,8 +166,12 @@ Widget build(BuildContext context) {
 }
 ```
 
-Use the colors defined in the theme. Example: `Theme.of(context).colorScheme.primary`.
+Use the colors defined in the theme.
 
-Use the text style defined in the text theme. Example: `Theme.of(context).textTheme.headline6`.
+- Example: `Theme.of(context).colorScheme.primary`.
+
+Use the text style defined in the text theme.
+
+- Example: `Theme.of(context).textTheme.headline6`.
 
 Add tooltips to areas where users can operate, and consider accessibility.

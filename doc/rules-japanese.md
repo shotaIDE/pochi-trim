@@ -166,8 +166,12 @@ Widget build(BuildContext context) {
 }
 ```
 
-色はテーマとして定義されたもの利用する。例: `Theme.of(context).colorScheme.primary`。
+色はテーマとして定義されたもの利用する。
 
-テキストのスタイルはテキストテーマとして定義されたものを利用する。例: `Theme.of(context).textTheme.headline6`。
+- 例: `Theme.of(context).colorScheme.primary`。
+
+テキストのスタイルはテキストテーマとして定義されたものを利用する。
+
+- 例: `Theme.of(context).textTheme.headline6`。
 
 ユーザーが操作できる箇所にはツールチップを追加し、アクセシビリティを考慮する。
