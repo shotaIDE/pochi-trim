@@ -79,6 +79,7 @@ Example:
 ```dart
 final data1Future = ref.watch(provider1.future);
 final data2Future = ref.watch(provider2.future);
+
 final data1 = await data1Future;
 final data2 = await data2Future;
 ```
@@ -109,29 +110,29 @@ Example:
 
 ```dart
 class MyWidget extends StatelessWidget {
-@override
-Widget build(BuildContext context) {
-return Column(
-children: [
-_Header(),
-_Content(),
-],
-);
-}
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _Header(),
+        _Content(),
+      ],
+    );
+  }
 }
 
 class _Header extends StatelessWidget {
-@override
-Widget build(BuildContext context) {
-return Text('Header');
-}
+  @override
+  Widget build(BuildContext context) {
+    return Text('Header');
+  }
 }
 
 class _Content extends StatelessWidget {
-@override
-Widget build(BuildContext context) {
-return Text('Content');
-}
+  @override
+  Widget build(BuildContext context) {
+    return Text('Content');
+  }
 }
 ```
 
@@ -146,13 +147,13 @@ const secondText = Text('2nd');
 
 // Assembling with margins
 final body = Column(
-children: const [
-firstText,
-Padding(
-padding: EdgeInsets.only(top: 16),
-child: secondText,
-),
-],
+  children: const [
+    firstText,
+    Padding(
+      padding: EdgeInsets.only(top: 16),
+      child: secondText,
+    ),
+  ],
 );
 ```
 
