@@ -34,5 +34,3 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
         "houseDocId": house_doc_id,
         "adminUser": user_id
     }
-
-# Debug
