@@ -82,10 +82,10 @@ class AddHouseWorkScreen extends ConsumerStatefulWidget {
   final HouseWork? existingHouseWork;
 
   @override
-  ConsumerState<AddHouseWorkScreen> createState() => _HouseWorkAddScreenState();
+  ConsumerState<AddHouseWorkScreen> createState() => _AddHouseWorkScreenState();
 }
 
-class _HouseWorkAddScreenState extends ConsumerState<AddHouseWorkScreen> {
+class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
 
