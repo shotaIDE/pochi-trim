@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/auth/login_presenter.dart';
+import 'package:house_worker/features/home/home_screen.dart';
+import 'package:house_worker/models/sign_in_result.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
+
+  static const name = 'LoginScreen';
+
+  static MaterialPageRoute<LoginScreen> route() =>
+      MaterialPageRoute<LoginScreen>(
+        builder: (_) => const LoginScreen(),
+        settings: const RouteSettings(name: name),
+      );
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -28,38 +38,48 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    final loginButton = ElevatedButton(
+      onPressed: _onLoginTapped,
+      child: const Text('ゲストとしてログイン'),
+    );
+
+    return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               'House Worker',
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
-            Text('家事を簡単に記録・管理できるアプリ', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 60),
-            _LoginButton(),
+            const SizedBox(height: 20),
+            const Text('家事を簡単に記録・管理できるアプリ', style: TextStyle(fontSize: 16)),
+            const SizedBox(height: 60),
+            loginButton,
           ],
         ),
       ),
     );
   }
-}
 
-class _LoginButton extends ConsumerWidget {
-  const _LoginButton();
+  Future<void> _onLoginTapped() async {
+    try {
+      await ref.read(loginButtonTappedResultProvider.notifier).onLoginTapped();
+    } on SignInException {
+      if (!mounted) {
+        return;
+      }
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ElevatedButton(
-      onPressed: () async {
-        await ref
-            .read(loginButtonTappedResultProvider.notifier)
-            .onLoginTapped();
-      },
-      child: const Text('ゲストとしてログイン'),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ログインに失敗しました。しばらくしてから再度お試しください。')),
+      );
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    await Navigator.of(context).pushReplacement(HomeScreen.route());
   }
 }

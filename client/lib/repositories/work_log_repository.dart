@@ -13,14 +13,12 @@ final _logger = Logger('WorkLogRepository');
 
 @riverpod
 WorkLogRepository workLogRepository(Ref ref) {
-  final appSession = ref.watch(rootAppInitializedProvider);
+  final appSession = ref.watch(unwrappedCurrentAppSessionProvider);
 
   switch (appSession) {
-    case final AppSessionSignedIn signedInSession:
-      return WorkLogRepository(houseId: signedInSession.currentHouseId);
-    case AppSessionNotSignedIn _:
-      throw NoHouseIdError();
-    case AppSessionLoading _:
+    case AppSessionSignedIn(currentHouseId: final currentHouseId):
+      return WorkLogRepository(houseId: currentHouseId);
+    case AppSessionNotSignedIn():
       throw NoHouseIdError();
   }
 }

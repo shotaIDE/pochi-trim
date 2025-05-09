@@ -4,9 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/common/theme/app_theme.dart';
 import 'package:house_worker/flavor_config.dart';
-import 'package:house_worker/root_screen.dart';
+import 'package:house_worker/root_app.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:logging/logging.dart';
 
@@ -138,32 +137,5 @@ void main() async {
     // Firebase が初期化できなくても、アプリを続行する
   }
 
-  runApp(const ProviderScope(child: HouseWorkerApp()));
-}
-
-class HouseWorkerApp extends StatelessWidget {
-  const HouseWorkerApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'House Worker ${FlavorConfig.instance.name}',
-      theme: getLightTheme(),
-      darkTheme: getDarkTheme(),
-      home: const AuthWrapper(),
-      debugShowCheckedModeBanner: !FlavorConfig.isProd,
-      builder: (context, child) {
-        // Flavorに応じたバナーを表示（本番環境以外）
-        if (!FlavorConfig.isProd) {
-          return Banner(
-            message: FlavorConfig.instance.name,
-            location: BannerLocation.topEnd,
-            color: FlavorConfig.instance.color,
-            child: child,
-          );
-        }
-        return child!;
-      },
-    );
-  }
+  runApp(const ProviderScope(child: RootApp()));
 }

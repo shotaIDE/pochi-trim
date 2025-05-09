@@ -175,3 +175,31 @@ Widget build(BuildContext context) {
 - 例: `Theme.of(context).textTheme.headline6`。
 
 ユーザーが操作できる箇所にはツールチップを追加し、アクセシビリティを考慮する。
+
+### 画面ナビゲーション
+
+画面には静的フィールドで `MaterialPageRoute` を定義し、その画面に遷移する際には静的フィールドと`Navigator` を使用する。
+
+例:
+
+```dart
+class SomeScreen extends StatelessWidget {
+  const SomeScreen({super.key});
+
+  static const name = 'AnalysisScreen';
+
+  static MaterialPageRoute<SomeScreen> route() =>
+      MaterialPageRoute<SomeScreen>(
+        builder: (_) => const SomeScreen(),
+        settings: const RouteSettings(name: name),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    // 画面のビルド処理
+  }
+}
+
+// 遷移する際
+Navigator.of(context).push(SomeScreen.route);
+```

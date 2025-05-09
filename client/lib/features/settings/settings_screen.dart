@@ -15,6 +15,14 @@ final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
+  static const name = 'SettingsScreen';
+
+  static MaterialPageRoute<SettingsScreen> route() =>
+      MaterialPageRoute<SettingsScreen>(
+        builder: (_) => const SettingsScreen(),
+        settings: const RouteSettings(name: name),
+      );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfileAsync = ref.watch(currentUserProfileProvider);
@@ -292,13 +300,8 @@ class SettingsScreen extends ConsumerWidget {
                   try {
                     await ref.read(authServiceProvider).signOut();
                     await ref
-                        .read(rootAppInitializedProvider.notifier)
+                        .read(currentAppSessionProvider.notifier)
                         .signOut();
-
-                    if (context.mounted) {
-                      Navigator.pop(context); // ダイアログを閉じる
-                      Navigator.pop(context); // 設定画面を閉じる
-                    }
                   } on Exception catch (e) {
                     if (context.mounted) {
                       Navigator.pop(context);
@@ -338,15 +341,9 @@ class SettingsScreen extends ConsumerWidget {
                   try {
                     // Firebase認証からのサインアウト
                     await ref.read(authServiceProvider).signOut();
-
-                    if (context.mounted) {
-                      Navigator.pop(context); // ダイアログを閉じる
-                      Navigator.pop(context); // 設定画面を閉じる
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('アカウントを削除しました')),
-                      );
-                    }
+                    await ref
+                        .read(currentAppSessionProvider.notifier)
+                        .signOut();
                   } on Exception catch (e) {
                     if (context.mounted) {
                       Navigator.pop(context);

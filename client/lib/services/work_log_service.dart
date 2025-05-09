@@ -11,23 +11,19 @@ part 'work_log_service.g.dart';
 
 @riverpod
 WorkLogService workLogService(Ref ref) {
-  final appSession = ref.watch(rootAppInitializedProvider);
+  final appSession = ref.watch(unwrappedCurrentAppSessionProvider);
   final workLogRepository = ref.watch(workLogRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
 
   switch (appSession) {
-    case final AppSessionSignedIn signedInSession:
-      final houseId = signedInSession.currentHouseId;
-
+    case AppSessionSignedIn(currentHouseId: final currentHouseId):
       return WorkLogService(
         workLogRepository: workLogRepository,
         authService: authService,
-        currentHouseId: houseId,
+        currentHouseId: currentHouseId,
         ref: ref,
       );
-    case AppSessionNotSignedIn _:
-      throw NoHouseIdError();
-    case AppSessionLoading _:
+    case AppSessionNotSignedIn():
       throw NoHouseIdError();
   }
 }

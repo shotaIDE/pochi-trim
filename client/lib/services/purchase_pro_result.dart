@@ -14,9 +14,9 @@ class PurchaseProResult extends _$PurchaseProResult {
   Future<bool> purchasePro() async {
     // TODO(ide): RevenueCatを使用して課金処理を実行
 
-    final appSession = ref.read(rootAppInitializedProvider);
+    final appSession = ref.read(unwrappedCurrentAppSessionProvider);
     if (appSession is AppSessionSignedIn) {
-      await ref.read(rootAppInitializedProvider.notifier).upgradeToPro();
+      await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
     }
 
     return true;

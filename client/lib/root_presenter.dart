@@ -1,4 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/preference_key.dart';
+import 'package:house_worker/models/root_app_not_initialized.dart';
 import 'package:house_worker/root_app_session.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/preference_service.dart';
@@ -7,16 +9,15 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'root_presenter.g.dart';
 
 @riverpod
-class RootAppInitialized extends _$RootAppInitialized {
+class CurrentAppSession extends _$CurrentAppSession {
   @override
-  AppSession build() {
-    return AppSession.notSignedIn();
-  }
-
-  Future<void> initialize() async {
-    final userProfile = await ref.watch(currentUserProfileProvider.future);
+  Future<AppSession> build() async {
+    // TODO(ide): `ref.watch` を使用すると、サインアウトした際に即時状態が更新され、
+    // スプラッシュスクリーンを経由せずにリビルドされることにより、MaterialApp のルートが
+    // 置換されず、ログイン画面に遷移しない問題があるため、`ref.read` を使用している。
+    final userProfile = await ref.read(currentUserProfileProvider.future);
     if (userProfile == null) {
-      return;
+      return AppSession.notSignedIn();
     }
 
     final preferenceService = ref.read(preferenceServiceProvider);
@@ -29,7 +30,7 @@ class RootAppInitialized extends _$RootAppInitialized {
     // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
     const isPro = false;
 
-    state = AppSession.signedIn(
+    return AppSession.signedIn(
       userId: userProfile.id,
       currentHouseId: houseId,
       isPro: isPro,
@@ -40,15 +41,22 @@ class RootAppInitialized extends _$RootAppInitialized {
     // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
     const isPro = false;
 
-    state = AppSession.signedIn(
-      userId: userId,
-      currentHouseId: houseId,
-      isPro: isPro,
+    state = AsyncValue.data(
+      AppSession.signedIn(
+        userId: userId,
+        currentHouseId: houseId,
+        isPro: isPro,
+      ),
     );
   }
 
   Future<void> signOut() async {
-    state = AppSession.notSignedIn();
+    state = const AsyncValue.loading();
+
+    // スプラッシュスクリーン（ `Container` ）が表示され、ルートが置換されるまで少し待つ
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+
+    state = AsyncValue.data(AppSession.notSignedIn());
   }
 
   Future<void> upgradeToPro() async {
@@ -57,7 +65,21 @@ class RootAppInitialized extends _$RootAppInitialized {
     }
 
     final currentState = state as AppSessionSignedIn;
+    final newState = currentState.copyWith(isPro: true);
 
-    state = currentState.copyWith(isPro: true);
+    state = AsyncValue.data(newState);
   }
+}
+
+@riverpod
+AppSession unwrappedCurrentAppSession(Ref ref) {
+  final appSessionAsync = ref.watch(currentAppSessionProvider);
+  final appSession = appSessionAsync.whenOrNull(
+    data: (appSession) => appSession,
+  );
+  if (appSession == null) {
+    throw RootAppNotInitializedError();
+  }
+
+  return appSession;
 }
