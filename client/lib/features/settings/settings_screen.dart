@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/definition/app_definition.dart';
 import 'package:house_worker/features/settings/debug_screen.dart';
 import 'package:house_worker/features/settings/section_header.dart';
 import 'package:house_worker/models/user_profile.dart';
 import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/app_info_service.dart';
 import 'package:house_worker/services/auth_service.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -39,7 +41,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildUserInfoTile(context, userProfile, ref),
               const Divider(),
               const SectionHeader(title: 'アプリについて'),
-              _buildReviewTile(context),
+              const ReviewAppTile(),
               _buildShareAppTile(context),
               _buildTermsOfServiceTile(context),
               _buildPrivacyPolicyTile(context),
@@ -82,30 +84,6 @@ class SettingsScreen extends ConsumerWidget {
       title: const Text('ユーザー名'),
       subtitle: Text(subtitle),
       onTap: onTap,
-    );
-  }
-
-  Widget _buildReviewTile(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.star),
-      title: const Text('アプリをレビューする'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () async {
-        // レビューページへのリンク
-        // TODO(ide): in_app_review を使用して実現する
-        final url = Uri.parse(
-          'https://play.google.com/store/apps/details?id=com.example.houseworker',
-        );
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url);
-        } else {
-          if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
-          }
-        }
-      },
     );
   }
 
@@ -315,6 +293,22 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
+    );
+  }
+}
+
+class ReviewAppTile extends StatelessWidget {
+  const ReviewAppTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.star),
+      title: const Text('アプリをレビューする'),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      // アプリ内レビューは表示回数に制限があるため、ストアに移動するようにしている
+      onTap:
+          () => InAppReview.instance.openStoreListing(appStoreId: appStoreId),
     );
   }
 }
