@@ -5,7 +5,7 @@ import 'package:house_worker/common/theme/app_theme.dart';
 import 'package:house_worker/features/auth/login_screen.dart';
 import 'package:house_worker/features/home/home_screen.dart';
 import 'package:house_worker/flavor_config.dart';
-import 'package:house_worker/root_app_session.dart';
+import 'package:house_worker/models/app_session.dart';
 import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/remote_config_service.dart';
 
