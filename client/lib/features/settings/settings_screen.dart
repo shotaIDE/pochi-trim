@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/settings/debug_screen.dart';
+import 'package:house_worker/features/settings/section_title_text.dart';
 import 'package:house_worker/models/user_profile.dart';
 import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/auth_service.dart';
@@ -39,20 +40,20 @@ class SettingsScreen extends ConsumerWidget {
 
           return ListView(
             children: [
-              _buildSectionHeader(context, 'ユーザー情報'),
+              const SectionHeader(title: 'ユーザー情報'),
               _buildUserInfoTile(context, userProfile, ref),
               const Divider(),
-              _buildSectionHeader(context, 'アプリについて'),
+              const SectionHeader(title: 'アプリについて'),
               _buildReviewTile(context),
               _buildShareAppTile(context),
               _buildTermsOfServiceTile(context),
               _buildPrivacyPolicyTile(context),
               _buildLicenseTile(context),
-              _buildSectionHeader(context, 'デバッグ'),
+              const SectionHeader(title: 'デバッグ'),
               _buildDebugTile(context),
               _buildVersionInfo(context, packageInfoAsync),
               const Divider(),
-              _buildSectionHeader(context, 'アカウント管理'),
+              const SectionHeader(title: 'アカウント管理'),
               _buildLogoutTile(context, ref),
               _buildDeleteAccountTile(context, ref, userProfile),
             ],
@@ -60,20 +61,6 @@ class SettingsScreen extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('エラーが発生しました: $error')),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary,
-        ),
       ),
     );
   }
