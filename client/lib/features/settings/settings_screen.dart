@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/features/settings/debug_screen.dart';
 import 'package:house_worker/models/user_profile.dart';
 import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/auth_service.dart';
@@ -202,12 +203,7 @@ class SettingsScreen extends ConsumerWidget {
       leading: const Icon(Icons.bug_report),
       title: const Text('デバッグ画面'),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        // デバッグ画面への遷移処理
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('デバッグ画面は現在開発中です')));
-      },
+      onTap: () => Navigator.of(context).push(DebugScreen.route()),
     );
   }
 
