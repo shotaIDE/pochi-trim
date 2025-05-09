@@ -16,10 +16,10 @@ class UpgradeToProScreen extends ConsumerStatefulWidget {
       );
 
   @override
-  ConsumerState<UpgradeToProScreen> createState() => _ProUpgradeScreenState();
+  ConsumerState<UpgradeToProScreen> createState() => _UpgradeToProScreenState();
 }
 
-class _ProUpgradeScreenState extends ConsumerState<UpgradeToProScreen> {
+class _UpgradeToProScreenState extends ConsumerState<UpgradeToProScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
