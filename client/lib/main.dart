@@ -145,7 +145,7 @@ Future<void> main() async {
     isAnalyticsEnabled(),
   );
 
-  if (isCrashlyticsEnabled) {
+  if (isCrashlyticsEnabled()) {
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
     PlatformDispatcher.instance.onError = (error, stack) {
