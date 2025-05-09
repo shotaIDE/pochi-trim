@@ -1,4 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/preference_key.dart';
+import 'package:house_worker/models/root_app_not_initialized.dart';
 import 'package:house_worker/root_app_session.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/preference_service.dart';
@@ -65,4 +67,17 @@ class RootAppInitialized extends _$RootAppInitialized {
 
     state = AsyncValue.data(newState);
   }
+}
+
+@riverpod
+AppSession unwrappedAppSession(Ref ref) {
+  final appSessionAsync = ref.watch(rootAppInitializedProvider);
+  final appSession = appSessionAsync.whenOrNull(
+    data: (appSession) => appSession,
+  );
+  if (appSession == null) {
+    throw RootAppNotInitializedError();
+  }
+
+  return appSession;
 }
