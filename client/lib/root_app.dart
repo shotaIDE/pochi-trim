@@ -19,7 +19,9 @@ class _RootAppState extends ConsumerState<RootApp> {
   @override
   Widget build(BuildContext context) {
     final appSessionAsync = ref.watch(rootAppInitializedProvider);
-    final appSession = appSessionAsync.value;
+    final appSession = appSessionAsync.whenOrNull(
+      data: (appSession) => appSession,
+    );
     if (appSession == null) {
       return Container();
     }

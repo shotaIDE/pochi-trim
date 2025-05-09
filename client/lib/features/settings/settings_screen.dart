@@ -302,11 +302,6 @@ class SettingsScreen extends ConsumerWidget {
                     await ref
                         .read(rootAppInitializedProvider.notifier)
                         .signOut();
-
-                    if (context.mounted) {
-                      Navigator.pop(context); // ダイアログを閉じる
-                      Navigator.pop(context); // 設定画面を閉じる
-                    }
                   } on Exception catch (e) {
                     if (context.mounted) {
                       Navigator.pop(context);
@@ -346,15 +341,6 @@ class SettingsScreen extends ConsumerWidget {
                   try {
                     // Firebase認証からのサインアウト
                     await ref.read(authServiceProvider).signOut();
-
-                    if (context.mounted) {
-                      Navigator.pop(context); // ダイアログを閉じる
-                      Navigator.pop(context); // 設定画面を閉じる
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('アカウントを削除しました')),
-                      );
-                    }
                   } on Exception catch (e) {
                     if (context.mounted) {
                       Navigator.pop(context);
