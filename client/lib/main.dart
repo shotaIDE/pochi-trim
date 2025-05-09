@@ -105,68 +105,56 @@ void setupFlavorConfig() {
 }
 
 Future<void> main() async {
-  await runZonedGuarded<Future<void>>(
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
 
-      // ロギングシステムの初期化
-      _setupLogging();
+  // ロギングシステムの初期化
+  _setupLogging();
 
-      // 環境設定の初期化
-      setupFlavorConfig();
+  // 環境設定の初期化
+  setupFlavorConfig();
 
-      try {
-        // Firebase初期化
-        if (FlavorConfig.instance.firebaseOptions != null) {
-          await Firebase.initializeApp(
-            options: FlavorConfig.instance.firebaseOptions,
-          );
-        } else {
-          await Firebase.initializeApp();
-        }
-        _logger.info('Firebase initialized successfully');
-
-        // エミュレーターの設定が有効な場合のみ適用
-        if (FlavorConfig.instance.useFirebaseEmulator) {
-          // エミュレーターのホスト情報を取得
-          final emulatorHost = getEmulatorHost();
-          _logger.info('エミュレーターホスト: $emulatorHost');
-
-          // エミュレーターの設定を適用
-          setupFirebaseEmulators(emulatorHost);
-          _logger.info('Firebase Emulator設定を適用しました');
-        }
-
-        // 既存ユーザーのログイン状態を確認してUIDをログ出力
-        final container = ProviderContainer();
-        container.read(authServiceProvider).checkCurrentUser();
-      } on Exception catch (e) {
-        _logger.severe('Failed to initialize Firebase', e);
-        // Firebase が初期化できなくても、アプリを続行する
-      }
-
-      await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(
-        isAnalyticsEnabled,
+  try {
+    // Firebase初期化
+    if (FlavorConfig.instance.firebaseOptions != null) {
+      await Firebase.initializeApp(
+        options: FlavorConfig.instance.firebaseOptions,
       );
+    } else {
+      await Firebase.initializeApp();
+    }
+    _logger.info('Firebase initialized successfully');
 
-      if (isCrashlyticsEnabled) {
-        FlutterError.onError =
-            FirebaseCrashlytics.instance.recordFlutterFatalError;
+    // エミュレーターの設定が有効な場合のみ適用
+    if (FlavorConfig.instance.useFirebaseEmulator) {
+      // エミュレーターのホスト情報を取得
+      final emulatorHost = getEmulatorHost();
+      _logger.info('エミュレーターホスト: $emulatorHost');
 
-        PlatformDispatcher.instance.onError = (error, stack) {
-          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-          return true;
-        };
-      }
+      // エミュレーターの設定を適用
+      setupFirebaseEmulators(emulatorHost);
+      _logger.info('Firebase Emulator設定を適用しました');
+    }
 
-      runApp(const ProviderScope(child: RootApp()));
-    },
-    (error, stack) {
-      if (!isCrashlyticsEnabled) {
-        return;
-      }
+    // 既存ユーザーのログイン状態を確認してUIDをログ出力
+    final container = ProviderContainer();
+    container.read(authServiceProvider).checkCurrentUser();
+  } on Exception catch (e) {
+    _logger.severe('Failed to initialize Firebase', e);
+    // Firebase が初期化できなくても、アプリを続行する
+  }
 
-      FirebaseCrashlytics.instance.recordError(error, stack);
-    },
+  await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(
+    isAnalyticsEnabled,
   );
+
+  if (isCrashlyticsEnabled) {
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
+
+  runApp(const ProviderScope(child: RootApp()));
 }
