@@ -4,15 +4,11 @@ import 'package:house_worker/features/settings/debug_screen.dart';
 import 'package:house_worker/features/settings/section_header.dart';
 import 'package:house_worker/models/user_profile.dart';
 import 'package:house_worker/root_presenter.dart';
+import 'package:house_worker/services/app_info_service.dart';
 import 'package:house_worker/services/auth_service.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// アプリのバージョン情報を取得するプロバイダー
-final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
-  return PackageInfo.fromPlatform();
-});
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -28,7 +24,6 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfileAsync = ref.watch(currentUserProfileProvider);
-    final packageInfoAsync = ref.watch(packageInfoProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('設定')),
@@ -51,7 +46,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildLicenseTile(context),
               const SectionHeader(title: 'デバッグ'),
               _buildDebugTile(context),
-              _buildVersionInfo(context, packageInfoAsync),
+              const _AppVersionTile(),
               const Divider(),
               const SectionHeader(title: 'アカウント管理'),
               _buildLogoutTile(context, ref),
@@ -195,27 +190,6 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildVersionInfo(
-    BuildContext context,
-    AsyncValue<PackageInfo> packageInfoAsync,
-  ) {
-    return packageInfoAsync.when(
-      data: (packageInfo) {
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Center(
-            child: Text(
-              'バージョン: ${packageInfo.version} (${packageInfo.buildNumber})',
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ),
-        );
-      },
-      loading: () => const Center(child: Text('バージョン情報を読み込み中...')),
-      error: (_, _) => const Center(child: Text('バージョン情報を取得できませんでした')),
-    );
-  }
-
   Widget _buildLogoutTile(BuildContext context, WidgetRef ref) {
     return ListTile(
       leading: const Icon(Icons.logout, color: Colors.red),
@@ -341,6 +315,43 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
+    );
+  }
+}
+
+class _AppVersionTile extends ConsumerWidget {
+  const _AppVersionTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appVersionAsync = ref.watch(currentAppVersionProvider);
+
+    final versionString = appVersionAsync.when(
+      data:
+          (appVersion) =>
+              'バージョン: ${appVersion.version} (${appVersion.buildNumber})',
+      loading: () => 'バージョン: n.n.n (nnn)',
+      error: (_, _) => 'バージョン情報を取得できませんでした',
+    );
+    final versionText = Text(
+      versionString,
+      style: Theme.of(
+        context,
+      ).textTheme.labelLarge!.copyWith(color: Theme.of(context).dividerColor),
+    );
+
+    return Center(
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Skeletonizer(
+            enabled: appVersionAsync.isLoading,
+            child: versionText,
+          ),
+        ),
+      ),
     );
   }
 }
