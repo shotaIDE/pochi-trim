@@ -17,25 +17,20 @@ class RootApp extends ConsumerStatefulWidget {
 
 class _RootAppState extends ConsumerState<RootApp> {
   @override
-  void initState() {
-    super.initState();
-
-    ref.read(rootAppInitializedProvider.notifier).initialize();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final rootAppSession = ref.watch(rootAppInitializedProvider);
+    final appSessionAsync = ref.watch(rootAppInitializedProvider);
+    final appSession = appSessionAsync.value;
+    if (appSession == null) {
+      return Container();
+    }
 
     final List<MaterialPageRoute<Widget>> initialRoutes;
 
-    switch (rootAppSession) {
+    switch (appSession) {
       case AppSessionSignedIn():
         initialRoutes = [HomeScreen.route()];
       case AppSessionNotSignedIn():
         initialRoutes = [LoginScreen.route()];
-      case AppSessionLoading():
-        return Container();
     }
 
     final navigatorObservers = <NavigatorObserver>[

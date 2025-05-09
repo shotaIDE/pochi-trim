@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/models/no_house_id_error.dart';
+import 'package:house_worker/models/root_app_not_initialized.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/root_app_session.dart';
 import 'package:house_worker/root_presenter.dart';
@@ -13,14 +14,16 @@ final _logger = Logger('WorkLogRepository');
 
 @riverpod
 WorkLogRepository workLogRepository(Ref ref) {
-  final appSession = ref.watch(rootAppInitializedProvider);
+  final appSessionAsync = ref.read(rootAppInitializedProvider);
+  final appSession = appSessionAsync.value;
+  if (appSession == null) {
+    throw RootAppNotInitializedError();
+  }
 
   switch (appSession) {
-    case final AppSessionSignedIn signedInSession:
-      return WorkLogRepository(houseId: signedInSession.currentHouseId);
-    case AppSessionNotSignedIn _:
-      throw NoHouseIdError();
-    case AppSessionLoading _:
+    case AppSessionSignedIn(currentHouseId: final currentHouseId):
+      return WorkLogRepository(houseId: currentHouseId);
+    case AppSessionNotSignedIn():
       throw NoHouseIdError();
   }
 }

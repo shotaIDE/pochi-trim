@@ -12,5 +12,4 @@ sealed class AppSession with _$AppSession {
     required bool isPro,
   }) = AppSessionSignedIn;
   factory AppSession.notSignedIn() = AppSessionNotSignedIn;
-  factory AppSession.loading() = AppSessionLoading;
 }

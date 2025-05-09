@@ -9,16 +9,10 @@ part 'root_presenter.g.dart';
 @riverpod
 class RootAppInitialized extends _$RootAppInitialized {
   @override
-  AppSession build() {
-    return AppSession.loading();
-  }
-
-  Future<void> initialize() async {
+  Future<AppSession> build() async {
     final userProfile = await ref.watch(currentUserProfileProvider.future);
     if (userProfile == null) {
-      state = AppSession.notSignedIn();
-
-      return;
+      return AppSession.notSignedIn();
     }
 
     final preferenceService = ref.read(preferenceServiceProvider);
@@ -31,7 +25,7 @@ class RootAppInitialized extends _$RootAppInitialized {
     // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
     const isPro = false;
 
-    state = AppSession.signedIn(
+    return AppSession.signedIn(
       userId: userProfile.id,
       currentHouseId: houseId,
       isPro: isPro,
@@ -42,21 +36,23 @@ class RootAppInitialized extends _$RootAppInitialized {
     // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
     const isPro = false;
 
-    state = AppSession.signedIn(
-      userId: userId,
-      currentHouseId: houseId,
-      isPro: isPro,
+    state = AsyncValue.data(
+      AppSession.signedIn(
+        userId: userId,
+        currentHouseId: houseId,
+        isPro: isPro,
+      ),
     );
   }
 
   Future<void> signOut() async {
-    state = AppSession.loading();
+    state = const AsyncValue.loading();
 
     // Wait a bit so that the splash screen appears
     // and the routes replacement runs.
     await Future<void>.delayed(const Duration(seconds: 1));
 
-    state = AppSession.notSignedIn();
+    state = AsyncValue.data(AppSession.notSignedIn());
   }
 
   Future<void> upgradeToPro() async {
@@ -66,6 +62,6 @@ class RootAppInitialized extends _$RootAppInitialized {
 
     final currentState = state as AppSessionSignedIn;
 
-    state = currentState.copyWith(isPro: true);
+    state = AsyncValue.data(currentState.copyWith(isPro: true));
   }
 }
