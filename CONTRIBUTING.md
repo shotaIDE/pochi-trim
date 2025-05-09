@@ -2,23 +2,6 @@
 
 このドキュメントでは、House Worker プロジェクトの開発に貢献するための手順を説明します。
 
-## 目次
-
-- [開発環境のセットアップ](#開発環境のセットアップ)
-- [初期プロジェクト設定](#初期プロジェクト設定)
-  - [Flavor の設定](#flavor-の設定)
-  - [ツールのバージョン固定](#ツールのバージョン固定)
-  - [Firebase プロジェクト情報の追加](#firebase-プロジェクト情報の追加)
-  - [アイコンの設定](#アイコンの設定)
-  - [fastlane の設定](#fastlane-の設定)
-  - [Android のリリースビルドの設定](#android-のリリースビルドの設定)
-- [Firebase emulator の設定](#firebase-emulator-の設定)
-  - [Firebase emulator のサーバーをローカルマシンで実行する](#firebase-emulator-のサーバーをローカルマシンで実行する)
-  - [Firebase emulator に向けたクライアントアプリを実行する](#firebase-emulator-に向けたクライアントアプリを実行する)
-- [デプロイ](#デプロイ)
-  - [App Store へのデプロイ](#app-store-へのデプロイ)
-  - [Google Play へのデプロイ](#google-play-へのデプロイ)
-
 ## 開発環境のセットアップ
 
 ### 必要条件
@@ -128,7 +111,7 @@ flutterfire config \
   --android-out="android/app/src/${DIRECTORY_NAME_FOR_ANDROID}/google-services.json"
 ```
 
-#### Firebase プロジェクトの手動設定
+### Firebase プロジェクトの手動設定
 
 Terraform で作成した Firebase プロジェクトに、Firebase Console から手動で以下の設定を行います。
 
