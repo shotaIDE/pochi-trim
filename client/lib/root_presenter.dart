@@ -31,9 +31,10 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
       return AppInitialRoute.home;
     case AppSessionNotSignedIn():
       return AppInitialRoute.login;
+    default:
+      // 不要だが、Linterの警告を回避するために必要
+      return AppInitialRoute.login;
   }
-
-  return AppInitialRoute.login;
 }
 
 @riverpod
