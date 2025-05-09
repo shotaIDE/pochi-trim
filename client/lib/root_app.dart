@@ -42,6 +42,7 @@ class _RootAppState extends ConsumerState<RootApp> {
       data: (appInitialRoute) => appInitialRoute,
     );
     if (appInitialRoute == null) {
+      debugPrint('Loading...');
       return Container();
     }
 

@@ -13,12 +13,14 @@ part 'root_presenter.g.dart';
 
 @riverpod
 Future<AppInitialRoute> appInitialRoute(Ref ref) async {
+  final minimumBuildNumber = ref.watch(minimumBuildNumberProvider);
+  final appSessionFuture = ref.watch(currentAppSessionProvider.future);
+
   // Remote Config ですでにフェッチされた値を有効化する
   await ref
       .read(updatedRemoteConfigKeysProvider.notifier)
       .ensureActivateFetchedRemoteConfigs();
 
-  final minimumBuildNumber = ref.watch(minimumBuildNumberProvider);
   if (minimumBuildNumber != null) {
     final currentAppVersion = await ref.watch(currentAppVersionProvider.future);
     final currentBuildNumber = currentAppVersion.buildNumber;
@@ -27,7 +29,7 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
     }
   }
 
-  final appSession = await ref.watch(currentAppSessionProvider.future);
+  final appSession = await appSessionFuture;
   switch (appSession) {
     case AppSessionSignedIn():
       return AppInitialRoute.home;
@@ -40,11 +42,7 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
 class CurrentAppSession extends _$CurrentAppSession {
   @override
   Future<AppSession> build() async {
-    // `ref.watch` を使用すると、サインアウトした際に即時状態が更新され、
-    // スプラッシュスクリーンを経由せずにリビルドされることにより、
-    // MaterialApp のルートが置換されず、ログイン画面に遷移しない問題があるため、
-    // `ref.read` を使用している。
-    final userProfile = await ref.read(currentUserProfileProvider.future);
+    final userProfile = await ref.watch(currentUserProfileProvider.future);
     if (userProfile == null) {
       return AppSession.notSignedIn();
     }
@@ -80,11 +78,6 @@ class CurrentAppSession extends _$CurrentAppSession {
   }
 
   Future<void> signOut() async {
-    state = const AsyncValue.loading();
-
-    // スプラッシュスクリーン（ `Container` ）が表示され、ルートが置換されるまで少し待つ
-    await Future<void>.delayed(const Duration(milliseconds: 10));
-
     state = AsyncValue.data(AppSession.notSignedIn());
   }
 
