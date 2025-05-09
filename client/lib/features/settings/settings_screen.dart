@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/definition/app_definition.dart';
 import 'package:house_worker/features/settings/debug_screen.dart';
 import 'package:house_worker/features/settings/section_header.dart';
 import 'package:house_worker/models/user_profile.dart';
 import 'package:house_worker/root_presenter.dart';
+import 'package:house_worker/services/app_info_service.dart';
 import 'package:house_worker/services/auth_service.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// アプリのバージョン情報を取得するプロバイダー
-final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
-  return PackageInfo.fromPlatform();
-});
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -28,7 +26,6 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfileAsync = ref.watch(currentUserProfileProvider);
-    final packageInfoAsync = ref.watch(packageInfoProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('設定')),
@@ -44,14 +41,14 @@ class SettingsScreen extends ConsumerWidget {
               _buildUserInfoTile(context, userProfile, ref),
               const Divider(),
               const SectionHeader(title: 'アプリについて'),
-              _buildReviewTile(context),
+              const _ReviewAppTile(),
               _buildShareAppTile(context),
               _buildTermsOfServiceTile(context),
               _buildPrivacyPolicyTile(context),
               _buildLicenseTile(context),
               const SectionHeader(title: 'デバッグ'),
               _buildDebugTile(context),
-              _buildVersionInfo(context, packageInfoAsync),
+              const _AppVersionTile(),
               const Divider(),
               const SectionHeader(title: 'アカウント管理'),
               _buildLogoutTile(context, ref),
@@ -90,34 +87,10 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildReviewTile(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.star),
-      title: const Text('アプリをレビューする'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () async {
-        // レビューページへのリンク
-        final url = Uri.parse(
-          'https://play.google.com/store/apps/details?id=com.example.houseworker',
-        );
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url);
-        } else {
-          if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
-          }
-        }
-      },
-    );
-  }
-
   Widget _buildShareAppTile(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.share),
       title: const Text('友達に教える'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () {
         // シェア機能
         Share.share(
@@ -131,7 +104,7 @@ class SettingsScreen extends ConsumerWidget {
     return ListTile(
       leading: const Icon(Icons.description),
       title: const Text('利用規約'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: const _OpenTrailingIcon(),
       onTap: () async {
         // 利用規約ページへのリンク
         final url = Uri.parse('https://example.com/terms');
@@ -152,7 +125,7 @@ class SettingsScreen extends ConsumerWidget {
     return ListTile(
       leading: const Icon(Icons.privacy_tip),
       title: const Text('プライバシーポリシー'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: const _OpenTrailingIcon(),
       onTap: () async {
         // プライバシーポリシーページへのリンク
         final url = Uri.parse('https://example.com/privacy');
@@ -173,7 +146,7 @@ class SettingsScreen extends ConsumerWidget {
     return ListTile(
       leading: const Icon(Icons.description_outlined),
       title: const Text('ライセンス'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: const _MoveScreenTrailingIcon(),
       onTap: () {
         // ライセンス表示画面へ遷移
         showLicensePage(
@@ -189,29 +162,8 @@ class SettingsScreen extends ConsumerWidget {
     return ListTile(
       leading: const Icon(Icons.bug_report),
       title: const Text('デバッグ画面'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: const _MoveScreenTrailingIcon(),
       onTap: () => Navigator.of(context).push(DebugScreen.route()),
-    );
-  }
-
-  Widget _buildVersionInfo(
-    BuildContext context,
-    AsyncValue<PackageInfo> packageInfoAsync,
-  ) {
-    return packageInfoAsync.when(
-      data: (packageInfo) {
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Center(
-            child: Text(
-              'バージョン: ${packageInfo.version} (${packageInfo.buildNumber})',
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ),
-        );
-      },
-      loading: () => const Center(child: Text('バージョン情報を読み込み中...')),
-      error: (_, _) => const Center(child: Text('バージョン情報を取得できませんでした')),
     );
   }
 
@@ -340,6 +292,77 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
+    );
+  }
+}
+
+class _ReviewAppTile extends StatelessWidget {
+  const _ReviewAppTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.star),
+      title: const Text('アプリをレビューする'),
+      trailing: const _OpenTrailingIcon(),
+      // アプリ内レビューは表示回数に制限があるため、ストアに移動するようにしている
+      onTap:
+          () => InAppReview.instance.openStoreListing(appStoreId: appStoreId),
+    );
+  }
+}
+
+class _OpenTrailingIcon extends StatelessWidget {
+  const _OpenTrailingIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(Icons.open_in_browser);
+  }
+}
+
+class _MoveScreenTrailingIcon extends StatelessWidget {
+  const _MoveScreenTrailingIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(Icons.arrow_forward_ios, size: 16);
+  }
+}
+
+class _AppVersionTile extends ConsumerWidget {
+  const _AppVersionTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appVersionAsync = ref.watch(currentAppVersionProvider);
+
+    final versionString = appVersionAsync.when(
+      data:
+          (appVersion) =>
+              'バージョン: ${appVersion.version} (${appVersion.buildNumber})',
+      loading: () => 'バージョン: n.n.n (nnn)',
+      error: (_, _) => 'バージョン情報を取得できませんでした',
+    );
+    final versionText = Text(
+      versionString,
+      style: Theme.of(
+        context,
+      ).textTheme.labelLarge!.copyWith(color: Theme.of(context).dividerColor),
+    );
+
+    return Center(
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Skeletonizer(
+            enabled: appVersionAsync.isLoading,
+            child: versionText,
+          ),
+        ),
+      ),
     );
   }
 }

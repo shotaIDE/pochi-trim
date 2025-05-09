@@ -1,21 +1,48 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/app_initial_route.dart';
+import 'package:house_worker/models/app_session.dart';
 import 'package:house_worker/models/preference_key.dart';
 import 'package:house_worker/models/root_app_not_initialized.dart';
-import 'package:house_worker/root_app_session.dart';
+import 'package:house_worker/services/app_info_service.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/preference_service.dart';
+import 'package:house_worker/services/remote_config_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'root_presenter.g.dart';
 
 @riverpod
+Future<AppInitialRoute> appInitialRoute(Ref ref) async {
+  final minimumBuildNumber = ref.watch(minimumBuildNumberProvider);
+  final appSessionFuture = ref.watch(currentAppSessionProvider.future);
+
+  // Remote Config ですでにフェッチされた値を有効化する
+  await ref
+      .read(updatedRemoteConfigKeysProvider.notifier)
+      .ensureActivateFetchedRemoteConfigs();
+
+  if (minimumBuildNumber != null) {
+    final currentAppVersion = await ref.watch(currentAppVersionProvider.future);
+    final currentBuildNumber = currentAppVersion.buildNumber;
+    if (currentBuildNumber < minimumBuildNumber) {
+      return AppInitialRoute.updateApp;
+    }
+  }
+
+  final appSession = await appSessionFuture;
+  switch (appSession) {
+    case AppSessionSignedIn():
+      return AppInitialRoute.home;
+    case AppSessionNotSignedIn():
+      return AppInitialRoute.login;
+  }
+}
+
+@riverpod
 class CurrentAppSession extends _$CurrentAppSession {
   @override
   Future<AppSession> build() async {
-    // TODO(ide): `ref.watch` を使用すると、サインアウトした際に即時状態が更新され、
-    // スプラッシュスクリーンを経由せずにリビルドされることにより、MaterialApp のルートが
-    // 置換されず、ログイン画面に遷移しない問題があるため、`ref.read` を使用している。
-    final userProfile = await ref.read(currentUserProfileProvider.future);
+    final userProfile = await ref.watch(currentUserProfileProvider.future);
     if (userProfile == null) {
       return AppSession.notSignedIn();
     }
@@ -51,11 +78,6 @@ class CurrentAppSession extends _$CurrentAppSession {
   }
 
   Future<void> signOut() async {
-    state = const AsyncValue.loading();
-
-    // スプラッシュスクリーン（ `Container` ）が表示され、ルートが置換されるまで少し待つ
-    await Future<void>.delayed(const Duration(milliseconds: 10));
-
     state = AsyncValue.data(AppSession.notSignedIn());
   }
 

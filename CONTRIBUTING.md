@@ -116,6 +116,7 @@ flutterfire config \
 Terraform で作成した Firebase プロジェクトに、Firebase Console から手動で以下の設定を行います。
 
 - Google アナリティクスの有効化
+- Remote Config でパラメータを設定
 
 ### アイコンの設定
 

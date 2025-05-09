@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/models/app_session.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/max_house_work_limit_exceeded_exception.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
-import 'package:house_worker/root_app_session.dart';
 import 'package:house_worker/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

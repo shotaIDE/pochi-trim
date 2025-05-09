@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'root_app_session.freezed.dart';
+part 'app_session.freezed.dart';
 
 @freezed
 sealed class AppSession with _$AppSession {
