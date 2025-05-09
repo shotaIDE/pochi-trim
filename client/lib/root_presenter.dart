@@ -52,7 +52,7 @@ class RootAppInitialized extends _$RootAppInitialized {
 
     // Wait a bit so that the splash screen appears
     // and the routes replacement runs.
-    await Future<void>.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(milliseconds: 10));
 
     state = AsyncValue.data(AppSession.notSignedIn());
   }
