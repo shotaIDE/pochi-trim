@@ -50,8 +50,7 @@ class RootAppInitialized extends _$RootAppInitialized {
   Future<void> signOut() async {
     state = const AsyncValue.loading();
 
-    // Wait a bit so that the splash screen appears
-    // and the routes replacement runs.
+    // スプラッシュスクリーン（ `Container` ）が表示され、ルートが置換されるまで少し待つ
     await Future<void>.delayed(const Duration(milliseconds: 10));
 
     state = AsyncValue.data(AppSession.notSignedIn());
