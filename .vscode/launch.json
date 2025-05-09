@@ -26,11 +26,10 @@
         "--flavor",
         "emulator",
         "--dart-define-from-file",
-        "emulator-config.json"
-      ],
-      "env": {
-        "IS_ANALYTICS_ENABLED": true
-      }
+        "emulator-config.json",
+        "--dart-define",
+        "IS_ANALYTICS_ENABLED=true"
+      ]
     },
     {
       "name": "Emulator-Profile",

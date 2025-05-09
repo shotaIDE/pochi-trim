@@ -1,17 +1,21 @@
 import 'package:flutter/foundation.dart';
 
 bool isAnalyticsEnabled() {
-  const environmentKey = 'IS_ANALYTICS_ENABLED';
-  final bool? enableAnalytics;
+  final bool? isEnabledOnEnvironment;
 
-  if (const bool.hasEnvironment(environmentKey)) {
-    enableAnalytics = const bool.fromEnvironment(environmentKey);
+  const isEnabledStringOnEnvironment = String.fromEnvironment(
+    'IS_ANALYTICS_ENABLED',
+  );
+  if (isEnabledStringOnEnvironment == 'true') {
+    isEnabledOnEnvironment = true;
+  } else if (isEnabledStringOnEnvironment == 'false') {
+    isEnabledOnEnvironment = false;
   } else {
-    enableAnalytics = null;
+    isEnabledOnEnvironment = null;
   }
 
-  if (enableAnalytics != null) {
-    return true;
+  if (isEnabledOnEnvironment != null) {
+    return isEnabledOnEnvironment;
   }
 
   return kReleaseMode;
