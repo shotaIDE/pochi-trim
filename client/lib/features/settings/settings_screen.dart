@@ -341,6 +341,9 @@ class SettingsScreen extends ConsumerWidget {
                   try {
                     // Firebase認証からのサインアウト
                     await ref.read(authServiceProvider).signOut();
+                    await ref
+                        .read(currentAppSessionProvider.notifier)
+                        .signOut();
                   } on Exception catch (e) {
                     if (context.mounted) {
                       Navigator.pop(context);
