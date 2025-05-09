@@ -17,7 +17,7 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
       .read(updatedRemoteConfigKeysProvider.notifier)
       .ensureActivateFetchedRemoteConfigs();
 
-  final minimumBuildNumber = ref.read(minimumBuildNumberProvider);
+  final minimumBuildNumber = ref.watch(minimumBuildNumberProvider);
   // TODO(ide): 強制アップデートの実装
 
   final appSession = ref.watch(currentAppSessionProvider.future);
@@ -35,11 +35,6 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
 class CurrentAppSession extends _$CurrentAppSession {
   @override
   Future<AppSession> build() async {
-    // Remote Config ですでにフェッチされた値を有効化する
-    await ref
-        .read(updatedRemoteConfigKeysProvider.notifier)
-        .ensureActivateFetchedRemoteConfigs();
-
     // `ref.watch` を使用すると、サインアウトした際に即時状態が更新され、
     // スプラッシュスクリーンを経由せずにリビルドされることにより、
     // MaterialApp のルートが置換されず、ログイン画面に遷移しない問題があるため、
