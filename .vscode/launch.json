@@ -32,6 +32,22 @@
       ]
     },
     {
+      "name": "Emulator-Debug (Crashlytics enabled)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/client",
+      "program": "lib/main.dart",
+      "flutterMode": "debug",
+      "args": [
+        "--flavor",
+        "emulator",
+        "--dart-define-from-file",
+        "emulator-config.json",
+        "--dart-define",
+        "IS_CRASHLYTICS_ENABLED=true"
+      ]
+    },
+    {
       "name": "Emulator-Profile",
       "request": "launch",
       "type": "dart",
