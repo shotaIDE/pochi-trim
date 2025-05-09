@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,7 +20,8 @@ class DebugScreen extends ConsumerWidget {
       body: ListView(
         children: [
           _buildSectionHeader(context, 'Crashlytics'),
-          _buildUserInfoTile(context),
+          const _ForceErrorTile(),
+          const _ForceCrashTile(),
         ],
       ),
     );
@@ -38,11 +40,25 @@ class DebugScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildUserInfoTile(BuildContext context) {
+class _ForceCrashTile extends StatelessWidget {
+  const _ForceCrashTile();
+
+  @override
+  Widget build(BuildContext context) {
     return ListTile(
       title: const Text('強制クラッシュ'),
-      onTap: () => throw Exception(),
+      onTap: () => FirebaseCrashlytics.instance.crash(),
     );
+  }
+}
+
+class _ForceErrorTile extends StatelessWidget {
+  const _ForceErrorTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(title: const Text('強制エラー'), onTap: () => throw Exception());
   }
 }
