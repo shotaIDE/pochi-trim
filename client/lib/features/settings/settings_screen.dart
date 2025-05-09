@@ -97,6 +97,7 @@ class SettingsScreen extends ConsumerWidget {
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () async {
         // レビューページへのリンク
+        // TODO(ide): in_app_review を使用して実現する
         final url = Uri.parse(
           'https://play.google.com/store/apps/details?id=com.example.houseworker',
         );
