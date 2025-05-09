@@ -41,6 +41,7 @@ class _UpdateAppScreenState extends State<UpdateAppScreen> {
           // Android OSのバックボタンによりダイアログを閉じることができないようにする
           canPop: false,
           child: AlertDialog(
+            title: const Text('アプリのアップデートをお願いします'),
             content: const Text(
               '新しいバージョンがリリースされています。より良いパフォーマンスを得るために、アップデートしてご利用ください',
             ),
