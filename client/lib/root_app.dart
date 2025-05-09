@@ -7,12 +7,35 @@ import 'package:house_worker/features/home/home_screen.dart';
 import 'package:house_worker/flavor_config.dart';
 import 'package:house_worker/root_app_session.dart';
 import 'package:house_worker/root_presenter.dart';
+import 'package:house_worker/services/remote_config_service.dart';
 
-class RootApp extends ConsumerWidget {
+class RootApp extends ConsumerStatefulWidget {
   const RootApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RootApp> createState() => _RootAppState();
+}
+
+class _RootAppState extends ConsumerState<RootApp> {
+  @override
+  void initState() {
+    super.initState();
+
+    ref.listenManual(updatedRemoteConfigKeysProvider, (_, next) {
+      next.maybeWhen(
+        data: (keys) {
+          // Remote Config の変更を監視し、次回 `RootApp` が生成された際に有効になるようにする。
+          // リスナー側が何も行わなくても、ライブラリは変更された値を保持する。
+          // https://firebase.google.com/docs/remote-config/loading#strategy_3_load_new_values_for_next_startup
+          debugPrint('Updated remote config keys: $keys');
+        },
+        orElse: () {},
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final appSessionAsync = ref.watch(currentAppSessionProvider);
     final appSession = appSessionAsync.whenOrNull(
       data: (appSession) => appSession,

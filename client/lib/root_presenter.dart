@@ -4,6 +4,7 @@ import 'package:house_worker/models/root_app_not_initialized.dart';
 import 'package:house_worker/root_app_session.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/preference_service.dart';
+import 'package:house_worker/services/remote_config_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'root_presenter.g.dart';
@@ -12,9 +13,14 @@ part 'root_presenter.g.dart';
 class CurrentAppSession extends _$CurrentAppSession {
   @override
   Future<AppSession> build() async {
+    // Remote Config ですでにフェッチされた値を有効化する
+    await ref
+        .read(updatedRemoteConfigKeysProvider.notifier)
+        .ensureActivateFetchedRemoteConfigs();
+
     // TODO(ide): `ref.watch` を使用すると、サインアウトした際に即時状態が更新され、
-    // スプラッシュスクリーンを経由せずにリビルドされることにより、MaterialApp のルートが
-    // 置換されず、ログイン画面に遷移しない問題があるため、`ref.read` を使用している。
+    //  スプラッシュスクリーンを経由せずにリビルドされることにより、MaterialApp のルートが
+    //  置換されず、ログイン画面に遷移しない問題があるため、`ref.read` を使用している。
     final userProfile = await ref.read(currentUserProfileProvider.future);
     if (userProfile == null) {
       return AppSession.notSignedIn();
