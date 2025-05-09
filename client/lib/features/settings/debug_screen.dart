@@ -1,6 +1,7 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/features/settings/section_title_text.dart';
 
 class DebugScreen extends ConsumerWidget {
   const DebugScreen({super.key});
@@ -18,25 +19,11 @@ class DebugScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('デバッグ')),
       body: ListView(
-        children: [
-          _buildSectionHeader(context, 'Crashlytics'),
-          const _ForceErrorTile(),
-          const _ForceCrashTile(),
+        children: const [
+          SectionHeader(title: 'Crashlytics'),
+          _ForceErrorTile(),
+          _ForceCrashTile(),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary,
-        ),
       ),
     );
   }
