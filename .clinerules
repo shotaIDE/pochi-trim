@@ -175,3 +175,31 @@ Use the text style defined in the text theme.
 - Example: `Theme.of(context).textTheme.headline6`.
 
 Add tooltips to areas where users can operate, and consider accessibility.
+
+### Screen navigation
+
+Define `MaterialPageRoute` in a static field for the screen, and use the static field and `Navigator` when transitioning to that screen.
+
+Example:
+
+```dart
+class SomeScreen extends StatelessWidget {
+  const SomeScreen({super.key});
+
+  static const name = 'AnalysisScreen';
+
+  static MaterialPageRoute<SomeScreen> route() =>
+      MaterialPageRoute<SomeScreen>(
+        builder: (_) => const SomeScreen(),
+        settings: const RouteSettings(name: name),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    // Screen build process
+  }
+}
+
+// When transitioning
+Navigator.of(context).push(SomeScreen.route);
+```
