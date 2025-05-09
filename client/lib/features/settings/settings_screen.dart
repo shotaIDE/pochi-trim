@@ -41,7 +41,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildUserInfoTile(context, userProfile, ref),
               const Divider(),
               const SectionHeader(title: 'アプリについて'),
-              const ReviewAppTile(),
+              const _ReviewAppTile(),
               _buildShareAppTile(context),
               _buildTermsOfServiceTile(context),
               _buildPrivacyPolicyTile(context),
@@ -91,7 +91,6 @@ class SettingsScreen extends ConsumerWidget {
     return ListTile(
       leading: const Icon(Icons.share),
       title: const Text('友達に教える'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () {
         // シェア機能
         Share.share(
@@ -105,7 +104,7 @@ class SettingsScreen extends ConsumerWidget {
     return ListTile(
       leading: const Icon(Icons.description),
       title: const Text('利用規約'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: const _OpenTrailingIcon(),
       onTap: () async {
         // 利用規約ページへのリンク
         final url = Uri.parse('https://example.com/terms');
@@ -126,7 +125,7 @@ class SettingsScreen extends ConsumerWidget {
     return ListTile(
       leading: const Icon(Icons.privacy_tip),
       title: const Text('プライバシーポリシー'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: const _OpenTrailingIcon(),
       onTap: () async {
         // プライバシーポリシーページへのリンク
         final url = Uri.parse('https://example.com/privacy');
@@ -147,7 +146,7 @@ class SettingsScreen extends ConsumerWidget {
     return ListTile(
       leading: const Icon(Icons.description_outlined),
       title: const Text('ライセンス'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: const _MoveScreenTrailingIcon(),
       onTap: () {
         // ライセンス表示画面へ遷移
         showLicensePage(
@@ -163,7 +162,7 @@ class SettingsScreen extends ConsumerWidget {
     return ListTile(
       leading: const Icon(Icons.bug_report),
       title: const Text('デバッグ画面'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: const _MoveScreenTrailingIcon(),
       onTap: () => Navigator.of(context).push(DebugScreen.route()),
     );
   }
@@ -297,19 +296,37 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-class ReviewAppTile extends StatelessWidget {
-  const ReviewAppTile({super.key});
+class _ReviewAppTile extends StatelessWidget {
+  const _ReviewAppTile();
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.star),
       title: const Text('アプリをレビューする'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: const _OpenTrailingIcon(),
       // アプリ内レビューは表示回数に制限があるため、ストアに移動するようにしている
       onTap:
           () => InAppReview.instance.openStoreListing(appStoreId: appStoreId),
     );
+  }
+}
+
+class _OpenTrailingIcon extends StatelessWidget {
+  const _OpenTrailingIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(Icons.open_in_browser);
+  }
+}
+
+class _MoveScreenTrailingIcon extends StatelessWidget {
+  const _MoveScreenTrailingIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(Icons.arrow_forward_ios, size: 16);
   }
 }
 
