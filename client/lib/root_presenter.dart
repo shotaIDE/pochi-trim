@@ -12,6 +12,9 @@ part 'root_presenter.g.dart';
 class CurrentAppSession extends _$CurrentAppSession {
   @override
   Future<AppSession> build() async {
+    // TODO(ide): `ref.watch` を使用すると、サインアウトした際に即時状態が更新され、
+    // スプラッシュスクリーンを経由せずにリビルドされることにより、MaterialApp のルートが
+    // 置換されず、ログイン画面に遷移しない問題があるため、`ref.read` を使用している。
     final userProfile = await ref.read(currentUserProfileProvider.future);
     if (userProfile == null) {
       return AppSession.notSignedIn();
