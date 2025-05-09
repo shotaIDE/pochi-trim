@@ -8,16 +8,11 @@ import 'package:house_worker/flavor_config.dart';
 import 'package:house_worker/root_app_session.dart';
 import 'package:house_worker/root_presenter.dart';
 
-class RootApp extends ConsumerStatefulWidget {
+class RootApp extends ConsumerWidget {
   const RootApp({super.key});
 
   @override
-  ConsumerState<RootApp> createState() => _RootAppState();
-}
-
-class _RootAppState extends ConsumerState<RootApp> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final appSessionAsync = ref.watch(rootAppInitializedProvider);
     final appSession = appSessionAsync.whenOrNull(
       data: (appSession) => appSession,
