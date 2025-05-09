@@ -82,6 +82,7 @@ class AddHouseWorkScreen extends ConsumerStatefulWidget {
       MaterialPageRoute<AddHouseWorkScreen>(
         builder: (_) => const AddHouseWorkScreen(),
         settings: const RouteSettings(name: name),
+        fullscreenDialog: true,
       );
   final HouseWork? existingHouseWork;
 

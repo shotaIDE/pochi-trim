@@ -12,6 +12,7 @@ class UpgradeToProScreen extends ConsumerStatefulWidget {
       MaterialPageRoute<UpgradeToProScreen>(
         builder: (_) => const UpgradeToProScreen(),
         settings: const RouteSettings(name: name),
+        fullscreenDialog: true,
       );
 
   @override
