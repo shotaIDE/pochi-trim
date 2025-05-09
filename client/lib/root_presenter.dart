@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/app_initial_route.dart';
 import 'package:house_worker/models/app_session.dart';
 import 'package:house_worker/models/preference_key.dart';
 import 'package:house_worker/models/root_app_not_initialized.dart';
@@ -8,6 +9,27 @@ import 'package:house_worker/services/remote_config_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'root_presenter.g.dart';
+
+@riverpod
+Future<AppInitialRoute> appInitialRoute(Ref ref) async {
+  // Remote Config ですでにフェッチされた値を有効化する
+  await ref
+      .read(updatedRemoteConfigKeysProvider.notifier)
+      .ensureActivateFetchedRemoteConfigs();
+
+  final minimumBuildNumber = ref.read(minimumBuildNumberProvider);
+  // TODO(ide): 強制アップデートの実装
+
+  final appSession = ref.watch(currentAppSessionProvider.future);
+  switch (appSession) {
+    case AppSessionSignedIn():
+      return AppInitialRoute.home;
+    case AppSessionNotSignedIn():
+      return AppInitialRoute.login;
+  }
+
+  return AppInitialRoute.login;
+}
 
 @riverpod
 class CurrentAppSession extends _$CurrentAppSession {
