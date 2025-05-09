@@ -1,22 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-bool isAnalyticsEnabled() {
-  final bool? isEnabledOnEnvironment;
+const bool isAnalyticsEnabled =
+    String.fromEnvironment('ENABLE_ANALYTICS') == 'true' || kReleaseMode;
 
-  const isEnabledStringOnEnvironment = String.fromEnvironment(
-    'IS_ANALYTICS_ENABLED',
-  );
-  if (isEnabledStringOnEnvironment == 'true') {
-    isEnabledOnEnvironment = true;
-  } else if (isEnabledStringOnEnvironment == 'false') {
-    isEnabledOnEnvironment = false;
-  } else {
-    isEnabledOnEnvironment = null;
-  }
-
-  if (isEnabledOnEnvironment != null) {
-    return isEnabledOnEnvironment;
-  }
-
-  return kReleaseMode;
-}
+const bool isCrashlyticsEnabled =
+    String.fromEnvironment('ENABLE_CRASHLYTICS') == 'true' || kReleaseMode;
