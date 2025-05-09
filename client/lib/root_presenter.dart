@@ -10,7 +10,7 @@ part 'root_presenter.g.dart';
 class RootAppInitialized extends _$RootAppInitialized {
   @override
   Future<AppSession> build() async {
-    final userProfile = await ref.watch(currentUserProfileProvider.future);
+    final userProfile = await ref.read(currentUserProfileProvider.future);
     if (userProfile == null) {
       return AppSession.notSignedIn();
     }
@@ -61,7 +61,8 @@ class RootAppInitialized extends _$RootAppInitialized {
     }
 
     final currentState = state as AppSessionSignedIn;
+    final newState = currentState.copyWith(isPro: true);
 
-    state = AsyncValue.data(currentState.copyWith(isPro: true));
+    state = AsyncValue.data(newState);
   }
 }
