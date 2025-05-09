@@ -28,7 +28,7 @@
         "--dart-define-from-file",
         "emulator-config.json",
         "--dart-define",
-        "IS_ANALYTICS_ENABLED=true"
+        "ENABLE_ANALYTICS=true"
       ]
     },
     {
@@ -44,7 +44,7 @@
         "--dart-define-from-file",
         "emulator-config.json",
         "--dart-define",
-        "IS_CRASHLYTICS_ENABLED=true"
+        "ENABLE_CRASHLYTICS=true"
       ]
     },
     {

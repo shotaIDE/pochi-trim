@@ -146,10 +146,10 @@ Future<void> main() async {
       }
 
       await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(
-        isAnalyticsEnabled(),
+        isAnalyticsEnabled,
       );
 
-      if (isCrashlyticsEnabled()) {
+      if (isCrashlyticsEnabled) {
         FlutterError.onError =
             FirebaseCrashlytics.instance.recordFlutterFatalError;
 
@@ -162,7 +162,7 @@ Future<void> main() async {
       runApp(const ProviderScope(child: RootApp()));
     },
     (error, stack) {
-      if (!isCrashlyticsEnabled()) {
+      if (!isCrashlyticsEnabled) {
         return;
       }
 
