@@ -71,11 +71,6 @@ String getRandomEmoji() {
 class AddHouseWorkScreen extends ConsumerStatefulWidget {
   const AddHouseWorkScreen({super.key, this.existingHouseWork});
 
-  // 既存の家事から新しい家事を作成するためのファクトリコンストラクタ
-  factory AddHouseWorkScreen.fromExistingHouseWork(HouseWork houseWork) {
-    return AddHouseWorkScreen(existingHouseWork: houseWork);
-  }
-
   static const name = 'AddHouseWorkScreen';
 
   static MaterialPageRoute<AddHouseWorkScreen> route() =>
