@@ -1,7 +1,7 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/settings/section_title_text.dart';
+import 'package:house_worker/features/settings/section_header.dart';
 
 class DebugScreen extends ConsumerWidget {
   const DebugScreen({super.key});

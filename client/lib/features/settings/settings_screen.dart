@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/settings/debug_screen.dart';
-import 'package:house_worker/features/settings/section_title_text.dart';
+import 'package:house_worker/features/settings/section_header.dart';
 import 'package:house_worker/models/user_profile.dart';
 import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/auth_service.dart';
