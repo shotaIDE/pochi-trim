@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/features/auth/login_presenter.dart';
 import 'package:house_worker/features/home/home_screen.dart';
+import 'package:house_worker/models/sign_in_result.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -62,13 +63,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _onLoginTapped() async {
-    await ref.read(loginButtonTappedResultProvider.notifier).onLoginTapped();
+    try {
+      await ref.read(loginButtonTappedResultProvider.notifier).onLoginTapped();
+    } on SignInException {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ログインに失敗しました。しばらくしてから再度お試しください。')),
+      );
+      return;
+    }
 
     if (!mounted) {
       return;
     }
-
-    // TODO(ide): エラーハンドリング
 
     await Navigator.of(context).pushReplacement(HomeScreen.route());
   }
