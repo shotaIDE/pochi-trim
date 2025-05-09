@@ -300,7 +300,7 @@ class SettingsScreen extends ConsumerWidget {
                   try {
                     await ref.read(authServiceProvider).signOut();
                     await ref
-                        .read(rootAppInitializedProvider.notifier)
+                        .read(currentAppSessionProvider.notifier)
                         .signOut();
                   } on Exception catch (e) {
                     if (context.mounted) {

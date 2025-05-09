@@ -9,7 +9,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'root_presenter.g.dart';
 
 @riverpod
-class RootAppInitialized extends _$RootAppInitialized {
+class CurrentAppSession extends _$CurrentAppSession {
   @override
   Future<AppSession> build() async {
     final userProfile = await ref.read(currentUserProfileProvider.future);
@@ -69,8 +69,8 @@ class RootAppInitialized extends _$RootAppInitialized {
 }
 
 @riverpod
-AppSession unwrappedAppSession(Ref ref) {
-  final appSessionAsync = ref.watch(rootAppInitializedProvider);
+AppSession unwrappedCurrentAppSession(Ref ref) {
+  final appSessionAsync = ref.watch(currentAppSessionProvider);
   final appSession = appSessionAsync.whenOrNull(
     data: (appSession) => appSession,
   );

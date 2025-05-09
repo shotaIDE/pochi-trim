@@ -13,7 +13,7 @@ final _logger = Logger('WorkLogRepository');
 
 @riverpod
 WorkLogRepository workLogRepository(Ref ref) {
-  final appSession = ref.watch(unwrappedAppSessionProvider);
+  final appSession = ref.watch(unwrappedCurrentAppSessionProvider);
 
   switch (appSession) {
     case AppSessionSignedIn(currentHouseId: final currentHouseId):

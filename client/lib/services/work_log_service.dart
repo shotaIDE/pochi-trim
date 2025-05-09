@@ -11,7 +11,7 @@ part 'work_log_service.g.dart';
 
 @riverpod
 WorkLogService workLogService(Ref ref) {
-  final appSession = ref.watch(unwrappedAppSessionProvider);
+  final appSession = ref.watch(unwrappedCurrentAppSessionProvider);
   final workLogRepository = ref.watch(workLogRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
 

@@ -10,7 +10,7 @@ part 'add_house_work_presenter.g.dart';
 
 @riverpod
 Future<String> saveHouseWorkResult(Ref ref, HouseWork houseWork) async {
-  final appSession = ref.watch(unwrappedAppSessionProvider);
+  final appSession = ref.watch(unwrappedCurrentAppSessionProvider);
 
   final bool isPro;
   switch (appSession) {

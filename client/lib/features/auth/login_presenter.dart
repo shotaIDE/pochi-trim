@@ -35,7 +35,7 @@ class LoginButtonTappedResult extends _$LoginButtonTappedResult {
     }
 
     await ref
-        .read(rootAppInitializedProvider.notifier)
+        .read(currentAppSessionProvider.notifier)
         .signIn(userId: userId, houseId: myHouseId);
   }
 }

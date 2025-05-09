@@ -13,7 +13,7 @@ class RootApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appSessionAsync = ref.watch(rootAppInitializedProvider);
+    final appSessionAsync = ref.watch(currentAppSessionProvider);
     final appSession = appSessionAsync.whenOrNull(
       data: (appSession) => appSession,
     );
