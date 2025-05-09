@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:house_worker/definition/app_feature.dart';
 import 'package:house_worker/flavor_config.dart';
 import 'package:house_worker/root_app.dart';
 import 'package:house_worker/services/auth_service.dart';
@@ -98,7 +100,7 @@ void setupFlavorConfig() {
   _logger.info('アプリケーション環境: ${FlavorConfig.instance.name}');
 }
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // ロギングシステムの初期化
@@ -136,6 +138,10 @@ void main() async {
     _logger.severe('Failed to initialize Firebase', e);
     // Firebase が初期化できなくても、アプリを続行する
   }
+
+  await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(
+    isAnalyticsEnabled,
+  );
 
   runApp(const ProviderScope(child: RootApp()));
 }
