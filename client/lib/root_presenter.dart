@@ -19,20 +19,19 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
       .ensureActivateFetchedRemoteConfigs();
 
   final minimumBuildNumber = ref.watch(minimumBuildNumberProvider);
-  final currentAppVersion = await ref.watch(currentAppVersionProvider.future);
-  final currentBuildNumber = currentAppVersion.buildNumber;
-  if (currentBuildNumber < minimumBuildNumber) {
-    return AppInitialRoute.updateApp;
+  if (minimumBuildNumber != null) {
+    final currentAppVersion = await ref.watch(currentAppVersionProvider.future);
+    final currentBuildNumber = currentAppVersion.buildNumber;
+    if (currentBuildNumber < minimumBuildNumber) {
+      return AppInitialRoute.updateApp;
+    }
   }
 
-  final appSession = ref.watch(currentAppSessionProvider.future);
+  final appSession = await ref.watch(currentAppSessionProvider.future);
   switch (appSession) {
     case AppSessionSignedIn():
       return AppInitialRoute.home;
     case AppSessionNotSignedIn():
-      return AppInitialRoute.login;
-    default:
-      // 不要だが、Linterの警告を回避するために必要
       return AppInitialRoute.login;
   }
 }

@@ -19,6 +19,13 @@ class UpdatedRemoteConfigKeys extends _$UpdatedRemoteConfigKeys {
 }
 
 @riverpod
-int minimumBuildNumber(Ref ref) {
-  return FirebaseRemoteConfig.instance.getInt('minimumBuildNumber');
+int? minimumBuildNumber(Ref ref) {
+  final minimumBuildNumber = FirebaseRemoteConfig.instance.getInt(
+    'minimumBuildNumber',
+  );
+  if (minimumBuildNumber == 0) {
+    return null;
+  }
+
+  return minimumBuildNumber;
 }
