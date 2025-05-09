@@ -140,7 +140,7 @@ Future<void> main() async {
   }
 
   await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(
-    isAnalyticsEnabled,
+    isAnalyticsEnabled(),
   );
 
   runApp(const ProviderScope(child: RootApp()));

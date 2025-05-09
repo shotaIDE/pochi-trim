@@ -16,6 +16,23 @@
       ]
     },
     {
+      "name": "Emulator-Debug (Analytics enabled)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/client",
+      "program": "lib/main.dart",
+      "flutterMode": "debug",
+      "args": [
+        "--flavor",
+        "emulator",
+        "--dart-define-from-file",
+        "emulator-config.json"
+      ],
+      "env": {
+        "IS_ANALYTICS_ENABLED": true
+      }
+    },
+    {
       "name": "Emulator-Profile",
       "request": "launch",
       "type": "dart",
