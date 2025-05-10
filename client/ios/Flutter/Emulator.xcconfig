@@ -1,0 +1,5 @@
+#include "Generated.xcconfig"
+
+BUNDLE_IDENTIFIER_SUFFIX=.emulator
+APP_ICON_NAME_SUFFIX=-emulator
+GOOGLE_SERVICE_REVERSED_CLIENT_ID=com.googleusercontent.apps.916996426069-g2369gkf3e1t61b8mhafj1ns1gqepppp

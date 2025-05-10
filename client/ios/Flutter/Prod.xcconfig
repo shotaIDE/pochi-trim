@@ -1,0 +1,5 @@
+#include "Generated.xcconfig"
+
+BUNDLE_IDENTIFIER_SUFFIX=
+APP_ICON_NAME_SUFFIX=-prod
+GOOGLE_SERVICE_REVERSED_CLIENT_ID=com.googleusercontent.apps.916996426069-kar2v777tcr4e1cr27m8390o0odtrbbr
