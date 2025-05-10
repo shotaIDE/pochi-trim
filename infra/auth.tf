@@ -21,6 +21,10 @@ resource "google_identity_platform_config" "auth" {
     }
   }
 
+  multi_tenant {
+    allow_tenants = false
+  }
+
   depends_on = [
     google_project_service.default,
   ]
