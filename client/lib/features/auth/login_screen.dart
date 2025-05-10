@@ -38,9 +38,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final loginButton = ElevatedButton(
+    final anonymousLoginButton = ElevatedButton(
       onPressed: _onLoginTapped,
+      style: ElevatedButton.styleFrom(minimumSize: const Size(220, 50)),
       child: const Text('ゲストとしてログイン'),
+    );
+
+    final googleLoginButton = ElevatedButton.icon(
+      icon: const Icon(Icons.login),
+      label: const Text('Google でログイン'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        minimumSize: const Size(220, 50),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: BorderSide(color: Colors.grey.shade300),
+        ),
+      ),
+      onPressed: _onGoogleLoginTapped,
     );
 
     return Scaffold(
@@ -55,7 +71,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const SizedBox(height: 20),
             const Text('家事を簡単に記録・管理できるアプリ', style: TextStyle(fontSize: 16)),
             const SizedBox(height: 60),
-            loginButton,
+            anonymousLoginButton,
+            const SizedBox(height: 16),
+            googleLoginButton,
           ],
         ),
       ),
@@ -73,6 +91,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('ログインに失敗しました。しばらくしてから再度お試しください。')),
       );
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    await Navigator.of(context).pushReplacement(HomeScreen.route());
+  }
+
+  Future<void> _onGoogleLoginTapped() async {
+    try {
+      await ref
+          .read(loginButtonTappedResultProvider.notifier)
+          .onGoogleLoginTapped();
+    } on SignInException catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      var message = 'ログインに失敗しました。しばらくしてから再度お試しください。';
+      if (e is GoogleSignInException) {
+        message = 'Googleログインに失敗しました。しばらくしてから再度お試しください。';
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
       return;
     }
 
