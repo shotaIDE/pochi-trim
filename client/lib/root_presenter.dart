@@ -64,6 +64,32 @@ class CurrentAppSession extends _$CurrentAppSession {
     );
   }
 
+  Future<void> initialize() async {
+    final userProfile = await ref.watch(currentUserProfileProvider.future);
+    if (userProfile == null) {
+      state = AsyncValue.data(AppSession.notSignedIn());
+      return;
+    }
+
+    final preferenceService = ref.read(preferenceServiceProvider);
+
+    final houseId =
+        await preferenceService.getString(PreferenceKey.currentHouseId) ??
+        // TODO(ide): 開発用。本番リリース時には削除する
+        'default-house-id';
+
+    // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
+    const isPro = false;
+
+    state = AsyncValue.data(
+      AppSession.signedIn(
+        userId: userProfile.id,
+        currentHouseId: houseId,
+        isPro: isPro,
+      ),
+    );
+  }
+
   Future<void> signIn({required String userId, required String houseId}) async {
     // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
     const isPro = false;
@@ -82,14 +108,12 @@ class CurrentAppSession extends _$CurrentAppSession {
   }
 
   Future<void> upgradeToPro() async {
-    if (state is! AppSessionSignedIn) {
-      return;
+    final currentAppSession = state.valueOrNull;
+
+    if (currentAppSession case AppSessionSignedIn()) {
+      final newState = currentAppSession.copyWith(isPro: true);
+      state = AsyncValue.data(newState);
     }
-
-    final currentState = state as AppSessionSignedIn;
-    final newState = currentState.copyWith(isPro: true);
-
-    state = AsyncValue.data(newState);
   }
 }
 
