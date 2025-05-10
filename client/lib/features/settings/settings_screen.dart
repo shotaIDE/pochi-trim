@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/definition/app_definition.dart';
 import 'package:house_worker/features/settings/debug_screen.dart';
 import 'package:house_worker/features/settings/section_header.dart';
+import 'package:house_worker/models/sign_in_result.dart';
 import 'package:house_worker/models/user_profile.dart';
 import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/app_info_service.dart';
@@ -12,7 +13,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   static const name = 'SettingsScreen';
@@ -24,7 +25,12 @@ class SettingsScreen extends ConsumerWidget {
       );
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  @override
+  Widget build(BuildContext context) {
     final userProfileAsync = ref.watch(currentUserProfileProvider);
 
     return Scaffold(
@@ -193,14 +199,14 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('匿名ユーザー情報'),
+            title: const Text('アカウント連携'),
             content: const Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('現在、匿名ユーザーとしてログインしています。'),
                 SizedBox(height: 8),
-                Text('アカウント登録をすると、以下の機能が利用できるようになります：'),
+                Text('アカウント連携をすると、以下の機能が利用できるようになります：'),
                 SizedBox(height: 8),
                 Text('• データのバックアップと復元'),
                 Text('• 複数のデバイスでの同期'),
@@ -210,7 +216,42 @@ class SettingsScreen extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('閉じる'),
+                child: const Text('キャンセル'),
+              ),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.login),
+                label: const Text('Google アカウントと連携'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black87,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    side: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  try {
+                    await ref.read(authServiceProvider).linkWithGoogle();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('アカウントを連携しました')),
+                      );
+                    }
+                  } on SignInException catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            e is AccountLinkException
+                                ? 'アカウント連携に失敗しました'
+                                : 'エラーが発生しました',
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                },
               ),
             ],
           ),
