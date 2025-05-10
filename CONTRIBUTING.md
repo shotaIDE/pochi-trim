@@ -17,7 +17,7 @@
 ### Flavor の設定
 
 Flavor を追加する場合は、以下の公式ドキュメントに従ってセットアップしてください。
-Xcode 上でスキームの設定を行ってください。
+Xcode 上でスキームの設定を行ってください。また、独自のビルド設定を追加する手順も必要です。
 
 https://docs.flutter.dev/deployment/flavors-ios
 
