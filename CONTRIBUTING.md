@@ -117,6 +117,9 @@ Terraform で作成した Firebase プロジェクトに、Firebase Console か�
 
 - Google アナリティクスの有効化
 - Remote Config でパラメータを設定
+- Authentication におけるログインプロバイダを設定し、FlutterFire CLI による Firebase プロジェクト構成の再構成を行う
+  - 再構成が必要なタイミングは公式ドキュメントを参照してください
+    - https://firebase.google.com/docs/flutter/setup?platform=ios&hl=ja#configure-firebase
 
 ### アイコンの設定
 
