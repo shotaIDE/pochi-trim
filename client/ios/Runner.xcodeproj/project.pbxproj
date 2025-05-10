@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -459,9 +459,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Emulator.xcconfig */;
 			buildSettings = {
-				APP_ICON_NAME_SUFFIX = "-emulator";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
-				BUNDLE_IDENTIFIER_SUFFIX = .emulator;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 4UGYN353AH;
@@ -587,9 +585,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Dev.xcconfig */;
 			buildSettings = {
-				APP_ICON_NAME_SUFFIX = "-dev";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
-				BUNDLE_IDENTIFIER_SUFFIX = .dev;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 4UGYN353AH;
@@ -683,9 +679,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Dev.xcconfig */;
 			buildSettings = {
-				APP_ICON_NAME_SUFFIX = "-dev";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
-				BUNDLE_IDENTIFIER_SUFFIX = .dev;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 4UGYN353AH;
@@ -774,9 +768,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Dev.xcconfig */;
 			buildSettings = {
-				APP_ICON_NAME_SUFFIX = "-dev";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
-				BUNDLE_IDENTIFIER_SUFFIX = .dev;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 4UGYN353AH;
@@ -870,9 +862,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 78AEEB562DCF56A40025E0A8 /* Prod.xcconfig */;
 			buildSettings = {
-				APP_ICON_NAME_SUFFIX = "-prod";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
-				BUNDLE_IDENTIFIER_SUFFIX = "";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 4UGYN353AH;
@@ -966,9 +956,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 78AEEB562DCF56A40025E0A8 /* Prod.xcconfig */;
 			buildSettings = {
-				APP_ICON_NAME_SUFFIX = "-prod";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
-				BUNDLE_IDENTIFIER_SUFFIX = "";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 4UGYN353AH;
@@ -1057,9 +1045,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 78AEEB562DCF56A40025E0A8 /* Prod.xcconfig */;
 			buildSettings = {
-				APP_ICON_NAME_SUFFIX = "-prod";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
-				BUNDLE_IDENTIFIER_SUFFIX = "";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 4UGYN353AH;
@@ -1207,9 +1193,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Emulator.xcconfig */;
 			buildSettings = {
-				APP_ICON_NAME_SUFFIX = "-emulator";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
-				BUNDLE_IDENTIFIER_SUFFIX = .emulator;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 4UGYN353AH;
@@ -1232,9 +1216,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Emulator.xcconfig */;
 			buildSettings = {
-				APP_ICON_NAME_SUFFIX = "-emulator";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
-				BUNDLE_IDENTIFIER_SUFFIX = .emulator;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 4UGYN353AH;
