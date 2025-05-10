@@ -94,9 +94,6 @@ class AuthService {
     } on firebase_auth.FirebaseAuthException catch (e) {
       _logger.warning('Googleログインに失敗しました: $e');
       throw const SignInException.google();
-    } catch (e) {
-      _logger.warning('Googleログイン中に予期せぬエラーが発生しました: $e');
-      throw const SignInException.google();
     }
   }
 
@@ -128,9 +125,6 @@ class AuthService {
       _logger.info('ユーザーが匿名アカウントをGoogleアカウントと連携しました。UID: ${user.uid}');
     } on firebase_auth.FirebaseAuthException catch (e) {
       _logger.warning('アカウント連携に失敗しました: $e');
-      throw const SignInException.accountLink();
-    } catch (e) {
-      _logger.warning('アカウント連携中に予期せぬエラーが発生しました: $e');
       throw const SignInException.accountLink();
     }
   }
