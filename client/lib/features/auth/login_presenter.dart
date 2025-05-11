@@ -54,17 +54,12 @@ class LoginButtonTappedResult extends _$LoginButtonTappedResult {
       return;
     }
 
-    if (result case SignInCancelled()) {
-      state = const AsyncValue.data(null);
-      return;
-    }
+    switch (result) {
+      case SignInSuccess(userId: final userId, isNewUser: final isNewUser):
+        _logger.info(
+          'Google sign-in successful. User ID = $userId, new user = $isNewUser',
+        );
 
-    if (result case SignInSuccess(
-      userId: final userId,
-      isNewUser: final isNewUser,
-    )) {
-      if (isNewUser) {
-        _logger.info('新規ユーザーのためマイハウスを生成します。UID: $userId');
         final String myHouseId;
         try {
           myHouseId = await ref.read(generateMyHouseProvider.future);
@@ -76,10 +71,10 @@ class LoginButtonTappedResult extends _$LoginButtonTappedResult {
         await ref
             .read(currentAppSessionProvider.notifier)
             .signIn(userId: userId, houseId: myHouseId);
-      } else {
-        _logger.info('既存ユーザーのため初期化処理を実行します。UID: $userId');
-        await ref.read(currentAppSessionProvider.notifier).initialize();
-      }
+
+      case SignInCancelled():
+        _logger.info('Google sign-in cancelled.');
+        return;
     }
   }
 }

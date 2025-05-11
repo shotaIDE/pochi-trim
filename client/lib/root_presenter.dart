@@ -64,32 +64,6 @@ class CurrentAppSession extends _$CurrentAppSession {
     );
   }
 
-  Future<void> initialize() async {
-    final userProfile = await ref.watch(currentUserProfileProvider.future);
-    if (userProfile == null) {
-      state = AsyncValue.data(AppSession.notSignedIn());
-      return;
-    }
-
-    final preferenceService = ref.read(preferenceServiceProvider);
-
-    final houseId =
-        await preferenceService.getString(PreferenceKey.currentHouseId) ??
-        // TODO(ide): 開発用。本番リリース時には削除する
-        'default-house-id';
-
-    // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
-    const isPro = false;
-
-    state = AsyncValue.data(
-      AppSession.signedIn(
-        userId: userProfile.id,
-        currentHouseId: houseId,
-        isPro: isPro,
-      ),
-    );
-  }
-
   Future<void> signIn({required String userId, required String houseId}) async {
     // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
     const isPro = false;
