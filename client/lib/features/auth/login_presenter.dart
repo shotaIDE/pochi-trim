@@ -17,32 +17,7 @@ class LoginButtonTappedResult extends _$LoginButtonTappedResult {
     return;
   }
 
-  Future<void> onLoginTapped() async {
-    state = const AsyncValue.loading();
-
-    final authService = ref.read(authServiceProvider);
-    final String userId;
-    try {
-      userId = await authService.signInAnonymously();
-    } on SignInException catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-      return;
-    }
-
-    final String myHouseId;
-    try {
-      myHouseId = await ref.read(generateMyHouseProvider.future);
-    } on GenerateMyHouseException catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-      return;
-    }
-
-    await ref
-        .read(currentAppSessionProvider.notifier)
-        .signIn(userId: userId, houseId: myHouseId);
-  }
-
-  Future<void> onGoogleLoginTapped() async {
+  Future<void> startWithGoogle() async {
     state = const AsyncValue.loading();
 
     final authService = ref.read(authServiceProvider);
@@ -76,5 +51,30 @@ class LoginButtonTappedResult extends _$LoginButtonTappedResult {
         _logger.info('Google sign-in cancelled.');
         return;
     }
+  }
+
+  Future<void> startWithoutAccount() async {
+    state = const AsyncValue.loading();
+
+    final authService = ref.read(authServiceProvider);
+    final String userId;
+    try {
+      userId = await authService.signInAnonymously();
+    } on SignInException catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return;
+    }
+
+    final String myHouseId;
+    try {
+      myHouseId = await ref.read(generateMyHouseProvider.future);
+    } on GenerateMyHouseException catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return;
+    }
+
+    await ref
+        .read(currentAppSessionProvider.notifier)
+        .signIn(userId: userId, houseId: myHouseId);
   }
 }

@@ -41,7 +41,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final startWithGoogleButton = ElevatedButton.icon(
       icon: const Icon(Icons.login),
       label: const Text('Googleアカウントで開始'),
-      onPressed: _onGoogleLoginTapped,
+      onPressed: _startWithGoogle,
     );
 
     final continueWithoutAccountButton = TextButton(
@@ -72,7 +72,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _onLoginTapped() async {
     try {
-      await ref.read(loginButtonTappedResultProvider.notifier).onLoginTapped();
+      await ref
+          .read(loginButtonTappedResultProvider.notifier)
+          .startWithoutAccount();
     } on SignInException {
       if (!mounted) {
         return;
@@ -91,11 +93,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     await Navigator.of(context).pushReplacement(HomeScreen.route());
   }
 
-  Future<void> _onGoogleLoginTapped() async {
+  Future<void> _startWithGoogle() async {
     try {
       await ref
           .read(loginButtonTappedResultProvider.notifier)
-          .onGoogleLoginTapped();
+          .startWithGoogle();
     } on SignInException catch (e) {
       if (!mounted) {
         return;
