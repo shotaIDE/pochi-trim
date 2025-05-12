@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:house_worker/features/auth/login_presenter.dart';
 import 'package:house_worker/features/home/home_screen.dart';
 import 'package:house_worker/models/sign_in_result.dart';
@@ -23,7 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final startWithGoogleButton = ElevatedButton.icon(
-      icon: const Icon(Icons.login),
+      icon: const Icon(FontAwesomeIcons.google),
       label: const Text('Googleアカウントで開始'),
       onPressed: _startWithGoogle,
     );
