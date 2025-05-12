@@ -62,9 +62,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ログインに失敗しました。しばらくしてから再度お試しください。')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
       return;
     }
 
@@ -83,9 +81,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ログインに失敗しました。しばらくしてから再度お試しください。')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
       return;
     }
 
@@ -96,3 +92,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     await Navigator.of(context).pushReplacement(HomeScreen.route());
   }
 }
+
+const _failedLoginSnackBar = SnackBar(
+  content: Text('ログインに失敗しました。しばらくしてから再度お試しください。'),
+);
