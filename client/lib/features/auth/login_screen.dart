@@ -24,13 +24,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final startWithGoogleButton = ElevatedButton.icon(
+      onPressed: _startWithGoogle,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+      ),
       icon: const Icon(FontAwesomeIcons.google),
       label: const Text('Googleアカウントで開始'),
-      onPressed: _startWithGoogle,
     );
 
     final continueWithoutAccountButton = TextButton(
       onPressed: _startWithoutAccount,
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+      ),
       child: const Text('アカウントを利用せず開始'),
     );
 
