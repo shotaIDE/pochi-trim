@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:house_worker/definition/app_definition.dart';
 import 'package:house_worker/features/settings/debug_screen.dart';
 import 'package:house_worker/features/settings/section_header.dart';
@@ -193,69 +194,70 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  // 匿名ユーザー情報ダイアログ
   void _showAnonymousUserInfoDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('アカウント連携'),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('現在、匿名ユーザーとしてログインしています。'),
-                SizedBox(height: 8),
-                Text('アカウント連携をすると、以下の機能が利用できるようになります：'),
-                SizedBox(height: 8),
-                Text('• データのバックアップと復元'),
-                Text('• 複数のデバイスでの同期'),
-                Text('• 家族や友人との家事の共有'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('キャンセル'),
-              ),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.login),
-                label: const Text('Google アカウントと連携'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black87,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    side: BorderSide(color: Colors.grey.shade300),
-                  ),
-                ),
-                onPressed: () async {
-                  Navigator.pop(context);
-                  try {
-                    await ref.read(authServiceProvider).linkWithGoogle();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('アカウントを連携しました')),
-                      );
-                    }
-                  } on SignInException catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            e is AccountLinkException
-                                ? 'アカウント連携に失敗しました'
-                                : 'エラーが発生しました',
-                          ),
-                        ),
-                      );
-                    }
-                  }
-                },
-              ),
+      builder: (context) {
+        final linkWithGoogleButton = TextButton.icon(
+          onPressed: _linkWithGoogle,
+          icon: const Icon(FontAwesomeIcons.google),
+          label: const Text('Googleアカウントと連携'),
+        );
+
+        return AlertDialog(
+          title: const Text('アカウント連携'),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('現在、ゲストとしてアプリを利用しています。'),
+              SizedBox(height: 8),
+              Text('アカウント連携をすると、以下の機能が利用できるようになります：'),
+              SizedBox(height: 8),
+              Text('• データのバックアップと復元'),
+              Text('• 複数のデバイスでの同期'),
+              Text('• 家族や友人との家事の共有'),
             ],
           ),
+          actions: [
+            linkWithGoogleButton,
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('キャンセル'),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  Future<void> _linkWithGoogle() async {
+    Navigator.pop(context);
+
+    try {
+      await ref.read(authServiceProvider).linkWithGoogle();
+    } on SignInException catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e is AccountLinkException ? 'アカウント連携に失敗しました' : 'エラーが発生しました',
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('アカウントを連携しました')));
   }
 
   // ログアウト確認ダイアログ
