@@ -38,15 +38,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final loginByGoogleButton = ElevatedButton.icon(
+    final startWithGoogleButton = ElevatedButton.icon(
       icon: const Icon(Icons.login),
-      label: const Text('Google でログイン'),
+      label: const Text('Googleアカウントで開始'),
       onPressed: _onGoogleLoginTapped,
     );
 
-    final continueWithoutLoginButton = TextButton(
+    final continueWithoutAccountButton = TextButton(
       onPressed: _onLoginTapped,
-      child: const Text('ログインせずに続ける'),
+      child: const Text('アカウントを利用せず開始'),
     );
 
     return Scaffold(
@@ -61,9 +61,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const SizedBox(height: 20),
             const Text('家事を簡単に記録・管理できるアプリ', style: TextStyle(fontSize: 16)),
             const SizedBox(height: 60),
-            loginByGoogleButton,
+            startWithGoogleButton,
             const SizedBox(height: 16),
-            continueWithoutLoginButton,
+            continueWithoutAccountButton,
           ],
         ),
       ),
