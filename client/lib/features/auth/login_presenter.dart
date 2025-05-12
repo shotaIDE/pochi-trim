@@ -9,8 +9,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'login_presenter.g.dart';
 
 @riverpod
-class LoginButtonTappedResult extends _$LoginButtonTappedResult {
-  final _logger = Logger('LoginButtonTappedResult');
+class StartResult extends _$StartResult {
+  final _logger = Logger('StartResult');
 
   @override
   Future<void> build() async {

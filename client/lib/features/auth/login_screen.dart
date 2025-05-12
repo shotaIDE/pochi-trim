@@ -21,22 +21,6 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
-  void initState() {
-    super.initState();
-
-    ref.listenManual(loginButtonTappedResultProvider, (previous, next) {
-      next.maybeWhen(
-        error: (_, _) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('ログインに失敗しました。しばらくしてから再度お試しください。')),
-          );
-        },
-        orElse: () {},
-      );
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final startWithGoogleButton = ElevatedButton.icon(
       icon: const Icon(Icons.login),
@@ -45,7 +29,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
 
     final continueWithoutAccountButton = TextButton(
-      onPressed: _onLoginTapped,
+      onPressed: _startWithoutAccount,
       child: const Text('アカウントを利用せず開始'),
     );
 
@@ -70,11 +54,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Future<void> _onLoginTapped() async {
+  Future<void> _startWithoutAccount() async {
     try {
-      await ref
-          .read(loginButtonTappedResultProvider.notifier)
-          .startWithoutAccount();
+      await ref.read(startResultProvider.notifier).startWithoutAccount();
     } on SignInException {
       if (!mounted) {
         return;
@@ -95,22 +77,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _startWithGoogle() async {
     try {
-      await ref
-          .read(loginButtonTappedResultProvider.notifier)
-          .startWithGoogle();
-    } on SignInException catch (e) {
+      await ref.read(startResultProvider.notifier).startWithGoogle();
+    } on SignInException {
       if (!mounted) {
         return;
       }
 
-      var message = 'ログインに失敗しました。しばらくしてから再度お試しください。';
-      if (e is GoogleSignInException) {
-        message = 'Googleログインに失敗しました。しばらくしてから再度お試しください。';
-      }
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ログインに失敗しました。しばらくしてから再度お試しください。')),
+      );
       return;
     }
 
