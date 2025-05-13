@@ -64,13 +64,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _startWithoutAccount() async {
     try {
       await ref.read(startResultProvider.notifier).startWithoutAccount();
-    } on SignInException {
+    } on SignInException catch (error) {
       if (!mounted) {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
-      return;
+      switch (error) {
+        case SignInExceptionCancelled():
+          return;
+        case SignInExceptionAlreadyInUse():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('このGoogleアカウントは、既に利用されています。別のアカウントでお試しください。'),
+            ),
+          );
+          return;
+        case SignInExceptionUncategorized():
+          ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
+          return;
+      }
     }
 
     if (!mounted) {
