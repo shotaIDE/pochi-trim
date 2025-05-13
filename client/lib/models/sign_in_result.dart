@@ -11,10 +11,26 @@ sealed class SignInResult with _$SignInResult {
 }
 
 @freezed
-sealed class SignInException with _$SignInException implements Exception {
-  const factory SignInException.cancelled() = SignInExceptionCancelled;
+sealed class SignInWithGoogleException
+    with _$SignInWithGoogleException
+    implements Exception {
+  const factory SignInWithGoogleException.cancelled() =
+      SignInWithGoogleExceptionCancelled;
 
-  const factory SignInException.alreadyInUse() = SignInExceptionAlreadyInUse;
+  const factory SignInWithGoogleException.uncategorized() =
+      SignInWithGoogleExceptionUncategorized;
+}
 
-  const factory SignInException.uncategorized() = SignInExceptionUncategorized;
+@freezed
+sealed class LinkWithGoogleException
+    with _$LinkWithGoogleException
+    implements Exception {
+  const factory LinkWithGoogleException.cancelled() =
+      LinkWithGoogleExceptionCancelled;
+
+  const factory LinkWithGoogleException.alreadyInUse() =
+      LinkWithGoogleExceptionAlreadyInUse;
+
+  const factory LinkWithGoogleException.uncategorized() =
+      LinkWithGoogleExceptionUncategorized;
 }

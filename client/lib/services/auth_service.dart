@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:house_worker/models/sign_in_result.dart';
 import 'package:house_worker/models/user_profile.dart';
+import 'package:house_worker/services/sign_in_google_exception.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -29,20 +30,28 @@ class AuthService {
   final _logger = Logger('AuthService');
 
   Future<SignInResult> signInWithGoogle() async {
-    final authCredential = await _loginGoogle();
+    final firebase_auth.AuthCredential authCredential;
+    try {
+      authCredential = await _loginGoogle();
+    } on SignInGoogleException catch (error) {
+      switch (error) {
+        case SignInGoogleExceptionCancelled():
+          _logger.warning('Google sign-in cancelled.');
+
+          throw const SignInWithGoogleException.cancelled();
+        case SignInGoogleExceptionUncategorized():
+          _logger.warning('Google sign-in failed.');
+
+          throw const SignInWithGoogleException.uncategorized();
+      }
+    }
 
     final firebase_auth.UserCredential userCredential;
     try {
       userCredential = await firebase_auth.FirebaseAuth.instance
           .signInWithCredential(authCredential);
-    } on firebase_auth.FirebaseAuthException catch (error) {
-      if (error.code == 'credential-already-in-use') {
-        _logger.warning('This Google account is already in use.');
-
-        throw const SignInException.alreadyInUse();
-      }
-
-      throw const SignInException.uncategorized();
+    } on firebase_auth.FirebaseAuthException {
+      throw const SignInWithGoogleException.uncategorized();
     }
 
     final user = userCredential.user!;
@@ -58,7 +67,21 @@ class AuthService {
   Future<void> linkWithGoogle() async {
     final user = firebase_auth.FirebaseAuth.instance.currentUser!;
 
-    final authCredential = await _loginGoogle();
+    final firebase_auth.AuthCredential authCredential;
+    try {
+      authCredential = await _loginGoogle();
+    } on SignInGoogleException catch (error) {
+      switch (error) {
+        case SignInGoogleExceptionCancelled():
+          _logger.warning('Google sign-in cancelled.');
+
+          throw const LinkWithGoogleException.cancelled();
+        case SignInGoogleExceptionUncategorized():
+          _logger.warning('Google sign-in failed.');
+
+          throw const LinkWithGoogleException.uncategorized();
+      }
+    }
 
     try {
       await user.linkWithCredential(authCredential);
@@ -66,10 +89,10 @@ class AuthService {
       if (error.code == 'credential-already-in-use') {
         _logger.warning('This Google account is already in use.');
 
-        throw const SignInException.alreadyInUse();
+        throw const LinkWithGoogleException.alreadyInUse();
       }
 
-      throw const SignInException.uncategorized();
+      throw const LinkWithGoogleException.uncategorized();
     }
 
     _logger.info('Linked with Google account.');
@@ -104,14 +127,14 @@ class AuthService {
     final executor = GoogleSignIn();
     final account = await executor.signIn();
     if (account == null) {
-      throw const SignInException.cancelled();
+      throw const SignInGoogleException.cancelled();
     }
 
     final authentication = await account.authentication;
     final idToken = authentication.idToken;
     final accessToken = authentication.accessToken;
     if (idToken == null || accessToken == null) {
-      throw const SignInException.uncategorized();
+      throw const SignInGoogleException.uncategorized();
     }
 
     _logger.info(

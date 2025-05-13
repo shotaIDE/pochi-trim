@@ -236,22 +236,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     try {
       await ref.read(authServiceProvider).linkWithGoogle();
-    } on SignInException catch (error) {
+    } on LinkWithGoogleException catch (error) {
       if (!mounted) {
         return;
       }
 
       switch (error) {
-        case SignInExceptionCancelled():
+        case LinkWithGoogleExceptionCancelled():
           return;
-        case SignInExceptionAlreadyInUse():
+        case LinkWithGoogleExceptionAlreadyInUse():
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('このGoogleアカウントは、既に利用されています。別のアカウントでお試しください。'),
             ),
           );
           return;
-        case SignInExceptionUncategorized():
+        case LinkWithGoogleExceptionUncategorized():
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('アカウント連携に失敗しました。しばらくしてから再度お試しください。')),
           );
