@@ -74,23 +74,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     UserProfile userProfile,
     WidgetRef ref,
   ) {
-    final String subtitle;
+    final String titleText;
+    final Widget? subtitle;
     final VoidCallback? onTap;
+    Widget leading;
 
     switch (userProfile) {
-      case UserProfileWithGoogleAccount(displayName: final displayName):
-        subtitle = displayName ?? '名前未設定';
+      case UserProfileWithGoogleAccount(
+        displayName: final displayName,
+        email: final email,
+        photoUrl: final photoUrl,
+      ):
+        leading =
+            photoUrl != null
+                ? CircleAvatar(
+                  backgroundImage: NetworkImage(photoUrl),
+                  radius: 20,
+                )
+                : const Icon(Icons.person);
+        titleText = displayName ?? '名前未設定';
+        subtitle = email != null ? Text(email) : null;
         onTap = null;
 
       case UserProfileAnonymous():
-        subtitle = 'ゲスト';
+        leading = const Icon(Icons.person);
+        titleText = 'ゲストユーザー';
+        subtitle = null;
         onTap = () => _showAnonymousUserInfoDialog(context);
     }
 
     return ListTile(
-      leading: const Icon(Icons.person),
-      title: const Text('ユーザー名'),
-      subtitle: Text(subtitle),
+      leading: leading,
+      title: Text(titleText),
+      subtitle: subtitle,
       onTap: onTap,
     );
   }
