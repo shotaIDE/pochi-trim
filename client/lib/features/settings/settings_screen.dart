@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:house_worker/definition/app_definition.dart';
+import 'package:house_worker/definition/color.dart';
 import 'package:house_worker/features/settings/debug_screen.dart';
 import 'package:house_worker/features/settings/section_header.dart';
 import 'package:house_worker/models/sign_in_result.dart';
@@ -229,17 +230,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         final linkWithGoogleButton = TextButton.icon(
           onPressed: _linkWithGoogle,
           icon: const Icon(FontAwesomeIcons.google),
-          label: const Text('Googleアカウントと連携'),
+          label: const Text('Googleと連携'),
         );
 
         final linkWithAppleButton = TextButton.icon(
           onPressed: _linkWithApple,
           icon: const Icon(FontAwesomeIcons.apple),
           style: TextButton.styleFrom(
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
+            backgroundColor: signInWithAppleBackgroundColor(context),
+            foregroundColor: signInWithAppleForegroundColor(context),
           ),
-          label: const Text('Apple IDと連携'),
+          label: const Text('Appleと連携'),
         );
 
         final actions = <Widget>[linkWithGoogleButton];

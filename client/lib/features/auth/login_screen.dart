@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:house_worker/definition/color.dart';
 import 'package:house_worker/features/auth/login_presenter.dart';
 import 'package:house_worker/models/sign_in_result.dart';
 
@@ -30,18 +31,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
       icon: const Icon(FontAwesomeIcons.google),
-      label: const Text('Googleアカウントで開始'),
+      label: const Text('Googleで続ける'),
     );
 
     final startWithAppleButton = ElevatedButton.icon(
       onPressed: _startWithApple,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: signInWithAppleBackgroundColor(context),
+        foregroundColor: signInWithAppleForegroundColor(context),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
       icon: const Icon(FontAwesomeIcons.apple),
-      label: const Text('Apple IDで開始'),
+      label: const Text('Appleで続ける'),
     );
 
     final continueWithoutAccountButton = TextButton(
@@ -49,7 +50,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
-      child: const Text('アカウントを利用せず開始'),
+      child: const Text('アカウントを利用せず続ける'),
     );
 
     final children = <Widget>[
