@@ -5,15 +5,15 @@ part 'user_profile.freezed.dart';
 
 @freezed
 sealed class UserProfile with _$UserProfile {
-  const factory UserProfile.anonymous({required String id}) =
-      UserProfileAnonymous;
-
   const factory UserProfile.withGoogleAccount({
     required String id,
     required String? displayName,
     required String? email,
     required String? photoUrl,
   }) = UserProfileWithGoogleAccount;
+
+  const factory UserProfile.anonymous({required String id}) =
+      UserProfileAnonymous;
 
   const UserProfile._();
 

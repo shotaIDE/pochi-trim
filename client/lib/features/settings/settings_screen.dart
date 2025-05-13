@@ -78,12 +78,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final VoidCallback? onTap;
 
     switch (userProfile) {
-      case UserProfileAnonymous():
-        subtitle = 'ゲスト';
-        onTap = () => _showAnonymousUserInfoDialog(context);
       case UserProfileWithGoogleAccount(displayName: final displayName):
         subtitle = displayName ?? '名前未設定';
         onTap = null;
+
+      case UserProfileAnonymous():
+        subtitle = 'ゲスト';
+        onTap = () => _showAnonymousUserInfoDialog(context);
     }
 
     return ListTile(
