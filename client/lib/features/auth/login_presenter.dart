@@ -34,6 +34,25 @@ class StartResult extends _$StartResult {
         .signIn(userId: userId, houseId: myHouseId);
   }
 
+  Future<void> startWithApple() async {
+    state = const AsyncValue.loading();
+
+    final authService = ref.read(authServiceProvider);
+    final result = await authService.signInWithApple();
+
+    final userId = result.userId;
+    final isNewUser = result.isNewUser;
+    _logger.info(
+      'Apple sign-in successful. User ID = $userId, new user = $isNewUser',
+    );
+
+    final myHouseId = await ref.read(generateMyHouseProvider.future);
+
+    await ref
+        .read(currentAppSessionProvider.notifier)
+        .signIn(userId: userId, houseId: myHouseId);
+  }
+
   Future<void> startWithoutAccount() async {
     state = const AsyncValue.loading();
 
