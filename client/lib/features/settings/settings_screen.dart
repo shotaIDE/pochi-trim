@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -240,6 +242,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           label: const Text('Apple IDと連携'),
         );
 
+        final actions = <Widget>[linkWithGoogleButton];
+
+        if (Platform.isIOS) {
+          actions.add(linkWithAppleButton);
+        }
+
+        actions.add(
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('キャンセル'),
+          ),
+        );
+
         return AlertDialog(
           title: const Text('アカウント連携'),
           content: const Column(
@@ -255,14 +270,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Text('• 家族や友人との家事の共有'),
             ],
           ),
-          actions: [
-            linkWithGoogleButton,
-            linkWithAppleButton,
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('キャンセル'),
-            ),
-          ],
+          actions: actions,
         );
       },
     );
