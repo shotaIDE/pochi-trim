@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:house_worker/features/auth/login_presenter.dart';
-import 'package:house_worker/features/home/home_screen.dart';
 import 'package:house_worker/models/sign_in_result.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -78,21 +77,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     }
 
-    if (!mounted) {
-      return;
-    }
-
-    await Navigator.of(context).pushReplacement(HomeScreen.route());
+    // ホーム画面への遷移は RootApp で自動で行われる
   }
 
   Future<void> _startWithoutAccount() async {
     await ref.read(startResultProvider.notifier).startWithoutAccount();
 
-    if (!mounted) {
-      return;
-    }
-
-    await Navigator.of(context).pushReplacement(HomeScreen.route());
+    // ホーム画面への遷移は RootApp で自動で行われる
   }
 }
 
