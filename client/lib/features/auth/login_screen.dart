@@ -61,9 +61,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Future<void> _startWithoutAccount() async {
+  Future<void> _startWithGoogle() async {
     try {
-      await ref.read(startResultProvider.notifier).startWithoutAccount();
+      await ref.read(startResultProvider.notifier).startWithGoogle();
     } on SignInException catch (error) {
       if (!mounted) {
         return;
@@ -92,17 +92,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     await Navigator.of(context).pushReplacement(HomeScreen.route());
   }
 
-  Future<void> _startWithGoogle() async {
-    try {
-      await ref.read(startResultProvider.notifier).startWithGoogle();
-    } on SignInException {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
-      return;
-    }
+  Future<void> _startWithoutAccount() async {
+    await ref.read(startResultProvider.notifier).startWithoutAccount();
 
     if (!mounted) {
       return;
