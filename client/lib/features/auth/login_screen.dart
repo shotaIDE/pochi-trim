@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -50,24 +52,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: const Text('アカウントを利用せず開始'),
     );
 
+    final children = <Widget>[
+      const Text(
+        'House Worker',
+        style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 20),
+      const Text('家事を簡単に記録・管理できるアプリ', style: TextStyle(fontSize: 16)),
+      const SizedBox(height: 60),
+      startWithGoogleButton,
+      const SizedBox(height: 16),
+    ];
+
+    if (Platform.isIOS) {
+      children.addAll([startWithAppleButton, const SizedBox(height: 16)]);
+    }
+
+    children.add(continueWithoutAccountButton);
+
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'House Worker',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            const Text('家事を簡単に記録・管理できるアプリ', style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 60),
-            startWithGoogleButton,
-            const SizedBox(height: 16),
-            startWithAppleButton,
-            const SizedBox(height: 16),
-            continueWithoutAccountButton,
-          ],
+          children: children,
         ),
       ),
     );
