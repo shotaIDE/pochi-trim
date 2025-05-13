@@ -304,6 +304,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ).showSnackBar(const SnackBar(content: Text('アカウントを連携しました')));
   }
 
+  Future<void> _linkWithApple() async {
+    Navigator.pop(context);
+
+    try {
+      await ref.read(authServiceProvider).linkWithApple();
+    } on LinkWithAppleException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      switch (error) {
+        case LinkWithAppleExceptionCancelled():
+          return;
+        case LinkWithAppleExceptionAlreadyInUse():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('このApple IDは、既に利用されています。別のアカウントでお試しください。'),
+            ),
+          );
+          return;
+        case LinkWithAppleExceptionUncategorized():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('アカウント連携に失敗しました。しばらくしてから再度お試しください。')),
+          );
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('アカウントを連携しました')));
+  }
+
   // ログアウト確認ダイアログ
   void _showLogoutConfirmDialog(BuildContext context, WidgetRef ref) {
     showDialog<void>(
