@@ -49,7 +49,7 @@ class AuthService {
 
     _logger.info('Signed in with Google.');
 
-    return SignInResult.success(
+    return SignInResult(
       userId: user.uid,
       isNewUser: userCredential.additionalUserInfo?.isNewUser ?? false,
     );

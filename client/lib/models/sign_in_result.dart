@@ -4,12 +4,10 @@ part 'sign_in_result.freezed.dart';
 
 @freezed
 sealed class SignInResult with _$SignInResult {
-  const factory SignInResult.success({
+  const factory SignInResult({
     required String userId,
     required bool isNewUser,
-  }) = SignInSuccess;
-
-  const factory SignInResult.cancelled() = SignInCancelled;
+  }) = _SignInResult;
 }
 
 @freezed
