@@ -152,8 +152,6 @@ class AuthService {
 
       throw const LinkWithAppleException.uncategorized();
     }
-
-    _logger.info('ユーザーが匿名アカウントをApple IDと連携しました。UID: ${user.uid}');
   }
 
   Future<String> signInAnonymously() async {
