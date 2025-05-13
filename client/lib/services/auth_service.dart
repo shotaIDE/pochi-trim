@@ -77,35 +77,44 @@ class AuthService {
   }
 
   Future<void> linkWithGoogle() async {
-    final user = firebase_auth.FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      throw const SignInException.accountLink();
+    final user = firebase_auth.FirebaseAuth.instance.currentUser!;
+
+    final googleSignIn = GoogleSignIn();
+    final googleUser = await googleSignIn.signIn();
+    if (googleUser == null) {
+      throw const SignInException.cancelled();
     }
 
-    if (!user.isAnonymous) {
-      throw const SignInException.accountLink();
-    }
+    final googleAuth = await googleUser.authentication;
+    final credential = firebase_auth.GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
 
     try {
-      final googleSignIn = GoogleSignIn();
+      await user.linkWithCredential(credential);
+    } on firebase_auth.FirebaseAuthException catch (error) {
+      if (error.code == 'credential-already-in-use') {
+        _logger.warning(
+          'This Google account is already in use: '
+          'display name = ${googleUser.displayName}, '
+          'email = ${googleUser.email}'
+          'photo URL = ${googleUser.photoUrl}',
+        );
 
-      final googleUser = await googleSignIn.signIn();
-      if (googleUser == null) {
-        return;
+        throw const SignInException.alreadyInUse();
       }
 
-      final googleAuth = await googleUser.authentication;
-      final credential = firebase_auth.GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      await user.linkWithCredential(credential);
-
-      _logger.info('ユーザーが匿名アカウントをGoogleアカウントと連携しました。UID: ${user.uid}');
-    } on firebase_auth.FirebaseAuthException catch (e) {
-      _logger.warning('アカウント連携に失敗しました: $e');
-      throw const SignInException.accountLink();
+      throw const SignInException.uncategorized();
     }
+
+    _logger.info(
+      'Linked with Google account. '
+      'user ID = ${user.uid}, '
+      'display name = ${user.displayName}, '
+      'email = ${user.email}, '
+      'photo URL = ${user.photoURL}',
+    );
   }
 
   Future<String> signInAnonymously() async {
