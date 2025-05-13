@@ -134,7 +134,12 @@ class AuthService {
   }
 
   Future<firebase_auth.AuthCredential> _loginGoogle() async {
-    final executor = GoogleSignIn(scopes: ['email', 'profile']);
+    final executor = GoogleSignIn(
+      scopes: [
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile',
+      ],
+    );
     final account = await executor.signIn();
     if (account == null) {
       throw const SignInGoogleException.cancelled();
