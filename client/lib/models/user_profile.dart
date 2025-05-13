@@ -12,6 +12,12 @@ sealed class UserProfile with _$UserProfile {
     required String? photoUrl,
   }) = UserProfileWithGoogleAccount;
 
+  const factory UserProfile.withAppleAccount({
+    required String id,
+    required String? displayName,
+    required String? email,
+  }) = UserProfileWithAppleAccount;
+
   const factory UserProfile.anonymous({required String id}) =
       UserProfileAnonymous;
 
@@ -22,11 +28,27 @@ sealed class UserProfile with _$UserProfile {
       return UserProfile.anonymous(id: user.uid);
     }
 
-    return UserProfile.withGoogleAccount(
-      id: user.uid,
-      displayName: user.displayName,
-      email: user.email,
-      photoUrl: user.photoURL,
-    );
+    final providerData = user.providerData.firstOrNull;
+    if (providerData == null) {
+      return UserProfile.anonymous(id: user.uid);
+    }
+
+    switch (providerData.providerId) {
+      case 'google.com':
+        return UserProfile.withGoogleAccount(
+          id: user.uid,
+          displayName: user.displayName,
+          email: user.email,
+          photoUrl: user.photoURL,
+        );
+      case 'apple.com':
+        return UserProfile.withAppleAccount(
+          id: user.uid,
+          displayName: user.displayName,
+          email: user.email,
+        );
+      default:
+        throw Exception('Unsupported provider: ${providerData.providerId}');
+    }
   }
 }
