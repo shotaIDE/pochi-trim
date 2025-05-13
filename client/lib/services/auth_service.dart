@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:house_worker/models/sign_in_result.dart';
 import 'package:house_worker/models/user_profile.dart';
-// ignore: unused_import
-import 'package:house_worker/services/sign_in_apple_exception.dart';
 import 'package:house_worker/services/sign_in_google_exception.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
