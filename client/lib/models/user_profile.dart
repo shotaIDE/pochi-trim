@@ -53,7 +53,7 @@ sealed class UserProfile with _$UserProfile {
   }
 }
 
-class UnsupportedProviderError implements Exception {
+class UnsupportedProviderError extends Error {
   UnsupportedProviderError(this.providerId);
 
   final String providerId;
