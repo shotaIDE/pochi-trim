@@ -230,6 +230,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           label: const Text('Googleアカウントと連携'),
         );
 
+        final linkWithAppleButton = TextButton.icon(
+          onPressed: _linkWithApple,
+          icon: const Icon(FontAwesomeIcons.apple),
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+          ),
+          label: const Text('Apple IDと連携'),
+        );
+
         return AlertDialog(
           title: const Text('アカウント連携'),
           content: const Column(
@@ -247,6 +257,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           actions: [
             linkWithGoogleButton,
+            linkWithAppleButton,
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('キャンセル'),
