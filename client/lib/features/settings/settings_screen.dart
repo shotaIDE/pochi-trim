@@ -96,6 +96,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         subtitle = email != null ? Text(email) : null;
         onTap = null;
 
+      case UserProfileWithAppleAccount(
+        displayName: final displayName,
+        email: final email,
+      ):
+        leading = const Icon(FontAwesomeIcons.apple);
+        titleText = displayName ?? '名前未設定';
+        subtitle = email != null ? Text(email) : null;
+        onTap = null;
+
       case UserProfileAnonymous():
         leading = const Icon(Icons.person);
         titleText = 'ゲストユーザー';
