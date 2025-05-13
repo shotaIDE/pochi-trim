@@ -48,7 +48,18 @@ sealed class UserProfile with _$UserProfile {
           email: user.email,
         );
       default:
-        throw Exception('Unsupported provider: ${providerData.providerId}');
+        throw UnsupportedProviderError(providerData.providerId);
     }
+  }
+}
+
+class UnsupportedProviderError implements Exception {
+  UnsupportedProviderError(this.providerId);
+
+  final String providerId;
+
+  @override
+  String toString() {
+    return 'Unsupported provider: $providerId';
   }
 }
