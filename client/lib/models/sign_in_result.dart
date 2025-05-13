@@ -34,3 +34,28 @@ sealed class LinkWithGoogleException
   const factory LinkWithGoogleException.uncategorized() =
       LinkWithGoogleExceptionUncategorized;
 }
+
+@freezed
+sealed class SignInWithAppleException
+    with _$SignInWithAppleException
+    implements Exception {
+  const factory SignInWithAppleException.cancelled() =
+      SignInWithAppleExceptionCancelled;
+
+  const factory SignInWithAppleException.uncategorized() =
+      SignInWithAppleExceptionUncategorized;
+}
+
+@freezed
+sealed class LinkWithAppleException
+    with _$LinkWithAppleException
+    implements Exception {
+  const factory LinkWithAppleException.cancelled() =
+      LinkWithAppleExceptionCancelled;
+
+  const factory LinkWithAppleException.alreadyInUse() =
+      LinkWithAppleExceptionAlreadyInUse;
+
+  const factory LinkWithAppleException.uncategorized() =
+      LinkWithAppleExceptionUncategorized;
+}
