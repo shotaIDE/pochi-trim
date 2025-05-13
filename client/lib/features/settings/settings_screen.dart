@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:house_worker/definition/app_definition.dart';
+import 'package:house_worker/definition/color.dart';
 import 'package:house_worker/features/settings/debug_screen.dart';
 import 'package:house_worker/features/settings/section_header.dart';
 import 'package:house_worker/models/sign_in_result.dart';
@@ -92,6 +95,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   radius: 20,
                 )
                 : const Icon(Icons.person);
+        titleText = displayName ?? '名前未設定';
+        subtitle = email != null ? Text(email) : null;
+        onTap = null;
+
+      case UserProfileWithAppleAccount(
+        displayName: final displayName,
+        email: final email,
+      ):
+        leading = const Icon(FontAwesomeIcons.apple);
         titleText = displayName ?? '名前未設定';
         subtitle = email != null ? Text(email) : null;
         onTap = null;
@@ -218,7 +230,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         final linkWithGoogleButton = TextButton.icon(
           onPressed: _linkWithGoogle,
           icon: const Icon(FontAwesomeIcons.google),
-          label: const Text('Googleアカウントと連携'),
+          label: const Text('Googleと連携'),
+        );
+
+        final linkWithAppleButton = TextButton.icon(
+          onPressed: _linkWithApple,
+          icon: const Icon(FontAwesomeIcons.apple),
+          style: TextButton.styleFrom(
+            backgroundColor: signInWithAppleBackgroundColor(context),
+            foregroundColor: signInWithAppleForegroundColor(context),
+          ),
+          label: const Text('Appleと連携'),
+        );
+
+        final actions = <Widget>[linkWithGoogleButton];
+
+        if (Platform.isIOS) {
+          actions.add(linkWithAppleButton);
+        }
+
+        actions.add(
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('キャンセル'),
+          ),
         );
 
         return AlertDialog(
@@ -236,13 +271,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Text('• 家族や友人との家事の共有'),
             ],
           ),
-          actions: [
-            linkWithGoogleButton,
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('キャンセル'),
-            ),
-          ],
+          actions: actions,
         );
       },
     );
@@ -269,6 +298,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           );
           return;
         case LinkWithGoogleExceptionUncategorized():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('アカウント連携に失敗しました。しばらくしてから再度お試しください。')),
+          );
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('アカウントを連携しました')));
+  }
+
+  Future<void> _linkWithApple() async {
+    Navigator.pop(context);
+
+    try {
+      await ref.read(authServiceProvider).linkWithApple();
+    } on LinkWithAppleException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      switch (error) {
+        case LinkWithAppleExceptionCancelled():
+          return;
+        case LinkWithAppleExceptionAlreadyInUse():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('このApple IDは、既に利用されています。別のアカウントでお試しください。'),
+            ),
+          );
+          return;
+        case LinkWithAppleExceptionUncategorized():
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('アカウント連携に失敗しました。しばらくしてから再度お試しください。')),
           );

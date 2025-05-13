@@ -108,6 +108,52 @@ class AuthService {
     _logger.info('Linked with Google account.');
   }
 
+  Future<SignInResult> signInWithApple() async {
+    final appleAuthProvider = _getAppleAuthProvider();
+
+    final firebase_auth.UserCredential userCredential;
+    try {
+      userCredential = await firebase_auth.FirebaseAuth.instance
+          .signInWithProvider(appleAuthProvider);
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      if (e.code == 'canceled') {
+        throw const SignInWithAppleException.cancelled();
+      }
+
+      throw const SignInWithAppleException.uncategorized();
+    }
+
+    final user = userCredential.user;
+    if (user == null) {
+      throw const SignInWithAppleException.uncategorized();
+    }
+
+    return SignInResult(
+      userId: user.uid,
+      isNewUser: userCredential.additionalUserInfo?.isNewUser ?? false,
+    );
+  }
+
+  Future<void> linkWithApple() async {
+    final user = firebase_auth.FirebaseAuth.instance.currentUser!;
+
+    final appleAuthProvider = _getAppleAuthProvider();
+
+    try {
+      await user.linkWithProvider(appleAuthProvider);
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      if (e.code == 'canceled') {
+        throw const LinkWithAppleException.cancelled();
+      }
+
+      if (e.code == 'credential-already-in-use') {
+        throw const LinkWithAppleException.alreadyInUse();
+      }
+
+      throw const LinkWithAppleException.uncategorized();
+    }
+  }
+
   Future<String> signInAnonymously() async {
     final userCredential =
         await firebase_auth.FirebaseAuth.instance.signInAnonymously();
@@ -164,5 +210,11 @@ class AuthService {
       idToken: idToken,
       accessToken: accessToken,
     );
+  }
+
+  firebase_auth.AppleAuthProvider _getAppleAuthProvider() {
+    return firebase_auth.AppleAuthProvider()
+      ..addScope('email')
+      ..addScope('name');
   }
 }
