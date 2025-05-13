@@ -14,6 +14,12 @@ sealed class SignInResult with _$SignInResult {
 
 @freezed
 sealed class SignInException with _$SignInException implements Exception {
+  const factory SignInException.cancelled() = SignInExceptionCancelled;
+
+  const factory SignInException.alreadyInUse() = SignInExceptionAlreadyInUse;
+
+  const factory SignInException.uncategorized() = SignInExceptionUncategorized;
+
   const factory SignInException.general() = GeneralSignInException;
 
   const factory SignInException.google() = GoogleSignInException;
