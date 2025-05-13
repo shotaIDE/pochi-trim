@@ -118,7 +118,6 @@ class AuthService {
       userCredential = await firebase_auth.FirebaseAuth.instance
           .signInWithProvider(appleAuthProvider);
     } on firebase_auth.FirebaseAuthException catch (e) {
-      _logger.warning('Appleログインに失敗しました: $e');
       if (e.code == 'canceled') {
         throw const SignInWithAppleException.cancelled();
       }
@@ -130,8 +129,6 @@ class AuthService {
     if (user == null) {
       throw const SignInWithAppleException.uncategorized();
     }
-
-    _logger.info('ユーザーがApple IDでログインしました。UID: ${user.uid}');
 
     return SignInResult(
       userId: user.uid,
@@ -147,7 +144,6 @@ class AuthService {
     try {
       await user.linkWithProvider(appleAuthProvider);
     } on firebase_auth.FirebaseAuthException catch (e) {
-      _logger.warning('アカウント連携に失敗しました: $e');
       if (e.code == 'canceled') {
         throw const LinkWithAppleException.cancelled();
       }
@@ -155,6 +151,7 @@ class AuthService {
       if (e.code == 'credential-already-in-use') {
         throw const LinkWithAppleException.alreadyInUse();
       }
+
       throw const LinkWithAppleException.uncategorized();
     }
 
