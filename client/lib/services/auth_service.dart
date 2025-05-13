@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// ignore: unused_import
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:house_worker/models/sign_in_result.dart';
 import 'package:house_worker/models/user_profile.dart';
@@ -17,7 +16,7 @@ AuthService authService(Ref _) {
 
 @riverpod
 Stream<UserProfile?> currentUserProfile(Ref ref) {
-  return firebase_auth.FirebaseAuth.instance.authStateChanges().map((user) {
+  return firebase_auth.FirebaseAuth.instance.userChanges().map((user) {
     if (user == null) {
       return null;
     }
