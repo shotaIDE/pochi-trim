@@ -17,7 +17,7 @@
 ### Flavor の設定
 
 Flavor を追加する場合は、以下の公式ドキュメントに従ってセットアップしてください。
-Xcode 上でスキームの設定を行ってください。
+Xcode 上でスキームの設定を行ってください。また、独自のビルド設定を追加する手順も必要です。
 
 https://docs.flutter.dev/deployment/flavors-ios
 
@@ -117,6 +117,11 @@ Terraform で作成した Firebase プロジェクトに、Firebase Console か�
 
 - Google アナリティクスの有効化
 - Remote Config でパラメータを設定
+- Authentication におけるログインプロバイダを設定し、FlutterFire CLI による Firebase プロジェクト構成の再構成を行う
+  - 再構成が必要なタイミングは公式ドキュメントを参照
+    - https://firebase.google.com/docs/flutter/setup?platform=ios&hl=ja#configure-firebase
+  - Google アカウントのログインプロバイダを設定する場合、SHA-1 フィンガープリントを登録する必要がある。Firebase Emulator 環境においても同様に登録が必要。
+    - https://developers.google.com/android/guides/client-auth?hl=ja#using_keytool_on_the_certificate
 
 ### アイコンの設定
 

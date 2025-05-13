@@ -7,9 +7,9 @@ sealed class AppSession with _$AppSession {
   const AppSession._();
 
   factory AppSession.signedIn({
-    required String userId,
     required String currentHouseId,
     required bool isPro,
   }) = AppSessionSignedIn;
+
   factory AppSession.notSignedIn() = AppSessionNotSignedIn;
 }

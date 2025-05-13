@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:house_worker/definition/app_definition.dart';
 import 'package:house_worker/features/settings/debug_screen.dart';
 import 'package:house_worker/features/settings/section_header.dart';
+import 'package:house_worker/models/sign_in_result.dart';
 import 'package:house_worker/models/user_profile.dart';
 import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/app_info_service.dart';
@@ -12,7 +14,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   static const name = 'SettingsScreen';
@@ -24,7 +26,12 @@ class SettingsScreen extends ConsumerWidget {
       );
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  @override
+  Widget build(BuildContext context) {
     final userProfileAsync = ref.watch(currentUserProfileProvider);
 
     return Scaffold(
@@ -67,22 +74,39 @@ class SettingsScreen extends ConsumerWidget {
     UserProfile userProfile,
     WidgetRef ref,
   ) {
-    final String subtitle;
+    final String titleText;
+    final Widget? subtitle;
     final VoidCallback? onTap;
+    Widget leading;
 
     switch (userProfile) {
-      case UserProfileAnonymous():
-        subtitle = 'ゲスト';
-        onTap = () => _showAnonymousUserInfoDialog(context);
-      case UserProfileWithAccount(displayName: final displayName):
-        subtitle = displayName ?? '名前未設定';
+      case UserProfileWithGoogleAccount(
+        displayName: final displayName,
+        email: final email,
+        photoUrl: final photoUrl,
+      ):
+        leading =
+            photoUrl != null
+                ? CircleAvatar(
+                  backgroundImage: NetworkImage(photoUrl),
+                  radius: 20,
+                )
+                : const Icon(Icons.person);
+        titleText = displayName ?? '名前未設定';
+        subtitle = email != null ? Text(email) : null;
         onTap = null;
+
+      case UserProfileAnonymous():
+        leading = const Icon(Icons.person);
+        titleText = 'ゲストユーザー';
+        subtitle = null;
+        onTap = () => _showAnonymousUserInfoDialog(context);
     }
 
     return ListTile(
-      leading: const Icon(Icons.person),
-      title: const Text('ユーザー名'),
-      subtitle: Text(subtitle),
+      leading: leading,
+      title: Text(titleText),
+      subtitle: subtitle,
       onTap: onTap,
     );
   }
@@ -187,34 +211,77 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  // 匿名ユーザー情報ダイアログ
   void _showAnonymousUserInfoDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('匿名ユーザー情報'),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('現在、匿名ユーザーとしてログインしています。'),
-                SizedBox(height: 8),
-                Text('アカウント登録をすると、以下の機能が利用できるようになります：'),
-                SizedBox(height: 8),
-                Text('• データのバックアップと復元'),
-                Text('• 複数のデバイスでの同期'),
-                Text('• 家族や友人との家事の共有'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('閉じる'),
-              ),
+      builder: (context) {
+        final linkWithGoogleButton = TextButton.icon(
+          onPressed: _linkWithGoogle,
+          icon: const Icon(FontAwesomeIcons.google),
+          label: const Text('Googleアカウントと連携'),
+        );
+
+        return AlertDialog(
+          title: const Text('アカウント連携'),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('現在、ゲストとしてアプリを利用しています。'),
+              SizedBox(height: 8),
+              Text('アカウント連携をすると、以下の機能が利用できるようになります：'),
+              SizedBox(height: 8),
+              Text('• データのバックアップと復元'),
+              Text('• 複数のデバイスでの同期'),
+              Text('• 家族や友人との家事の共有'),
             ],
           ),
+          actions: [
+            linkWithGoogleButton,
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('キャンセル'),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  Future<void> _linkWithGoogle() async {
+    Navigator.pop(context);
+
+    try {
+      await ref.read(authServiceProvider).linkWithGoogle();
+    } on LinkWithGoogleException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      switch (error) {
+        case LinkWithGoogleExceptionCancelled():
+          return;
+        case LinkWithGoogleExceptionAlreadyInUse():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('このGoogleアカウントは、既に利用されています。別のアカウントでお試しください。'),
+            ),
+          );
+          return;
+        case LinkWithGoogleExceptionUncategorized():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('アカウント連携に失敗しました。しばらくしてから再度お試しください。')),
+          );
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('アカウントを連携しました')));
   }
 
   // ログアウト確認ダイアログ

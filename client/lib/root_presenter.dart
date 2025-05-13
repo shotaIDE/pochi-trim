@@ -42,8 +42,8 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
 class CurrentAppSession extends _$CurrentAppSession {
   @override
   Future<AppSession> build() async {
-    final userProfile = await ref.watch(currentUserProfileProvider.future);
-    if (userProfile == null) {
+    final isSignedIn = await ref.watch(isSignedInProvider.future);
+    if (!isSignedIn) {
       return AppSession.notSignedIn();
     }
 
@@ -57,11 +57,7 @@ class CurrentAppSession extends _$CurrentAppSession {
     // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
     const isPro = false;
 
-    return AppSession.signedIn(
-      userId: userProfile.id,
-      currentHouseId: houseId,
-      isPro: isPro,
-    );
+    return AppSession.signedIn(currentHouseId: houseId, isPro: isPro);
   }
 
   Future<void> signIn({required String userId, required String houseId}) async {
@@ -69,11 +65,7 @@ class CurrentAppSession extends _$CurrentAppSession {
     const isPro = false;
 
     state = AsyncValue.data(
-      AppSession.signedIn(
-        userId: userId,
-        currentHouseId: houseId,
-        isPro: isPro,
-      ),
+      AppSession.signedIn(currentHouseId: houseId, isPro: isPro),
     );
   }
 
@@ -82,14 +74,12 @@ class CurrentAppSession extends _$CurrentAppSession {
   }
 
   Future<void> upgradeToPro() async {
-    if (state is! AppSessionSignedIn) {
-      return;
+    final currentAppSession = state.valueOrNull;
+
+    if (currentAppSession case AppSessionSignedIn()) {
+      final newState = currentAppSession.copyWith(isPro: true);
+      state = AsyncValue.data(newState);
     }
-
-    final currentState = state as AppSessionSignedIn;
-    final newState = currentState.copyWith(isPro: true);
-
-    state = AsyncValue.data(newState);
   }
 }
 
