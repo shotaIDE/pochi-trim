@@ -19,10 +19,4 @@ sealed class SignInException with _$SignInException implements Exception {
   const factory SignInException.alreadyInUse() = SignInExceptionAlreadyInUse;
 
   const factory SignInException.uncategorized() = SignInExceptionUncategorized;
-
-  const factory SignInException.general() = GeneralSignInException;
-
-  const factory SignInException.google() = GoogleSignInException;
-
-  const factory SignInException.accountLink() = AccountLinkException;
 }
