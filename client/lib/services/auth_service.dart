@@ -29,30 +29,15 @@ class AuthService {
   final _logger = Logger('AuthService');
 
   Future<SignInResult> signInWithGoogle() async {
-    final googleSignIn = GoogleSignIn();
-    final googleUser = await googleSignIn.signIn();
-    if (googleUser == null) {
-      throw const SignInException.cancelled();
-    }
-
-    final googleAuth = await googleUser.authentication;
-    final credential = firebase_auth.GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
+    final authCredential = await _loginGoogle();
 
     final firebase_auth.UserCredential userCredential;
     try {
       userCredential = await firebase_auth.FirebaseAuth.instance
-          .signInWithCredential(credential);
+          .signInWithCredential(authCredential);
     } on firebase_auth.FirebaseAuthException catch (error) {
       if (error.code == 'credential-already-in-use') {
-        _logger.warning(
-          'This Google account is already in use: '
-          'display name = ${googleUser.displayName}, '
-          'email = ${googleUser.email}'
-          'photo URL = ${googleUser.photoUrl}',
-        );
+        _logger.warning('This Google account is already in use.');
 
         throw const SignInException.alreadyInUse();
       }
@@ -62,13 +47,7 @@ class AuthService {
 
     final user = userCredential.user!;
 
-    _logger.info(
-      'Signed in with Google. '
-      'user ID = ${user.uid}, '
-      'display name = ${user.displayName}, '
-      'email = ${user.email}, '
-      'photo URL = ${user.photoURL}',
-    );
+    _logger.info('Signed in with Google.');
 
     return SignInResult.success(
       userId: user.uid,
@@ -79,28 +58,13 @@ class AuthService {
   Future<void> linkWithGoogle() async {
     final user = firebase_auth.FirebaseAuth.instance.currentUser!;
 
-    final googleSignIn = GoogleSignIn();
-    final googleUser = await googleSignIn.signIn();
-    if (googleUser == null) {
-      throw const SignInException.cancelled();
-    }
-
-    final googleAuth = await googleUser.authentication;
-    final credential = firebase_auth.GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
+    final authCredential = await _loginGoogle();
 
     try {
-      await user.linkWithCredential(credential);
+      await user.linkWithCredential(authCredential);
     } on firebase_auth.FirebaseAuthException catch (error) {
       if (error.code == 'credential-already-in-use') {
-        _logger.warning(
-          'This Google account is already in use: '
-          'display name = ${googleUser.displayName}, '
-          'email = ${googleUser.email}'
-          'photo URL = ${googleUser.photoUrl}',
-        );
+        _logger.warning('This Google account is already in use.');
 
         throw const SignInException.alreadyInUse();
       }
@@ -108,13 +72,7 @@ class AuthService {
       throw const SignInException.uncategorized();
     }
 
-    _logger.info(
-      'Linked with Google account. '
-      'user ID = ${user.uid}, '
-      'display name = ${user.displayName}, '
-      'email = ${user.email}, '
-      'photo URL = ${user.photoURL}',
-    );
+    _logger.info('Linked with Google account.');
   }
 
   Future<String> signInAnonymously() async {
@@ -140,5 +98,33 @@ class AuthService {
     }
 
     _logger.info('既存ユーザーがログイン中です。UID: ${user.uid}');
+  }
+
+  Future<firebase_auth.AuthCredential> _loginGoogle() async {
+    final executor = GoogleSignIn();
+    final account = await executor.signIn();
+    if (account == null) {
+      throw const SignInException.cancelled();
+    }
+
+    final authentication = await account.authentication;
+    final idToken = authentication.idToken;
+    final accessToken = authentication.accessToken;
+    if (idToken == null || accessToken == null) {
+      throw const SignInException.uncategorized();
+    }
+
+    _logger.info(
+      'Signed in Google account: '
+      'user ID = ${account.id}, '
+      'display name = ${account.displayName}, '
+      'email = ${account.email}, '
+      'photo URL = ${account.photoUrl}',
+    );
+
+    return firebase_auth.GoogleAuthProvider.credential(
+      idToken: idToken,
+      accessToken: accessToken,
+    );
   }
 }
