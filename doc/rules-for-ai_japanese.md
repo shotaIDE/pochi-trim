@@ -6,7 +6,18 @@
 
 `client/` は、Flutter による iOS と Android クライアントアプリのコードを配置する。
 
-`./lib/models/` は、ドメインモデルを配置する。UI に依存しない純粋なデータ構造や、UI に依存しない `Exception`、`Error` などを配置する。
+- [`./android/`](/client/android/): Android 専用のプロダクトコードやプロジェクト設定
+- [`./ios/`](/client/ios/): iOS 専用のプロダクトコードやプロジェクト設定
+- [`./lib/`](/client/lib/): OS 間で共通のプロダクトコード
+  - [`./data/`](/client/lib/data/): 情報の保持・取得や、OS レイヤーとのやりとり
+    - [`./definition/`](/client/lib/data/definition/): 情報の保持・取得や、OS レイヤーとのやりとりに利用する共通化された定義
+    - [`./model/`](/client/lib/data/model/): ドメインモデル。UI に依存しない純粋なデータ構造や、UI に依存しない `Exception`、`Error` などを配置する。
+    - [`./repository/`](/client/lib/data/repository/): Repository。具体的な向き先を抽象化しつつ、情報の保持・取得を行う処理の定義
+    - [`./service/`](/client/lib/data/service/): Service。OS や Firebase との接続を定義
+  - [`./ui/`](/client/lib/ui/): 画面描画や表示ロジックの定義
+    - [`./component/`](/client/lib/ui/component/): 画面間で共通化された UI 部品の定義
+    - [`./feature/`](/client/lib/ui/feature/): 画面と画面ロジック。カテゴリーごとのサブフォルダーが存在する。
+- [`./test/`](/client/test/): ユニットテスト、ウィジェットテスト
 
 ## インフラ
 
