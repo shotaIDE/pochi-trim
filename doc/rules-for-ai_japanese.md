@@ -27,6 +27,14 @@
 
 ## 一般的なルール
 
+### ドキュメンテーション
+
+クラスアーキテクチャやディレクトリ構造に関して、新しい概念が導入された場合は、以下のドキュメントを更新する。
+
+- [doc/rules-for-ai_japanese.md](/doc/rules-for-ai_japanese.md)
+- [.clinerules](/.clinerules)
+- [ARCHITECTURE.md](/ARCHITECTURE.md)
+
 ### スタイル
 
 Linter やコンパイラの警告は、即時解決しなさい。
