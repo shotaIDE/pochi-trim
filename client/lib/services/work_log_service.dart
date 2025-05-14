@@ -3,8 +3,8 @@ import 'package:house_worker/models/app_session.dart';
 import 'package:house_worker/models/no_house_id_error.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
-import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/auth_service.dart';
+import 'package:house_worker/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'work_log_service.g.dart';

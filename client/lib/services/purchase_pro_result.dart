@@ -1,5 +1,5 @@
 import 'package:house_worker/models/app_session.dart';
-import 'package:house_worker/root_presenter.dart';
+import 'package:house_worker/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'purchase_pro_result.g.dart';

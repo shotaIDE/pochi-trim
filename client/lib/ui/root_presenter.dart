@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/app_initial_route.dart';
 import 'package:house_worker/models/app_session.dart';
 import 'package:house_worker/models/preference_key.dart';
 import 'package:house_worker/models/root_app_not_initialized.dart';
@@ -7,6 +6,7 @@ import 'package:house_worker/services/app_info_service.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/services/preference_service.dart';
 import 'package:house_worker/services/remote_config_service.dart';
+import 'package:house_worker/ui/app_initial_route.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'root_presenter.g.dart';

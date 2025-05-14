@@ -11,8 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/definition/app_feature.dart';
 import 'package:house_worker/flavor_config.dart';
-import 'package:house_worker/root_app.dart';
 import 'package:house_worker/services/auth_service.dart';
+import 'package:house_worker/ui/root_app.dart';
 import 'package:logging/logging.dart';
 
 import 'firebase_options_dev.dart' as dev;
