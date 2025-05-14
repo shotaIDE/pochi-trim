@@ -1,15 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/analysis/analysis_period.dart';
-import 'package:house_worker/features/analysis/analysis_screen.dart';
-import 'package:house_worker/features/analysis/statistics.dart';
-import 'package:house_worker/features/analysis/weekday.dart';
-import 'package:house_worker/features/analysis/weekday_frequency.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
+import 'package:house_worker/ui/feature/analysis/analysis_period.dart';
+import 'package:house_worker/ui/feature/analysis/analysis_screen.dart';
+import 'package:house_worker/ui/feature/analysis/statistics.dart';
+import 'package:house_worker/ui/feature/analysis/weekday.dart';
+import 'package:house_worker/ui/feature/analysis/weekday_frequency.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analysis_presenter.g.dart';

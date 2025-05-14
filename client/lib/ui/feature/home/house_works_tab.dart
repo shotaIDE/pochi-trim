@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/home/house_work_item.dart';
-import 'package:house_worker/features/home/house_works_presenter.dart';
 import 'package:house_worker/models/house_work.dart';
+import 'package:house_worker/ui/feature/home/house_work_item.dart';
+import 'package:house_worker/ui/feature/home/house_works_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HouseWorksTab extends ConsumerStatefulWidget {

@@ -2,13 +2,13 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/app_initial_route.dart';
-import 'package:house_worker/common/theme/app_theme.dart';
-import 'package:house_worker/features/auth/login_screen.dart';
-import 'package:house_worker/features/home/home_screen.dart';
-import 'package:house_worker/features/update/update_app_screen.dart';
 import 'package:house_worker/flavor_config.dart';
 import 'package:house_worker/root_presenter.dart';
 import 'package:house_worker/services/remote_config_service.dart';
+import 'package:house_worker/ui/component/app_theme.dart';
+import 'package:house_worker/ui/feature/auth/login_screen.dart';
+import 'package:house_worker/ui/feature/home/home_screen.dart';
+import 'package:house_worker/ui/feature/update/update_app_screen.dart';
 
 class RootApp extends ConsumerStatefulWidget {
   const RootApp({super.key});

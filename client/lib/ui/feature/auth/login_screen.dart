@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:house_worker/definition/color.dart';
-import 'package:house_worker/features/auth/login_presenter.dart';
 import 'package:house_worker/models/sign_in_result.dart';
+import 'package:house_worker/ui/feature/auth/login_presenter.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});

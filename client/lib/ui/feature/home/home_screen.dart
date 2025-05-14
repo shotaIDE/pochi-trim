@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/analysis/analysis_screen.dart';
-import 'package:house_worker/features/home/add_house_work_screen.dart';
-import 'package:house_worker/features/home/home_presenter.dart';
-import 'package:house_worker/features/home/house_works_tab.dart';
-import 'package:house_worker/features/home/work_log_included_house_work.dart';
-import 'package:house_worker/features/home/work_logs_tab.dart';
-import 'package:house_worker/features/settings/settings_screen.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/services/work_log_service.dart';
+import 'package:house_worker/ui/feature/analysis/analysis_screen.dart';
+import 'package:house_worker/ui/feature/home/add_house_work_screen.dart';
+import 'package:house_worker/ui/feature/home/home_presenter.dart';
+import 'package:house_worker/ui/feature/home/house_works_tab.dart';
+import 'package:house_worker/ui/feature/home/work_log_included_house_work.dart';
+import 'package:house_worker/ui/feature/home/work_logs_tab.dart';
+import 'package:house_worker/ui/feature/settings/settings_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 // 選択されたタブを管理するプロバイダー

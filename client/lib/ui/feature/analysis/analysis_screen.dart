@@ -1,14 +1,14 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/analysis/analysis_period.dart';
-import 'package:house_worker/features/analysis/analysis_presenter.dart';
-import 'package:house_worker/features/analysis/bar_chart_touched_position.dart';
-import 'package:house_worker/features/analysis/statistics.dart';
 import 'package:house_worker/models/house_work.dart';
 import 'package:house_worker/models/work_log.dart';
 import 'package:house_worker/repositories/house_work_repository.dart';
 import 'package:house_worker/repositories/work_log_repository.dart';
+import 'package:house_worker/ui/feature/analysis/analysis_period.dart';
+import 'package:house_worker/ui/feature/analysis/analysis_presenter.dart';
+import 'package:house_worker/ui/feature/analysis/bar_chart_touched_position.dart';
+import 'package:house_worker/ui/feature/analysis/statistics.dart';
 import 'package:intl/intl.dart';
 
 // 家事ごとの頻度分析のためのデータクラス
