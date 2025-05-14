@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:house_worker/features/analysis/analysis_presenter.dart';
+import 'package:house_worker/ui/feature/analysis/analysis_presenter.dart';
 
 void main() {
   group('家事の表示状態', () {
