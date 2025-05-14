@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/data/model/clear_count_exception.dart';
-import 'package:house_worker/data/model/count.dart';
-import 'package:house_worker/data/model/count_up_exception.dart';
+import 'package:house_worker/data/model/house_work.dart';
+import 'package:house_worker/data/service/work_log_service.dart';
+import 'package:house_worker/ui/feature/analysis/analysis_screen.dart';
+import 'package:house_worker/ui/feature/home/add_house_work_screen.dart';
 import 'package:house_worker/ui/feature/home/home_presenter.dart';
+import 'package:house_worker/ui/feature/home/house_works_tab.dart';
+import 'package:house_worker/ui/feature/home/work_log_included_house_work.dart';
+import 'package:house_worker/ui/feature/home/work_logs_tab.dart';
 import 'package:house_worker/ui/feature/settings/settings_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+
+// 選択されたタブを管理するプロバイダー
+final selectedTabProvider = StateProvider<int>((ref) => 0);
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -23,10 +30,21 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  var _isLogTabHighlighted = false;
+
   @override
   Widget build(BuildContext context) {
-    const title = Text('カウンター');
+    final selectedTab = ref.watch(selectedTabProvider);
 
+    const titleText = Text('記録');
+
+    final analysisButton = IconButton(
+      onPressed: () {
+        Navigator.of(context).push(AnalysisScreen.route());
+      },
+      tooltip: '分析を表示する',
+      icon: const Icon(Icons.analytics),
+    );
     final settingsButton = IconButton(
       onPressed: () {
         Navigator.of(context).push(SettingsScreen.route());
@@ -35,146 +53,338 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       icon: const Icon(Icons.settings),
     );
 
-    final countUpButton = FloatingActionButton(
-      tooltip: 'カウントを増やす',
-      onPressed: _clearCount,
+    const homeWorksTabItem = Tooltip(
+      message: '登録されている家事を表示する',
+      child: Tab(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8,
+          children: [Icon(Icons.list_alt), Text('家事')],
+        ),
+      ),
+    );
+    final workLogsTabItem = Tooltip(
+      message: '完了した家事ログを表示する',
+      child: AnimatedContainer(
+        // TODO(ide): 文字サイズが変わった時にも固定サイズで問題ないか？
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        duration: const Duration(milliseconds: 250),
+        color:
+            _isLogTabHighlighted
+                ? Theme.of(context).highlightColor
+                : Colors.transparent,
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8,
+          children: [Icon(Icons.check_circle), Text('ログ')],
+        ),
+      ),
+    );
+    final tabBar = TabBar(
+      onTap: (index) {
+        ref.read(selectedTabProvider.notifier).state = index;
+      },
+      tabs: [homeWorksTabItem, workLogsTabItem],
+    );
+
+    final addHouseWorkButton = FloatingActionButton(
+      tooltip: '家事を追加する',
+      onPressed: () {
+        Navigator.of(context).push(AddHouseWorkScreen.route());
+      },
       child: const Icon(Icons.add),
     );
 
-    final clearButton = FloatingActionButton(
-      tooltip: 'カウントをリセットする',
-      onPressed: _countUp,
-      child: const Icon(Icons.clear),
-    );
-
-    const body = Center(
-      child: Padding(padding: EdgeInsets.all(16), child: _CounterPanel()),
-    );
-
-    return Scaffold(
-      appBar: AppBar(title: title, actions: [settingsButton]),
-      body: body,
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [countUpButton, clearButton],
+    return DefaultTabController(
+      length: 2,
+      initialIndex: selectedTab,
+      child: Scaffold(
+        appBar: AppBar(
+          title: titleText,
+          actions: [analysisButton, settingsButton],
+          bottom: tabBar,
+        ),
+        body: TabBarView(
+          children: [
+            HouseWorksTab(onCompleteButtonTap: _onCompleteHouseWorkButtonTap),
+            WorkLogsTab(onDuplicateButtonTap: _onDuplicateWorkLogButtonTap),
+          ],
+        ),
+        floatingActionButton: addHouseWorkButton,
+        bottomNavigationBar: _QuickRegisterBottomBar(
+          onTap: _onQuickRegisterButtonPressed,
+        ),
       ),
     );
   }
 
-  Future<void> _countUp() async {
+  Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
     await HapticFeedback.mediumImpact();
 
-    try {
-      await ref.read(countUpResultProvider.future);
-    } on CountUpException {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('カウントの増加に失敗しました。しばらくしてから再度お試しください')),
-      );
-      return;
-    }
-  }
-
-  Future<void> _clearCount() async {
-    final shouldClear = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            content: const Text('カウンターをリセットしてもよろしいですか？'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('削除'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('キャンセル'),
-              ),
-            ],
-          ),
+    final result = await ref.read(
+      onCompleteHouseWorkButtonTappedResultProvider(houseWork).future,
     );
-
-    if (shouldClear != true) {
-      return;
-    }
-
-    try {
-      await ref.read(clearCountResultProvider.future);
-    } on ClearCountException {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('カウントのリセットに失敗しました。しばらくしてから再度お試しください')),
-      );
-      return;
-    }
 
     if (!mounted) {
       return;
     }
 
+    if (!result) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+      );
+      return;
+    }
+
+    _highlightWorkLogsTabItem();
+
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('カウントをリセットしました。')));
+    ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
+  }
+
+  Future<void> _onDuplicateWorkLogButtonTap(
+    WorkLogIncludedHouseWork workLogIncludedHouseWork,
+  ) async {
+    await HapticFeedback.mediumImpact();
+
+    final isSucceeded = await ref.read(
+      onDuplicateWorkLogButtonTappedResultProvider(
+        workLogIncludedHouseWork,
+      ).future,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    // TODO(ide): 共通化できる
+    if (!isSucceeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
+  }
+
+  Future<void> _onQuickRegisterButtonPressed(HouseWork houseWork) async {
+    await HapticFeedback.mediumImpact();
+
+    final workLogService = ref.read(workLogServiceProvider);
+
+    final isSucceeded = await workLogService.recordWorkLog(
+      houseWorkId: houseWork.id,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    // TODO(ide): 共通化
+    if (!isSucceeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+      );
+      return;
+    }
+
+    final selectedTab = ref.read(selectedTabProvider);
+    if (selectedTab == 0) {
+      // 家事タブが選択されている場合は、ログタブの方に家事の登録が完了したことを通知する
+      _highlightWorkLogsTabItem();
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
+  }
+
+  void _highlightWorkLogsTabItem() {
+    setState(() {
+      _isLogTabHighlighted = true;
+    });
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _isLogTabHighlighted = false;
+        });
+      }
+    });
   }
 }
 
-class _CounterPanel extends ConsumerWidget {
-  const _CounterPanel();
+class _QuickRegisterBottomBar extends ConsumerStatefulWidget {
+  const _QuickRegisterBottomBar({required this.onTap});
+
+  final void Function(HouseWork) onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final countFuture = ref.watch(currentCountProvider.future);
+  ConsumerState<_QuickRegisterBottomBar> createState() =>
+      _QuickRegisterBottomBarState();
+}
 
-    return FutureBuilder(
-      future: countFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Text('カウンターの値の取得に失敗しました。しばらくしてから再度アプリを起動してください。');
-        }
+class _QuickRegisterBottomBarState
+    extends ConsumerState<_QuickRegisterBottomBar> {
+  AsyncValue<List<HouseWork>> _sortedHouseWorksByCompletionCountAsync =
+      const AsyncValue.loading();
 
-        final count = snapshot.data;
-        if (count == null) {
-          return Skeletonizer(
-            child: _CounterTextList(
-              count: Count(id: '', value: 0, updatedAt: DateTime.now()),
-            ),
-          );
-        }
+  @override
+  void initState() {
+    super.initState();
 
-        return _CounterTextList(count: count);
-      },
+    ref.listenManual(houseWorksSortedByMostFrequentlyUsedProvider, (
+      previous,
+      next,
+    ) {
+      // 2回以降にデータが取得された場合は、何もしない
+      // UI上で頻繁に更新されてチラつくのを防ぐため
+      if (!_sortedHouseWorksByCompletionCountAsync.isLoading) {
+        return;
+      }
+
+      setState(() {
+        _sortedHouseWorksByCompletionCountAsync = next;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 130),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withAlpha(77), // 0.3 * 255 = 約77
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, -1),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Skeletonizer(
+          enabled: _sortedHouseWorksByCompletionCountAsync.isLoading,
+          child: _sortedHouseWorksByCompletionCountAsync.when(
+            data: (recentHouseWorks) {
+              final items =
+                  recentHouseWorks.map((houseWork) {
+                    return _QuickRegisterButton(
+                      houseWork: houseWork,
+                      onTap: (houseWork) => widget.onTap(houseWork),
+                    );
+                  }).toList();
+
+              return ListView(
+                scrollDirection: Axis.horizontal,
+                children: items,
+              );
+            },
+            loading:
+                () => ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: List.filled(4, const _FakeQuickRegisterButton()),
+                ),
+            error:
+                (_, _) => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text(
+                      'クイック登録の取得に失敗しました。アプリを再起動し、再度お試しください。',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+          ),
+        ),
+      ),
     );
   }
 }
 
-class _CounterTextList extends StatelessWidget {
-  const _CounterTextList({required this.count});
+class _QuickRegisterButton extends ConsumerWidget {
+  const _QuickRegisterButton({required this.houseWork, required this.onTap});
 
-  final Count count;
+  final HouseWork houseWork;
+  final void Function(HouseWork) onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SizedBox(
+      width: 100,
+      child: InkWell(
+        onTap: () => onTap(houseWork),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
+            children: [
+              Container(
+                alignment: Alignment.center,
+                // TODO(ide): 共通化できる
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                width: 32,
+                height: 32,
+                child: Text(
+                  houseWork.icon,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+              Text(
+                houseWork.title,
+                style: const TextStyle(fontSize: 12),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FakeQuickRegisterButton extends StatelessWidget {
+  const _FakeQuickRegisterButton();
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      spacing: 16,
-      children: [
-        Text(
-          count.value.toString(),
-          style: Theme.of(context).textTheme.bodyLarge,
+    return SizedBox(
+      width: 100,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 4,
+          children: [
+            Container(
+              alignment: Alignment.center,
+              width: 32,
+              height: 32,
+              child: const Text('🙇🏻‍♂️', style: TextStyle(fontSize: 24)),
+            ),
+            const Text(
+              'Fake house work',
+              style: TextStyle(fontSize: 12),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
-        Text(
-          '最終更新日時: ${count.updatedAt}',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).dividerColor,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -1,40 +1,75 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/data/model/count.dart';
-import 'package:house_worker/data/service/database_service.dart';
+import 'package:house_worker/data/model/house_work.dart';
+import 'package:house_worker/data/model/work_log.dart';
+import 'package:house_worker/data/repository/house_work_repository.dart';
+import 'package:house_worker/data/repository/work_log_repository.dart';
+import 'package:house_worker/data/service/work_log_service.dart';
+import 'package:house_worker/ui/feature/home/work_log_included_house_work.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_presenter.g.dart';
 
 @riverpod
-Stream<Count> currentCount(Ref ref) {
-  final databaseService = ref.watch(databaseServiceProvider);
-
-  return databaseService.getAll();
-}
-
-@riverpod
-Future<void> countUpResult(Ref ref) async {
-  final databaseService = ref.watch(databaseServiceProvider);
-
-  final currentCount = await ref.read(currentCountProvider.future);
-
-  final newCount = currentCount.copyWith(
-    value: currentCount.value + 1,
-    updatedAt: DateTime.now(),
+Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
+  final houseWorks = await ref.watch(_houseWorksFilePrivateProvider.future);
+  final completedWorkLogs = await ref.watch(
+    _completedWorkLogsFilePrivateProvider.future,
   );
 
-  // TODO(ide): エラー処理
-  await databaseService.save(newCount);
+  final completionCountOfHouseWorks = <HouseWork, int>{};
+
+  for (final houseWork in houseWorks) {
+    final completionCount =
+        completedWorkLogs
+            .where((workLog) => workLog.houseWorkId == houseWork.id)
+            .length;
+
+    completionCountOfHouseWorks[houseWork] = completionCount;
+  }
+
+  final sortedHouseWorksByCompletionCount =
+      completionCountOfHouseWorks.entries
+          .sortedBy((entry) => entry.value)
+          .reversed
+          .map((entry) => entry.key)
+          .toList();
+
+  return sortedHouseWorksByCompletionCount;
 }
 
 @riverpod
-Future<void> clearCountResult(Ref ref) async {
-  final databaseService = ref.watch(databaseServiceProvider);
+Future<bool> onCompleteHouseWorkButtonTappedResult(
+  Ref ref,
+  HouseWork houseWork,
+) {
+  final workLogService = ref.read(workLogServiceProvider);
 
-  final currentCount = await ref.read(currentCountProvider.future);
+  return workLogService.recordWorkLog(houseWorkId: houseWork.id);
+}
 
-  final newCount = currentCount.copyWith(value: 0, updatedAt: DateTime.now());
+@riverpod
+Future<bool> onDuplicateWorkLogButtonTappedResult(
+  Ref ref,
+  WorkLogIncludedHouseWork workLogIncludedHouseWork,
+) {
+  final workLogService = ref.read(workLogServiceProvider);
 
-  // TODO(ide): エラー処理
-  await databaseService.save(newCount);
+  return workLogService.recordWorkLog(
+    houseWorkId: workLogIncludedHouseWork.houseWork.id,
+  );
+}
+
+@riverpod
+Stream<List<HouseWork>> _houseWorksFilePrivate(Ref ref) {
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+
+  return houseWorkRepository.getAll();
+}
+
+@riverpod
+Stream<List<WorkLog>> _completedWorkLogsFilePrivate(Ref ref) {
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
+
+  return workLogRepository.getCompletedWorkLogs();
 }
