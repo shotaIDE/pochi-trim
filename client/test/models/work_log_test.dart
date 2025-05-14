@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:house_worker/models/work_log.dart';
+import 'package:house_worker/data/model/work_log.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 

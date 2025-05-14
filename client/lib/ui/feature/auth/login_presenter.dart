@@ -1,5 +1,5 @@
-import 'package:house_worker/services/auth_service.dart';
-import 'package:house_worker/services/functions_service.dart';
+import 'package:house_worker/data/service/auth_service.dart';
+import 'package:house_worker/data/service/functions_service.dart';
 import 'package:house_worker/ui/root_presenter.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

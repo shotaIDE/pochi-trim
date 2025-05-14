@@ -1,4 +1,4 @@
-import 'package:house_worker/models/app_session.dart';
+import 'package:house_worker/data/model/app_session.dart';
 import 'package:house_worker/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

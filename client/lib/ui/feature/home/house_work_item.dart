@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:house_worker/models/house_work.dart';
+import 'package:house_worker/data/model/house_work.dart';
 
 class HouseWorkItem extends StatefulWidget {
   const HouseWorkItem({

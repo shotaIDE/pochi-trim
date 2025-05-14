@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:house_worker/definition/app_definition.dart';
+import 'package:house_worker/data/definition/app_definition.dart';
 import 'package:in_app_review/in_app_review.dart';
 
 class UpdateAppScreen extends StatefulWidget {

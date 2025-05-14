@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/models/house_work.dart';
-import 'package:house_worker/services/work_log_service.dart';
+import 'package:house_worker/data/model/house_work.dart';
+import 'package:house_worker/data/service/work_log_service.dart';
 import 'package:house_worker/ui/feature/analysis/analysis_screen.dart';
 import 'package:house_worker/ui/feature/home/add_house_work_screen.dart';
 import 'package:house_worker/ui/feature/home/home_presenter.dart';

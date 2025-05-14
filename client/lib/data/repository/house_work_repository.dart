@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/models/app_session.dart';
-import 'package:house_worker/models/house_work.dart';
-import 'package:house_worker/models/no_house_id_error.dart';
+import 'package:house_worker/data/model/app_session.dart';
+import 'package:house_worker/data/model/house_work.dart';
+import 'package:house_worker/data/model/no_house_id_error.dart';
 import 'package:house_worker/ui/root_presenter.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/models/app_session.dart';
-import 'package:house_worker/models/no_house_id_error.dart';
-import 'package:house_worker/models/work_log.dart';
-import 'package:house_worker/repositories/work_log_repository.dart';
-import 'package:house_worker/services/auth_service.dart';
+import 'package:house_worker/data/model/app_session.dart';
+import 'package:house_worker/data/model/no_house_id_error.dart';
+import 'package:house_worker/data/model/work_log.dart';
+import 'package:house_worker/data/repository/work_log_repository.dart';
+import 'package:house_worker/data/service/auth_service.dart';
 import 'package:house_worker/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

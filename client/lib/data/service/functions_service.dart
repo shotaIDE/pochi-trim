@@ -1,7 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/models/generate_my_house_exception.dart';
-import 'package:house_worker/services/dao/generate_my_house_result_functions.dart';
+import 'package:house_worker/data/model/generate_my_house_exception.dart';
+import 'package:house_worker/data/service/dao/generate_my_house_result_functions.dart';
 import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/models/house_work.dart';
-import 'package:house_worker/repositories/house_work_repository.dart';
+import 'package:house_worker/data/model/house_work.dart';
+import 'package:house_worker/data/repository/house_work_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'house_works_presenter.g.dart';

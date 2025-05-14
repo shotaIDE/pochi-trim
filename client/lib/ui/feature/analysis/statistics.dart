@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:house_worker/models/house_work.dart';
+import 'package:house_worker/data/model/house_work.dart';
 import 'package:house_worker/ui/feature/analysis/analysis_screen.dart';
 import 'package:house_worker/ui/feature/analysis/weekday_frequency.dart';
 

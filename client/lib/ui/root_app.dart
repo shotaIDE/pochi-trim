@@ -1,8 +1,8 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/definition/flavor_config.dart';
-import 'package:house_worker/services/remote_config_service.dart';
+import 'package:house_worker/data/definition/flavor_config.dart';
+import 'package:house_worker/data/service/remote_config_service.dart';
 import 'package:house_worker/ui/app_initial_route.dart';
 import 'package:house_worker/ui/component/app_theme.dart';
 import 'package:house_worker/ui/feature/auth/login_screen.dart';

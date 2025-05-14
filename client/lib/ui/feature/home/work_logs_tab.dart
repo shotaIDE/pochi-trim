@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/models/house_work.dart';
+import 'package:house_worker/data/model/house_work.dart';
 import 'package:house_worker/ui/feature/home/work_log_included_house_work.dart';
 import 'package:house_worker/ui/feature/home/work_log_item.dart';
 import 'package:house_worker/ui/feature/home/work_log_provider.dart';
