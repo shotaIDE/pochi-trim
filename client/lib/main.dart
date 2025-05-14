@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:house_worker/definition/app_feature.dart';
-import 'package:house_worker/flavor_config.dart';
+import 'package:house_worker/definition/flavor_config.dart';
 import 'package:house_worker/services/auth_service.dart';
 import 'package:house_worker/ui/root_app.dart';
 import 'package:logging/logging.dart';
