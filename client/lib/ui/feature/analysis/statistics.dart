@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:house_worker/data/model/house_work.dart';
-import 'package:house_worker/ui/feature/analysis/analysis_screen.dart';
-import 'package:house_worker/ui/feature/analysis/weekday_frequency.dart';
+import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
+import 'package:pochi_trim/ui/feature/analysis/weekday_frequency.dart';
 
 part 'statistics.freezed.dart';
 

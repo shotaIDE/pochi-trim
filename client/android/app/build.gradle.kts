@@ -19,7 +19,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.house_worker"
+    namespace = "com.example.pochi_trim"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

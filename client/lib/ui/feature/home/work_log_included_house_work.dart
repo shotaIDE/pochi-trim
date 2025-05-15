@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:house_worker/data/model/house_work.dart';
-import 'package:house_worker/data/model/work_log.dart';
+import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/data/model/work_log.dart';
 
 part 'work_log_included_house_work.freezed.dart';
 

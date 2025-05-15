@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:house_worker/data/model/work_log.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:pochi_trim/data/model/work_log.dart';
 
 @GenerateMocks([DocumentSnapshot])
 import 'work_log_test.mocks.dart';

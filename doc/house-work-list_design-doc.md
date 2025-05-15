@@ -153,9 +153,9 @@ Stream<List<HouseWork>> getAll() {
 ```dart
 // client/lib/features/home/house_work_list_presenter.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/models/house_work.dart';
-import 'package:house_worker/repositories/house_work_repository.dart';
-import 'package:house_worker/services/work_log_service.dart';
+import 'package:pochi_trim/models/house_work.dart';
+import 'package:pochi_trim/repositories/house_work_repository.dart';
+import 'package:pochi_trim/services/work_log_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'house_work_list_presenter.g.dart';
@@ -183,11 +183,11 @@ Future<bool> deleteHouseWork(Ref ref, String houseWorkId) async {
 // client/lib/features/home/house_work_list_tab.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/features/home/house_work_item.dart';
-import 'package:house_worker/features/home/house_work_list_presenter.dart';
-import 'package:house_worker/features/home/work_log_dashboard_screen.dart';
-import 'package:house_worker/models/house_work.dart';
-import 'package:house_worker/models/work_log.dart';
+import 'package:pochi_trim/features/home/house_work_item.dart';
+import 'package:pochi_trim/features/home/house_work_list_presenter.dart';
+import 'package:pochi_trim/features/home/work_log_dashboard_screen.dart';
+import 'package:pochi_trim/models/house_work.dart';
+import 'package:pochi_trim/models/work_log.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HouseWorkListTab extends ConsumerWidget {
@@ -362,7 +362,7 @@ class _SkeletonHouseWorkItem extends StatelessWidget {
 // client/lib/features/home/house_work_item.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:house_worker/models/house_work.dart';
+import 'package:pochi_trim/models/house_work.dart';
 
 class HouseWorkItem extends StatelessWidget {
   const HouseWorkItem({

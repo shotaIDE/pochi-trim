@@ -2,8 +2,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:house_worker/ui/feature/analysis/analysis_screen.dart';
-import 'package:house_worker/ui/feature/analysis/weekday.dart';
+import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
+import 'package:pochi_trim/ui/feature/analysis/weekday.dart';
 
 part 'weekday_frequency.freezed.dart';
 

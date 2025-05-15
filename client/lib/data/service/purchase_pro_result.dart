@@ -1,5 +1,5 @@
-import 'package:house_worker/data/model/app_session.dart';
-import 'package:house_worker/ui/root_presenter.dart';
+import 'package:pochi_trim/data/model/app_session.dart';
+import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'purchase_pro_result.g.dart';

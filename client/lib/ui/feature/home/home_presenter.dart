@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/data/model/house_work.dart';
-import 'package:house_worker/data/model/work_log.dart';
-import 'package:house_worker/data/repository/house_work_repository.dart';
-import 'package:house_worker/data/repository/work_log_repository.dart';
-import 'package:house_worker/data/service/work_log_service.dart';
-import 'package:house_worker/ui/feature/home/work_log_included_house_work.dart';
+import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/data/model/work_log.dart';
+import 'package:pochi_trim/data/repository/house_work_repository.dart';
+import 'package:pochi_trim/data/repository/work_log_repository.dart';
+import 'package:pochi_trim/data/service/work_log_service.dart';
+import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_presenter.g.dart';

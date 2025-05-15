@@ -1,15 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/data/model/house_work.dart';
-import 'package:house_worker/data/model/work_log.dart';
-import 'package:house_worker/data/repository/house_work_repository.dart';
-import 'package:house_worker/data/repository/work_log_repository.dart';
-import 'package:house_worker/ui/feature/analysis/analysis_period.dart';
-import 'package:house_worker/ui/feature/analysis/analysis_screen.dart';
-import 'package:house_worker/ui/feature/analysis/statistics.dart';
-import 'package:house_worker/ui/feature/analysis/weekday.dart';
-import 'package:house_worker/ui/feature/analysis/weekday_frequency.dart';
+import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/data/model/work_log.dart';
+import 'package:pochi_trim/data/repository/house_work_repository.dart';
+import 'package:pochi_trim/data/repository/work_log_repository.dart';
+import 'package:pochi_trim/ui/feature/analysis/analysis_period.dart';
+import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
+import 'package:pochi_trim/ui/feature/analysis/statistics.dart';
+import 'package:pochi_trim/ui/feature/analysis/weekday.dart';
+import 'package:pochi_trim/ui/feature/analysis/weekday_frequency.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analysis_presenter.g.dart';
