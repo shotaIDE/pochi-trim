@@ -19,7 +19,7 @@ import 'firebase_options_dev.dart' as dev;
 import 'firebase_options_prod.dart' as prod;
 
 // アプリケーションのロガー
-final _logger = Logger('HouseWorker');
+final _logger = Logger('PochiTrim');
 
 // ロギングシステムの初期化
 void _setupLogging() {

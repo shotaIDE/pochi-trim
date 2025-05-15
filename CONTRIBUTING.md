@@ -41,7 +41,7 @@ https://firebase.google.com/docs/flutter/setup?hl=ja&platform=ios#install-cli-to
 
 ```shell
 PROJECT_ID_BASE="colomney"
-APPLICATION_ID_BASE="ide.shota.colomney.HouseWorker"
+APPLICATION_ID_BASE="ide.shota.colomney"
 ```
 
 各環境ごとに以下の変数を設定し、共通のコマンドを実行します：
@@ -51,7 +51,7 @@ APPLICATION_ID_BASE="ide.shota.colomney.HouseWorker"
 ```shell
 # 環境固有の変数設定
 PROJECT_ID_SUFFIX="-house-worker-dev-tf1"
-APPLICATION_ID_SUFFIX=".emulator"
+APPLICATION_ID_SUFFIX=".HouseWorker.emulator"
 DART_FILE_NAME_SUFFIX="_emulator"
 DIRECTORY_NAME_FOR_IOS="Emulator"
 DIRECTORY_NAME_FOR_ANDROID="emulator"
@@ -69,7 +69,7 @@ APPLICATION_ID="${APPLICATION_ID_BASE}${APPLICATION_ID_SUFFIX}"
 ```shell
 # 環境固有の変数設定
 PROJECT_ID_SUFFIX="-house-worker-dev-tf1"
-APPLICATION_ID_SUFFIX=".dev"
+APPLICATION_ID_SUFFIX=".HouseWorker.dev"
 DART_FILE_NAME_SUFFIX="_dev"
 DIRECTORY_NAME_FOR_IOS="Dev"
 DIRECTORY_NAME_FOR_ANDROID="dev"
@@ -87,7 +87,7 @@ APPLICATION_ID="${APPLICATION_ID_BASE}${APPLICATION_ID_SUFFIX}"
 ```shell
 # 環境固有の変数設定
 PROJECT_ID_SUFFIX="-pochi-trim"
-APPLICATION_ID_SUFFIX=""
+APPLICATION_ID_SUFFIX=".PochiTrim"
 DART_FILE_NAME_SUFFIX="_prod"
 DIRECTORY_NAME_FOR_IOS="Prod"
 DIRECTORY_NAME_FOR_ANDROID="prod"
