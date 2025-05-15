@@ -13,12 +13,26 @@ terraform {
   }
 }
 
+provider "google-beta" {
+  user_project_override = true
+}
+
+provider "google-beta" {
+  alias                 = "no_user_project_override"
+  user_project_override = false
+}
+
 module "firebase" {
   source = "../../modules/firebase"
 
   project_id           = local.google_project_id
   project_display_name = local.google_project_display_name
   billing_account_id   = var.google_billing_account_id
+
+  providers = {
+    google-beta                          = google-beta
+    google-beta.no_user_project_override = google-beta.no_user_project_override
+  }
 }
 
 module "firestore" {
