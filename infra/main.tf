@@ -34,8 +34,8 @@ variable "firebase_android_app_sha1_hashes" {
 }
 
 locals {
-  google_project_id_base           = "colomney-house-worker"
-  google_project_display_name_base = "HouseWorker"
+  google_project_id_base           = "colomney"
+  google_project_display_name_base = "PochiTrim"
   application_id_base              = "ide.shota.colomney.HouseWorker"
 }
 

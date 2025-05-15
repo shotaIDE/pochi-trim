@@ -40,7 +40,7 @@ https://firebase.google.com/docs/flutter/setup?hl=ja&platform=ios#install-cli-to
 以下の共通変数を設定します：
 
 ```shell
-PROJECT_ID_BASE="colomney-house-worker"
+PROJECT_ID_BASE="colomney"
 APPLICATION_ID_BASE="ide.shota.colomney.HouseWorker"
 ```
 
@@ -50,7 +50,7 @@ APPLICATION_ID_BASE="ide.shota.colomney.HouseWorker"
 
 ```shell
 # 環境固有の変数設定
-PROJECT_ID_SUFFIX="-emulator"
+PROJECT_ID_SUFFIX="-house-worker-dev-tf1"
 APPLICATION_ID_SUFFIX=".emulator"
 DART_FILE_NAME_SUFFIX="_emulator"
 DIRECTORY_NAME_FOR_IOS="Emulator"
@@ -68,7 +68,7 @@ APPLICATION_ID="${APPLICATION_ID_BASE}${APPLICATION_ID_SUFFIX}"
 
 ```shell
 # 環境固有の変数設定
-PROJECT_ID_SUFFIX="-dev"
+PROJECT_ID_SUFFIX="-house-worker-dev-tf1"
 APPLICATION_ID_SUFFIX=".dev"
 DART_FILE_NAME_SUFFIX="_dev"
 DIRECTORY_NAME_FOR_IOS="Dev"
@@ -86,7 +86,7 @@ APPLICATION_ID="${APPLICATION_ID_BASE}${APPLICATION_ID_SUFFIX}"
 
 ```shell
 # 環境固有の変数設定
-PROJECT_ID_SUFFIX=""
+PROJECT_ID_SUFFIX="-pochi-trim"
 APPLICATION_ID_SUFFIX=""
 DART_FILE_NAME_SUFFIX="_prod"
 DIRECTORY_NAME_FOR_IOS="Prod"
