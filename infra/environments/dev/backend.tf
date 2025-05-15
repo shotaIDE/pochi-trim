@@ -1,5 +1,5 @@
 terraform {
-  backend "gcs" {
-    bucket = "colomney-house-worker-dev-deploy"
-  }
+  # backend "gcs" {
+  #   bucket = "colomney-house-worker-dev-deploy"
+  # }
 }
