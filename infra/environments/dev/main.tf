@@ -4,6 +4,62 @@ locals {
   application_id              = "ide.shota.colomney.HouseWorker.dev"
 }
 
+# リソースの移動を宣言するmovedブロック
+moved {
+  from = google_project.default
+  to   = module.firebase.google_project.default
+}
+
+moved {
+  from = google_project_service.default
+  to   = module.firebase.google_project_service.default
+}
+
+moved {
+  from = google_firebase_project.default
+  to   = module.firebase.google_firebase_project.default
+}
+
+moved {
+  from = google_firebase_apple_app.default
+  to   = module.app.google_firebase_apple_app.default
+}
+
+moved {
+  from = google_firebase_android_app.default
+  to   = module.app.google_firebase_android_app.default
+}
+
+moved {
+  from = google_identity_platform_config.auth
+  to   = module.auth.google_identity_platform_config.auth
+}
+
+moved {
+  from = google_firestore_database.default
+  to   = module.firestore.google_firestore_database.default
+}
+
+moved {
+  from = google_firebaserules_ruleset.firestore
+  to   = module.firestore.google_firebaserules_ruleset.firestore
+}
+
+moved {
+  from = google_firebaserules_release.firestore
+  to   = module.firestore.google_firebaserules_release.firestore
+}
+
+moved {
+  from = google_firestore_index.house_works
+  to   = module.firestore.google_firestore_index.house_works
+}
+
+moved {
+  from = google_firestore_index.work_logs
+  to   = module.firestore.google_firestore_index.work_logs
+}
+
 terraform {
   required_providers {
     google-beta = {
