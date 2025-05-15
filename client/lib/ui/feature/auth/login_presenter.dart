@@ -1,7 +1,7 @@
-import 'package:house_worker/data/service/auth_service.dart';
-import 'package:house_worker/data/service/functions_service.dart';
-import 'package:house_worker/ui/root_presenter.dart';
 import 'package:logging/logging.dart';
+import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/functions_service.dart';
+import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'login_presenter.g.dart';

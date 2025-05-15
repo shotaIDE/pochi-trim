@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/data/model/work_log.dart';
-import 'package:house_worker/data/repository/work_log_repository.dart';
+import 'package:pochi_trim/data/model/work_log.dart';
+import 'package:pochi_trim/data/repository/work_log_repository.dart';
 
 // タイトルでワークログを検索するプロバイダー
 final FutureProviderFamily<List<WorkLog>, String> workLogsByTitleProvider =

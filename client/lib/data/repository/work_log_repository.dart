@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/data/model/app_session.dart';
-import 'package:house_worker/data/model/no_house_id_error.dart';
-import 'package:house_worker/data/model/work_log.dart';
-import 'package:house_worker/ui/root_presenter.dart';
 import 'package:logging/logging.dart';
+import 'package:pochi_trim/data/model/app_session.dart';
+import 'package:pochi_trim/data/model/no_house_id_error.dart';
+import 'package:pochi_trim/data/model/work_log.dart';
+import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'work_log_repository.g.dart';

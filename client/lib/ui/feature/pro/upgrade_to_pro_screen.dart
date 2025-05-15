@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:house_worker/data/model/purchase_exception.dart';
-import 'package:house_worker/data/service/purchase_pro_result.dart';
+import 'package:pochi_trim/data/model/purchase_exception.dart';
+import 'package:pochi_trim/data/service/purchase_pro_result.dart';
 
 class UpgradeToProScreen extends ConsumerStatefulWidget {
   const UpgradeToProScreen({super.key});

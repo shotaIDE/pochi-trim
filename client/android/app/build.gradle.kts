@@ -19,7 +19,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.house_worker"
+    namespace = "ide.shota.colomney.pochi_trim"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -33,8 +33,7 @@ android {
     }
 
     defaultConfig {
-        // applicationId は flavorDimensions で上書きされます
-        applicationId = "ide.shota.colomney.HouseWorker"
+        applicationId = "ide.shota.colomney"
         minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -45,19 +44,19 @@ android {
     productFlavors {
         create("emulator") {
             dimension = "environment"
-            applicationIdSuffix = ".emulator"
+            applicationIdSuffix = ".HouseWorker.emulator"
             manifestPlaceholders["usesCleartextTraffic"] = "true"
             resValue("string", "app_name", "House Worker [Emulator]")
         }
         create("dev") {
             dimension = "environment"
-            applicationIdSuffix = ".dev"
+            applicationIdSuffix = ".HouseWorker.dev"
             manifestPlaceholders["usesCleartextTraffic"] = "true"
             resValue("string", "app_name", "House Worker [Dev]")
         }
         create("prod") {
             dimension = "environment"
-            // 本番環境はサフィックスなし
+            applicationIdSuffix = ".PochiTrim"
             manifestPlaceholders["usesCleartextTraffic"] = "false"
             resValue("string", "app_name", "House Worker")
         }
