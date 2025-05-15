@@ -1,4 +1,4 @@
-package com.example.house_worker
+package ide.shota.colomney.house_worker
 
 import io.flutter.embedding.android.FlutterActivity
 

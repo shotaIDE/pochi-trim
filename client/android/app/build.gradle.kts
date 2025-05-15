@@ -19,7 +19,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.pochi_trim"
+    namespace = "ide.shota.colomney.pochi_trim"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
