@@ -27,7 +27,7 @@ module "firebase" {
 
   project_id_suffix           = local.google_project_id_suffix
   project_display_name_suffix = local.google_project_display_name_suffix
-  google_billing_account_id          = var.google_billing_account_id
+  google_billing_account_id   = var.google_billing_account_id
 
   providers = {
     google-beta                          = google-beta
@@ -57,9 +57,9 @@ module "auth" {
 module "firestore" {
   source = "../../module/firestore"
 
-  project_id      = module.firebase.project_id
+  project_id              = module.firebase.project_id
   google_project_location = var.google_project_location
-  rules_file_path = "../../firestore.rules"
+  rules_file_path         = "../../firestore.rules"
 
   depends_on = [module.firebase]
 }
