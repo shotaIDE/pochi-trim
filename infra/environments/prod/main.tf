@@ -1,7 +1,7 @@
 locals {
   google_project_id_suffix           = "-pochi-trim"
   google_project_display_name_suffix = ""
-  application_id_suffix                     = ".PochiTrim"
+  application_id_suffix              = ".PochiTrim"
 }
 
 terraform {
@@ -27,7 +27,7 @@ module "firebase" {
 
   project_id_suffix           = local.google_project_id_suffix
   project_display_name_suffix = local.google_project_display_name_suffix
-  billing_account_id   = var.google_billing_account_id
+  billing_account_id          = var.google_billing_account_id
 
   providers = {
     google-beta                          = google-beta
@@ -57,7 +57,7 @@ module "app" {
   source = "../../modules/app"
 
   project_id              = module.firebase.project_id
-  application_id_suffix          = local.application_id_suffix
+  application_id_suffix   = local.application_id_suffix
   ios_app_team_id         = var.ios_app_team_id
   android_app_sha1_hashes = var.firebase_android_app_sha1_hashes
 
