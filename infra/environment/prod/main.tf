@@ -23,7 +23,7 @@ provider "google-beta" {
 }
 
 module "firebase" {
-  source = "../../modules/firebase"
+  source = "../../module/firebase"
 
   project_id_suffix           = local.google_project_id_suffix
   project_display_name_suffix = local.google_project_display_name_suffix
@@ -36,7 +36,7 @@ module "firebase" {
 }
 
 module "app" {
-  source = "../../modules/app"
+  source = "../../module/app"
 
   project_id              = module.firebase.project_id
   application_id_suffix   = local.application_id_suffix
@@ -47,7 +47,7 @@ module "app" {
 }
 
 module "auth" {
-  source = "../../modules/auth"
+  source = "../../module/auth"
 
   project_id = module.firebase.project_id
 
@@ -55,7 +55,7 @@ module "auth" {
 }
 
 module "firestore" {
-  source = "../../modules/firestore"
+  source = "../../module/firestore"
 
   project_id      = module.firebase.project_id
   google_project_location = var.google_project_location

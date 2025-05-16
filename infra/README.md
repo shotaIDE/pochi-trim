@@ -4,8 +4,8 @@
 
 ## 環境
 
-- **開発環境（Dev）**: `environments/dev/`
-- **本番環境（Prod）**: `environments/prod/`
+- **開発環境（Dev）**: `environment/dev/`
+- **本番環境（Prod）**: `environment/prod/`
 
 ## 前提条件
 
@@ -18,7 +18,7 @@
 
 ```shell
 # 開発環境ディレクトリに移動
-cd environments/dev
+cd environment/dev
 
 # 初期化
 terraform init
@@ -34,7 +34,7 @@ terraform apply
 
 ```shell
 # 本番環境ディレクトリに移動
-cd environments/prod
+cd environment/prod
 
 # 初期化
 terraform init
