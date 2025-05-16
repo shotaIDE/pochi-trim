@@ -132,7 +132,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         SharePlus.instance.share(
           ShareParams(
             text:
-                '家事管理アプリ「House Worker」を使ってみませんか？ https://example.com/houseworker',
+                // TODO(ide): アプリのURLを取得する
+                '家事の可視化と削減アプリ「ポチそぎ」を使ってみませんか？ ',
+            title: '家事の可視化と削減アプリ「ポチそぎ」',
           ),
         );
       },
