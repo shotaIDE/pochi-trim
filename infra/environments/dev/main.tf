@@ -1,7 +1,7 @@
 locals {
   google_project_id_suffix           = "-house-worker-dev-tf1"
   google_project_display_name_suffix = "-Dev-Terraform1"
-  application_id                     = "ide.shota.colomney.HouseWorker.dev"
+  application_id_suffix              = ".HouseWorker.dev"
 }
 
 moved {
@@ -112,7 +112,7 @@ module "app" {
   source = "../../modules/app"
 
   project_id              = module.firebase.project_id
-  application_id          = local.application_id
+  application_id_suffix   = local.application_id_suffix
   ios_app_team_id         = var.ios_app_team_id
   android_app_sha1_hashes = var.firebase_android_app_sha1_hashes
 

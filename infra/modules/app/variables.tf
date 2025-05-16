@@ -1,15 +1,15 @@
 variable "project_id" {
-  description = "GCPプロジェクトID"
+  description = "Google CloudのプロジェクトID"
   type        = string
 }
 
-variable "application_id" {
-  description = "アプリケーションID"
+variable "application_id_suffix" {
+  description = "iOS、AndroidアプリにおけるアプリケーションID等の接尾辞"
   type        = string
 }
 
 variable "ios_app_team_id" {
-  description = "iOS開発者チームID"
+  description = "Apple開発者アカウントのチームID"
   type        = string
 }
 

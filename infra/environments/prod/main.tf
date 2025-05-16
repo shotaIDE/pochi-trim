@@ -1,7 +1,7 @@
 locals {
   google_project_id_suffix           = "-pochi-trim"
   google_project_display_name_suffix = ""
-  application_id                     = "ide.shota.colomney.PochiTrim"
+  application_id_suffix                     = ".PochiTrim"
 }
 
 terraform {
@@ -57,7 +57,7 @@ module "app" {
   source = "../../modules/app"
 
   project_id              = module.firebase.project_id
-  application_id          = local.application_id
+  application_id_suffix          = local.application_id_suffix
   ios_app_team_id         = var.ios_app_team_id
   android_app_sha1_hashes = var.firebase_android_app_sha1_hashes
 
