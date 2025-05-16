@@ -2,5 +2,11 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "automerge": true,
+  "packageRules": [
+    {
+      "matchManagers": ["pyenv"],
+      "automerge": false
+    }
+  ],
   "rangeStrategy": "pin"
 }
