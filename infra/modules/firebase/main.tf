@@ -1,3 +1,8 @@
+locals {
+  project_id_base           = "colomney"
+  project_display_name_base = "PochiTrim"
+}
+
 terraform {
   required_providers {
     google-beta = {
@@ -13,8 +18,8 @@ terraform {
 resource "google_project" "default" {
   provider = google-beta.no_user_project_override
 
-  name            = var.project_display_name
-  project_id      = var.project_id
+  name            = "${local.project_display_name_base}${var.project_display_name_suffix}"
+  project_id      = "${local.project_id_base}${var.project_id_suffix}"
   billing_account = var.billing_account_id
 
   labels = {}

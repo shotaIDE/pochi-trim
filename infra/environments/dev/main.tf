@@ -1,10 +1,9 @@
 locals {
-  google_project_id           = "colomney-house-worker-dev-tf1"
-  google_project_display_name = "PochiTrim-Dev-Terraform1"
-  application_id              = "ide.shota.colomney.HouseWorker.dev"
+  google_project_id_suffix           = "-house-worker-dev-tf1"
+  google_project_display_name_suffix = "-Dev-Terraform1"
+  application_id                     = "ide.shota.colomney.HouseWorker.dev"
 }
 
-# リソースの移動を宣言するmovedブロック
 moved {
   from = google_project.default
   to   = module.firebase.google_project.default
@@ -81,9 +80,9 @@ provider "google-beta" {
 module "firebase" {
   source = "../../modules/firebase"
 
-  project_id           = local.google_project_id
-  project_display_name = local.google_project_display_name
-  billing_account_id   = var.google_billing_account_id
+  project_id_suffix           = local.google_project_id_suffix
+  project_display_name_suffix = local.google_project_display_name_suffix
+  billing_account_id          = var.google_billing_account_id
 
   providers = {
     google-beta                          = google-beta
