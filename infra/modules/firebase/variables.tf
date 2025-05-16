@@ -1,14 +1,14 @@
 variable "project_id_suffix" {
-  description = "Google CloudのプロジェクトIDの接尾辞"
   type        = string
+  description = "Google CloudのプロジェクトIDの接尾辞"
 }
 
 variable "project_display_name_suffix" {
-  description = "Google Cloudのプロジェクト表示名の接尾辞"
   type        = string
+  description = "Google Cloudのプロジェクト表示名の接尾辞"
 }
 
 variable "billing_account_id" {
-  description = "Google Cloudの請求先アカウントID"
   type        = string
+  description = "Google Cloudの請求先アカウントID"
 }

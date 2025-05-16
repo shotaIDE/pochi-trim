@@ -1,4 +1,4 @@
 variable "project_id" {
-  description = "Google CloudのプロジェクトID"
   type        = string
+  description = "Google CloudのプロジェクトID"
 }
