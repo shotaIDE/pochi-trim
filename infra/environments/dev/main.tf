@@ -4,6 +4,9 @@ locals {
   application_id_suffix              = ".HouseWorker.dev"
 }
 
+
+# module導入前のstateを、module導入後のstateに移植するために利用した設定
+# しばらくmodule導入状態で運用し、問題が発生しなかったら削除する
 moved {
   from = google_project.default
   to   = module.firebase.google_project.default
