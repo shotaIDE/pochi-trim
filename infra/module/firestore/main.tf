@@ -1,23 +1,28 @@
+terraform {
+  required_providers {
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "6.35.0"
+    }
+  }
+}
+
 resource "google_firestore_database" "default" {
-  project                 = google_project.default.project_id
+  project                 = var.project_id
   name                    = "(default)"
   location_id             = var.google_project_location
   type                    = "FIRESTORE_NATIVE"
   delete_protection_state = "DELETE_PROTECTION_DISABLED"
   deletion_policy         = "ABANDON"
-
-  depends_on = [
-    google_project_service.default,
-  ]
 }
 
 resource "google_firebaserules_ruleset" "firestore" {
   provider = google-beta
-  project  = google_project.default.project_id
+  project  = var.project_id
   source {
     files {
       name    = "firestore.rules"
-      content = file("./firestore.rules")
+      content = file(var.rules_file_path)
     }
   }
 
@@ -30,7 +35,7 @@ resource "google_firebaserules_release" "firestore" {
   provider     = google-beta
   name         = "cloud.firestore"
   ruleset_name = google_firebaserules_ruleset.firestore.name
-  project      = google_project.default.project_id
+  project      = var.project_id
 
   depends_on = [
     google_firestore_database.default,
@@ -38,7 +43,7 @@ resource "google_firebaserules_release" "firestore" {
 }
 
 resource "google_firestore_index" "house_works" {
-  project    = google_project.default.project_id
+  project    = var.project_id
   collection = "houseWorks"
   database   = google_firestore_database.default.name
 
@@ -58,7 +63,7 @@ resource "google_firestore_index" "house_works" {
 }
 
 resource "google_firestore_index" "work_logs" {
-  project    = google_project.default.project_id
+  project    = var.project_id
   collection = "workLogs"
   database   = google_firestore_database.default.name
 

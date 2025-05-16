@@ -1,6 +1,15 @@
+terraform {
+  required_providers {
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "6.35.0"
+    }
+  }
+}
+
 resource "google_identity_platform_config" "auth" {
   provider                   = google-beta
-  project                    = google_project.default.project_id
+  project                    = var.project_id
   autodelete_anonymous_users = false
 
   sign_in {
@@ -24,8 +33,4 @@ resource "google_identity_platform_config" "auth" {
   multi_tenant {
     allow_tenants = false
   }
-
-  depends_on = [
-    google_project_service.default,
-  ]
 }
