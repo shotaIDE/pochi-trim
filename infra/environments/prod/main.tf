@@ -35,12 +35,13 @@ module "firebase" {
   }
 }
 
-module "firestore" {
-  source = "../../modules/firestore"
+module "app" {
+  source = "../../modules/app"
 
-  project_id      = module.firebase.project_id
-  location_id     = var.google_project_location
-  rules_file_path = "../../firestore.rules"
+  project_id              = module.firebase.project_id
+  application_id_suffix   = local.application_id_suffix
+  ios_app_team_id         = var.ios_app_team_id
+  android_app_sha1_hashes = var.firebase_android_app_sha1_hashes
 
   depends_on = [module.firebase]
 }
@@ -53,13 +54,12 @@ module "auth" {
   depends_on = [module.firebase]
 }
 
-module "app" {
-  source = "../../modules/app"
+module "firestore" {
+  source = "../../modules/firestore"
 
-  project_id              = module.firebase.project_id
-  application_id_suffix   = local.application_id_suffix
-  ios_app_team_id         = var.ios_app_team_id
-  android_app_sha1_hashes = var.firebase_android_app_sha1_hashes
+  project_id      = module.firebase.project_id
+  location_id     = var.google_project_location
+  rules_file_path = "../../firestore.rules"
 
   depends_on = [module.firebase]
 }

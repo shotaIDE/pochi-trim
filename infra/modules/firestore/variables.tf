@@ -1,5 +1,5 @@
 variable "project_id" {
-  description = "GCPプロジェクトID"
+  description = "Google CloudのプロジェクトID"
   type        = string
 }
 
