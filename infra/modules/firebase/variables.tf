@@ -9,6 +9,6 @@ variable "project_display_name_suffix" {
 }
 
 variable "billing_account_id" {
-  description = "請求先アカウントID"
+  description = "Google Cloudの請求先アカウントID"
   type        = string
 }
