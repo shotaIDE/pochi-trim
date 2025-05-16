@@ -1,20 +1,22 @@
-# インフラストラクチャ管理
+# インフラとバックエンド
 
-このディレクトリには、PochiTrim アプリケーションのインフラストラクチャを管理するための Terraform コードが含まれています。
+このディレクトリには、PochiTrim アプリケーションのインフラストラクチャを管理するための Terraform コードと、バックエンドのコードが含まれています。
 
-## 環境
+## インフラ
+
+### 環境
 
 - **開発環境（Dev）**: `environment/dev/`
 - **本番環境（Prod）**: `environment/prod/`
 
-## 前提条件
+### 前提条件
 
 - Terraform のインストール
   - https://developer.hashicorp.com/terraform/install
 - Google Cloud CLI のインストール
   - https://cloud.google.com/sdk/docs/install-sdk?hl=ja
 
-## 開発環境のデプロイ
+### 開発環境のデプロイ
 
 ```shell
 # 開発環境ディレクトリに移動
@@ -30,7 +32,7 @@ terraform plan
 terraform apply
 ```
 
-## 本番環境のデプロイ
+### 本番環境のデプロイ
 
 ```shell
 # 本番環境ディレクトリに移動
@@ -46,7 +48,7 @@ terraform plan
 terraform apply
 ```
 
-## モジュール構造
+### モジュール構造
 
 このプロジェクトは以下のモジュールで構成されています：
 
@@ -56,6 +58,25 @@ terraform apply
 - **app**: iOS と Android アプリの設定
 
 各環境（dev/prod）は、これらのモジュールを使用して独自の設定を行います。
+
+## バックエンド
+
+バックエンドは Firebase Functions を使用しており、以下のディレクトリにコードが格納されています：
+
+- **functions**: Firebase Functions のコード
+
+### Firebase Functions のデプロイ
+
+Firebase Functions は Terraform で管理されていないため、手動でデプロイする必要があります。
+
+```shell
+# 開発環境へのデプロイ
+firebase use default
+firebase deploy --only functions
+
+# 本番環境へのデプロイ
+# 準備中
+```
 
 ## Firebase エミュレータの起動
 
