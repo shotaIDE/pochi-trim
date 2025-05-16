@@ -8,12 +8,12 @@ variable "google_project_location" {
   description = "Google Cloudプロジェクトのロケーション"
 }
 
-variable "ios_app_team_id" {
+variable "apple_team_id" {
   type        = string
   description = "Apple開発者アカウントのチームID"
 }
 
-variable "firebase_android_app_sha1_hashes" {
+variable "android_app_sha1_hashes" {
   type        = list(string)
   description = "AndroidアプリのSHA-1ハッシュリスト"
 }

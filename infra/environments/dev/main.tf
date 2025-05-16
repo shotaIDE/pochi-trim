@@ -85,7 +85,7 @@ module "firebase" {
 
   project_id_suffix           = local.google_project_id_suffix
   project_display_name_suffix = local.google_project_display_name_suffix
-  billing_account_id          = var.google_billing_account_id
+  google_billing_account_id   = var.google_billing_account_id
 
   providers = {
     google-beta                          = google-beta
@@ -96,10 +96,10 @@ module "firebase" {
 module "app" {
   source = "../../modules/app"
 
-  project_id              = module.firebase.project_id
-  application_id_suffix   = local.application_id_suffix
-  ios_app_team_id         = var.ios_app_team_id
-  android_app_sha1_hashes = var.firebase_android_app_sha1_hashes
+  project_id                      = module.firebase.project_id
+  application_id_suffix           = local.application_id_suffix
+  apple_team_id                 = var.apple_team_id
+  android_app_sha1_hashes = var.android_app_sha1_hashes
 
   depends_on = [module.firebase]
 }
@@ -115,9 +115,9 @@ module "auth" {
 module "firestore" {
   source = "../../modules/firestore"
 
-  project_id      = module.firebase.project_id
-  location_id     = var.google_project_location
-  rules_file_path = "../../firestore.rules"
+  project_id              = module.firebase.project_id
+  google_project_location = var.google_project_location
+  rules_file_path         = "../../firestore.rules"
 
   depends_on = [module.firebase]
 }

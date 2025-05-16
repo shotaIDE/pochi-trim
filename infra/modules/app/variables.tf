@@ -8,7 +8,7 @@ variable "application_id_suffix" {
   description = "iOS、AndroidアプリにおけるアプリケーションID等の接尾辞"
 }
 
-variable "ios_app_team_id" {
+variable "apple_team_id" {
   type        = string
   description = "Apple開発者アカウントのチームID"
 }

@@ -8,7 +8,7 @@ variable "project_display_name_suffix" {
   description = "Google Cloudのプロジェクト表示名の接尾辞"
 }
 
-variable "billing_account_id" {
+variable "google_billing_account_id" {
   type        = string
   description = "Google Cloudの請求先アカウントID"
 }

@@ -40,8 +40,8 @@ module "app" {
 
   project_id              = module.firebase.project_id
   application_id_suffix   = local.application_id_suffix
-  ios_app_team_id         = var.ios_app_team_id
-  android_app_sha1_hashes = var.firebase_android_app_sha1_hashes
+  apple_team_id         = var.apple_team_id
+  android_app_sha1_hashes = var.android_app_sha1_hashes
 
   depends_on = [module.firebase]
 }

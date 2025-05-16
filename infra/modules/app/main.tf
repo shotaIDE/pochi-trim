@@ -18,7 +18,7 @@ resource "google_firebase_apple_app" "default" {
   project      = var.project_id
   display_name = "iOS"
   bundle_id    = local.application_id
-  team_id      = var.ios_app_team_id
+  team_id      = var.apple_team_id
 }
 
 resource "google_firebase_android_app" "default" {

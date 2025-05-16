@@ -3,9 +3,9 @@ variable "project_id" {
   description = "Google CloudのプロジェクトID"
 }
 
-variable "location_id" {
+variable "google_project_location" {
   type        = string
-  description = "Firestoreのロケーション"
+  description = "Google Cloudプロジェクトのロケーション"
 }
 
 variable "rules_file_path" {

@@ -20,7 +20,7 @@ resource "google_project" "default" {
 
   name            = "${local.project_display_name_base}${var.project_display_name_suffix}"
   project_id      = "${local.project_id_base}${var.project_id_suffix}"
-  billing_account = var.billing_account_id
+  billing_account = var.google_billing_account_id
 
   labels = {}
 }
