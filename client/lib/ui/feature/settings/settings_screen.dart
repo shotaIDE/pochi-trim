@@ -129,8 +129,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       title: const Text('友達に教える'),
       onTap: () {
         // シェア機能
-        Share.share(
-          '家事管理アプリ「House Worker」を使ってみませんか？ https://example.com/houseworker',
+        SharePlus.instance.share(
+          ShareParams(
+            text:
+                // TODO(ide): アプリのURLを取得する
+                '家事の可視化と削減アプリ「ポチそぎ」を使ってみませんか？ ',
+            title: '家事の可視化と削減アプリ「ポチそぎ」',
+          ),
         );
       },
     );
