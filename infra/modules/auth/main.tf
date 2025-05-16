@@ -15,12 +15,10 @@ resource "google_identity_platform_config" "auth" {
   sign_in {
     allow_duplicate_emails = false
 
-    # 匿名認証の設定をハードコード
     anonymous {
       enabled = true
     }
 
-    # メール認証の設定をハードコード
     email {
       enabled           = false
       password_required = false
