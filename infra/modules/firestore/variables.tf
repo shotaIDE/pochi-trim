@@ -1,15 +1,15 @@
 variable "project_id" {
-  description = "Google CloudのプロジェクトID"
   type        = string
+  description = "Google CloudのプロジェクトID"
 }
 
 variable "location_id" {
-  description = "Firestoreのロケーション"
   type        = string
+  description = "Firestoreのロケーション"
 }
 
 variable "rules_file_path" {
-  description = "Firestoreルールファイルのパス"
-  type        = string
   default     = "../firestore.rules"
+  type        = string
+  description = "Firestoreルールファイルのパス"
 }
