@@ -56,6 +56,12 @@
             "appId": "1:769405875528:ios:2bfe495d4eb4fbf8f22f7d",
             "uploadDebugSymbols": true,
             "fileOutput": "ios/Runner/Firebase/Prod/GoogleService-Info.plist"
+          },
+          "Release-prod": {
+            "projectId": "colomney-pochi-trim",
+            "appId": "1:769405875528:ios:2bfe495d4eb4fbf8f22f7d",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/Prod/GoogleService-Info.plist"
           }
         }
       },
