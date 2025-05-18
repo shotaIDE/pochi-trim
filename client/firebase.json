@@ -2,11 +2,6 @@
   "flutter": {
     "platforms": {
       "android": {
-        "default": {
-          "projectId": "colomney-house-worker-dev-tf1",
-          "appId": "1:916996426069:android:e524af5030bdbf22ebc7dc",
-          "fileOutput": "android/app/google-services.json"
-        },
         "buildConfigurations": {
           "src/dev": {
             "projectId": "colomney-house-worker-dev-tf1",
@@ -26,12 +21,6 @@
         }
       },
       "ios": {
-        "default": {
-          "projectId": "colomney-house-worker-dev-tf1",
-          "appId": "1:916996426069:ios:2f191d0f385f2c60ebc7dc",
-          "uploadDebugSymbols": false,
-          "fileOutput": "ios/Runner/GoogleService-Info.plist"
-        },
         "buildConfigurations": {
           "Debug-emulator": {
             "projectId": "colomney-house-worker-dev-tf1",
