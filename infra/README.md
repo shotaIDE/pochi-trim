@@ -75,7 +75,8 @@ firebase use default
 firebase deploy --only functions
 
 # 本番環境へのデプロイ
-# 準備中
+firebase use prod
+firebase deploy --only functions
 ```
 
 ## Firebase エミュレータの起動
