@@ -19,8 +19,8 @@
             "fileOutput": "android/app/src/emulator/google-services.json"
           },
           "src/prod": {
-            "projectId": "colomney-house-worker-dev-tf1",
-            "appId": "1:916996426069:android:95c12dd6e6ce222cebc7dc",
+            "projectId": "colomney-pochi-trim",
+            "appId": "1:769405875528:android:86e091f185e4f564f22f7d",
             "fileOutput": "android/app/src/prod/google-services.json"
           }
         }
@@ -50,6 +50,12 @@
             "appId": "1:916996426069:ios:2f191d0f385f2c60ebc7dc",
             "uploadDebugSymbols": true,
             "fileOutput": "ios/Runner/Firebase/Dev/GoogleService-Info.plist"
+          },
+          "Debug-prod": {
+            "projectId": "colomney-pochi-trim",
+            "appId": "1:769405875528:ios:2bfe495d4eb4fbf8f22f7d",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/Prod/GoogleService-Info.plist"
           }
         }
       },
@@ -69,10 +75,10 @@
           }
         },
         "lib/firebase_options_prod.dart": {
-          "projectId": "colomney-house-worker-dev-tf1",
+          "projectId": "colomney-pochi-trim",
           "configurations": {
-            "android": "1:916996426069:android:95c12dd6e6ce222cebc7dc",
-            "ios": "1:916996426069:ios:30475e9eb5d1dafdebc7dc"
+            "android": "1:769405875528:android:86e091f185e4f564f22f7d",
+            "ios": "1:769405875528:ios:2bfe495d4eb4fbf8f22f7d"
           }
         }
       }
