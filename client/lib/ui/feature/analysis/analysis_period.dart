@@ -4,8 +4,6 @@ part 'analysis_period.freezed.dart';
 
 @freezed
 sealed class AnalysisPeriod with _$AnalysisPeriod {
-  AnalysisPeriod._({required this.from, required this.to});
-
   factory AnalysisPeriod.today({required DateTime from, required DateTime to}) =
       AnalysisPeriodToday;
   factory AnalysisPeriod.yesterday({
@@ -32,11 +30,6 @@ sealed class AnalysisPeriod with _$AnalysisPeriod {
     required DateTime from,
     required DateTime to,
   }) = AnalysisPeriodPastMonth;
-
-  @override
-  final DateTime from;
-  @override
-  final DateTime to;
 }
 
 extension AnalysisPeriodTodayGenerator on AnalysisPeriodToday {
