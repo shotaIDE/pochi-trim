@@ -60,12 +60,18 @@
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		78A136752DDA1A1100F8B74D /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		78AEEB562DCF56A40025E0A8 /* Prod.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Prod.xcconfig; path = Flutter/Prod.xcconfig; sourceTree = "<group>"; };
+		78AEEB562DCF56A40025E0A8 /* prod.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = prod.xcconfig; path = Flutter/prod.xcconfig; sourceTree = "<group>"; };
 		78AEEB572DD3836F0025E0A8 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
-		7AFA3C8E1D35360C0083082E /* Dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Dev.xcconfig; path = Flutter/Dev.xcconfig; sourceTree = "<group>"; };
+		78F85B562DDC6472008E77ED /* Debug-dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Debug-dev.xcconfig"; path = "Flutter/Debug-dev.xcconfig"; sourceTree = "<group>"; };
+		78F85B572DDC6554008E77ED /* Release-dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Release-dev.xcconfig"; path = "Flutter/Release-dev.xcconfig"; sourceTree = "<group>"; };
+		78F85B582DDC65F0008E77ED /* Debug-emulator.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Debug-emulator.xcconfig"; path = "Flutter/Debug-emulator.xcconfig"; sourceTree = "<group>"; };
+		78F85B592DDC65F0008E77ED /* Debug-prod.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Debug-prod.xcconfig"; path = "Flutter/Debug-prod.xcconfig"; sourceTree = "<group>"; };
+		78F85B5A2DDC65F0008E77ED /* Release-emulator.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Release-emulator.xcconfig"; path = "Flutter/Release-emulator.xcconfig"; sourceTree = "<group>"; };
+		78F85B5B2DDC65F0008E77ED /* Release-prod.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Release-prod.xcconfig"; path = "Flutter/Release-prod.xcconfig"; sourceTree = "<group>"; };
+		7AFA3C8E1D35360C0083082E /* dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = dev.xcconfig; path = Flutter/dev.xcconfig; sourceTree = "<group>"; };
 		820F299C97E424749459C913 /* Pods-RunnerTests.profile-dev.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile-dev.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile-dev.xcconfig"; sourceTree = "<group>"; };
 		92F329CE37E26714524C019F /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		9740EEB21CF90195004384FC /* Emulator.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Emulator.xcconfig; path = Flutter/Emulator.xcconfig; sourceTree = "<group>"; };
+		9740EEB21CF90195004384FC /* emulator.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = emulator.xcconfig; path = Flutter/emulator.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97C146FB1CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -130,9 +136,15 @@
 			isa = PBXGroup;
 			children = (
 				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,
-				9740EEB21CF90195004384FC /* Emulator.xcconfig */,
-				7AFA3C8E1D35360C0083082E /* Dev.xcconfig */,
-				78AEEB562DCF56A40025E0A8 /* Prod.xcconfig */,
+				78F85B582DDC65F0008E77ED /* Debug-emulator.xcconfig */,
+				78F85B5A2DDC65F0008E77ED /* Release-emulator.xcconfig */,
+				78F85B562DDC6472008E77ED /* Debug-dev.xcconfig */,
+				78F85B572DDC6554008E77ED /* Release-dev.xcconfig */,
+				78F85B592DDC65F0008E77ED /* Debug-prod.xcconfig */,
+				78F85B5B2DDC65F0008E77ED /* Release-prod.xcconfig */,
+				9740EEB21CF90195004384FC /* emulator.xcconfig */,
+				7AFA3C8E1D35360C0083082E /* dev.xcconfig */,
+				78AEEB562DCF56A40025E0A8 /* prod.xcconfig */,
 				9740EEB31CF90195004384FC /* Generated.xcconfig */,
 			);
 			name = Flutter;
@@ -587,7 +599,7 @@
 		};
 		249021D4217E4FDB00AE95B9 /* Profile-emulator */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9740EEB21CF90195004384FC /* Emulator.xcconfig */;
+			baseConfigurationReference = 78F85B5A2DDC65F0008E77ED /* Release-emulator.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
 				CLANG_ENABLE_MODULES = YES;
@@ -717,7 +729,7 @@
 		};
 		782391582D86A3230009B3F8 /* Debug-dev */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Dev.xcconfig */;
+			baseConfigurationReference = 78F85B562DDC6472008E77ED /* Debug-dev.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
 				CLANG_ENABLE_MODULES = YES;
@@ -813,7 +825,7 @@
 		};
 		7823915B2D86A33C0009B3F8 /* Release-dev */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Dev.xcconfig */;
+			baseConfigurationReference = 78F85B572DDC6554008E77ED /* Release-dev.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
 				CLANG_ENABLE_MODULES = YES;
@@ -904,7 +916,7 @@
 		};
 		7823915E2D86A3420009B3F8 /* Profile-dev */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Dev.xcconfig */;
+			baseConfigurationReference = 78F85B572DDC6554008E77ED /* Release-dev.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
 				CLANG_ENABLE_MODULES = YES;
@@ -1000,7 +1012,7 @@
 		};
 		782391612D86A3490009B3F8 /* Debug-prod */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 78AEEB562DCF56A40025E0A8 /* Prod.xcconfig */;
+			baseConfigurationReference = 78F85B592DDC65F0008E77ED /* Debug-prod.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
 				CLANG_ENABLE_MODULES = YES;
@@ -1096,7 +1108,7 @@
 		};
 		782391642D86A3510009B3F8 /* Release-prod */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 78AEEB562DCF56A40025E0A8 /* Prod.xcconfig */;
+			baseConfigurationReference = 78F85B5B2DDC65F0008E77ED /* Release-prod.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
 				CLANG_ENABLE_MODULES = YES;
@@ -1187,7 +1199,7 @@
 		};
 		782391672D86A3570009B3F8 /* Profile-prod */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 78AEEB562DCF56A40025E0A8 /* Prod.xcconfig */;
+			baseConfigurationReference = 78F85B5B2DDC65F0008E77ED /* Release-prod.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
 				CLANG_ENABLE_MODULES = YES;
@@ -1337,7 +1349,7 @@
 		};
 		97C147061CF9000F007C117D /* Debug-emulator */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9740EEB21CF90195004384FC /* Emulator.xcconfig */;
+			baseConfigurationReference = 78F85B582DDC65F0008E77ED /* Debug-emulator.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
 				CLANG_ENABLE_MODULES = YES;
@@ -1361,7 +1373,7 @@
 		};
 		97C147071CF9000F007C117D /* Release-emulator */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9740EEB21CF90195004384FC /* Emulator.xcconfig */;
+			baseConfigurationReference = 78F85B5A2DDC65F0008E77ED /* Release-emulator.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon$(APP_ICON_NAME_SUFFIX)";
 				CLANG_ENABLE_MODULES = YES;
