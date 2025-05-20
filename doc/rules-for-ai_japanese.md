@@ -19,6 +19,16 @@
     - [`./feature/`](/client/lib/ui/feature/): 画面と画面ロジック。カテゴリーごとのサブフォルダーが存在する。
 - [`./test/`](/client/test/): ユニットテスト、ウィジェットテスト
 
+本アプリでは、Swift Package Manager(SPM) を有効化しており、CocoaPods と併用している。
+SPM は以下のコマンドにより、Flutter 本体で有効化している。
+
+```bash
+flutter config --enable-swift-package-manager
+```
+
+SPM はベータ版機能であるため、ビルドなどで問題が発生することがある。
+その際は、Flutter の報告されている Issue を調査したり、未知の問題が発生している可能性があることを考慮するなどにより、トラブルシューティングを行う。
+
 ## インフラ
 
 `infra/` は、インフラ構成とバックエンドのコードを配置する。

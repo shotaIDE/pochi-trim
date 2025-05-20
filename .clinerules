@@ -19,6 +19,18 @@ This project is an iOS and Android application, including front-end and back-end
   - [`./feature/`](/client/lib/ui/feature/): Screens and screen logic. There are subfolders for each category.
 - [`./test/`](/client/test/): Unit tests, widget tests
 
+In this app, Swift Package Manager (SPM) is enabled and used in conjunction with CocoaPods.
+
+SPM is enabled in Flutter itself with the following command:
+
+```bash
+flutter config --enable-swift-package-manager
+```
+
+Since SPM is a beta feature, problems may occur during builds, etc.
+
+In that case, troubleshoot by investigating any reported issues in Flutter or considering the possibility of an unknown problem.
+
 ## Infrastructure
 
 `infra/` is where you put the infrastructure configuration and back-end code.
