@@ -149,6 +149,12 @@ https://docs.flutter.dev/deployment/cd#fastlane
 
 https://docs.flutter.dev/deployment/android#sign-the-app
 
+### RevenueCat の設定
+
+以下を参考に App Store と Google Play に接続します。
+
+https://www.revenuecat.com/docs/projects/connect-a-store
+
 ## Firebase emulator の設定
 
 ### Firebase emulator のサーバーをローカルマシンで実行する
