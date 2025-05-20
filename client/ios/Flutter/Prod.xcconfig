@@ -1,5 +1,3 @@
-#include "Generated.xcconfig"
-
 BUNDLE_IDENTIFIER_SUFFIX=.PochiTrim
 APP_ICON_NAME_SUFFIX=-prod
 GOOGLE_SERVICE_REVERSED_CLIENT_ID=com.googleusercontent.apps.769405875528-noubp6b07ppm85cnnut98njkj9o5rt2e
