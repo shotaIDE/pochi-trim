@@ -1,0 +1,15 @@
+inputs:
+  working-directory:
+    required: false
+    default: ./
+
+runs:
+  using: "composite"
+  steps:
+    - name: Cache CocoaPods
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
+      with:
+        path: ${{ inputs.working-directory }}/Pods
+        key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pods-
