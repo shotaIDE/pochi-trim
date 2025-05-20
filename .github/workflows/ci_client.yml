@@ -148,6 +148,10 @@ jobs:
           working-directory: ./client
       - name: Setup Swift Package Manager
         uses: ./.github/actions/setup-spm
+      - name: Setup CocoaPods
+        uses: ./.github/actions/setup-cocoapods
+        with:
+          working-directory: ./client/ios
       - name: Setup Ruby
         uses: ./.github/actions/setup-ruby
         with:
