@@ -23,7 +23,7 @@ dependencies:
   flutter_riverpod: 2.6.1
   flutter_slidable: 4.0.0
   font_awesome_flutter: 10.8.0
-  freezed_annotation: 3.0.0
+  freezed_annotation:
   google_sign_in: 6.3.0
   in_app_review: 2.0.10
   intl: 0.20.2
@@ -41,23 +41,18 @@ dependencies:
 dev_dependencies:
   build_runner: 2.4.15
   cider: 0.2.8
-  custom_lint: 0.7.5
+  custom_lint:
   flutter_launcher_icons: 0.14.3
   flutter_lints: 5.0.0
   flutter_test:
     sdk: flutter
-  freezed: 3.0.6
+  freezed:
   json_serializable: 6.9.5
   mockito:
   mocktail: 1.0.4
   pedantic_mono: 1.30.3
-  riverpod_generator: 2.6.5
-  riverpod_lint: 2.6.5
-
-dependency_overrides:
-  # Workaround because purchases_flutter uses an old version of freezed.
-  freezed: 3.0.6
-  freezed_annotation: 3.0.0
+  riverpod_generator:
+  riverpod_lint:
 
 flutter:
   uses-material-design: true
