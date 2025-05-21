@@ -55,15 +55,13 @@ class CurrentAppSession extends _$CurrentAppSession {
         // TODO(ide): 開発用。本番リリース時には削除する
         'default-house-id';
 
-    // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
     final isPro = await ref.read(isProUserProvider.future);
 
     return AppSession.signedIn(currentHouseId: houseId, isPro: isPro);
   }
 
   Future<void> signIn({required String userId, required String houseId}) async {
-    // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
-    const isPro = false;
+    final isPro = await ref.read(isProUserProvider.future);
 
     state = AsyncValue.data(
       AppSession.signedIn(currentHouseId: houseId, isPro: isPro),

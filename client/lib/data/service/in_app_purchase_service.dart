@@ -39,6 +39,7 @@ class IsProUser extends _$IsProUser {
   }
 
   Future<bool> _hasProEntitlement({required CustomerInfo customerInfo}) async {
+    // TODO(ide): IDをきちんと設定する
     final entitlementInfo = customerInfo.entitlements.active['pro'];
     return entitlementInfo != null;
   }
