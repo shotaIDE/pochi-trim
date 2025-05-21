@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -39,8 +40,8 @@ class IsProUser extends _$IsProUser {
   }
 
   Future<bool> _hasProEntitlement({required CustomerInfo customerInfo}) async {
-    // TODO(ide): IDをきちんと設定する
-    final entitlementInfo = customerInfo.entitlements.active['pro'];
+    final entitlementInfo =
+        customerInfo.entitlements.active[revenueCatProEntitlementId];
     return entitlementInfo != null;
   }
 }
