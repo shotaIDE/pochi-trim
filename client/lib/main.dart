@@ -15,6 +15,8 @@ import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:pochi_trim/data/definition/app_feature.dart';
 import 'package:pochi_trim/data/definition/flavor.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
+import 'package:pochi_trim/data/service/in_app_purchase_service_mock.dart';
 import 'package:pochi_trim/ui/root_app.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
@@ -115,7 +117,7 @@ Future<void> main() async {
     await _setupRevenueCat();
   }
 
-  runApp(const ProviderScope(child: RootApp()));
+  runApp(ProviderScope(overrides: _getOverrides(), child: const RootApp()));
 }
 
 FirebaseOptions? _getFirebaseOptions() {
@@ -140,4 +142,14 @@ Future<void> _setupRevenueCat() async {
   }
 
   await Purchases.configure(configuration);
+}
+
+List<Override> _getOverrides() {
+  final overrides = <Override>[];
+
+  if (!isRevenueCatEnabled) {
+    overrides.add(isProUserProvider.overrideWith(IsProUserMock.new));
+  }
+
+  return overrides;
 }
