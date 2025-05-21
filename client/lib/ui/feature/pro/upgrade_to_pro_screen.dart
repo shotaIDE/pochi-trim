@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pochi_trim/data/model/purchase_exception.dart';
 import 'package:pochi_trim/data/service/purchase_pro_result.dart';
+import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 
 class UpgradeToProScreen extends ConsumerStatefulWidget {
   const UpgradeToProScreen({super.key});
@@ -215,38 +215,7 @@ class _PurchaseButtonState extends ConsumerState<_PurchaseButton> {
   }
 
   Future<void> _purchasePro() async {
-    final bool isSucceeded;
-    try {
-      isSucceeded =
-          await ref.read(purchaseProResultProvider.notifier).purchasePro();
-    } on PurchaseException catch (_) {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('購入処理中にエラーが発生しました')));
-
-      return;
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-    if (!isSucceeded) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('購入がキャンセルされました')));
-
-      return;
-    }
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Pro版へのアップグレードが完了しました！')));
-
-    Navigator.of(context).pop(true);
+    final paywallResult = await RevenueCatUI.presentPaywall();
+    debugPrint('Paywall result: $paywallResult');
   }
 }
