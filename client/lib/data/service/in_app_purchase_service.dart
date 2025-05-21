@@ -33,6 +33,8 @@ class IsProUser extends _$IsProUser {
     yield* controller.stream;
   }
 
+  /// This method is intentionally unimplemented in the production service.
+  /// It is meant to be handled by a mock provider for debugging or testing purposes.
   void setProUser({required bool isPro}) {
     throw UnimplementedError(
       'setProUser is not implemented in the real implementation',
