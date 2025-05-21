@@ -1,7 +1,8 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pochi_trim/data/definition/flavor_config.dart';
+import 'package:pochi_trim/data/definition/app_feature.dart';
+import 'package:pochi_trim/data/definition/flavor.dart';
 import 'package:pochi_trim/data/service/remote_config_service.dart';
 import 'package:pochi_trim/ui/app_initial_route.dart';
 import 'package:pochi_trim/ui/component/app_theme.dart';
@@ -61,28 +62,38 @@ class _RootAppState extends ConsumerState<RootApp> {
     ];
 
     return MaterialApp(
-      title: 'House Worker ${FlavorConfig.instance.name}',
+      title: 'ポチそぎ',
       theme: getLightTheme(),
       darkTheme: getDarkTheme(),
-      debugShowCheckedModeBanner: !FlavorConfig.isProd,
+      debugShowCheckedModeBanner: showCheckedModeBanner,
       // `initialRoute` and `routes` are ineffective settings
       // that are set to avoid assertion errors.
       initialRoute: '/',
       routes: {'/': (_) => const HomeScreen()},
       onGenerateInitialRoutes: (_) => initialRoutes,
       navigatorObservers: navigatorObservers,
-      builder: (context, child) {
-        // Flavorに応じたバナーを表示（本番環境以外）
-        if (!FlavorConfig.isProd) {
-          return Banner(
-            message: FlavorConfig.instance.name,
-            location: BannerLocation.topEnd,
-            color: FlavorConfig.instance.color,
-            child: child,
-          );
-        }
-        return child!;
-      },
+      builder: (context, child) => _getBanner(),
+    );
+  }
+
+  Banner _getBanner() {
+    final message = flavor.name;
+
+    final Color color;
+
+    switch (flavor) {
+      case Flavor.emulator:
+        color = Colors.purple;
+      case Flavor.dev:
+        color = Colors.green;
+      case Flavor.prod:
+        color = Colors.blue;
+    }
+
+    return Banner(
+      message: message,
+      location: BannerLocation.topEnd,
+      color: color,
     );
   }
 }
