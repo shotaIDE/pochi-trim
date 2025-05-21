@@ -90,7 +90,6 @@ void setupFlavorConfig() {
         flavor: Flavor.emulator,
         name: 'EMULATOR',
         color: Colors.purple,
-        useFirebaseEmulator: true,
       );
     case 'dev':
     default:
@@ -115,7 +114,6 @@ Future<void> main() async {
   setupFlavorConfig();
 
   try {
-    // Firebase初期化
     if (FlavorConfig.instance.firebaseOptions != null) {
       await Firebase.initializeApp(
         options: FlavorConfig.instance.firebaseOptions,
@@ -125,8 +123,7 @@ Future<void> main() async {
     }
     _logger.info('Firebase initialized successfully');
 
-    // エミュレーターの設定が有効な場合のみ適用
-    if (FlavorConfig.instance.useFirebaseEmulator) {
+    if (useFirebaseEmulator) {
       // エミュレーターのホスト情報を取得
       final emulatorHost = getEmulatorHost();
       _logger.info('エミュレーターホスト: $emulatorHost');

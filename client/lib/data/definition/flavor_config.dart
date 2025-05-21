@@ -8,14 +8,12 @@ class FlavorConfig {
     required String name,
     required Color color,
     FirebaseOptions? firebaseOptions,
-    bool useFirebaseEmulator = false,
   }) {
     _instance ??= FlavorConfig._internal(
       flavor: flavor,
       name: name,
       color: color,
       firebaseOptions: firebaseOptions,
-      useFirebaseEmulator: useFirebaseEmulator,
     );
     return _instance!;
   }
@@ -25,13 +23,11 @@ class FlavorConfig {
     required this.name,
     required this.color,
     this.firebaseOptions,
-    required this.useFirebaseEmulator,
   });
   final Flavor flavor;
   final String name;
   final Color color;
   final FirebaseOptions? firebaseOptions;
-  final bool useFirebaseEmulator;
 
   static FlavorConfig? _instance;
 

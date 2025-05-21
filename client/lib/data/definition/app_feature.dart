@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:pochi_trim/data/definition/flavor.dart';
 
+final useFirebaseEmulator = flavor == Flavor.emulator;
+
 const bool isAnalyticsEnabled =
     String.fromEnvironment('ENABLE_ANALYTICS') == 'true' || kReleaseMode;
 
