@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/definition/app_feature.dart';
+import 'package:pochi_trim/data/definition/flavor.dart';
 import 'package:pochi_trim/data/definition/flavor_config.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/ui/root_app.dart';
@@ -154,6 +155,10 @@ Future<void> main() async {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
       return true;
     };
+  }
+
+  if (isRevenueCatEnabled) {
+    // RevenueCatの初期化処理をここに追加
   }
 
   runApp(const ProviderScope(child: RootApp()));

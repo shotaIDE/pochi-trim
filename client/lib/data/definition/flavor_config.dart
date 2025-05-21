@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
-enum Flavor { emulator, dev, prod }
+import 'package:pochi_trim/data/definition/flavor.dart';
 
 class FlavorConfig {
   factory FlavorConfig({
