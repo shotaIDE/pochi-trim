@@ -158,6 +158,9 @@ RevenueCat のダッシュボードで、本番環境のアプリを束ねる 1 
 
 https://www.revenuecat.com/docs/projects/connect-a-store
 
+プロジェクトには`client/revenue-cat-config.sample.json`というサンプルファイルが含まれています。
+このファイルをコピーして`client/revenue-cat-config.json`を作成してください。
+
 本番環境のアプリをビルドし、App Store と Google Play にそれぞれアップロードします。
 課金アイテムを作成するために、アプリのアップロードや審査提出が必要なためです。
 
