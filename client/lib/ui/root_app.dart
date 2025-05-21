@@ -65,35 +65,40 @@ class _RootAppState extends ConsumerState<RootApp> {
       title: 'ポチそぎ',
       theme: getLightTheme(),
       darkTheme: getDarkTheme(),
-      debugShowCheckedModeBanner: showCheckedModeBanner,
+      debugShowCheckedModeBanner: showAppDebugBanner,
       // `initialRoute` and `routes` are ineffective settings
       // that are set to avoid assertion errors.
       initialRoute: '/',
       routes: {'/': (_) => const HomeScreen()},
       onGenerateInitialRoutes: (_) => initialRoutes,
       navigatorObservers: navigatorObservers,
-      builder: (context, child) => _getBanner(),
+      builder: (_, child) => _getBanner(child),
     );
   }
 
-  Banner _getBanner() {
-    final message = flavor.name;
+  Widget _getBanner(Widget? child) {
+    if (!showCustomAppBanner) {
+      return child!;
+    }
+
+    final message = flavor.name.toUpperCase();
 
     final Color color;
 
     switch (flavor) {
       case Flavor.emulator:
-        color = Colors.purple;
-      case Flavor.dev:
         color = Colors.green;
-      case Flavor.prod:
+      case Flavor.dev:
         color = Colors.blue;
+      case Flavor.prod:
+        color = Colors.red;
     }
 
     return Banner(
       message: message,
       location: BannerLocation.topEnd,
       color: color,
+      child: child,
     );
   }
 }

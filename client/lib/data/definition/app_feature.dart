@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:pochi_trim/data/definition/flavor.dart';
 
-final bool showCheckedModeBanner = !(flavor == Flavor.prod && kReleaseMode);
+final bool showCustomAppBanner =
+    flavor == Flavor.prod || (kProfileMode || kReleaseMode);
+
+final bool showAppDebugBanner = !showCustomAppBanner;
 
 final useFirebaseEmulator = flavor == Flavor.emulator;
 
