@@ -12,7 +12,9 @@ Flavor _getFlavor() {
     (value) => value.name == flavorString,
     orElse:
         () =>
-            throw UnimplementedError('Flavor $flavorString is not implemented'),
+            throw UnimplementedError(
+              'Flavor "$flavorString" is not implemented',
+            ),
   );
 
   logger.info('Detected flavor: ${flavor.name}');
