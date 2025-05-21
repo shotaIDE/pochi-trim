@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -10,10 +11,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:pochi_trim/data/definition/app_feature.dart';
 import 'package:pochi_trim/data/definition/flavor.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/ui/root_app.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'firebase_options_dev.dart' as dev;
 import 'firebase_options_emulator.dart' as emulator;
@@ -109,7 +112,7 @@ Future<void> main() async {
   }
 
   if (isRevenueCatEnabled) {
-    // RevenueCatの初期化処理をここに追加
+    await _setupRevenueCat();
   }
 
   runApp(const ProviderScope(child: RootApp()));
@@ -124,4 +127,17 @@ FirebaseOptions? _getFirebaseOptions() {
     case Flavor.prod:
       return prod.DefaultFirebaseOptions.currentPlatform;
   }
+}
+
+Future<void> _setupRevenueCat() async {
+  final PurchasesConfiguration configuration;
+  if (Platform.isAndroid) {
+    configuration = PurchasesConfiguration(revenueCatProjectGoogleApiKey);
+  } else if (Platform.isIOS) {
+    configuration = PurchasesConfiguration(revenueCatProjectAppleApiKey);
+  } else {
+    throw Exception('Unsupported platform: ${Platform.operatingSystem}');
+  }
+
+  await Purchases.configure(configuration);
 }
