@@ -12,6 +12,7 @@ GoogleService-Info.plist
 /ios/fastlane/app-store-connect-api-key.p8
 /ios/fastlane/report.xml
 /lib/firebase_options*.dart
+/revenue-cat-config.json
 
 # Miscellaneous
 *.class
