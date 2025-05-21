@@ -4,6 +4,7 @@ import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/model/root_app_not_initialized.dart';
 import 'package:pochi_trim/data/service/app_info_service.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/remote_config_service.dart';
 import 'package:pochi_trim/ui/app_initial_route.dart';
@@ -54,15 +55,13 @@ class CurrentAppSession extends _$CurrentAppSession {
         // TODO(ide): 開発用。本番リリース時には削除する
         'default-house-id';
 
-    // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
-    const isPro = false;
+    final isPro = await ref.read(isProUserProvider.future);
 
     return AppSession.signedIn(currentHouseId: houseId, isPro: isPro);
   }
 
   Future<void> signIn({required String userId, required String houseId}) async {
-    // TODO(ide): RevenueCatから取得する開発用。本番リリース時には削除する
-    const isPro = false;
+    final isPro = await ref.read(isProUserProvider.future);
 
     state = AsyncValue.data(
       AppSession.signedIn(currentHouseId: houseId, isPro: isPro),

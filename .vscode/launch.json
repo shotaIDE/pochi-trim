@@ -109,7 +109,12 @@
       "cwd": "${workspaceFolder}/client",
       "program": "lib/main.dart",
       "flutterMode": "debug",
-      "args": ["--flavor", "prod"]
+      "args": [
+        "--flavor",
+        "prod",
+        "--dart-define-from-file",
+        "revenue-cat-config.json"
+      ]
     },
     {
       "name": "Prod-Profile",
@@ -118,7 +123,12 @@
       "cwd": "${workspaceFolder}/client",
       "program": "lib/main.dart",
       "flutterMode": "profile",
-      "args": ["--flavor", "prod"]
+      "args": [
+        "--flavor",
+        "prod",
+        "--dart-define-from-file",
+        "revenue-cat-config.json"
+      ]
     },
     {
       "name": "Prod-Release",
@@ -127,7 +137,12 @@
       "cwd": "${workspaceFolder}/client",
       "program": "lib/main.dart",
       "flutterMode": "release",
-      "args": ["--flavor", "prod"]
+      "args": [
+        "--flavor",
+        "prod",
+        "--dart-define-from-file",
+        "revenue-cat-config.json"
+      ]
     }
   ]
 }
