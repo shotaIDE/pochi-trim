@@ -72,11 +72,11 @@ class _RootAppState extends ConsumerState<RootApp> {
       routes: {'/': (_) => const HomeScreen()},
       onGenerateInitialRoutes: (_) => initialRoutes,
       navigatorObservers: navigatorObservers,
-      builder: (_, child) => _getBanner(child),
+      builder: (_, child) => _wrapAppBanner(child),
     );
   }
 
-  Widget _getBanner(Widget? child) {
+  Widget _wrapAppBanner(Widget? child) {
     if (!showCustomAppBanner) {
       return child!;
     }
@@ -84,7 +84,6 @@ class _RootAppState extends ConsumerState<RootApp> {
     final message = flavor.name.toUpperCase();
 
     final Color color;
-
     switch (flavor) {
       case Flavor.emulator:
         color = Colors.green;
