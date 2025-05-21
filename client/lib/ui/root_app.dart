@@ -72,11 +72,11 @@ class _RootAppState extends ConsumerState<RootApp> {
       routes: {'/': (_) => const HomeScreen()},
       onGenerateInitialRoutes: (_) => initialRoutes,
       navigatorObservers: navigatorObservers,
-      builder: (_, child) => _wrapAppBanner(child),
+      builder: (_, child) => _wrapByAppBanner(child),
     );
   }
 
-  Widget _wrapAppBanner(Widget? child) {
+  Widget _wrapByAppBanner(Widget? child) {
     if (!showCustomAppBanner) {
       return child!;
     }
