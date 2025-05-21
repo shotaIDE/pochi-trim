@@ -9,14 +9,16 @@ part 'in_app_purchase_service.g.dart';
 @riverpod
 Stream<bool> isProUser(Ref ref) async* {
   final customerInfo = await Purchases.getCustomerInfo();
-  final entitlementInfo = customerInfo.entitlements.active['pro'];
-  yield entitlementInfo != null;
+  final hasProEntitlement = await _hasProEntitlement(
+    customerInfo: customerInfo,
+  );
+  yield hasProEntitlement;
 
   final controller = StreamController<bool>();
 
-  void customerInfoUpdateListener(CustomerInfo info) {
-    final entitlement = info.entitlements.active['pro'];
-    controller.add(entitlement != null);
+  Future<void> customerInfoUpdateListener(CustomerInfo info) async {
+    final hasProEntitlement = await _hasProEntitlement(customerInfo: info);
+    controller.add(hasProEntitlement);
   }
 
   Purchases.addCustomerInfoUpdateListener(customerInfoUpdateListener);
@@ -27,4 +29,9 @@ Stream<bool> isProUser(Ref ref) async* {
   });
 
   yield* controller.stream;
+}
+
+Future<bool> _hasProEntitlement({required CustomerInfo customerInfo}) async {
+  final entitlementInfo = customerInfo.entitlements.active['pro'];
+  return entitlementInfo != null;
 }
