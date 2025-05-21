@@ -151,9 +151,19 @@ https://docs.flutter.dev/deployment/android#sign-the-app
 
 ### RevenueCat の設定
 
-以下を参考に App Store と Google Play に接続します。
+RevenueCat のダッシュボードで、本番環境のアプリを束ねる 1 つのプロジェクトを作成します。
+
+プロジェクト内で App Store と Google Play のアプリを作成します。
+以下を参考に必要な設定をストアから取得します。
 
 https://www.revenuecat.com/docs/projects/connect-a-store
+
+本番環境のアプリをビルドし、App Store と Google Play にそれぞれアップロードします。
+課金アイテムを作成するために、アプリのアップロードや審査提出が必要なためです。
+
+以下を参考に課金アイテムを AppStore と Google Play それぞれに作成します。
+
+https://www.revenuecat.com/docs/offerings/products/setup-index
 
 ## Firebase emulator の設定
 
