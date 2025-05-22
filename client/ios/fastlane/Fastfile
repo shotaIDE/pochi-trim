@@ -59,7 +59,7 @@ platform :ios do
     )
   end
 
-  priivate_lane :build do
+  private_lane :build do
     flavor = options[:flavor]
     dart_defines_path = options[:dart_defines_path]
     export_options_plist_path = options[:export_options_plist_path]
