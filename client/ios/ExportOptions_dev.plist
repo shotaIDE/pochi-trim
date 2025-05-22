@@ -11,7 +11,7 @@
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>ide.shota.colomney.HouseWorker.dev</key>
-		<string>House Worker Dev App Store</string>
+		<string>Pochi Trim Dev App Store</string>
 	</dict>
 	<key>signingCertificate</key>
 	<string>Apple Distribution</string>
