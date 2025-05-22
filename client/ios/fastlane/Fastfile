@@ -110,7 +110,7 @@ platform :ios do
     dart_defines_command_part = if dart_defines_path.nil?
                                   ''
                                 else
-                                  "--dart-defines-file '#{dart_defines_path}' "
+                                  "--dart-define-from-file '#{dart_defines_path}' "
                                 end
 
     Dir.chdir('../../') do
