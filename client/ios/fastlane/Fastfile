@@ -8,10 +8,23 @@ platform :ios do
   desc 'Dev環境向けアプリをビルドします。'
   lane :build_dev do
     flavor = 'dev'
-    export_options_plist_path = './ios/ExportOptions.plist'
+    export_options_plist_path = './ios/ExportOptions-dev.plist'
 
     build(
       flavor: flavor,
+      export_options_plist_path: export_options_plist_path
+    )
+  end
+
+  desc 'Prod環境向けアプリをビルドします。'
+  lane :build_prod do
+    flavor = 'prod'
+    dart_defines_path = './revenue-cat-config.json'
+    export_options_plist_path = './ios/ExportOptions-prod.plist'
+
+    build(
+      flavor: flavor,
+      dart_defines_path: dart_defines_path,
       export_options_plist_path: export_options_plist_path
     )
   end
@@ -44,6 +57,36 @@ platform :ios do
     release_notes = generate_release_notes
 
     build_dev
+
+    api_key = app_store_connect_api_key(
+      key_id: apple_api_key_id,
+      issuer_id: apple_api_issuer_id,
+      key_filepath: app_store_connect_api_key_path
+    )
+
+    upload_to_testflight(
+      api_key:,
+      changelog: release_notes,
+      distribute_external: true,
+      groups: external_tester_groups
+    )
+  end
+
+  desc 'Prod環境向けアプリをApp Storeにデプロイします。'
+  lane :deploy_prod do
+    Dotenv.load '.env'
+
+    apple_api_issuer_id = ENV['APPLE_API_ISSUER_ID'].to_s
+    apple_api_key_id = ENV['APPLE_API_KEY_ID'].to_s
+    external_tester_groups_string = ENV['EXTERNAL_TESTER_GROUPS'].to_s
+    external_tester_groups = external_tester_groups_string.split(',')
+
+    # action で利用するパスなので、fastlane コマンドを実行するディレクトリからの相対パスで指定
+    app_store_connect_api_key_path = 'fastlane/app-store-connect-api-key.p8'
+
+    release_notes = generate_release_notes
+
+    build_prod
 
     api_key = app_store_connect_api_key(
       key_id: apple_api_key_id,
