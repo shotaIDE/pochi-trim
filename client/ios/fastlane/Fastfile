@@ -118,7 +118,7 @@ platform :ios do
         'flutter build ipa '\
         "--flavor #{flavor} "\
         "#{dart_defines_command_part}"\
-        "--export-options-plist=#{export_options_plist_path}"
+        "--export-options-plist '#{export_options_plist_path}'"
       )
     end
 
