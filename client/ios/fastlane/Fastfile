@@ -36,15 +36,19 @@ platform :ios do
 
   desc 'Dev環境向けアプリを電子署名なしにビルドします。'
   lane :build_dev_with_no_code_sign do
-    build_flutter_with_no_code_sign(flavor: 'dev')
+    flavor = 'dev'
+
+    configuration = "Release-#{flavor}"
+
+    archive_with_no_code_sign(flavor: flavor)
 
     Dir.chdir('../../') do
       sh(
         'set -o pipefail && '\
         'xcodebuild archive CODE_SIGNING_ALLOWED=NO '\
         '-workspace ./ios/Runner.xcworkspace '\
-        "-scheme 'dev' "\
-        "-configuration 'Release-dev' "\
+        "-scheme '#{flavor}' "\
+        "-configuration '#{configuration}' "\
         '-archivePath ./build/ios/Runner.xcarchive'
       )
     end
@@ -80,7 +84,7 @@ platform :ios do
     )
   end
 
-  private_lane :build_flutter_with_no_code_sign do
+  private_lane :archive_with_no_code_sign do
     flavor = options[:flavor]
     dart_defines_path = options[:dart_defines_path]
 
@@ -89,6 +93,8 @@ platform :ios do
     else
       " --dart-defines-file=#{dart_defines_path}"
 
+    configuration = "Release-#{flavor}"
+
     Dir.chdir('../../') do
       sh(
         'flutter build ios '\
@@ -96,10 +102,19 @@ platform :ios do
         "#{dart_defines_command_part} "\
         '--no-codesign'
       )
+
+      sh(
+        'set -o pipefail && '\
+        'xcodebuild archive CODE_SIGNING_ALLOWED=NO '\
+        '-workspace ./ios/Runner.xcworkspace '\
+        "-scheme '#{scheme}' "\
+        "-configuration '#{configuration}' "\
+        '-archivePath ./build/ios/Runner.xcarchive'
+      )
     end
   end
 
-  priivate_lane :build do
+  priivate_lane :export do
     flavor = options[:flavor]
     export_options_plist_path = options[:export_options_plist_path]
     apple_api_issuer_id = options[:apple_api_issuer_id]
