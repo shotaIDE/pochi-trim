@@ -225,8 +225,8 @@ Xcode で一旦 Automatically Signing により App Store ビルドを Export �
 
 Manual Signing で Export した際に出力された plist を環境ごとに以下のファイルに配置してください：
 
-- Dev 環境: [client/ios/ExportOptions-dev.plist](client/ios/ExportOptions-dev.plist)
-- Prod 環境: [client/ios/ExportOptions-prod.plist](client/ios/ExportOptions-prod.plist)
+- Dev 環境: [client/ios/ExportOptions_dev.plist](client/ios/ExportOptions_dev.plist)
+- Prod 環境: [client/ios/ExportOptions_prod.plist](client/ios/ExportOptions_prod.plist)
 
 最後に App Store Connect API キーを発行し、[client/ios/fastlane/app-store-connect-api-key.p8](client/ios/fastlane/app-store-connect-api-key.p8) に配置してください。
 以下を参考にしてください。

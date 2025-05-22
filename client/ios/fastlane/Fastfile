@@ -8,7 +8,7 @@ platform :ios do
   desc 'Dev環境向けアプリをビルドします。'
   lane :build_dev do
     flavor = 'dev'
-    export_options_plist_path = './ios/ExportOptions-dev.plist'
+    export_options_plist_path = './ios/ExportOptions_dev.plist'
 
     build(
       flavor: flavor,
@@ -20,7 +20,7 @@ platform :ios do
   lane :build_prod do
     flavor = 'prod'
     dart_defines_path = './revenue-cat-config.json'
-    export_options_plist_path = './ios/ExportOptions-prod.plist'
+    export_options_plist_path = './ios/ExportOptions_prod.plist'
 
     build(
       flavor: flavor,
