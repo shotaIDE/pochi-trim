@@ -65,9 +65,10 @@ platform :ios do
     export_options_plist_path = options[:export_options_plist_path]
 
     dart_defines_command_part = if dart_defines_path.nil?
-      ''
-    else
-      "--dart-defines-file '#{dart_defines_path}' "
+                                  ''
+                                else
+                                  "--dart-defines-file '#{dart_defines_path}' "
+                                end
 
     Dir.chdir('../../') do
       sh(
