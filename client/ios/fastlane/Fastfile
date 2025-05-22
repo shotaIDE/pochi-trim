@@ -23,7 +23,7 @@ platform :ios do
     Dir.chdir('../../') do
       sh(
         'flutter build ipa '\
-        "-flavor #{flavor} "\
+        "--flavor #{flavor} "\
         '--no-codesign'
       )
     end
