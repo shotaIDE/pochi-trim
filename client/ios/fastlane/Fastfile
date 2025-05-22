@@ -7,49 +7,24 @@ default_platform(:ios)
 platform :ios do
   desc 'Dev環境向けアプリをビルドします。'
   lane :build_dev do
-    Dotenv.load '.env'
-
-    apple_api_issuer_id = ENV['APPLE_API_ISSUER_ID'].to_s
-    apple_api_key_id = ENV['APPLE_API_KEY_ID'].to_s
-
-    app_store_connect_api_key_path = 'ios/fastlane/app-store-connect-api-key.p8'
+    flavor = 'dev'
     export_options_plist_path = './ios/ExportOptions.plist'
 
-    build_dev_with_no_code_sign
-
-    Dir.chdir('../../') do
-      sh(
-        'set -o pipefail && '\
-        'xcodebuild -exportArchive '\
-        '-archivePath ./build/ios/Runner.xcarchive '\
-        '-exportPath ./build/ios/ipa '\
-        "-exportOptionsPlist #{export_options_plist_path} "\
-        '-allowProvisioningUpdates '\
-        "-authenticationKeyIssuerID '#{apple_api_issuer_id}' "\
-        "-authenticationKeyID '#{apple_api_key_id}' "\
-        "-authenticationKeyPath `pwd`/#{app_store_connect_api_key_path}"
-      )
-    end
-
-    lane_context[SharedValues::IPA_OUTPUT_PATH] = '../build/ios/ipa/pochi_trim.ipa'
+    build(
+      flavor: flavor,
+      export_options_plist_path: export_options_plist_path
+    )
   end
 
   desc 'Dev環境向けアプリを電子署名なしにビルドします。'
   lane :build_dev_with_no_code_sign do
     flavor = 'dev'
 
-    configuration = "Release-#{flavor}"
-
-    archive_with_no_code_sign(flavor: flavor)
-
     Dir.chdir('../../') do
       sh(
-        'set -o pipefail && '\
-        'xcodebuild archive CODE_SIGNING_ALLOWED=NO '\
-        '-workspace ./ios/Runner.xcworkspace '\
-        "-scheme '#{flavor}' "\
-        "-configuration '#{configuration}' "\
-        '-archivePath ./build/ios/Runner.xcarchive'
+        'flutter build ipa '\
+        "-flavor #{flavor} "\
+        '--no-codesign'
       )
     end
   end
@@ -84,54 +59,22 @@ platform :ios do
     )
   end
 
-  private_lane :archive_with_no_code_sign do
+  priivate_lane :build do
     flavor = options[:flavor]
     dart_defines_path = options[:dart_defines_path]
+    export_options_plist_path = options[:export_options_plist_path]
 
     dart_defines_command_part = if dart_defines_path.nil?
       ''
     else
-      " --dart-defines-file=#{dart_defines_path}"
-
-    configuration = "Release-#{flavor}"
+      "--dart-defines-file '#{dart_defines_path}' "
 
     Dir.chdir('../../') do
       sh(
-        'flutter build ios '\
+        'flutter build ipa '\
         "--flavor #{flavor} "\
-        "#{dart_defines_command_part} "\
-        '--no-codesign'
-      )
-
-      sh(
-        'set -o pipefail && '\
-        'xcodebuild archive CODE_SIGNING_ALLOWED=NO '\
-        '-workspace ./ios/Runner.xcworkspace '\
-        "-scheme '#{scheme}' "\
-        "-configuration '#{configuration}' "\
-        '-archivePath ./build/ios/Runner.xcarchive'
-      )
-    end
-  end
-
-  priivate_lane :export do
-    flavor = options[:flavor]
-    export_options_plist_path = options[:export_options_plist_path]
-    apple_api_issuer_id = options[:apple_api_issuer_id]
-    apple_api_key_id = options[:apple_api_key_id]
-    app_store_connect_api_key_path = options[:app_store_connect_api_key_path]
-
-    Dir.chdir('../../') do
-      sh(
-        'set -o pipefail && '\
-        'xcodebuild -exportArchive '\
-        '-archivePath ./build/ios/Runner.xcarchive '\
-        '-exportPath ./build/ios/ipa '\
-        "-exportOptionsPlist #{export_options_plist_path} "\
-        '-allowProvisioningUpdates '\
-        "-authenticationKeyIssuerID '#{apple_api_issuer_id}' "\
-        "-authenticationKeyID '#{apple_api_key_id}' "\
-        "-authenticationKeyPath `pwd`/#{app_store_connect_api_key_path}"
+        "#{dart_defines_command_part}"\
+        "--export-options-plist=#{export_options_plist_path}"
       )
     end
 
