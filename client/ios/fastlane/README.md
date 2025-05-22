@@ -66,6 +66,14 @@ Flutterの依存関係をインストールします。
 
 Dev環境向けアプリをビルドします。
 
+### ios build_prod
+
+```sh
+[bundle exec] fastlane ios build_prod
+```
+
+Prod環境向けアプリをビルドします。
+
 ### ios build_dev_with_no_code_sign
 
 ```sh
@@ -81,6 +89,14 @@ Dev環境向けアプリを電子署名なしにビルドします。
 ```
 
 Dev環境向けアプリをApp Storeにデプロイします。
+
+### ios deploy_prod
+
+```sh
+[bundle exec] fastlane ios deploy_prod
+```
+
+Prod環境向けアプリをApp Storeにデプロイします。
 
 ----
 

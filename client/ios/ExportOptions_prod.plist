@@ -10,8 +10,8 @@
 	<string>app-store-connect</string>
 	<key>provisioningProfiles</key>
 	<dict>
-		<key>ide.shota.colomney.HouseWorker.dev</key>
-		<string>House Worker Dev App Store</string>
+		<key>ide.shota.colomney.PochiTrim</key>
+		<string>Pochi Trim App Store</string>
 	</dict>
 	<key>signingCertificate</key>
 	<string>Apple Distribution</string>
