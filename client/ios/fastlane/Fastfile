@@ -122,6 +122,7 @@ platform :ios do
       )
     end
 
-    lane_context[SharedValues::IPA_OUTPUT_PATH] = '../build/ios/ipa/pochi_trim.ipa'
+    lane_context[SharedValues::IPA_OUTPUT_PATH] =\
+      '../build/ios/ipa/pochi_trim.ipa'
   end
 end
