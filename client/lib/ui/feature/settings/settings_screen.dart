@@ -53,7 +53,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _buildUserInfoTile(context, userProfile, ref),
               const Divider(),
               const SectionHeader(title: 'アプリについて'),
-              const _PlanInfoTile(),
+              const _PlanInfoPanel(),
               const _ReviewAppTile(),
               _buildShareAppTile(context),
               _buildTermsOfServiceTile(context),
@@ -467,6 +467,72 @@ class _MoveScreenTrailingIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Icon(Icons.arrow_forward_ios, size: 16);
+  }
+}
+
+class _PlanInfoPanel extends ConsumerWidget {
+  const _PlanInfoPanel();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isProFuture = ref.watch(isProUserProvider.future);
+
+    return FutureBuilder(
+      future: isProFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const ListTile(
+            leading: Icon(Icons.error),
+            title: Text('プラン情報の取得に失敗しました'),
+          );
+        }
+
+        final isPro = snapshot.data;
+        return Skeletonizer(
+          enabled: isPro == null,
+          child: _PlanInfoTile(isPro: isPro ?? false),
+        );
+      },
+    );
+  }
+}
+
+class _PlanInfoTile extends StatelessWidget {
+  const _PlanInfoTile({required this.isPro});
+
+  final bool isPro;
+
+  @override
+  Widget build(BuildContext context) {
+    final children = <Widget>[
+      ListTile(
+        leading: Icon(
+          isPro ? Icons.workspace_premium : Icons.person,
+          color: isPro ? Colors.amber : null,
+        ),
+        title: Text(
+          isPro ? 'Pro版' : 'フリー版',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isPro ? Colors.amber : null,
+          ),
+        ),
+        subtitle: Text(isPro ? '全ての機能が利用可能です' : '一部機能に制限があります'),
+      ),
+    ];
+
+    if (!isPro) {
+      children.add(
+        ListTile(
+          leading: const Icon(Icons.upgrade),
+          title: const Text('Pro版にアップグレード'),
+          trailing: const _MoveScreenTrailingIcon(),
+          onTap: () => Navigator.of(context).push(UpgradeToProScreen.route()),
+        ),
+      );
+    }
+
+    return Column(children: children);
   }
 }
 
