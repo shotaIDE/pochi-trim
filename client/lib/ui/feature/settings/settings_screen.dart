@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:pochi_trim/data/definition/app_definition.dart';
-// ignore: unused_import
 import 'package:pochi_trim/data/definition/app_feature.dart';
 import 'package:pochi_trim/data/model/sign_in_result.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
@@ -61,8 +60,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _buildTermsOfServiceTile(context),
               _buildPrivacyPolicyTile(context),
               _buildLicenseTile(context),
-              const SectionHeader(title: 'デバッグ'),
-              _buildDebugTile(context),
+              if (showDebugFeatures) ...[
+                const SectionHeader(title: 'デバッグ'),
+                _buildDebugTile(context),
+              ],
               const _AppVersionTile(),
               const Divider(),
               const SectionHeader(title: 'アカウント管理'),
