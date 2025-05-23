@@ -51,6 +51,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _buildUserInfoTile(context, userProfile, ref),
               const Divider(),
               const SectionHeader(title: 'アプリについて'),
+              const _PlanInfoTile(),
               const _ReviewAppTile(),
               _buildShareAppTile(context),
               _buildTermsOfServiceTile(context),
