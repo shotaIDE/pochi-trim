@@ -533,19 +533,21 @@ class _PlanInfoTile extends StatelessWidget {
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 4,
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.workspace_premium, color: Colors.amber, size: 28),
-                  SizedBox(width: 12),
+                  const Icon(
+                    Icons.workspace_premium,
+                    color: Colors.amber,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
                   Text(
                     'Pro版にアップグレード',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
                   ),
                 ],
               ),
