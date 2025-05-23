@@ -522,14 +522,46 @@ class _PlanInfoTile extends StatelessWidget {
     ];
 
     if (!isPro) {
-      children.add(
-        ListTile(
-          leading: const Icon(Icons.upgrade),
-          title: const Text('Pro版にアップグレード'),
-          trailing: const _MoveScreenTrailingIcon(),
-          onTap: () => Navigator.of(context).push(UpgradeToProScreen.route()),
-        ),
-      );
+      children
+        ..add(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: ElevatedButton(
+              onPressed:
+                  () => Navigator.of(context).push(UpgradeToProScreen.route()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 4,
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.workspace_premium, color: Colors.amber, size: 28),
+                  SizedBox(width: 12),
+                  Text(
+                    'Pro版にアップグレード',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )
+        ..add(
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              'Pro版では家事の登録件数が無制限になります',
+              style: TextStyle(color: Colors.grey, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
     }
 
     return Column(children: children);
