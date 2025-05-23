@@ -168,6 +168,14 @@ https://www.revenuecat.com/docs/projects/connect-a-store
 
 https://www.revenuecat.com/docs/offerings/products/setup-index
 
+具体的には、以下の手順を実行します。
+
+1. Entitlement を RevenueCat のダッシュボードで作成します。
+2. App Store Connect でアプリを作成し、App Store の課金アイテムを作成し、下書き状態としておきます
+3. Google Play Console でアプリを作成し、Google Play の課金アイテムを作成します。
+4. RevenueCat のダッシュボードで、App Store と Google Play で作成した課金アイテムを Product としてインポートします。
+5. RevenueCat のダッシュボードで、Entitlement と Product を紐付けます。
+
 ## Firebase emulator の設定
 
 ### Firebase emulator のサーバーをローカルマシンで実行する
