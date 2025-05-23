@@ -9,7 +9,9 @@ import 'package:pochi_trim/data/model/sign_in_result.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
 import 'package:pochi_trim/data/service/app_info_service.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/ui/component/color.dart';
+import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/debug_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/section_header.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
@@ -51,6 +53,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _buildUserInfoTile(context, userProfile, ref),
               const Divider(),
               const SectionHeader(title: 'アプリについて'),
+              const _PlanInfoPanel(),
               const _ReviewAppTile(),
               _buildShareAppTile(context),
               _buildTermsOfServiceTile(context),
@@ -464,6 +467,106 @@ class _MoveScreenTrailingIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Icon(Icons.arrow_forward_ios, size: 16);
+  }
+}
+
+class _PlanInfoPanel extends ConsumerWidget {
+  const _PlanInfoPanel();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isProFuture = ref.watch(isProUserProvider.future);
+
+    return FutureBuilder(
+      future: isProFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const ListTile(
+            leading: Icon(Icons.error),
+            title: Text('プラン情報の取得に失敗しました'),
+          );
+        }
+
+        final isPro = snapshot.data;
+        return Skeletonizer(
+          enabled: isPro == null,
+          child: _PlanInfoTile(isPro: isPro ?? false),
+        );
+      },
+    );
+  }
+}
+
+class _PlanInfoTile extends StatelessWidget {
+  const _PlanInfoTile({required this.isPro});
+
+  final bool isPro;
+
+  @override
+  Widget build(BuildContext context) {
+    final children = <Widget>[
+      ListTile(
+        leading: Icon(
+          isPro ? Icons.workspace_premium : Icons.person,
+          color: isPro ? Colors.amber : null,
+        ),
+        title: Text(
+          isPro ? 'Pro版' : 'フリー版',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isPro ? Colors.amber : null,
+          ),
+        ),
+        subtitle: Text(isPro ? '全ての機能が利用可能です' : '一部機能に制限があります'),
+      ),
+    ];
+
+    if (!isPro) {
+      children
+        ..add(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: ElevatedButton(
+              onPressed:
+                  () => Navigator.of(context).push(UpgradeToProScreen.route()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.workspace_premium,
+                    color: Colors.amber,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Pro版にアップグレード',
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )
+        ..add(
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              'Pro版では家事の登録件数が無制限になります',
+              style: TextStyle(color: Colors.grey, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+    }
+
+    return Column(children: children);
   }
 }
 
