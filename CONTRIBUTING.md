@@ -176,6 +176,10 @@ https://www.revenuecat.com/docs/offerings/products/setup-index
 4. RevenueCat のダッシュボードで、App Store と Google Play で作成した課金アイテムを Product(アプリ内で購入できる単位)としてインポートします。
 5. RevenueCat のダッシュボードで、Entitlement と Product を紐付けます。
 
+:::message
+上記だけだとまだ課金処理が実装できないため、調査が必要です。
+:::
+
 ## Firebase emulator の設定
 
 ### Firebase emulator のサーバーをローカルマシンで実行する
