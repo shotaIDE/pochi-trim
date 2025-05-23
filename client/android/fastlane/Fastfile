@@ -7,11 +7,20 @@ default_platform(:android)
 platform :android do
   desc 'Dev環境向けアプリ(App Bundle)をビルドします。'
   lane :build_dev do
-    Dir.chdir('../../') do
-      sh('flutter build appbundle --flavor dev')
-    end
+    flavor = 'dev'
 
-    lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH] = '../build/app/outputs/bundle/devRelease/app-dev-release.aab'
+    build(flavor: flavor)
+  end
+
+  desc 'Prod環境向けアプリ(App Bundle)をビルドします。'
+  lane :build_prod do
+    flavor = 'prod'
+    dart_defines_path = './revenue-cat-config.json'
+
+    build(
+      flavor: flavor,
+      dart_defines_path: dart_defines_path
+    )
   end
 
   desc 'Dev環境向けアプリをGoogle Playにデプロイします。'
@@ -54,5 +63,47 @@ platform :android do
         UI.message("Reverted the committed release notes to the original state: #{release_notes_path}")
       end
     end
+  end
+
+  desc 'Prod環境向けアプリをGoogle Playにデプロイします。'
+  lane :deploy_prod do
+    package_name = 'ide.shota.colomney.PochiTrim'
+    # action で利用するパスなので、fastlane コマンドを実行するディレクトリからの相対パスで指定
+    google_play_json_key_path = 'fastlane/google-play-service-account-key.json'
+
+    build_prod
+
+    upload_to_play_store(
+      package_name:,
+      release_status: 'completed',
+      track: 'internal',
+      json_key: google_play_json_key_path,
+      skip_upload_changelogs: false
+    )
+  end
+
+  private_lane :build do |options|
+    flavor = options[:flavor]
+    dart_defines_path = options[:dart_defines_path]
+
+    build_variant = "#{flavor}Release"
+    app_name = "app-#{flavor}-release"
+
+    dart_defines_command_part = if dart_defines_path.nil?
+                                  ''
+                                else
+                                  "--dart-define-from-file '#{dart_defines_path}'"
+                                end
+
+    Dir.chdir('../../') do
+      sh(
+        'flutter build appbundle '\
+        "--flavor #{flavor} "\
+        "#{dart_defines_command_part}"
+      )
+    end
+
+    lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH] =\
+      "../build/app/outputs/bundle/#{build_variant}/#{app_name}.aab"
   end
 end
