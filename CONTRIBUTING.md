@@ -170,10 +170,10 @@ https://www.revenuecat.com/docs/offerings/products/setup-index
 
 具体的には、以下の手順を実行します。
 
-1. Entitlement を RevenueCat のダッシュボードで作成します。
-2. App Store Connect でアプリを作成し、App Store の課金アイテムを作成し、下書き状態としておきます
-3. Google Play Console でアプリを作成し、Google Play の課金アイテムを作成します。
-4. RevenueCat のダッシュボードで、App Store と Google Play で作成した課金アイテムを Product としてインポートします。
+1. Entitlement(アプリ内で課金によって解放される資格)を RevenueCat のダッシュボードで作成します。
+2. App Store Connect でアプリを作成し、アプリ専用の課金アイテムを作成し、下書き状態としておきます
+3. Google Play Console でアプリを作成し、アプリ専用の課金アイテムを作成します。
+4. RevenueCat のダッシュボードで、App Store と Google Play で作成した課金アイテムを Product(アプリ内で購入できる単位)としてインポートします。
 5. RevenueCat のダッシュボードで、Entitlement と Product を紐付けます。
 
 ## Firebase emulator の設定
