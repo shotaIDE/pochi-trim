@@ -110,14 +110,14 @@ platform :ios do
     dart_defines_command_part = if dart_defines_path.nil?
                                   ''
                                 else
-                                  "--dart-define-from-file '#{dart_defines_path}' "
+                                  "--dart-define-from-file '#{dart_defines_path}'"
                                 end
 
     Dir.chdir('../../') do
       sh(
         'flutter build ipa '\
         "--flavor #{flavor} "\
-        "#{dart_defines_command_part}"\
+        "#{dart_defines_command_part} "\
         "--export-options-plist '#{export_options_plist_path}'"
       )
     end
