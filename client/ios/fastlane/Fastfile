@@ -112,13 +112,36 @@ platform :ios do
                                 else
                                   "--dart-define-from-file '#{dart_defines_path}'"
                                 end
+    archive_path = './build/ios/Runner.xcarchive'
 
     Dir.chdir('../../') do
       sh(
-        'flutter build ipa '\
+        'flutter build ios '\
         "--flavor #{flavor} "\
         "#{dart_defines_command_part} "\
-        "--export-options-plist '#{export_options_plist_path}'"
+        '--no-codesign'
+      )
+
+      # workspace の以下設定を無視してビルドするために flutter コマンドではなく xcode コマンドを利用
+      # - Code Signing Style = Automatic
+      # - Code Signing Identity = iPhone Developer
+      # これらの設定は、開発マシンでビルドする際に効率的な設定であるため、残しておきたい
+      sh(
+        'set -o pipefail && '\
+        'xcodebuild archive CODE_SIGNING_ALLOWED=NO '\
+        '-workspace ./ios/Runner.xcworkspace '\
+        "-scheme '#{flavor}' "\
+        "-configuration 'Release-#{flavor}' "\
+        "-archivePath #{archive_path}"
+      )
+
+      sh(
+        'set -o pipefail && '\
+        'xcodebuild -exportArchive '\
+        "-archivePath #{archive_path} "\
+        '-exportPath ./build/ios/ipa '\
+        "-exportOptionsPlist #{export_options_plist_path} "\
+        '-allowProvisioningUpdates'
       )
     end
 
