@@ -82,6 +82,14 @@ Prod環境向けアプリ(App Bundle)をビルドします。
 
 Dev環境向けアプリをGoogle Playにデプロイします。
 
+### android deploy_prod
+
+```sh
+[bundle exec] fastlane android deploy_prod
+```
+
+Prod環境向けアプリをGoogle Playにデプロイします。
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
