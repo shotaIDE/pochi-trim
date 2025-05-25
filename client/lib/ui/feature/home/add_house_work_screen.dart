@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/max_house_work_limit_exceeded_exception.dart';
+import 'package:pochi_trim/data/repository/dao/add_house_work_args.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_presenter.dart';
 import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
@@ -69,7 +69,7 @@ String getRandomEmoji() {
 }
 
 class AddHouseWorkScreen extends ConsumerStatefulWidget {
-  const AddHouseWorkScreen({super.key, this.existingHouseWork});
+  const AddHouseWorkScreen({super.key});
 
   static const name = 'AddHouseWorkScreen';
 
@@ -79,7 +79,6 @@ class AddHouseWorkScreen extends ConsumerStatefulWidget {
         settings: const RouteSettings(name: name),
         fullscreenDialog: true,
       );
-  final HouseWork? existingHouseWork;
 
   @override
   ConsumerState<AddHouseWorkScreen> createState() => _AddHouseWorkScreenState();
@@ -94,15 +93,9 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
   @override
   void initState() {
     super.initState();
-    // 既存の家事がある場合は、そのデータを初期値として設定
-    if (widget.existingHouseWork != null) {
-      final hw = widget.existingHouseWork!;
-      _titleController = TextEditingController(text: hw.title);
-      _icon = hw.icon;
-    } else {
-      _titleController = TextEditingController();
-      _icon = getRandomEmoji(); // デフォルトでランダムな絵文字を設定
-    }
+
+    _titleController = TextEditingController();
+    _icon = getRandomEmoji();
   }
 
   @override
@@ -114,9 +107,7 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.existingHouseWork != null ? '家事を編集' : '家事追加'),
-      ),
+      appBar: AppBar(title: const Text('家事追加')),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -176,10 +167,7 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: Text(
-                    widget.existingHouseWork != null ? '家事を更新する' : '家事を登録する',
-                    style: const TextStyle(fontSize: 16),
-                  ),
+                  child: const Text('家事を登録する', style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],
@@ -256,17 +244,15 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
       return;
     }
 
-    // 新しい家事を作成
-    final houseWork = HouseWork(
-      id: widget.existingHouseWork?.id ?? '', // 編集時は既存のID、新規作成時は空文字列
+    final args = AddHouseWorkArgs(
       title: _titleController.text,
       icon: _icon,
-      createdAt: widget.existingHouseWork?.createdAt ?? DateTime.now(),
+      createdAt: DateTime.now(),
       createdBy: userProfile.id,
     );
 
     try {
-      await ref.read(saveHouseWorkResultProvider(houseWork).future);
+      await ref.read(saveHouseWorkResultProvider(args).future);
     } on MaxHouseWorkLimitExceededException {
       if (!mounted) {
         return;
@@ -282,13 +268,9 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          widget.existingHouseWork != null ? '家事を更新しました' : '家事を登録しました',
-        ),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事を登録しました')));
 
     // 一覧画面に戻る（更新フラグをtrueにして渡す）
     Navigator.of(context).pop(true);
