@@ -37,7 +37,7 @@ class IsProUser extends _$IsProUser {
   ///
   /// このメソッドは、本番環境のサービスでは意図的に実装されていません。
   /// デバッグやテストの目的で処理されることを目的としています。
-  void setProUser({required bool isPro}) {
+  Future<void> setProUser({required bool isPro}) {
     throw UnimplementedError(
       'setProUser is not implemented in the real implementation',
     );

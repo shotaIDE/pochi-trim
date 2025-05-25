@@ -1,1 +1,1 @@
-enum PreferenceKey { currentHouseId }
+enum PreferenceKey { currentHouseId, isProUserForDebug }
