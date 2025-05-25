@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
+import 'package:pochi_trim/data/repository/dao/add_house_work_args.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -30,21 +31,11 @@ class HouseWorkRepository {
 
   final String _houseId;
 
-  /// 家事を保存する
-  Future<String> save(HouseWork houseWork) async {
+  Future<String> add(AddHouseWorkArgs args) async {
     final houseWorksCollection = _getAllCollectionReference();
 
-    if (houseWork.id.isEmpty) {
-      // 新規家事の場合
-      final docRef = await houseWorksCollection.add(houseWork.toFirestore());
-      return docRef.id;
-    } else {
-      // 既存家事の更新
-      await houseWorksCollection
-          .doc(houseWork.id)
-          .update(houseWork.toFirestore());
-      return houseWork.id;
-    }
+    final docRef = await houseWorksCollection.add(args.toFirestore());
+    return docRef.id;
   }
 
   /// IDを指定して家事を取得する
