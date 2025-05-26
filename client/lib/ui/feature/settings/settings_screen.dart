@@ -198,8 +198,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         // ライセンス表示画面へ遷移
         showLicensePage(
           context: context,
-          applicationName: 'House Worker',
-          applicationLegalese: ' 2025 House Worker',
+          applicationName: 'ポチそぎ',
+          applicationLegalese: ' 2025 ポチそぎ',
         );
       },
     );
