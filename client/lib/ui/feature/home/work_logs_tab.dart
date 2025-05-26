@@ -170,17 +170,9 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
       );
 
       if (existingIndex == -1) {
-        // 新しいログの正しい位置を計算
-        var insertIndex = 0;
-        for (var j = 0; j < i && j < _currentWorkLogs.length; j++) {
-          if (_currentWorkLogs.length > j &&
-              newWorkLogs.any((log) => log.id == _currentWorkLogs[j].id)) {
-            insertIndex = j + 1;
-          }
-        }
-
-        // リストの範囲内に収める
-        insertIndex = insertIndex.clamp(0, _currentWorkLogs.length);
+        // シンプルに新しいデータの順序に従って挿入
+        // _syncListOrderで最終的な順序調整を行う
+        final insertIndex = i.clamp(0, _currentWorkLogs.length);
 
         _currentWorkLogs.insert(insertIndex, newWorkLog);
         _listKey.currentState?.insertItem(insertIndex);
@@ -191,7 +183,17 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     _syncListOrder(newWorkLogs);
   }
 
-  // リストの順序を新しいデータと同期
+  /// リストの順序を新しいデータと同期する
+  ///
+  /// [newWorkLogs] 新しい家事ログデータのリスト
+  ///
+  /// このメソッドは、_currentWorkLogsの順序がnewWorkLogsと一致しているかチェックし、
+  /// 異なる場合はsetStateを使用してリストを再構築します。
+  ///
+  /// 使用タイミング:
+  /// - _handleListChangesの最後で、追加・削除処理後の順序調整として呼び出す
+  /// - アニメーション付きの個別追加・削除では順序が乱れる可能性があるため、
+  ///   最終的な整合性を保つために必要
   void _syncListOrder(List<WorkLogIncludedHouseWork> newWorkLogs) {
     var needsReorder = false;
 
