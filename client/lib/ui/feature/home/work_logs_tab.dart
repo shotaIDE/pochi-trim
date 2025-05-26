@@ -132,6 +132,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
 
   // リスト変更を処理し、必要に応じてアニメーション
   void _handleListChanges(List<WorkLogIncludedHouseWork> newWorkLogs) {
+    // 初期化時は単純に置き換え
     if (_currentWorkLogs.isEmpty) {
       setState(() {
         _currentWorkLogs = List.from(newWorkLogs);
@@ -139,40 +140,76 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
       return;
     }
 
-    // 新しく追加されたアイテムを検出
-    for (final newWorkLog in newWorkLogs) {
+    // 削除されたアイテムを先に処理（インデックスの変更を避けるため逆順で処理）
+    final toRemove = <int>[];
+    for (var i = 0; i < _currentWorkLogs.length; i++) {
+      final existingLog = _currentWorkLogs[i];
+      if (!newWorkLogs.any((log) => log.id == existingLog.id)) {
+        toRemove.add(i);
+      }
+    }
+
+    // 削除アニメーション（逆順で処理してインデックスの問題を回避）
+    for (final index in toRemove.reversed) {
+      final removedItem = _currentWorkLogs.removeAt(index);
+      _listKey.currentState?.removeItem(
+        index,
+        (context, animation) => _buildAnimatedItem(
+          context,
+          removedItem,
+          animation.drive(Tween(begin: 1, end: 0)),
+        ),
+      );
+    }
+
+    // 新しく追加されたアイテムを検出して追加
+    for (var i = 0; i < newWorkLogs.length; i++) {
+      final newWorkLog = newWorkLogs[i];
       final existingIndex = _currentWorkLogs.indexWhere(
         (log) => log.id == newWorkLog.id,
       );
+
       if (existingIndex == -1) {
-        // 新しいログを追加してアニメーション
-        _currentWorkLogs.insert(0, newWorkLog); // 最新のログを先頭に追加
-        _listKey.currentState?.insertItem(0);
+        // 新しいログの正しい位置を計算
+        var insertIndex = 0;
+        for (var j = 0; j < i && j < _currentWorkLogs.length; j++) {
+          if (_currentWorkLogs.length > j &&
+              newWorkLogs.any((log) => log.id == _currentWorkLogs[j].id)) {
+            insertIndex = j + 1;
+          }
+        }
+
+        // リストの範囲内に収める
+        insertIndex = insertIndex.clamp(0, _currentWorkLogs.length);
+
+        _currentWorkLogs.insert(insertIndex, newWorkLog);
+        _listKey.currentState?.insertItem(insertIndex);
       }
     }
 
-    // 削除されたアイテムを検出（必要に応じて）
-    final toRemove = <WorkLogIncludedHouseWork>[];
-    for (final existingLog in _currentWorkLogs) {
-      if (!newWorkLogs.any((log) => log.id == existingLog.id)) {
-        toRemove.add(existingLog);
+    // 最終的に順序を同期（必要に応じて）
+    _syncListOrder(newWorkLogs);
+  }
+
+  // リストの順序を新しいデータと同期
+  void _syncListOrder(List<WorkLogIncludedHouseWork> newWorkLogs) {
+    var needsReorder = false;
+
+    // 順序が一致しているかチェック
+    if (_currentWorkLogs.length == newWorkLogs.length) {
+      for (var i = 0; i < _currentWorkLogs.length; i++) {
+        if (_currentWorkLogs[i].id != newWorkLogs[i].id) {
+          needsReorder = true;
+          break;
+        }
       }
     }
 
-    // 削除アニメーション（必要に応じて）
-    for (final logToRemove in toRemove) {
-      final index = _currentWorkLogs.indexOf(logToRemove);
-      if (index != -1) {
-        final removedItem = _currentWorkLogs.removeAt(index);
-        _listKey.currentState?.removeItem(
-          index,
-          (context, animation) => _buildAnimatedItem(
-            context,
-            removedItem,
-            animation.drive(Tween(begin: 1, end: 0)),
-          ),
-        );
-      }
+    // 順序が異なる場合は再構築
+    if (needsReorder) {
+      setState(() {
+        _currentWorkLogs = List.from(newWorkLogs);
+      });
     }
   }
 
