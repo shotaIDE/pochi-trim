@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pochi_trim/data/service/purchase_pro_result.dart';
-import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
+import 'package:pochi_trim/data/model/pro_product_info.dart';
+import 'package:pochi_trim/ui/feature/pro/pro_purchase_presenter.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class UpgradeToProScreen extends ConsumerStatefulWidget {
   const UpgradeToProScreen({super.key});
@@ -62,19 +63,7 @@ class _UpgradeToProScreenState extends ConsumerState<UpgradeToProScreen> {
               isComingSoon: true,
             ),
             SizedBox(height: 32),
-            Center(
-              child: Text(
-                '¥980（買い切り）',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-            ),
-            SizedBox(height: 8),
-            Center(
-              child: Text(
-                '一度購入すれば永続的に利用可能',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-            ),
+            _PriceDisplay(),
             SizedBox(height: 32),
             _PurchaseButton(),
             SizedBox(height: 24),
@@ -178,6 +167,119 @@ class _FeatureItem extends StatelessWidget {
   }
 }
 
+class _PriceDisplay extends ConsumerWidget {
+  const _PriceDisplay();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final purchaseState = ref.watch(proPurchasePresenterProvider);
+
+    return purchaseState.when(
+      loading: () => const _PriceLoadingSkeleton(),
+      loaded: (productInfo) => _PriceContent(productInfo: productInfo),
+      purchasing:
+          () => purchaseState.maybeWhen(
+            loaded: (productInfo) => _PriceContent(productInfo: productInfo),
+            orElse: () => const _PriceLoadingSkeleton(),
+          ),
+      success:
+          () => purchaseState.maybeWhen(
+            loaded: (productInfo) => _PriceContent(productInfo: productInfo),
+            orElse: () => const _PriceLoadingSkeleton(),
+          ),
+      error: (message) => _PriceError(message: message),
+    );
+  }
+}
+
+class _PriceContent extends StatelessWidget {
+  const _PriceContent({required this.productInfo});
+
+  final ProProductInfo productInfo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          productInfo.price,
+          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          '一度購入すれば永続的に利用可能',
+          style: TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+      ],
+    );
+  }
+}
+
+class _PriceLoadingSkeleton extends StatelessWidget {
+  const _PriceLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Skeletonizer(
+      child: Column(
+        children: [
+          Container(
+            width: 120,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: 200,
+            height: 16,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PriceError extends ConsumerWidget {
+  const _PriceError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        Icon(
+          Icons.error_outline,
+          size: 48,
+          color: Theme.of(context).colorScheme.error,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          message,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.error,
+            fontSize: 16,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed:
+              () => ref.read(proPurchasePresenterProvider.notifier).retry(),
+          child: const Text('再試行'),
+        ),
+      ],
+    );
+  }
+}
+
 class _PurchaseButton extends ConsumerStatefulWidget {
   const _PurchaseButton();
 
@@ -188,34 +290,58 @@ class _PurchaseButton extends ConsumerStatefulWidget {
 class _PurchaseButtonState extends ConsumerState<_PurchaseButton> {
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(purchaseProResultProvider).isLoading;
+    final purchaseState = ref.watch(proPurchasePresenterProvider);
 
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: isLoading ? null : _purchasePro,
+        onPressed: _getOnPressed(purchaseState),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
           backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
         ),
-        child:
-            isLoading
-                ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-                : const Text('Pro版を購入する', style: TextStyle(fontSize: 16)),
+        child: _getButtonChild(purchaseState),
       ),
     );
   }
 
-  Future<void> _purchasePro() async {
-    final paywallResult = await RevenueCatUI.presentPaywall();
-    debugPrint('Paywall result: $paywallResult');
+  VoidCallback? _getOnPressed(PurchaseState state) {
+    return state.maybeWhen(
+      loaded: (_) => _handlePurchase,
+      error: (_) => _handleRetry,
+      orElse: () => null,
+    );
+  }
+
+  Widget _getButtonChild(PurchaseState state) {
+    return state.when(
+      loading: () => const Text('読み込み中...'),
+      loaded: (_) => const Text('Pro版を購入する', style: TextStyle(fontSize: 16)),
+      purchasing:
+          () => const SizedBox(
+            height: 24,
+            width: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white,
+            ),
+          ),
+      success: () => const Text('購入完了'),
+      error: (_) => const Text('再試行'),
+    );
+  }
+
+  Future<void> _handlePurchase() async {
+    await ref.read(proPurchasePresenterProvider.notifier).purchasePro();
+
+    final state = ref.read(proPurchasePresenterProvider);
+    if (state is PurchaseStateSuccess && mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _handleRetry() {
+    ref.read(proPurchasePresenterProvider.notifier).retry();
   }
 }

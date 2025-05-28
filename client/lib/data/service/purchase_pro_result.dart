@@ -1,5 +1,4 @@
-import 'package:pochi_trim/data/model/app_session.dart';
-import 'package:pochi_trim/ui/root_presenter.dart';
+import 'package:pochi_trim/ui/feature/pro/pro_purchase_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'purchase_pro_result.g.dart';
@@ -11,14 +10,13 @@ class PurchaseProResult extends _$PurchaseProResult {
     return null;
   }
 
+  @Deprecated('Use ProPurchasePresenter instead')
   Future<bool> purchasePro() async {
-    // TODO(ide): RevenueCatを使用して課金処理を実行
+    // 新しい実装を使用することを推奨
+    final presenter = ref.read(proPurchasePresenterProvider.notifier);
+    await presenter.purchasePro();
 
-    final appSession = ref.read(unwrappedCurrentAppSessionProvider);
-    if (appSession is AppSessionSignedIn) {
-      await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
-    }
-
-    return true;
+    final state = ref.read(proPurchasePresenterProvider);
+    return state is PurchaseStateSuccess;
   }
 }
