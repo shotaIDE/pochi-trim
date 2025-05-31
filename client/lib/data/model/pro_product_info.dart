@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:purchases_flutter/models/package_wrapper.dart';
 
 part 'pro_product_info.freezed.dart';
 
@@ -11,5 +12,6 @@ class ProProductInfo with _$ProProductInfo {
     required String price,
     required String currencyCode,
     required double priceAmount,
+    required Package package,
   }) = _ProProductInfo;
 }

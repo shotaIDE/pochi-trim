@@ -50,21 +50,7 @@ class ProPurchasePresenter extends _$ProPurchasePresenter {
     state = const PurchaseState.purchasing();
 
     try {
-      final offerings = await Purchases.getOfferings();
-      final currentOffering = offerings.current;
-
-      if (currentOffering == null) {
-        state = const PurchaseState.error('商品が見つかりませんでした');
-        return;
-      }
-
-      final proPackage = currentOffering.getPackage(product.productId);
-      if (proPackage == null) {
-        state = const PurchaseState.error('購入可能な商品が見つかりませんでした');
-        return;
-      }
-
-      final customerInfo = await Purchases.purchasePackage(proPackage);
+      final customerInfo = await Purchases.purchasePackage(product.package);
 
       if (customerInfo.entitlements.active[revenueCatProEntitlementId] !=
           null) {

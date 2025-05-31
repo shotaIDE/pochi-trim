@@ -24,6 +24,7 @@ Future<List<ProProductInfo>?> purchasableProducts(Ref ref) async {
           price: package.storeProduct.priceString,
           currencyCode: package.storeProduct.currencyCode,
           priceAmount: package.storeProduct.price,
+          package: package,
         ),
       )
       .toList();
