@@ -218,7 +218,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
     );
   }
 
-  Future<void> _purchase(ProProductInfo productInfo) async {
+  Future<void> _purchase(Purchasable productInfo) async {
     try {
       await ref.read(purchaseResultProvider(productInfo).future);
     } on PurchaseException catch (e) {
@@ -259,9 +259,15 @@ class _PriceContent extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
+          color: Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Theme.of(context).primaryColor),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.shadow.withAlpha(50),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

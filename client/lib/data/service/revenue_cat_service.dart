@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'revenue_cat_service.g.dart';
 
 @riverpod
-Future<List<ProProductInfo>?> purchasableProducts(Ref ref) async {
+Future<List<Purchasable>?> purchasableProducts(Ref ref) async {
   final offerings = await Purchases.getOfferings();
   final currentOffering = offerings.current;
 
@@ -17,7 +17,7 @@ Future<List<ProProductInfo>?> purchasableProducts(Ref ref) async {
   final availablePackages = currentOffering.availablePackages;
   return availablePackages
       .map(
-        (package) => ProProductInfo(
+        (package) => Purchasable(
           productId: package.storeProduct.identifier,
           title: package.storeProduct.title,
           description: package.storeProduct.description,

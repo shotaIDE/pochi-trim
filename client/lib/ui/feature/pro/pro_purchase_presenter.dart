@@ -12,7 +12,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'pro_purchase_presenter.g.dart';
 
 @riverpod
-Future<void> purchaseResult(Ref ref, ProProductInfo product) async {
+Future<void> purchaseResult(Ref ref, Purchasable product) async {
   final CustomerInfo customerInfo;
   try {
     customerInfo = await Purchases.purchasePackage(product.package);
