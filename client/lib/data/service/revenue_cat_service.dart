@@ -22,8 +22,6 @@ Future<List<ProProductInfo>?> purchasableProducts(Ref ref) async {
           title: package.storeProduct.title,
           description: package.storeProduct.description,
           price: package.storeProduct.priceString,
-          currencyCode: package.storeProduct.currencyCode,
-          priceAmount: package.storeProduct.price,
           package: package,
         ),
       )

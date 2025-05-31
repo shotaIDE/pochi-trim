@@ -10,8 +10,6 @@ class ProProductInfo with _$ProProductInfo {
     required String title,
     required String description,
     required String price,
-    required String currencyCode,
-    required double priceAmount,
     required Package package,
   }) = _ProProductInfo;
 }
