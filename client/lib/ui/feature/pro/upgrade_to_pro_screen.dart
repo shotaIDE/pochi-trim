@@ -203,13 +203,17 @@ class _PriceContent extends StatelessWidget {
     return Column(
       children: [
         Text(
+          productInfo.title,
+          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        ),
+        Text(
           productInfo.price,
           style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        const Text(
-          '一度購入すれば永続的に利用可能',
-          style: TextStyle(fontSize: 14, color: Colors.grey),
+        Text(
+          productInfo.description,
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
         ),
       ],
     );
