@@ -177,7 +177,7 @@ class _PurchasablesPanel extends ConsumerStatefulWidget {
 class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
   @override
   Widget build(BuildContext context) {
-    final purchasablesFuture = ref.watch(purchasableProductsProvider.future);
+    final purchasablesFuture = ref.watch(currentPurchasablesProvider.future);
 
     return FutureBuilder(
       future: purchasablesFuture,
@@ -187,32 +187,46 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
         }
 
         final purchasables = snapshot.data;
-        final List<Widget> contents;
+        final Widget priceTile;
         if (purchasables == null) {
-          contents = List.generate(
-            1,
-            (index) => _PriceContent(
-              title: 'Pro版',
-              price: '400',
-              description: '全ての機能が利用できるようになります。',
-              onTap: () {},
-            ),
+          priceTile = const _PriceTile(
+            title: 'Pro版',
+            price: '400',
+            description: '全ての機能が利用できるようになります。',
           );
         } else {
-          contents =
-              purchasables.map((product) {
-                return _PriceContent(
-                  title: product.title,
-                  price: product.price,
-                  description: product.description,
-                  onTap: () => _purchase(product),
-                );
-              }).toList();
+          final purchasable = purchasables.first;
+          priceTile = _PriceTile(
+            title: purchasable.title,
+            price: purchasable.price,
+            description: purchasable.description,
+          );
         }
+
+        final purchaseButton = ElevatedButton(
+          onPressed:
+              purchasables == null ? null : () => _purchase(purchasables.first),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '購入する',
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+            ],
+          ),
+        );
 
         return Skeletonizer(
           enabled: purchasables == null,
-          child: Column(spacing: 4, children: contents),
+          child: Column(spacing: 36, children: [priceTile, purchaseButton]),
         );
       },
     );
@@ -239,55 +253,44 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
   }
 }
 
-class _PriceContent extends StatelessWidget {
-  const _PriceContent({
+class _PriceTile extends StatelessWidget {
+  const _PriceTile({
     required this.title,
     required this.price,
     required this.description,
-    required this.onTap,
   });
 
   final String title;
   final String price;
   final String description;
-  final void Function() onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).colorScheme.shadow.withAlpha(50),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 8,
-          children: [
-            Row(
-              spacing: 16,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                Text(price, style: Theme.of(context).textTheme.titleLarge),
-              ],
-            ),
-            Text(description, style: Theme.of(context).textTheme.bodyMedium),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        border: Border.all(color: Theme.of(context).colorScheme.primary),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 8,
+        children: [
+          Row(
+            spacing: 16,
+            children: [
+              Text(
+                title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              Text(price, style: Theme.of(context).textTheme.titleLarge),
+            ],
+          ),
+          Text(description, style: Theme.of(context).textTheme.bodyMedium),
+        ],
       ),
     );
   }
