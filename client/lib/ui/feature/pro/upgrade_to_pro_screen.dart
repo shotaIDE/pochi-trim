@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pochi_trim/data/model/pro_product_info.dart';
+import 'package:pochi_trim/data/model/purchasable.dart';
 import 'package:pochi_trim/data/service/revenue_cat_service.dart';
 import 'package:pochi_trim/ui/feature/pro/pro_purchase_presenter.dart';
 import 'package:pochi_trim/ui/feature/pro/purchase_exception.dart';
@@ -167,11 +167,16 @@ class _FeatureItem extends StatelessWidget {
   }
 }
 
-class _PurchasablesPanel extends ConsumerWidget {
+class _PurchasablesPanel extends ConsumerStatefulWidget {
   const _PurchasablesPanel();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_PurchasablesPanel> createState() => _PurchasablesPanelState();
+}
+
+class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
+  @override
+  Widget build(BuildContext context) {
     final purchasablesFuture = ref.watch(purchasableProductsProvider.future);
 
     return FutureBuilder(
@@ -182,21 +187,38 @@ class _PurchasablesPanel extends ConsumerWidget {
         }
 
         final purchasables = snapshot.data;
+        final List<Widget> contents;
         if (purchasables == null) {
-          return const _PriceError(message: 'Pro版の価格情報が取得できませんでした。');
+          contents = List.generate(
+            1,
+            (index) => _PriceContent(
+              title: 'Pro版',
+              price: '400',
+              description: '全ての機能が利用できるようになります。',
+              onTap: () {},
+            ),
+          );
+        } else {
+          contents =
+              purchasables.map((product) {
+                return _PriceContent(
+                  title: product.title,
+                  price: product.price,
+                  description: product.description,
+                  onTap: () => _purchase(product),
+                );
+              }).toList();
         }
 
-        final contents =
-            purchasables.map((product) {
-              return _PriceContent(productInfo: product, onTap: purchase);
-            }).toList();
-
-        return Column(spacing: 4, children: contents);
+        return Skeletonizer(
+          enabled: purchasables == null,
+          child: Column(spacing: 4, children: contents),
+        );
       },
     );
   }
 
-  Future<void> purchase(ProProductInfo productInfo) async {
+  Future<void> _purchase(ProProductInfo productInfo) async {
     try {
       await ref.read(purchaseResultProvider(productInfo).future);
     } on PurchaseException catch (e) {
@@ -218,15 +240,22 @@ class _PurchasablesPanel extends ConsumerWidget {
 }
 
 class _PriceContent extends StatelessWidget {
-  const _PriceContent({required this.productInfo, required this.onTap});
+  const _PriceContent({
+    required this.title,
+    required this.price,
+    required this.description,
+    required this.onTap,
+  });
 
-  final ProProductInfo productInfo;
-  final void Function(ProProductInfo) onTap;
+  final String title;
+  final String price;
+  final String description;
+  final void Function() onTap;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => onTap(productInfo),
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -242,54 +271,17 @@ class _PriceContent extends StatelessWidget {
               spacing: 16,
               children: [
                 Text(
-                  productInfo.title,
+                  title,
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                Text(
-                  productInfo.price,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+                Text(price, style: Theme.of(context).textTheme.titleLarge),
               ],
             ),
-            Text(
-              productInfo.description,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            Text(description, style: Theme.of(context).textTheme.bodyMedium),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _PriceLoadingSkeleton extends StatelessWidget {
-  const _PriceLoadingSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Skeletonizer(
-      child: Column(
-        children: [
-          Container(
-            width: 120,
-            height: 32,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            width: 200,
-            height: 16,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-        ],
       ),
     );
   }

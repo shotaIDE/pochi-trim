@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
-import 'package:pochi_trim/data/model/pro_product_info.dart';
+import 'package:pochi_trim/data/model/purchasable.dart';
 import 'package:pochi_trim/ui/feature/pro/purchase_exception.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';

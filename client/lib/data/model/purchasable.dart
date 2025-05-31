@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:purchases_flutter/models/package_wrapper.dart';
 
-part 'pro_product_info.freezed.dart';
+part 'purchasable.freezed.dart';
 
 @freezed
 class ProProductInfo with _$ProProductInfo {
