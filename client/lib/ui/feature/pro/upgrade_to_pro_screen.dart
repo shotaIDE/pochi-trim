@@ -65,7 +65,7 @@ class _UpgradeToProScreenState extends ConsumerState<UpgradeToProScreen> {
               isComingSoon: true,
             ),
             SizedBox(height: 32),
-            _PriceDisplay(),
+            _PurchasablesPanel(),
             SizedBox(height: 24),
           ],
         ),
@@ -167,8 +167,8 @@ class _FeatureItem extends StatelessWidget {
   }
 }
 
-class _PriceDisplay extends ConsumerWidget {
-  const _PriceDisplay();
+class _PurchasablesPanel extends ConsumerWidget {
+  const _PurchasablesPanel();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -186,29 +186,34 @@ class _PriceDisplay extends ConsumerWidget {
           return const _PriceError(message: 'Pro版の価格情報が取得できませんでした。');
         }
 
-        return _PriceContent(
-          // TODO(ide): 複数のプロダクトがある場合の表示方法を検討
-          productInfo: purchasables.first,
-          onTap: (product) async {
-            // TODO(ide): エラー処理
-            try {
-              ref.read(purchaseResultProvider(purchasables.first));
-            } on PurchaseException catch (e) {
-              switch (e) {
-                case PurchaseExceptionCancelled():
-                  return;
-                case PurchaseExceptionUncategorized():
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('購入中にエラーが発生しました。しばらくしてから再度お試しください。'),
-                    ),
-                  );
-              }
-            }
-          },
-        );
+        final contents =
+            purchasables.map((product) {
+              return _PriceContent(productInfo: product, onTap: purchase);
+            }).toList();
+
+        return Column(spacing: 4, children: contents);
       },
     );
+  }
+
+  Future<void> purchase(ProProductInfo productInfo) async {
+    try {
+      await ref.read(purchaseResultProvider(productInfo).future);
+    } on PurchaseException catch (e) {
+      switch (e) {
+        case PurchaseExceptionCancelled():
+          return;
+
+        case PurchaseExceptionUncategorized():
+          if (!mounted) {
+            return;
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('購入中にエラーが発生しました。しばらくしてから再度お試しください。')),
+          );
+      }
+    }
   }
 }
 
