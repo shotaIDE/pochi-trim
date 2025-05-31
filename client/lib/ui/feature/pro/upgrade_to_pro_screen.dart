@@ -176,15 +176,16 @@ class _PriceDisplay extends ConsumerWidget {
 
     return purchaseState.when(
       loading: () => const _PriceLoadingSkeleton(),
-      loaded: (productInfo) => _PriceContent(productInfo: productInfo),
+      // TODO(ide): 複数のプロダクトがある場合の表示方法を検討
+      loaded: (products) => _PriceContent(productInfo: products.first),
       purchasing:
           () => purchaseState.maybeWhen(
-            loaded: (productInfo) => _PriceContent(productInfo: productInfo),
+            loaded: (products) => _PriceContent(productInfo: products.first),
             orElse: () => const _PriceLoadingSkeleton(),
           ),
       success:
           () => purchaseState.maybeWhen(
-            loaded: (productInfo) => _PriceContent(productInfo: productInfo),
+            loaded: (products) => _PriceContent(productInfo: products.first),
             orElse: () => const _PriceLoadingSkeleton(),
           ),
       error: (message) => _PriceError(message: message),
@@ -270,11 +271,6 @@ class _PriceError extends ConsumerWidget {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed:
-              () => ref.read(proPurchasePresenterProvider.notifier).retry(),
-          child: const Text('再試行'),
-        ),
       ],
     );
   }
@@ -309,7 +305,7 @@ class _PurchaseButtonState extends ConsumerState<_PurchaseButton> {
   VoidCallback? _getOnPressed(PurchaseState state) {
     return state.maybeWhen(
       loaded: (_) => _handlePurchase,
-      error: (_) => _handleRetry,
+      error: (_) => null,
       orElse: () => null,
     );
   }
@@ -339,9 +335,5 @@ class _PurchaseButtonState extends ConsumerState<_PurchaseButton> {
     if (state is PurchaseStateSuccess && mounted) {
       Navigator.of(context).pop();
     }
-  }
-
-  void _handleRetry() {
-    ref.read(proPurchasePresenterProvider.notifier).retry();
   }
 }
