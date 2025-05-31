@@ -1,4 +1,6 @@
 colomney
 ide
 pochi
+purchasable
+purchasables
 shota

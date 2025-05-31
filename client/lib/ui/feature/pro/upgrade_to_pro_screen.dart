@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pochi_trim/data/service/purchase_pro_result.dart';
-import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
+import 'package:pochi_trim/data/model/purchasable.dart';
+import 'package:pochi_trim/data/service/revenue_cat_service.dart';
+import 'package:pochi_trim/ui/feature/pro/pro_purchase_presenter.dart';
+import 'package:pochi_trim/ui/feature/pro/purchase_exception.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class UpgradeToProScreen extends ConsumerStatefulWidget {
   const UpgradeToProScreen({super.key});
@@ -62,21 +65,7 @@ class _UpgradeToProScreenState extends ConsumerState<UpgradeToProScreen> {
               isComingSoon: true,
             ),
             SizedBox(height: 32),
-            Center(
-              child: Text(
-                '¥980（買い切り）',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-            ),
-            SizedBox(height: 8),
-            Center(
-              child: Text(
-                '一度購入すれば永続的に利用可能',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-            ),
-            SizedBox(height: 32),
-            _PurchaseButton(),
+            _PurchasablesPanel(),
             SizedBox(height: 24),
           ],
         ),
@@ -178,44 +167,181 @@ class _FeatureItem extends StatelessWidget {
   }
 }
 
-class _PurchaseButton extends ConsumerStatefulWidget {
-  const _PurchaseButton();
+class _PurchasablesPanel extends ConsumerStatefulWidget {
+  const _PurchasablesPanel();
 
   @override
-  ConsumerState<_PurchaseButton> createState() => _PurchaseButtonState();
+  ConsumerState<_PurchasablesPanel> createState() => _PurchasablesPanelState();
 }
 
-class _PurchaseButtonState extends ConsumerState<_PurchaseButton> {
+class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(purchaseProResultProvider).isLoading;
+    final purchasablesFuture = ref.watch(currentPurchasablesProvider.future);
 
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: isLoading ? null : _purchasePro,
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        ),
-        child:
-            isLoading
-                ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-                : const Text('Pro版を購入する', style: TextStyle(fontSize: 16)),
-      ),
+    return FutureBuilder(
+      future: purchasablesFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return _PriceError(message: snapshot.error.toString());
+        }
+
+        final purchasables = snapshot.data;
+        final Widget priceTile;
+        if (purchasables == null) {
+          priceTile = const _PriceTile(
+            title: 'Pro版',
+            price: '400',
+            effectivePeriod: EffectivePeriod.lifetime,
+            description: '全ての機能が利用できるようになります。',
+          );
+        } else {
+          final purchasable = purchasables.first;
+          priceTile = _PriceTile(
+            title: purchasable.title,
+            price: purchasable.price,
+            effectivePeriod: purchasable.effectivePeriod,
+            description: purchasable.description,
+          );
+        }
+
+        final purchaseButton = ElevatedButton(
+          onPressed:
+              purchasables == null ? null : () => _purchase(purchasables.first),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '購入する',
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+            ],
+          ),
+        );
+
+        return Skeletonizer(
+          enabled: purchasables == null,
+          child: Column(spacing: 36, children: [priceTile, purchaseButton]),
+        );
+      },
     );
   }
 
-  Future<void> _purchasePro() async {
-    final paywallResult = await RevenueCatUI.presentPaywall();
-    debugPrint('Paywall result: $paywallResult');
+  Future<void> _purchase(Purchasable productInfo) async {
+    try {
+      await ref.read(purchaseResultProvider(productInfo).future);
+    } on PurchaseException catch (e) {
+      switch (e) {
+        case PurchaseExceptionCancelled():
+          return;
+
+        case PurchaseExceptionUncategorized():
+          if (!mounted) {
+            return;
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('購入中にエラーが発生しました。しばらくしてから再度お試しください。')),
+          );
+      }
+    }
+  }
+}
+
+class _PriceTile extends StatelessWidget {
+  const _PriceTile({
+    required this.title,
+    required this.price,
+    required this.effectivePeriod,
+    required this.description,
+  });
+
+  final String title;
+  final String price;
+  final EffectivePeriod effectivePeriod;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        border: Border.all(color: Theme.of(context).colorScheme.primary),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 8,
+        children: [
+          Row(
+            spacing: 16,
+            children: [
+              Text(
+                title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              Text(price, style: Theme.of(context).textTheme.titleLarge),
+              if (effectivePeriod == EffectivePeriod.lifetime)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '買い切り',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          Text(description, style: Theme.of(context).textTheme.bodyMedium),
+        ],
+      ),
+    );
+  }
+}
+
+class _PriceError extends ConsumerWidget {
+  const _PriceError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        Icon(
+          Icons.error_outline,
+          size: 48,
+          color: Theme.of(context).colorScheme.error,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          message,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.error,
+            fontSize: 16,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
   }
 }
