@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/pro_product_info.dart';
 import 'package:pochi_trim/data/service/revenue_cat_service.dart';
 import 'package:pochi_trim/ui/feature/pro/pro_purchase_presenter.dart';
+import 'package:pochi_trim/ui/feature/pro/purchase_exception.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class UpgradeToProScreen extends ConsumerStatefulWidget {
@@ -190,7 +191,20 @@ class _PriceDisplay extends ConsumerWidget {
           productInfo: purchasables.first,
           onTap: (product) async {
             // TODO(ide): エラー処理
-            ref.read(purchaseResultProvider(purchasables.first));
+            try {
+              ref.read(purchaseResultProvider(purchasables.first));
+            } on PurchaseException catch (e) {
+              switch (e) {
+                case PurchaseExceptionCancelled():
+                  return;
+                case PurchaseExceptionUncategorized():
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('購入中にエラーが発生しました。しばらくしてから再度お試しください。'),
+                    ),
+                  );
+              }
+            }
           },
         );
       },
