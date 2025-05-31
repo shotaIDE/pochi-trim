@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/pro_product_info.dart';
+import 'package:pochi_trim/data/service/revenue_cat_service.dart';
 import 'package:pochi_trim/ui/feature/pro/pro_purchase_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -170,7 +171,7 @@ class _PriceDisplay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final purchaseState = ref.watch(proPurchasePresenterProvider);
+    final purchasablesFuture = ref.watch(purchasableProductsProvider.future);
 
     return purchaseState.when(
       loading: () => const _PriceLoadingSkeleton(),
