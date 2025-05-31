@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
@@ -49,48 +50,36 @@ class ProPurchasePresenter extends _$ProPurchasePresenter {
 
     state = const PurchaseState.purchasing();
 
+    final CustomerInfo customerInfo;
     try {
-      final customerInfo = await Purchases.purchasePackage(product.package);
+      customerInfo = await Purchases.purchasePackage(product.package);
+    } on PlatformException catch (e) {
+      final errorCode = PurchasesErrorHelper.getErrorCode(e);
 
-      if (customerInfo.entitlements.active[revenueCatProEntitlementId] !=
-          null) {
-        // AppSession更新
-        final appSession = ref.read(unwrappedCurrentAppSessionProvider);
-        if (appSession is AppSessionSignedIn) {
-          await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
-        }
+      state = PurchaseState.error(_getErrorMessage(errorCode));
+      return;
+    }
 
-        state = const PurchaseState.success();
-      } else {
-        state = const PurchaseState.error('購入処理が完了しませんでした');
+    if (customerInfo.entitlements.active[revenueCatProEntitlementId] != null) {
+      // AppSession更新
+      final appSession = ref.read(unwrappedCurrentAppSessionProvider);
+      if (appSession is AppSessionSignedIn) {
+        await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
       }
-    } on Exception catch (e) {
-      state = PurchaseState.error(_getErrorMessage(e));
+
+      state = const PurchaseState.success();
+    } else {
+      state = const PurchaseState.error('購入処理が完了しませんでした');
     }
   }
 
-  String _getErrorMessage(dynamic error) {
-    if (error is PurchasesError) {
-      final code = error.code;
-      if (code == PurchasesErrorCode.purchaseCancelledError) {
+  String _getErrorMessage(PurchasesErrorCode errorCode) {
+    switch (errorCode) {
+      case PurchasesErrorCode.purchaseCancelledError:
         return '購入がキャンセルされました';
-      } else if (code == PurchasesErrorCode.storeProblemError) {
-        return 'ストアに問題が発生しています。しばらく時間をおいて再試行してください';
-      } else if (code == PurchasesErrorCode.purchaseNotAllowedError) {
-        return '購入が許可されていません';
-      } else if (code == PurchasesErrorCode.purchaseInvalidError) {
-        return '無効な購入です';
-      } else if (code ==
-          PurchasesErrorCode.productNotAvailableForPurchaseError) {
-        return '商品が購入できません';
-      } else if (code == PurchasesErrorCode.networkError) {
-        return 'ネットワークエラーが発生しました。接続を確認してください';
-      } else if (code == PurchasesErrorCode.productAlreadyPurchasedError) {
-        return 'この商品は既に購入済みです';
-      } else {
+      // ignore: no_default_cases
+      default:
         return '購入処理中にエラーが発生しました';
-      }
     }
-    return '予期しないエラーが発生しました';
   }
 }
