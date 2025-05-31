@@ -13,7 +13,7 @@ part 'pro_purchase_presenter.g.dart';
 @freezed
 class PurchaseState with _$PurchaseState {
   const factory PurchaseState.loading() = PurchaseStateLoading;
-  const factory PurchaseState.loaded(ProProductInfo productInfo) =
+  const factory PurchaseState.loaded(List<ProProductInfo> productInfo) =
       PurchaseStateLoaded;
   const factory PurchaseState.purchasing() = PurchaseStatePurchasing;
   const factory PurchaseState.success() = PurchaseStateSuccess;
@@ -24,12 +24,12 @@ class PurchaseState with _$PurchaseState {
 class ProPurchasePresenter extends _$ProPurchasePresenter {
   @override
   PurchaseState build() {
-    final productInfoAsync = ref.watch(revenueCatServiceProvider);
+    final productsAsync = ref.watch(purchasableProductsProvider);
 
-    return productInfoAsync.when(
-      data: (productInfo) {
-        if (productInfo != null) {
-          return PurchaseState.loaded(productInfo);
+    return productsAsync.when(
+      data: (products) {
+        if (products != null) {
+          return PurchaseState.loaded(products);
         } else {
           return const PurchaseState.error('商品情報を取得できませんでした');
         }
@@ -112,10 +112,5 @@ class ProPurchasePresenter extends _$ProPurchasePresenter {
       }
     }
     return '予期しないエラーが発生しました';
-  }
-
-  /// 商品情報を再取得する
-  void retry() {
-    ref.read(revenueCatServiceProvider.notifier).refresh();
   }
 }
