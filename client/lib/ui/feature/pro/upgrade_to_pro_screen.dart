@@ -173,45 +173,27 @@ class _PriceDisplay extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final purchasablesFuture = ref.watch(purchasableProductsProvider.future);
 
-    return purchaseState.when(
-      loading: () => const _PriceLoadingSkeleton(),
-      // TODO(ide): 複数のプロダクトがある場合の表示方法を検討
-      loaded:
-          (products) => _PriceContent(
-            productInfo: products.first,
-            onTap: (product) {
-              ref
-                  .read(proPurchasePresenterProvider.notifier)
-                  .purchasePro(product);
-            },
-          ),
-      purchasing:
-          () => purchaseState.maybeWhen(
-            loaded:
-                (products) => _PriceContent(
-                  productInfo: products.first,
-                  onTap: (product) {
-                    ref
-                        .read(proPurchasePresenterProvider.notifier)
-                        .purchasePro(product);
-                  },
-                ),
-            orElse: () => const _PriceLoadingSkeleton(),
-          ),
-      success:
-          () => purchaseState.maybeWhen(
-            loaded:
-                (products) => _PriceContent(
-                  productInfo: products.first,
-                  onTap: (product) {
-                    ref
-                        .read(proPurchasePresenterProvider.notifier)
-                        .purchasePro(product);
-                  },
-                ),
-            orElse: () => const _PriceLoadingSkeleton(),
-          ),
-      error: (message) => _PriceError(message: message),
+    return FutureBuilder(
+      future: purchasablesFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return _PriceError(message: snapshot.error.toString());
+        }
+
+        final purchasables = snapshot.data;
+        if (purchasables == null) {
+          return const _PriceError(message: 'Pro版の価格情報が取得できませんでした。');
+        }
+
+        return _PriceContent(
+          // TODO(ide): 複数のプロダクトがある場合の表示方法を検討
+          productInfo: purchasables.first,
+          onTap: (product) async {
+            // TODO(ide): エラー処理
+            ref.read(purchaseResultProvider(purchasables.first));
+          },
+        );
+      },
     );
   }
 }
