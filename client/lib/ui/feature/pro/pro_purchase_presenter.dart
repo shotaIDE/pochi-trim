@@ -41,7 +41,7 @@ class ProPurchasePresenter extends _$ProPurchasePresenter {
     );
   }
 
-  Future<void> purchasePro() async {
+  Future<void> purchasePro(ProProductInfo product) async {
     final currentState = state;
     if (currentState is! PurchaseStateLoaded) {
       return;
@@ -58,16 +58,10 @@ class ProPurchasePresenter extends _$ProPurchasePresenter {
         return;
       }
 
-      // 'pro'パッケージを探す
-      var proPackage = currentOffering.getPackage('pro');
+      final proPackage = currentOffering.getPackage(product.productId);
       if (proPackage == null) {
-        // パッケージが見つからない場合、利用可能なパッケージから最初のものを使用
-        final availablePackages = currentOffering.availablePackages;
-        if (availablePackages.isEmpty) {
-          state = const PurchaseState.error('購入可能な商品が見つかりませんでした');
-          return;
-        }
-        proPackage = availablePackages.first;
+        state = const PurchaseState.error('購入可能な商品が見つかりませんでした');
+        return;
       }
 
       final customerInfo = await Purchases.purchasePackage(proPackage);

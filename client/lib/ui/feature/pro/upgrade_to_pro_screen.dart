@@ -64,8 +64,6 @@ class _UpgradeToProScreenState extends ConsumerState<UpgradeToProScreen> {
             ),
             SizedBox(height: 32),
             _PriceDisplay(),
-            SizedBox(height: 32),
-            _PurchaseButton(),
             SizedBox(height: 24),
           ],
         ),
@@ -177,15 +175,39 @@ class _PriceDisplay extends ConsumerWidget {
     return purchaseState.when(
       loading: () => const _PriceLoadingSkeleton(),
       // TODO(ide): 複数のプロダクトがある場合の表示方法を検討
-      loaded: (products) => _PriceContent(productInfo: products.first),
+      loaded:
+          (products) => _PriceContent(
+            productInfo: products.first,
+            onTap: (product) {
+              ref
+                  .read(proPurchasePresenterProvider.notifier)
+                  .purchasePro(product);
+            },
+          ),
       purchasing:
           () => purchaseState.maybeWhen(
-            loaded: (products) => _PriceContent(productInfo: products.first),
+            loaded:
+                (products) => _PriceContent(
+                  productInfo: products.first,
+                  onTap: (product) {
+                    ref
+                        .read(proPurchasePresenterProvider.notifier)
+                        .purchasePro(product);
+                  },
+                ),
             orElse: () => const _PriceLoadingSkeleton(),
           ),
       success:
           () => purchaseState.maybeWhen(
-            loaded: (products) => _PriceContent(productInfo: products.first),
+            loaded:
+                (products) => _PriceContent(
+                  productInfo: products.first,
+                  onTap: (product) {
+                    ref
+                        .read(proPurchasePresenterProvider.notifier)
+                        .purchasePro(product);
+                  },
+                ),
             orElse: () => const _PriceLoadingSkeleton(),
           ),
       error: (message) => _PriceError(message: message),
@@ -194,28 +216,48 @@ class _PriceDisplay extends ConsumerWidget {
 }
 
 class _PriceContent extends StatelessWidget {
-  const _PriceContent({required this.productInfo});
+  const _PriceContent({required this.productInfo, required this.onTap});
 
   final ProProductInfo productInfo;
+  final void Function(ProProductInfo) onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          productInfo.title,
-          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+    return InkWell(
+      onTap: () => onTap(productInfo),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Theme.of(context).primaryColor),
         ),
-        Text(
-          productInfo.price,
-          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 8,
+          children: [
+            Row(
+              spacing: 16,
+              children: [
+                Text(
+                  productInfo.title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  productInfo.price,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ],
+            ),
+            Text(
+              productInfo.description,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          productInfo.description,
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -277,67 +319,5 @@ class _PriceError extends ConsumerWidget {
         const SizedBox(height: 16),
       ],
     );
-  }
-}
-
-class _PurchaseButton extends ConsumerStatefulWidget {
-  const _PurchaseButton();
-
-  @override
-  ConsumerState<_PurchaseButton> createState() => _PurchaseButtonState();
-}
-
-class _PurchaseButtonState extends ConsumerState<_PurchaseButton> {
-  @override
-  Widget build(BuildContext context) {
-    final purchaseState = ref.watch(proPurchasePresenterProvider);
-
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _getOnPressed(purchaseState),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        ),
-        child: _getButtonChild(purchaseState),
-      ),
-    );
-  }
-
-  VoidCallback? _getOnPressed(PurchaseState state) {
-    return state.maybeWhen(
-      loaded: (_) => _handlePurchase,
-      error: (_) => null,
-      orElse: () => null,
-    );
-  }
-
-  Widget _getButtonChild(PurchaseState state) {
-    return state.when(
-      loading: () => const Text('読み込み中...'),
-      loaded: (_) => const Text('Pro版を購入する', style: TextStyle(fontSize: 16)),
-      purchasing:
-          () => const SizedBox(
-            height: 24,
-            width: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.white,
-            ),
-          ),
-      success: () => const Text('購入完了'),
-      error: (_) => const Text('再試行'),
-    );
-  }
-
-  Future<void> _handlePurchase() async {
-    await ref.read(proPurchasePresenterProvider.notifier).purchasePro();
-
-    final state = ref.read(proPurchasePresenterProvider);
-    if (state is PurchaseStateSuccess && mounted) {
-      Navigator.of(context).pop();
-    }
   }
 }
