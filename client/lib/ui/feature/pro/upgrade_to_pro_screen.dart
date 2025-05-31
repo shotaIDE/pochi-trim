@@ -192,6 +192,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
           priceTile = const _PriceTile(
             title: 'Pro版',
             price: '400',
+            effectivePeriod: EffectivePeriod.lifetime,
             description: '全ての機能が利用できるようになります。',
           );
         } else {
@@ -199,6 +200,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
           priceTile = _PriceTile(
             title: purchasable.title,
             price: purchasable.price,
+            effectivePeriod: purchasable.effectivePeriod,
             description: purchasable.description,
           );
         }
@@ -257,11 +259,13 @@ class _PriceTile extends StatelessWidget {
   const _PriceTile({
     required this.title,
     required this.price,
+    required this.effectivePeriod,
     required this.description,
   });
 
   final String title;
   final String price;
+  final EffectivePeriod effectivePeriod;
   final String description;
 
   @override
@@ -287,6 +291,23 @@ class _PriceTile extends StatelessWidget {
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(price, style: Theme.of(context).textTheme.titleLarge),
+              if (effectivePeriod == EffectivePeriod.lifetime)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '買い切り',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
             ],
           ),
           Text(description, style: Theme.of(context).textTheme.bodyMedium),

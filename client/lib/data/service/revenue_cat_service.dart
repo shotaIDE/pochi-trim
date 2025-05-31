@@ -14,15 +14,5 @@ Future<List<Purchasable>?> currentPurchasables(Ref ref) async {
   }
 
   final availablePackages = currentOffering.availablePackages;
-  return availablePackages
-      .map(
-        (package) => Purchasable(
-          productId: package.storeProduct.identifier,
-          title: package.storeProduct.title,
-          description: package.storeProduct.description,
-          price: package.storeProduct.priceString,
-          package: package,
-        ),
-      )
-      .toList();
+  return availablePackages.map(PurchasableGenerator.fromPackage).toList();
 }
