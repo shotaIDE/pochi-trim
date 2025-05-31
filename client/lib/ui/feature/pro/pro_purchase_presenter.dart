@@ -2,7 +2,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pochi_trim/data/definition/app_definition.dart';
-import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/purchasable.dart';
 import 'package:pochi_trim/ui/feature/pro/purchase_exception.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
@@ -11,6 +10,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pro_purchase_presenter.g.dart';
 
+/// Pro版を購入する
+///
+/// 購入に失敗した場合は、[PurchaseException]を投げる。
 @riverpod
 Future<void> purchaseResult(Ref ref, Purchasable product) async {
   final CustomerInfo customerInfo;
@@ -28,12 +30,9 @@ Future<void> purchaseResult(Ref ref, Purchasable product) async {
     }
   }
 
-  if (customerInfo.entitlements.active[revenueCatProEntitlementId] != null) {
-    final appSession = ref.read(unwrappedCurrentAppSessionProvider);
-    if (appSession is AppSessionSignedIn) {
-      await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
-    }
-  } else {
-    // TODO(ide): 実装
+  if (customerInfo.entitlements.active[revenueCatProEntitlementId] == null) {
+    throw const PurchaseException.uncategorized();
   }
+
+  await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
 }
