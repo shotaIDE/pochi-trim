@@ -15,8 +15,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      issues: read
-      pull-requests: read
+      issues: write
+      pull-requests: write
     steps:
       - uses: anthropics/claude-code-action@beta
         with:
