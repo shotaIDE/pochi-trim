@@ -13,6 +13,7 @@ jobs:
   claude-response:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       # GitHub Apps によるトークンを使用するための権限
       # https://github.com/anthropics/claude-code-action/blob/main/FAQ.md#why-am-i-getting-oidc-authentication-errors
       id-token: write
