@@ -4,6 +4,10 @@
   "automerge": true,
   "packageRules": [
     {
+      "matchPackageNames": ["flutter", "dart"],
+      "groupName": "flutter"
+    },
+    {
       "matchManagers": ["pyenv"],
       "automerge": false
     }
