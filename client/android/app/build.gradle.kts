@@ -33,6 +33,8 @@ android {
     }
 
     defaultConfig {
+        // 開発アプリでは初期に設定した一時アプリ名を使用し、本番アプリでは正式なアプリ名を使用できるよう、
+        // アプリ名部分を `applicationIdSuffix` で設定する。
         applicationId = "ide.shota.colomney"
         minSdk = 26
         targetSdk = flutter.targetSdkVersion
