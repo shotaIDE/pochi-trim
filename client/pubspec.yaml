@@ -5,7 +5,7 @@ publish_to: "none"
 version: 0.0.1+8
 
 environment:
-  sdk: 3.7.2
+  sdk: 3.8.1
 
 dependencies:
   cloud_firestore: 5.6.8
@@ -36,7 +36,7 @@ dependencies:
   riverpod_annotation: 2.6.1
   share_plus: 11.0.0
   shared_preferences: 2.5.3
-  skeletonizer: 1.4.3
+  skeletonizer: 2.0.1
   url_launcher: 6.3.1
 
 dev_dependencies:
