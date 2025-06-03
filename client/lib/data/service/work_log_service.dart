@@ -42,7 +42,22 @@ class WorkLogService {
   final String currentHouseId;
   final Ref ref;
 
+  /// 各家事の最終登録時刻を追跡するMap（連打防止用）
+  final Map<String, DateTime> _lastRegistrationTimes = {};
+
   Future<bool> recordWorkLog({required String houseWorkId}) async {
+    // 連打防止：同じ家事の場合は1秒以内の連続登録を無視する
+    final now = DateTime.now();
+    final lastRegistrationTime = _lastRegistrationTimes[houseWorkId];
+    
+    if (lastRegistrationTime != null) {
+      final timeDifference = now.difference(lastRegistrationTime);
+      if (timeDifference.inMilliseconds < 1000) {
+        // 1秒以内の連続登録は無視
+        return false;
+      }
+    }
+
     final userProfile = await ref.read(currentUserProfileProvider.future);
     if (userProfile == null) {
       return false;
@@ -51,12 +66,14 @@ class WorkLogService {
     final workLog = WorkLog(
       id: '', // 新規登録のため空文字列
       houseWorkId: houseWorkId,
-      completedAt: DateTime.now(),
+      completedAt: now,
       completedBy: userProfile.id,
     );
 
     try {
       await workLogRepository.save(workLog);
+      // 成功時に最終登録時刻を更新
+      _lastRegistrationTimes[houseWorkId] = now;
     } on Exception {
       return false;
     }
