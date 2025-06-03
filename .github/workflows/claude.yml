@@ -13,13 +13,11 @@ jobs:
   claude-response:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      # GitHub Apps によるトークンを使用するための権限
-      # https://github.com/anthropics/claude-code-action/blob/main/FAQ.md#why-am-i-getting-oidc-authentication-errors
-      id-token: write
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # GitHub App のトークンを使用するため、GITHUB_TOKEN は指定しない
+          github_token: ${{ secrets.GITHUB_TOKEN }}
