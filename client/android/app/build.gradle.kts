@@ -48,19 +48,16 @@ android {
             dimension = "environment"
             applicationIdSuffix = ".HouseWorker.emulator"
             manifestPlaceholders["usesCleartextTraffic"] = "true"
-            resValue("string", "app_name", "House Worker [Emulator]")
         }
         create("dev") {
             dimension = "environment"
             applicationIdSuffix = ".HouseWorker.dev"
             manifestPlaceholders["usesCleartextTraffic"] = "true"
-            resValue("string", "app_name", "House Worker [Dev]")
         }
         create("prod") {
             dimension = "environment"
             applicationIdSuffix = ".PochiTrim"
             manifestPlaceholders["usesCleartextTraffic"] = "false"
-            resValue("string", "app_name", "House Worker")
         }
     }
 
