@@ -7,14 +7,8 @@ import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/time_provider.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
-import 'package:pochi_trim/ui/root_presenter.dart';
 
-@GenerateMocks([
-  WorkLogRepository,
-  AuthService,
-  TimeProvider,
-  Ref,
-])
+@GenerateMocks([WorkLogRepository, AuthService, TimeProvider, Ref])
 import 'work_log_service_test.mocks.dart';
 
 Future<UserProfile?> _dummyUserProfileFuture() async => null;
@@ -28,8 +22,7 @@ void main() {
     late WorkLogService workLogService;
 
     setUp(() {
-      provideDummy<Future<UserProfile?>>(
-          _dummyUserProfileFuture());
+      provideDummy<Future<UserProfile?>>(_dummyUserProfileFuture());
 
       mockWorkLogRepository = MockWorkLogRepository();
       mockAuthService = MockAuthService();
@@ -58,13 +51,15 @@ void main() {
 
       // モックの設定
       when(mockTimeProvider.now()).thenReturn(now);
-      when(mockRef.read(currentUserProfileProvider.future))
-          .thenAnswer((_) async => userProfile);
+      when(
+        mockRef.read(currentUserProfileProvider.future),
+      ).thenAnswer((_) async => userProfile);
       when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
 
       // 実行
-      final result =
-          await workLogService.recordWorkLog(houseWorkId: houseWorkId);
+      final result = await workLogService.recordWorkLog(
+        houseWorkId: houseWorkId,
+      );
 
       // 検証
       expect(result, isTrue);
@@ -84,19 +79,22 @@ void main() {
       );
 
       // モックの設定
-      when(mockRef.read(currentUserProfileProvider.future))
-          .thenAnswer((_) async => userProfile);
+      when(
+        mockRef.read(currentUserProfileProvider.future),
+      ).thenAnswer((_) async => userProfile);
       when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
 
       // 1回目の登録
       when(mockTimeProvider.now()).thenReturn(firstTime);
-      final firstResult =
-          await workLogService.recordWorkLog(houseWorkId: houseWorkId);
+      final firstResult = await workLogService.recordWorkLog(
+        houseWorkId: houseWorkId,
+      );
 
       // 2回目の登録（500ms後）
       when(mockTimeProvider.now()).thenReturn(secondTime);
-      final secondResult =
-          await workLogService.recordWorkLog(houseWorkId: houseWorkId);
+      final secondResult = await workLogService.recordWorkLog(
+        houseWorkId: houseWorkId,
+      );
 
       // 検証
       expect(firstResult, isTrue);
@@ -117,19 +115,22 @@ void main() {
       );
 
       // モックの設定
-      when(mockRef.read(currentUserProfileProvider.future))
-          .thenAnswer((_) async => userProfile);
+      when(
+        mockRef.read(currentUserProfileProvider.future),
+      ).thenAnswer((_) async => userProfile);
       when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
 
       // 1回目の登録
       when(mockTimeProvider.now()).thenReturn(firstTime);
-      final firstResult =
-          await workLogService.recordWorkLog(houseWorkId: houseWorkId);
+      final firstResult = await workLogService.recordWorkLog(
+        houseWorkId: houseWorkId,
+      );
 
       // 2回目の登録（1秒後）
       when(mockTimeProvider.now()).thenReturn(secondTime);
-      final secondResult =
-          await workLogService.recordWorkLog(houseWorkId: houseWorkId);
+      final secondResult = await workLogService.recordWorkLog(
+        houseWorkId: houseWorkId,
+      );
 
       // 検証
       expect(firstResult, isTrue);
@@ -151,15 +152,18 @@ void main() {
 
       // モックの設定
       when(mockTimeProvider.now()).thenReturn(now);
-      when(mockRef.read(currentUserProfileProvider.future))
-          .thenAnswer((_) async => userProfile);
+      when(
+        mockRef.read(currentUserProfileProvider.future),
+      ).thenAnswer((_) async => userProfile);
       when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
 
       // 異なる家事の連続登録
-      final result1 =
-          await workLogService.recordWorkLog(houseWorkId: houseWorkId1);
-      final result2 =
-          await workLogService.recordWorkLog(houseWorkId: houseWorkId2);
+      final result1 = await workLogService.recordWorkLog(
+        houseWorkId: houseWorkId1,
+      );
+      final result2 = await workLogService.recordWorkLog(
+        houseWorkId: houseWorkId2,
+      );
 
       // 検証
       expect(result1, isTrue);
@@ -174,12 +178,14 @@ void main() {
 
       // モックの設定
       when(mockTimeProvider.now()).thenReturn(now);
-      when(mockRef.read(currentUserProfileProvider.future))
-          .thenAnswer((_) async => null); // ユーザープロファイルがnull
+      when(
+        mockRef.read(currentUserProfileProvider.future),
+      ).thenAnswer((_) async => null); // ユーザープロファイルがnull
 
       // 実行
-      final result =
-          await workLogService.recordWorkLog(houseWorkId: houseWorkId);
+      final result = await workLogService.recordWorkLog(
+        houseWorkId: houseWorkId,
+      );
 
       // 検証
       expect(result, isFalse);
@@ -199,13 +205,15 @@ void main() {
 
       // モックの設定
       when(mockTimeProvider.now()).thenReturn(now);
-      when(mockRef.read(currentUserProfileProvider.future))
-          .thenAnswer((_) async => userProfile);
+      when(
+        mockRef.read(currentUserProfileProvider.future),
+      ).thenAnswer((_) async => userProfile);
       when(mockWorkLogRepository.save(any)).thenThrow(Exception('DB Error'));
 
       // 実行
-      final result =
-          await workLogService.recordWorkLog(houseWorkId: houseWorkId);
+      final result = await workLogService.recordWorkLog(
+        houseWorkId: houseWorkId,
+      );
 
       // 検証
       expect(result, isFalse);
@@ -226,31 +234,34 @@ void main() {
       );
 
       // モックの設定
-      when(mockRef.read(currentUserProfileProvider.future))
-          .thenAnswer((_) async => userProfile);
+      when(
+        mockRef.read(currentUserProfileProvider.future),
+      ).thenAnswer((_) async => userProfile);
       when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
 
       // 1回目の登録
       when(mockTimeProvider.now()).thenReturn(firstTime);
-      final firstResult =
-          await workLogService.recordWorkLog(houseWorkId: houseWorkId);
+      final firstResult = await workLogService.recordWorkLog(
+        houseWorkId: houseWorkId,
+      );
 
       // 2回目の登録（999ms後）
       when(mockTimeProvider.now()).thenReturn(secondTime);
-      final secondResult =
-          await workLogService.recordWorkLog(houseWorkId: houseWorkId);
+      final secondResult = await workLogService.recordWorkLog(
+        houseWorkId: houseWorkId,
+      );
 
       // 3回目の登録（1000ms後）
       when(mockTimeProvider.now()).thenReturn(thirdTime);
-      final thirdResult =
-          await workLogService.recordWorkLog(houseWorkId: houseWorkId);
+      final thirdResult = await workLogService.recordWorkLog(
+        houseWorkId: houseWorkId,
+      );
 
       // 検証
       expect(firstResult, isTrue);
       expect(secondResult, isFalse); // 999msなので拒否される
       expect(thirdResult, isTrue); // 1000msなので許可される
-      verify(mockWorkLogRepository.save(any))
-          .called(2); // 1回目と3回目のみ保存される
+      verify(mockWorkLogRepository.save(any)).called(2); // 1回目と3回目のみ保存される
     });
   });
 }
