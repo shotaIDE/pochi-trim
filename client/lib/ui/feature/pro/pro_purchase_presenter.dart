@@ -36,3 +36,29 @@ Future<void> purchaseResult(Ref ref, Purchasable product) async {
 
   await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
 }
+
+/// 購入履歴を復元する
+///
+/// 復元に失敗した場合は、[PurchaseException]を投げる。
+@riverpod
+Future<void> restorePurchaseResult(Ref ref) async {
+  final CustomerInfo customerInfo;
+  try {
+    customerInfo = await Purchases.restorePurchases();
+  } on PlatformException catch (e) {
+    final errorCode = PurchasesErrorHelper.getErrorCode(e);
+
+    switch (errorCode) {
+      case PurchasesErrorCode.purchaseCancelledError:
+        throw const PurchaseException.cancelled();
+      // ignore: no_default_cases
+      default:
+        throw const PurchaseException.uncategorized();
+    }
+  }
+
+  // Pro版のエンタイトルメントがアクティブかチェック
+  if (customerInfo.entitlements.active[revenueCatProEntitlementId] != null) {
+    await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
+  }
+}
