@@ -107,14 +107,7 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('家事追加'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
-          tooltip: '閉じる',
-        ),
-      ),
+      appBar: AppBar(title: const Text('家事追加')),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
