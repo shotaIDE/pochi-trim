@@ -262,7 +262,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
         actions.add(
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('キャンセル'),
           ),
         );
@@ -289,7 +289,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _linkWithGoogle() async {
-    Navigator.pop(context);
+    Navigator.of(context).pop();
 
     try {
       await ref.read(authServiceProvider).linkWithGoogle();
@@ -325,7 +325,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _linkWithApple() async {
-    Navigator.pop(context);
+    Navigator.of(context).pop();
 
     try {
       await ref.read(authServiceProvider).linkWithApple();
@@ -370,7 +370,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             content: const Text('本当にログアウトしますか？'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.of(context).pop(),
                 child: const Text('キャンセル'),
               ),
               TextButton(
@@ -382,7 +382,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         .signOut();
                   } on Exception catch (e) {
                     if (context.mounted) {
-                      Navigator.pop(context);
+                      Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('ログアウトに失敗しました: $e')),
                       );
@@ -410,7 +410,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             content: const Text('本当にアカウントを削除しますか？この操作は元に戻せません。'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.of(context).pop(),
                 child: const Text('キャンセル'),
               ),
               TextButton(
@@ -424,7 +424,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         .signOut();
                   } on Exception catch (e) {
                     if (context.mounted) {
-                      Navigator.pop(context);
+                      Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('アカウント削除に失敗しました: $e')),
                       );
