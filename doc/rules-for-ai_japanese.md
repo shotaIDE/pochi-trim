@@ -47,11 +47,34 @@ SPM はベータ版機能であるため、ビルドなどで問題が発生す�
 
 ### スタイル
 
+コード修正をした後は、必ず Linter の自動修正を適用しなさい。
+実行コマンドは以下の通り。
+
+```bash
+dart fix --apply
+```
+
 Linter やコンパイラの警告は、即時解決しなさい。
 
 早期リターンを必ず使用して、ネストを減らす。
 
 `try`-`catch` 文は、throw する可能性のある処理のみを囲み、できるだけ小さなスコープで使用する。
+
+例:
+
+```dart
+// try-catch のスコープ外でも例外が発生する処理の戻り値を使用するため、定義を先にしておく
+final CustomerInfo customerInfo;
+try {
+  // 例外が発生する可能性のある処理
+  customerInfo = await Purchases.purchasePackage(product.package);
+} catch (e) {
+  throw PurchaseException();
+}
+
+// 後続処理
+return customerInfo.entitlements;
+```
 
 利用されていないコードは、即時削除する。
 
