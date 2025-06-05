@@ -271,14 +271,6 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
   Future<void> _restorePurchases() async {
     try {
       await ref.read(restorePurchaseResultProvider.future);
-
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('購入履歴の復元が完了しました。')));
     } on PurchaseException catch (e) {
       switch (e) {
         case PurchaseExceptionCancelled():
@@ -294,8 +286,17 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
               content: Text('購入履歴の復元中にエラーが発生しました。しばらくしてから再度お試しください。'),
             ),
           );
+          return;
       }
     }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('購入履歴の復元が完了しました。')));
   }
 }
 
