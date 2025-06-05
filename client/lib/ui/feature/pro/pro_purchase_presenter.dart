@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pochi_trim/data/model/purchasable.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/ui/feature/pro/purchase_exception.dart';
@@ -39,7 +38,7 @@ Future<void> purchaseResult(Ref ref, Purchasable product) async {
 
 /// 購入履歴を復元する
 ///
-/// 復元に失敗した場合は、[PurchaseException]を投げる。
+/// 復元に失敗した場合は、[RestorePurchaseException]を投げる。
 @riverpod
 Future<void> restorePurchaseResult(Ref ref) async {
   final CustomerInfo customerInfo;
@@ -49,8 +48,8 @@ Future<void> restorePurchaseResult(Ref ref) async {
     final errorCode = PurchasesErrorHelper.getErrorCode(e);
 
     switch (errorCode) {
-      case PurchasesErrorCode.purchaseCancelledError:
-        throw const PurchaseException.cancelled();
+      case PurchasesErrorCode.invalidReceiptError:
+        throw const RestorePurchaseException.notFound();
       // ignore: no_default_cases
       default:
         throw const PurchaseException.uncategorized();

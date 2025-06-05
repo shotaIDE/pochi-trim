@@ -271,12 +271,19 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
   Future<void> _restorePurchases() async {
     try {
       await ref.read(restorePurchaseResultProvider.future);
-    } on PurchaseException catch (e) {
+    } on RestorePurchaseException catch (e) {
       switch (e) {
-        case PurchaseExceptionCancelled():
+        case RestorePurchaseExceptionNotFound():
+          if (!mounted) {
+            return;
+          }
+
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('購入履歴が見つかりませんでした。')));
           return;
 
-        case PurchaseExceptionUncategorized():
+        case RestorePurchaseExceptionUncategorized():
           if (!mounted) {
             return;
           }

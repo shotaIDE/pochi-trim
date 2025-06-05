@@ -9,3 +9,14 @@ sealed class PurchaseException with _$PurchaseException implements Exception {
   const factory PurchaseException.uncategorized() =
       PurchaseExceptionUncategorized;
 }
+
+@freezed
+sealed class RestorePurchaseException
+    with _$RestorePurchaseException
+    implements Exception {
+  const factory RestorePurchaseException.notFound() =
+      RestorePurchaseExceptionNotFound;
+
+  const factory RestorePurchaseException.uncategorized() =
+      RestorePurchaseExceptionUncategorized;
+}
