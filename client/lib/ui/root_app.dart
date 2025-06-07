@@ -62,7 +62,7 @@ class _RootAppState extends ConsumerState<RootApp> {
     ];
 
     return MaterialApp(
-      title: 'ポチそぎ',
+      title: 'ぽちそぎ',
       theme: getLightTheme(),
       darkTheme: getDarkTheme(),
       debugShowCheckedModeBanner: showAppDebugBanner,

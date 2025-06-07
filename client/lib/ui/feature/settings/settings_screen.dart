@@ -135,8 +135,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ShareParams(
             text:
                 // TODO(ide): アプリのURLを取得する
-                '家事の可視化と削減アプリ「ポチそぎ」を使ってみませんか？ ',
-            title: '家事の可視化と削減アプリ「ポチそぎ」',
+                '家事の可視化と削減アプリ「ぽちそぎ」を使ってみませんか？ ',
+            title: '家事の可視化と削減アプリ「ぽちそぎ」',
           ),
         );
       },
@@ -194,8 +194,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         // ライセンス表示画面へ遷移
         showLicensePage(
           context: context,
-          applicationName: 'ポチそぎ',
-          applicationLegalese: ' 2025 ポチそぎ',
+          applicationName: 'ぽちそぎ',
+          applicationLegalese: '2025 colomney',
         );
       },
     );
