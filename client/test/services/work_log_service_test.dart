@@ -24,6 +24,14 @@ void main() {
     late MockRef mockRef;
     late WorkLogService workLogService;
 
+    // 共通のテストデータ
+    const testUserProfile = UserProfile.withGoogleAccount(
+      id: 'user-1',
+      displayName: 'Test User',
+      email: 'test@example.com',
+      photoUrl: 'https://example.com/photo.jpg',
+    );
+
     setUpAll(() {
       registerFallbackValue(
         WorkLog(
@@ -54,18 +62,12 @@ void main() {
       // テスト用のデータ
       final now = DateTime(2023, 1, 1, 12);
       const houseWorkId = 'house-work-1';
-      const userProfile = UserProfile.withGoogleAccount(
-        id: 'user-1',
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoUrl: 'https://example.com/photo.jpg',
-      );
 
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
         () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => userProfile);
+      ).thenAnswer((_) async => testUserProfile);
       when(
         () => mockWorkLogRepository.save(any()),
       ).thenAnswer((_) async => 'test-id');
@@ -85,17 +87,11 @@ void main() {
       final firstTime = DateTime(2023, 1, 1, 12);
       final secondTime = DateTime(2023, 1, 1, 12, 0, 1, 500); // 1.5秒後
       const houseWorkId = 'house-work-1';
-      const userProfile = UserProfile.withGoogleAccount(
-        id: 'user-1',
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoUrl: 'https://example.com/photo.jpg',
-      );
 
       // モックの設定
       when(
         () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => userProfile);
+      ).thenAnswer((_) async => testUserProfile);
       when(
         () => mockWorkLogRepository.save(any()),
       ).thenAnswer((_) async => 'test-id');
@@ -123,17 +119,11 @@ void main() {
       final firstTime = DateTime(2023, 1, 1, 12);
       final secondTime = DateTime(2023, 1, 1, 12, 0, 3); // 3秒後
       const houseWorkId = 'house-work-1';
-      const userProfile = UserProfile.withGoogleAccount(
-        id: 'user-1',
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoUrl: 'https://example.com/photo.jpg',
-      );
 
       // モックの設定
       when(
         () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => userProfile);
+      ).thenAnswer((_) async => testUserProfile);
       when(
         () => mockWorkLogRepository.save(any()),
       ).thenAnswer((_) async => 'test-id');
@@ -161,18 +151,12 @@ void main() {
       final now = DateTime(2023, 1, 1, 12);
       const houseWorkId1 = 'house-work-1';
       const houseWorkId2 = 'house-work-2';
-      const userProfile = UserProfile.withGoogleAccount(
-        id: 'user-1',
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoUrl: 'https://example.com/photo.jpg',
-      );
 
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
         () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => userProfile);
+      ).thenAnswer((_) async => testUserProfile);
       when(
         () => mockWorkLogRepository.save(any()),
       ).thenAnswer((_) async => 'test-id');
@@ -216,18 +200,12 @@ void main() {
       // テスト用のデータ
       final now = DateTime(2023, 1, 1, 12);
       const houseWorkId = 'house-work-1';
-      const userProfile = UserProfile.withGoogleAccount(
-        id: 'user-1',
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoUrl: 'https://example.com/photo.jpg',
-      );
 
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
         () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => userProfile);
+      ).thenAnswer((_) async => testUserProfile);
       when(
         () => mockWorkLogRepository.save(any()),
       ).thenThrow(Exception('DB Error'));
@@ -248,17 +226,11 @@ void main() {
       final secondTime = DateTime(2023, 1, 1, 12, 0, 2, 999); // 2999ms後
       final thirdTime = DateTime(2023, 1, 1, 12, 0, 3); // 3000ms後
       const houseWorkId = 'house-work-1';
-      const userProfile = UserProfile.withGoogleAccount(
-        id: 'user-1',
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoUrl: 'https://example.com/photo.jpg',
-      );
 
       // モックの設定
       when(
         () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => userProfile);
+      ).thenAnswer((_) async => testUserProfile);
       when(
         () => mockWorkLogRepository.save(any()),
       ).thenAnswer((_) async => 'test-id');
