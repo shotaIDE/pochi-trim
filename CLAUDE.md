@@ -71,6 +71,16 @@ try {
 return customerInfo.entitlements;
 ```
 
+If you do not use a function argument, explicitly indicate that it is unused by naming it `_`.
+
+Example:
+
+```dart
+onTap: (_) { // If you do not use an argument, explicitly state that it is unused as "_"
+// ...
+},
+```
+
 Immediately delete unused code.
 
 ### Maintain code consistency
