@@ -13,15 +13,16 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'work_log_service.g.dart';
 
-/// デバウンス閾値（ミリ秒）
-const _debounceThresholdMilliseconds = 3000;
-
 @riverpod
 class DebounceManager extends _$DebounceManager {
+  /// デバウンス閾値（ミリ秒）
+  static const _debounceThresholdMilliseconds = 3000;
+
   @override
   Map<String, DateTime> build() {
     // プロバイダーを3秒間維持
     ref.cacheFor(const Duration(milliseconds: _debounceThresholdMilliseconds));
+
     return <String, DateTime>{};
   }
 
@@ -42,6 +43,7 @@ class DebounceManager extends _$DebounceManager {
   /// 家事の最終登録時刻を記録する
   void recordRegistration(String houseWorkId, DateTime currentTime) {
     state = {...state, houseWorkId: currentTime};
+
     // 記録時に再度3秒間維持
     ref.cacheFor(const Duration(milliseconds: _debounceThresholdMilliseconds));
   }
