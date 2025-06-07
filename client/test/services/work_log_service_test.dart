@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
+import 'package:pochi_trim/ui/root_presenter.dart';
 
 class MockWorkLogRepository extends Mock implements WorkLogRepository {}
 
@@ -22,7 +24,6 @@ void main() {
     late MockAuthService mockAuthService;
     late MockSystemService mockSystemService;
     late MockRef mockRef;
-    late WorkLogService workLogService;
 
     // 共通のテストデータ
     const testUserProfile = UserProfile.withGoogleAccount(
@@ -48,14 +49,6 @@ void main() {
       mockAuthService = MockAuthService();
       mockSystemService = MockSystemService();
       mockRef = MockRef();
-
-      workLogService = WorkLogService(
-        workLogRepository: mockWorkLogRepository,
-        authService: mockAuthService,
-        currentHouseId: 'house-1',
-        systemService: mockSystemService,
-        ref: mockRef,
-      );
     });
 
     test('初回の家事登録は成功すること', () async {
@@ -71,8 +64,22 @@ void main() {
       when(
         () => mockWorkLogRepository.save(any()),
       ).thenAnswer((_) async => 'test-id');
+      final container = ProviderContainer(
+        overrides: [
+          unwrappedCurrentAppSessionProvider.overrideWith(
+            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+          ),
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          authServiceProvider.overrideWith((_) => mockAuthService),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+          currentUserProfileProvider.overrideWith(
+            (_) => Stream.value(testUserProfile),
+          ),
+        ],
+      );
 
       // 実行
+      final workLogService = container.read(workLogServiceProvider);
       final result = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
