@@ -15,7 +15,7 @@ WorkLogService workLogService(Ref ref) {
   final appSession = ref.watch(unwrappedCurrentAppSessionProvider);
   final workLogRepository = ref.watch(workLogRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
-  final timeProvider = ref.watch(timeProviderProvider);
+  final systemService = ref.watch(systemServiceProvider);
 
   switch (appSession) {
     case AppSessionSignedIn(currentHouseId: final currentHouseId):
@@ -23,7 +23,7 @@ WorkLogService workLogService(Ref ref) {
         workLogRepository: workLogRepository,
         authService: authService,
         currentHouseId: currentHouseId,
-        timeProvider: timeProvider,
+        systemService: systemService,
         ref: ref,
       );
     case AppSessionNotSignedIn():
@@ -37,14 +37,14 @@ class WorkLogService {
     required this.workLogRepository,
     required this.authService,
     required this.currentHouseId,
-    required this.timeProvider,
+    required this.systemService,
     required this.ref,
   });
 
   final WorkLogRepository workLogRepository;
   final AuthService authService;
   final String currentHouseId;
-  final SystemService timeProvider;
+  final SystemService systemService;
   final Ref ref;
 
   /// 各家事の最終登録時刻を追跡するMap（連打防止用）
@@ -52,7 +52,7 @@ class WorkLogService {
 
   Future<bool> recordWorkLog({required String houseWorkId}) async {
     // 連打防止：同じ家事の場合は1秒以内の連続登録を無視する
-    final now = timeProvider.getCurrentDateTime();
+    final now = systemService.getCurrentDateTime();
     final lastRegistrationTime = _lastRegistrationTimes[houseWorkId];
 
     if (lastRegistrationTime != null) {
