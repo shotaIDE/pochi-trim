@@ -16,8 +16,6 @@ class MockAuthService extends Mock implements AuthService {}
 
 class MockSystemService extends Mock implements SystemService {}
 
-class MockRef extends Mock implements Ref {}
-
 void main() {
   group('家事ログの連続登録禁止', () {
     late MockWorkLogRepository mockWorkLogRepository;
