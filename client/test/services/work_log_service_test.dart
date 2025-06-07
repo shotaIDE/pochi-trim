@@ -17,7 +17,7 @@ void main() {
   group('WorkLogService 連打防止テスト', () {
     late MockWorkLogRepository mockWorkLogRepository;
     late MockAuthService mockAuthService;
-    late MockTimeProvider mockTimeProvider;
+    late MockSystemService mockSystemService;
     late MockRef mockRef;
     late WorkLogService workLogService;
 
@@ -26,14 +26,14 @@ void main() {
 
       mockWorkLogRepository = MockWorkLogRepository();
       mockAuthService = MockAuthService();
-      mockTimeProvider = MockTimeProvider();
+      mockSystemService = MockSystemService();
       mockRef = MockRef();
 
       workLogService = WorkLogService(
         workLogRepository: mockWorkLogRepository,
         authService: mockAuthService,
         currentHouseId: 'house-1',
-        timeProvider: mockTimeProvider,
+        systemService: mockSystemService,
         ref: mockRef,
       );
     });
@@ -50,7 +50,7 @@ void main() {
       );
 
       // モックの設定
-      when(mockTimeProvider.now()).thenReturn(now);
+      when(mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
         mockRef.read(currentUserProfileProvider.future),
       ).thenAnswer((_) async => userProfile);
@@ -85,13 +85,13 @@ void main() {
       when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
 
       // 1回目の登録
-      when(mockTimeProvider.now()).thenReturn(firstTime);
+      when(mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
       final firstResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
 
       // 2回目の登録（500ms後）
-      when(mockTimeProvider.now()).thenReturn(secondTime);
+      when(mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
       final secondResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
@@ -121,13 +121,13 @@ void main() {
       when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
 
       // 1回目の登録
-      when(mockTimeProvider.now()).thenReturn(firstTime);
+      when(mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
       final firstResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
 
       // 2回目の登録（1秒後）
-      when(mockTimeProvider.now()).thenReturn(secondTime);
+      when(mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
       final secondResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
@@ -151,7 +151,7 @@ void main() {
       );
 
       // モックの設定
-      when(mockTimeProvider.now()).thenReturn(now);
+      when(mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
         mockRef.read(currentUserProfileProvider.future),
       ).thenAnswer((_) async => userProfile);
@@ -177,7 +177,7 @@ void main() {
       const houseWorkId = 'house-work-1';
 
       // モックの設定
-      when(mockTimeProvider.now()).thenReturn(now);
+      when(mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
         mockRef.read(currentUserProfileProvider.future),
       ).thenAnswer((_) async => null); // ユーザープロファイルがnull
@@ -204,7 +204,7 @@ void main() {
       );
 
       // モックの設定
-      when(mockTimeProvider.now()).thenReturn(now);
+      when(mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
         mockRef.read(currentUserProfileProvider.future),
       ).thenAnswer((_) async => userProfile);
@@ -240,19 +240,19 @@ void main() {
       when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
 
       // 1回目の登録
-      when(mockTimeProvider.now()).thenReturn(firstTime);
+      when(mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
       final firstResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
 
       // 2回目の登録（999ms後）
-      when(mockTimeProvider.now()).thenReturn(secondTime);
+      when(mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
       final secondResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
 
       // 3回目の登録（1000ms後）
-      when(mockTimeProvider.now()).thenReturn(thirdTime);
+      when(mockSystemService.getCurrentDateTime()).thenReturn(thirdTime);
       final thirdResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
