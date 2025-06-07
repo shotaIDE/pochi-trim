@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_screen.dart';
@@ -69,10 +69,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         // TODO(ide): 文字サイズが変わった時にも固定サイズで問題ないか？
         padding: const EdgeInsets.symmetric(vertical: 12),
         duration: const Duration(milliseconds: 250),
-        color:
-            _isLogTabHighlighted
-                ? Theme.of(context).highlightColor
-                : Colors.transparent,
+        color: _isLogTabHighlighted
+            ? Theme.of(context).highlightColor
+            : Colors.transparent,
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 8,
@@ -119,8 +118,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
-    await HapticFeedback.mediumImpact();
-
     final result = await ref.read(
       onCompleteHouseWorkButtonTappedResultProvider(houseWork).future,
     );
@@ -146,8 +143,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _onDuplicateWorkLogButtonTap(
     WorkLogIncludedHouseWork workLogIncludedHouseWork,
   ) async {
-    await HapticFeedback.mediumImpact();
-
     final isSucceeded = await ref.read(
       onDuplicateWorkLogButtonTappedResultProvider(
         workLogIncludedHouseWork,
@@ -172,12 +167,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _onQuickRegisterButtonPressed(HouseWork houseWork) async {
-    await HapticFeedback.mediumImpact();
-
     final workLogService = ref.read(workLogServiceProvider);
+    final systemService = ref.read(systemServiceProvider);
 
     final isSucceeded = await workLogService.recordWorkLog(
       houseWorkId: houseWork.id,
+      onRequestAccepted: systemService.doHapticFeedbackActionReceived,
     );
 
     if (!mounted) {
@@ -274,34 +269,31 @@ class _QuickRegisterBottomBarState
           enabled: _sortedHouseWorksByCompletionCountAsync.isLoading,
           child: _sortedHouseWorksByCompletionCountAsync.when(
             data: (recentHouseWorks) {
-              final items =
-                  recentHouseWorks.map((houseWork) {
-                    return _QuickRegisterButton(
-                      houseWork: houseWork,
-                      onTap: (houseWork) => widget.onTap(houseWork),
-                    );
-                  }).toList();
+              final items = recentHouseWorks.map((houseWork) {
+                return _QuickRegisterButton(
+                  houseWork: houseWork,
+                  onTap: (houseWork) => widget.onTap(houseWork),
+                );
+              }).toList();
 
               return ListView(
                 scrollDirection: Axis.horizontal,
                 children: items,
               );
             },
-            loading:
-                () => ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: List.filled(4, const _FakeQuickRegisterButton()),
+            loading: () => ListView(
+              scrollDirection: Axis.horizontal,
+              children: List.filled(4, const _FakeQuickRegisterButton()),
+            ),
+            error: (_, _) => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  'クイック登録の取得に失敗しました。アプリを再起動し、再度お試しください。',
+                  textAlign: TextAlign.center,
                 ),
-            error:
-                (_, _) => const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      'クイック登録の取得に失敗しました。アプリを再起動し、再度お試しください。',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
+              ),
+            ),
           ),
         ),
       ),

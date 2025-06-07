@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -15,5 +16,10 @@ class SystemService {
   /// 現在の日時を取得する
   DateTime getCurrentDateTime() {
     return DateTime.now();
+  }
+
+  /// ユーザーアクションが受け取られたときの触覚フィードバックを実行する
+  Future<void> doHapticFeedbackActionReceived() async {
+    await HapticFeedback.mediumImpact();
   }
 }
