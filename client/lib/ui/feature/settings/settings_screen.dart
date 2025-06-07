@@ -399,7 +399,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('アカウント削除'),
-        content: const Text('本当にアカウントを削除しますか？この操作は元に戻せません。'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('本当にアカウントを削除しますか？'),
+            SizedBox(height: 16),
+            Text('削除されるデータ:', style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            Text('• ユーザーアカウント情報'),
+            Text('• 登録した家事データ'),
+            Text('• 作業履歴'),
+            Text('• アプリ内設定'),
+            SizedBox(height: 16),
+            Text(
+              'この操作は元に戻せません。',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -408,16 +429,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           TextButton(
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             onPressed: () async {
+              Navigator.of(context).pop();
+              
               try {
-                // Firebase認証からのサインアウト
-                await ref.read(authServiceProvider).signOut();
+                // アカウントの削除
+                await ref.read(authServiceProvider).deleteAccount();
+                
+                // アプリセッションのクリア
                 await ref.read(currentAppSessionProvider.notifier).signOut();
+                
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('アカウントを削除しました')),
+                  );
+                }
+              } on DeleteAccountException catch (error) {
+                if (!context.mounted) {
+                  return;
+                }
+                
+                switch (error) {
+                  case DeleteAccountExceptionRequiresRecentLogin():
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('アカウント削除には最新のログインが必要です。一度ログアウトして再度ログインしてからお試しください。'),
+                      ),
+                    );
+                  case DeleteAccountExceptionUncategorized():
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('アカウント削除に失敗しました。しばらくしてから再度お試しください。')),
+                    );
+                }
               } on Exception catch (e) {
                 if (context.mounted) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('アカウント削除に失敗しました: $e')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('アカウント削除に失敗しました: $e')),
+                  );
                 }
               }
             },

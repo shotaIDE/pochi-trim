@@ -169,6 +169,26 @@ class AuthService {
     await firebase_auth.FirebaseAuth.instance.signOut();
   }
 
+  Future<void> deleteAccount() async {
+    final user = firebase_auth.FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw const DeleteAccountException.uncategorized();
+    }
+
+    try {
+      await user.delete();
+      _logger.info('User account deleted successfully.');
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        _logger.warning('Account deletion requires recent login.');
+        throw const DeleteAccountException.requiresRecentLogin();
+      }
+
+      _logger.severe('Account deletion failed: ${e.message}');
+      throw const DeleteAccountException.uncategorized();
+    }
+  }
+
   /// 現在のユーザー情報をチェックし、ログインしている場合はUIDをログ出力します
   void checkCurrentUser() {
     final user = firebase_auth.FirebaseAuth.instance.currentUser;
