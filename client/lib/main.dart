@@ -49,7 +49,7 @@ void _setupLogging() {
 }
 
 // Firebase Emulatorのホスト情報を取得する関数
-String getEmulatorHost() {
+String _getEmulatorHost() {
   try {
     // dart-define-from-fileから設定を読み込む
     const emulatorHost = String.fromEnvironment(
@@ -65,8 +65,8 @@ String getEmulatorHost() {
 }
 
 // Firebase Emulatorの設定を行う関数
-void setupFirebaseEmulators(String host) {
-  FirebaseAuth.instance.useAuthEmulator(host, 9099);
+Future<void> _setupFirebaseEmulators(String host) async {
+  await FirebaseAuth.instance.useAuthEmulator(host, 9099);
   FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
   FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
 }
@@ -84,11 +84,11 @@ Future<void> main() async {
 
     if (useFirebaseEmulator) {
       // エミュレーターのホスト情報を取得
-      final emulatorHost = getEmulatorHost();
+      final emulatorHost = _getEmulatorHost();
       _logger.info('エミュレーターホスト: $emulatorHost');
 
       // エミュレーターの設定を適用
-      setupFirebaseEmulators(emulatorHost);
+      await _setupFirebaseEmulators(emulatorHost);
       _logger.info('Firebase Emulator設定を適用しました');
     }
 
