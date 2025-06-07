@@ -53,7 +53,15 @@ class WorkLogService {
   /// 各家事の最終登録時刻を追跡するMap（連打防止用）
   final Map<String, DateTime> _lastRegistrationTimes = {};
 
-  Future<bool> recordWorkLog({required String houseWorkId}) async {
+  Future<bool> recordWorkLog({
+    required String houseWorkId,
+
+    /// 家事ログ登録のリクエストが承認されたときに呼び出されるコールバック
+    ///
+    /// 家事ログの登録における事前バリデーションチェックが成功した場合に呼び出されます。
+    /// コールバックの中身は、Hapticフィードバックの処理を実行することなどを想定しています。
+    void Function()? onRequestAccepted,
+  }) async {
     // 連打防止：同じ家事の場合は3秒以内の連続登録を無視する
     final now = systemService.getCurrentDateTime();
     final lastRegistrationTime = _lastRegistrationTimes[houseWorkId];
@@ -70,6 +78,8 @@ class WorkLogService {
     if (userProfile == null) {
       return false;
     }
+
+    onRequestAccepted?.call();
 
     final workLog = WorkLog(
       id: '', // 新規登録のため空文字列
