@@ -10,6 +10,7 @@
     {
       "matchPackageNames": [
         "cloud_firestore",
+        "cloud_functions",
         "firebase_analytics",
         "firebase_auth",
         "firebase_core",
