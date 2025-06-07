@@ -81,6 +81,8 @@ class WorkLogService {
 
     onRequestAccepted?.call();
 
+    _lastRegistrationTimes[houseWorkId] = now;
+
     final workLog = WorkLog(
       id: '', // 新規登録のため空文字列
       houseWorkId: houseWorkId,
@@ -93,9 +95,6 @@ class WorkLogService {
     } on Exception {
       return false;
     }
-
-    // 成功時に最終登録時刻を更新
-    _lastRegistrationTimes[houseWorkId] = now;
 
     return true;
   }
