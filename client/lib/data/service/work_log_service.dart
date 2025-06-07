@@ -51,14 +51,14 @@ class WorkLogService {
   final Map<String, DateTime> _lastRegistrationTimes = {};
 
   Future<bool> recordWorkLog({required String houseWorkId}) async {
-    // 連打防止：同じ家事の場合は1秒以内の連続登録を無視する
+    // 連打防止：同じ家事の場合は3秒以内の連続登録を無視する
     final now = systemService.getCurrentDateTime();
     final lastRegistrationTime = _lastRegistrationTimes[houseWorkId];
 
     if (lastRegistrationTime != null) {
       final timeDifference = now.difference(lastRegistrationTime);
-      if (timeDifference.inMilliseconds < 1000) {
-        // 1秒以内の連続登録は無視
+      if (timeDifference.inMilliseconds < 3000) {
+        // 3秒以内の連続登録は無視
         return false;
       }
     }
