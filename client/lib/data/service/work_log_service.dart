@@ -15,32 +15,21 @@ part 'work_log_service.g.dart';
 /// デバウンス閾値（ミリ秒）
 const _debounceThresholdMilliseconds = 3000;
 
+/// Riverpodプロバイダーを特定の時間だけ維持するためのExtension
+extension CacheForExtension on Ref {
+  void cacheFor(Duration duration) {
+    final link = keepAlive();
+    final timer = Timer(duration, link.close);
+    onDispose(timer.cancel);
+  }
+}
+
 @riverpod
 class DebounceManager extends _$DebounceManager {
-  Timer? _keepAliveTimer;
-
   @override
   Map<String, DateTime> build() {
-    // 3秒間プロバイダーを維持するタイマーを設定
-    _keepProviderAlive();
-
-    // プロバイダーが破棄される際にタイマーをクリア
-    ref.onDispose(() {
-      _keepAliveTimer?.cancel();
-    });
-
+    // 初期状態では維持しない（最初のアクセス時に維持を開始）
     return <String, DateTime>{};
-  }
-
-  /// プロバイダーを3秒間維持する
-  void _keepProviderAlive() {
-    _keepAliveTimer?.cancel();
-    _keepAliveTimer = Timer(
-      const Duration(milliseconds: _debounceThresholdMilliseconds),
-      () {
-        // タイマー終了時は何もしない（自然に破棄される）
-      },
-    );
   }
 
   /// 家事の最終登録時刻を記録し、デバウンス判定を行う
@@ -57,8 +46,8 @@ class DebounceManager extends _$DebounceManager {
     // 記録可能な場合は最終登録時刻を更新
     state = {...state, houseWorkId: currentTime};
 
-    // プロバイダーを再度3秒間維持
-    _keepProviderAlive();
+    // プロバイダーを3秒間維持
+    ref.cacheFor(const Duration(milliseconds: _debounceThresholdMilliseconds));
 
     return true;
   }
