@@ -195,7 +195,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         showLicensePage(
           context: context,
           applicationName: 'ぽちそぎ',
-          applicationLegalese: '2025 ぽちそぎ',
+          applicationLegalese: '2025 colomney',
         );
       },
     );
