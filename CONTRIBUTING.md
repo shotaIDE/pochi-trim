@@ -122,6 +122,9 @@ Terraform で作成した Firebase プロジェクトに、Firebase Console か�
     - https://firebase.google.com/docs/flutter/setup?platform=ios&hl=ja#configure-firebase
   - Google アカウントのログインプロバイダを設定する場合、SHA-1 フィンガープリントを登録する必要がある。Firebase Emulator 環境においても同様に登録が必要。
     - https://developers.google.com/android/guides/client-auth?hl=ja#using_keytool_on_the_certificate
+  - Apple アカウントのログインプロバイダを設定する場合、Xcode 上で Release 構成は Manual Signing に設定しておく必要がある。
+    - Xcode 上では Automatic Signing 状態で、コマンドにより Manual Signing に付け替えて App Store 向けのビルドを行うと、Apple でサインイン機能が原因不明のエラーで失敗する。そのため、付け替えでなく最初から Manual Signing に設定しておく必要がある。
+    - https://zenn.dev/colomney/scraps/c6a503fad4da72
 
 ### アイコンの設定
 

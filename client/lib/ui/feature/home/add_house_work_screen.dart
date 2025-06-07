@@ -124,10 +124,9 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color:
-                            Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
@@ -181,42 +180,40 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
     // 簡易的な絵文字選択ダイアログを表示
     final selectedEmoji = await showDialog<String>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('アイコンを選択'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: GridView.builder(
-                shrinkWrap: true,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 6,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                ),
-                itemCount: _emojiList.length,
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onTap: () => Navigator.of(context).pop(_emojiList[index]),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color:
-                            Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Text(
-                          _emojiList[index],
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+      builder: (context) => AlertDialog(
+        title: const Text('アイコンを選択'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: GridView.builder(
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 6,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
             ),
+            itemCount: _emojiList.length,
+            itemBuilder: (context, index) {
+              return InkWell(
+                onTap: () => Navigator.of(context).pop(_emojiList[index]),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      _emojiList[index],
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
+        ),
+      ),
     );
 
     if (selectedEmoji != null) {
@@ -272,31 +269,29 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
       context,
     ).showSnackBar(const SnackBar(content: Text('家事を登録しました')));
 
-    // 一覧画面に戻る（更新フラグをtrueにして渡す）
-    Navigator.of(context).pop(true);
+    Navigator.of(context).pop();
   }
 
   Future<void> _showProUpgradeDialog(String message) async {
     await showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('制限に達しました'),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('キャンセル'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).push(UpgradeToProScreen.route());
-                },
-                child: const Text('Pro版にアップグレード'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('制限に達しました'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('キャンセル'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(UpgradeToProScreen.route());
+            },
+            child: const Text('Pro版にアップグレード'),
+          ),
+        ],
+      ),
     );
   }
 }

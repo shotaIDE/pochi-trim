@@ -44,8 +44,15 @@ class IsProUser extends _$IsProUser {
   }
 
   Future<bool> _hasProEntitlement({required CustomerInfo customerInfo}) async {
-    final entitlementInfo =
-        customerInfo.entitlements.active[revenueCatProEntitlementId];
-    return entitlementInfo != null;
+    return hasProEntitlement(customerInfo: customerInfo);
   }
+}
+
+/// Pro版のエンタイトルメントがアクティブかチェックする
+///
+/// [customerInfo] を基にPro版のエンタイトルメントがアクティブかどうかを判定します。
+bool hasProEntitlement({required CustomerInfo customerInfo}) {
+  final entitlementInfo =
+      customerInfo.entitlements.active[revenueCatProEntitlementId];
+  return entitlementInfo != null;
 }

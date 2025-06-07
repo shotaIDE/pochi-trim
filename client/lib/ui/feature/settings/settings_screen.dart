@@ -94,13 +94,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         email: final email,
         photoUrl: final photoUrl,
       ):
-        leading =
-            photoUrl != null
-                ? CircleAvatar(
-                  backgroundImage: NetworkImage(photoUrl),
-                  radius: 20,
-                )
-                : const Icon(Icons.person);
+        leading = photoUrl != null
+            ? CircleAvatar(backgroundImage: NetworkImage(photoUrl), radius: 20)
+            : const Icon(Icons.person);
         titleText = displayName ?? '名前未設定';
         subtitle = email != null ? Text(email) : null;
         onTap = null;
@@ -262,7 +258,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
         actions.add(
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('キャンセル'),
           ),
         );
@@ -289,7 +285,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _linkWithGoogle() async {
-    Navigator.pop(context);
+    Navigator.of(context).pop();
 
     try {
       await ref.read(authServiceProvider).linkWithGoogle();
@@ -325,7 +321,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _linkWithApple() async {
-    Navigator.pop(context);
+    Navigator.of(context).pop();
 
     try {
       await ref.read(authServiceProvider).linkWithApple();
@@ -364,35 +360,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showLogoutConfirmDialog(BuildContext context, WidgetRef ref) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('ログアウト'),
-            content: const Text('本当にログアウトしますか？'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('キャンセル'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  try {
-                    await ref.read(authServiceProvider).signOut();
-                    await ref
-                        .read(currentAppSessionProvider.notifier)
-                        .signOut();
-                  } on Exception catch (e) {
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('ログアウトに失敗しました: $e')),
-                      );
-                    }
-                  }
-                },
-                child: const Text('ログアウト'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('ログアウト'),
+        content: const Text('本当にログアウトしますか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('キャンセル'),
           ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await ref.read(authServiceProvider).signOut();
+                await ref.read(currentAppSessionProvider.notifier).signOut();
+              } on Exception catch (e) {
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('ログアウトに失敗しました: $e')));
+                }
+              }
+            },
+            child: const Text('ログアウト'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -404,37 +397,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   ) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('アカウント削除'),
-            content: const Text('本当にアカウントを削除しますか？この操作は元に戻せません。'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('キャンセル'),
-              ),
-              TextButton(
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                onPressed: () async {
-                  try {
-                    // Firebase認証からのサインアウト
-                    await ref.read(authServiceProvider).signOut();
-                    await ref
-                        .read(currentAppSessionProvider.notifier)
-                        .signOut();
-                  } on Exception catch (e) {
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('アカウント削除に失敗しました: $e')),
-                      );
-                    }
-                  }
-                },
-                child: const Text('削除する'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('アカウント削除'),
+        content: const Text('本当にアカウントを削除しますか？この操作は元に戻せません。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('キャンセル'),
           ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () async {
+              try {
+                // Firebase認証からのサインアウト
+                await ref.read(authServiceProvider).signOut();
+                await ref.read(currentAppSessionProvider.notifier).signOut();
+              } on Exception catch (e) {
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('アカウント削除に失敗しました: $e')));
+                }
+              }
+            },
+            child: const Text('削除する'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -449,8 +439,8 @@ class _ReviewAppTile extends StatelessWidget {
       title: const Text('アプリをレビューする'),
       trailing: const _OpenTrailingIcon(),
       // アプリ内レビューは表示回数に制限があるため、ストアに移動するようにしている
-      onTap:
-          () => InAppReview.instance.openStoreListing(appStoreId: appStoreId),
+      onTap: () =>
+          InAppReview.instance.openStoreListing(appStoreId: appStoreId),
     );
   }
 }
@@ -530,8 +520,8 @@ class _PlanInfoTile extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: ElevatedButton(
-              onPressed:
-                  () => Navigator.of(context).push(UpgradeToProScreen.route()),
+              onPressed: () =>
+                  Navigator.of(context).push(UpgradeToProScreen.route()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -581,9 +571,8 @@ class _AppVersionTile extends ConsumerWidget {
     final appVersionAsync = ref.watch(currentAppVersionProvider);
 
     final versionString = appVersionAsync.when(
-      data:
-          (appVersion) =>
-              'バージョン: ${appVersion.version} (${appVersion.buildNumber})',
+      data: (appVersion) =>
+          'バージョン: ${appVersion.version} (${appVersion.buildNumber})',
       loading: () => 'バージョン: n.n.n (nnn)',
       error: (_, _) => 'バージョン情報を取得できませんでした',
     );

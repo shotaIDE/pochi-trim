@@ -95,10 +95,9 @@ class _FeatureItem extends StatelessWidget {
         Icon(
           icon,
           size: 24,
-          color:
-              isComingSoon
-                  ? Theme.of(context).colorScheme.onSurface.withAlpha(100)
-                  : Colors.green,
+          color: isComingSoon
+              ? Theme.of(context).colorScheme.onSurface.withAlpha(100)
+              : Colors.green,
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -113,12 +112,11 @@ class _FeatureItem extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color:
-                            isComingSoon
-                                ? Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withAlpha(100)
-                                : Theme.of(context).colorScheme.onSurface,
+                        color: isComingSoon
+                            ? Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withAlpha(100)
+                            : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -151,12 +149,9 @@ class _FeatureItem extends StatelessWidget {
                 description,
                 style: TextStyle(
                   fontSize: 14,
-                  color:
-                      isComingSoon
-                          ? Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withAlpha(100)
-                          : Theme.of(context).colorScheme.onSurface,
+                  color: isComingSoon
+                      ? Theme.of(context).colorScheme.onSurface.withAlpha(100)
+                      : Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],
@@ -206,8 +201,9 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
         }
 
         final purchaseButton = ElevatedButton(
-          onPressed:
-              purchasables == null ? null : () => _purchase(purchasables.first),
+          onPressed: purchasables == null
+              ? null
+              : () => _purchase(purchasables.first),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -226,9 +222,27 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
           ),
         );
 
+        final restoreButton = TextButton(
+          onPressed: _restorePurchases,
+          child: Text(
+            '購入履歴を復元する',
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        );
+
         return Skeletonizer(
           enabled: purchasables == null,
-          child: Column(spacing: 36, children: [priceTile, purchaseButton]),
+          child: Column(
+            spacing: 16,
+            children: [
+              priceTile,
+              const SizedBox(height: 20),
+              purchaseButton,
+              restoreButton,
+            ],
+          ),
         );
       },
     );
@@ -252,6 +266,44 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
           );
       }
     }
+  }
+
+  Future<void> _restorePurchases() async {
+    try {
+      await ref.read(restorePurchaseResultProvider.future);
+    } on RestorePurchaseException catch (e) {
+      switch (e) {
+        case RestorePurchaseExceptionNotFound():
+          if (!mounted) {
+            return;
+          }
+
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('購入履歴が見つかりませんでした。')));
+          return;
+
+        case RestorePurchaseExceptionUncategorized():
+          if (!mounted) {
+            return;
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('購入履歴の復元中にエラーが発生しました。しばらくしてから再度お試しください。'),
+            ),
+          );
+          return;
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('購入履歴の復元が完了しました。')));
   }
 }
 

@@ -41,11 +41,35 @@ In that case, troubleshoot by investigating any reported issues in Flutter or co
 
 ### Style
 
+After fixing the code, be sure to apply the Linter's automatic fix.
+
+The execution command is as follows:
+
+```bash
+dart fix --apply
+```
+
 Resolve linter and compiler warnings immediately.
 
 Always use early returns to reduce nesting.
 
 Use `try`-`catch` statements to enclose only processes that may throw, and in the smallest possible scope.
+
+Example:
+
+```dart
+// Define the return value of a process that may throw an exception even outside the scope of try-catch, so that it is used first.
+final CustomerInfo customerInfo;
+try {
+// Process that may throw an exception
+  customerInfo = await Purchases.purchasePackage(product.package);
+} catch (e) {
+  throw PurchaseException();
+}
+
+// Subsequent process
+return customerInfo.entitlements;
+```
 
 Immediately delete unused code.
 
