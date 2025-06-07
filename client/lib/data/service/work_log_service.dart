@@ -6,6 +6,7 @@ import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/riverpod_extension.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -14,15 +15,6 @@ part 'work_log_service.g.dart';
 
 /// デバウンス閾値（ミリ秒）
 const _debounceThresholdMilliseconds = 3000;
-
-/// Riverpodプロバイダーを特定の時間だけ維持するためのExtension
-extension CacheForExtension on Ref {
-  void cacheFor(Duration duration) {
-    final link = keepAlive();
-    final timer = Timer(duration, link.close);
-    onDispose(timer.cancel);
-  }
-}
 
 @riverpod
 class DebounceManager extends _$DebounceManager {
