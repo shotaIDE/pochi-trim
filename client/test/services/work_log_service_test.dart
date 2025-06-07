@@ -66,10 +66,10 @@ void main() {
       verify(mockWorkLogRepository.save(any)).called(1);
     });
 
-    test('1秒以内の連続登録は拒否されること', () async {
+    test('3秒以内の連続登録は拒否されること', () async {
       // テスト用のデータ
       final firstTime = DateTime(2023, 1, 1, 12);
-      final secondTime = DateTime(2023, 1, 1, 12, 0, 0, 500); // 500ms後
+      final secondTime = DateTime(2023, 1, 1, 12, 0, 1, 500); // 1.5秒後
       const houseWorkId = 'house-work-1';
       const userProfile = UserProfile.withGoogleAccount(
         id: 'user-1',
@@ -90,7 +90,7 @@ void main() {
         houseWorkId: houseWorkId,
       );
 
-      // 2回目の登録（500ms後）
+      // 2回目の登録（1.5秒後）
       when(mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
       final secondResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
@@ -102,10 +102,10 @@ void main() {
       verify(mockWorkLogRepository.save(any)).called(1); // 1回のみ保存される
     });
 
-    test('1秒後の登録は許可されること', () async {
+    test('3秒後の登録は許可されること', () async {
       // テスト用のデータ
       final firstTime = DateTime(2023, 1, 1, 12);
-      final secondTime = DateTime(2023, 1, 1, 12, 0, 1); // 1秒後
+      final secondTime = DateTime(2023, 1, 1, 12, 0, 3); // 3秒後
       const houseWorkId = 'house-work-1';
       const userProfile = UserProfile.withGoogleAccount(
         id: 'user-1',
@@ -126,7 +126,7 @@ void main() {
         houseWorkId: houseWorkId,
       );
 
-      // 2回目の登録（1秒後）
+      // 2回目の登録（3秒後）
       when(mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
       final secondResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
@@ -134,7 +134,7 @@ void main() {
 
       // 検証
       expect(firstResult, isTrue);
-      expect(secondResult, isTrue); // 1秒経過しているので許可される
+      expect(secondResult, isTrue); // 3秒経過しているので許可される
       verify(mockWorkLogRepository.save(any)).called(2); // 2回とも保存される
     });
 
@@ -220,11 +220,11 @@ void main() {
       verify(mockWorkLogRepository.save(any)).called(1);
     });
 
-    test('999msの連続登録は拒否され、1000msの登録は許可されること', () async {
+    test('2999msの連続登録は拒否され、3000msの登録は許可されること', () async {
       // テスト用のデータ
       final firstTime = DateTime(2023, 1, 1, 12);
-      final secondTime = DateTime(2023, 1, 1, 12, 0, 0, 999); // 999ms後
-      final thirdTime = DateTime(2023, 1, 1, 12, 0, 1); // 1000ms後
+      final secondTime = DateTime(2023, 1, 1, 12, 0, 2, 999); // 2999ms後
+      final thirdTime = DateTime(2023, 1, 1, 12, 0, 3); // 3000ms後
       const houseWorkId = 'house-work-1';
       const userProfile = UserProfile.withGoogleAccount(
         id: 'user-1',
@@ -245,13 +245,13 @@ void main() {
         houseWorkId: houseWorkId,
       );
 
-      // 2回目の登録（999ms後）
+      // 2回目の登録（2999ms後）
       when(mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
       final secondResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
 
-      // 3回目の登録（1000ms後）
+      // 3回目の登録（3000ms後）
       when(mockSystemService.getCurrentDateTime()).thenReturn(thirdTime);
       final thirdResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
@@ -259,8 +259,8 @@ void main() {
 
       // 検証
       expect(firstResult, isTrue);
-      expect(secondResult, isFalse); // 999msなので拒否される
-      expect(thirdResult, isTrue); // 1000msなので許可される
+      expect(secondResult, isFalse); // 2999msなので拒否される
+      expect(thirdResult, isTrue); // 3000msなので許可される
       verify(mockWorkLogRepository.save(any)).called(2); // 1回目と3回目のみ保存される
     });
   });
