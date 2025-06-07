@@ -29,6 +29,10 @@ void main() {
       email: 'test@example.com',
       photoUrl: 'https://example.com/photo.jpg',
     );
+    final testAppSession = AppSession.signedIn(
+      currentHouseId: 'house-1',
+      isPro: false,
+    );
 
     setUpAll(() {
       registerFallbackValue(
@@ -60,7 +64,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+            (_) => testAppSession,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
@@ -96,7 +100,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+            (_) => testAppSession,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
@@ -139,7 +143,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+            (_) => testAppSession,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
@@ -182,7 +186,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+            (_) => testAppSession,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
@@ -218,7 +222,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+            (_) => testAppSession,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
@@ -253,7 +257,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+            (_) => testAppSession,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
@@ -290,7 +294,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+            (_) => testAppSession,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
