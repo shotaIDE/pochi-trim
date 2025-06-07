@@ -1,17 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
+import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
 
-@GenerateMocks([WorkLogRepository, AuthService, SystemService, Ref])
-import 'work_log_service_test.mocks.dart';
+class MockWorkLogRepository extends Mock implements WorkLogRepository {}
 
-Future<UserProfile?> _dummyUserProfileFuture() async => null;
+class MockAuthService extends Mock implements AuthService {}
+
+class MockSystemService extends Mock implements SystemService {}
+
+class MockRef extends Mock implements Ref {}
 
 void main() {
   group('家事ログの連続登録禁止', () {
@@ -21,9 +24,18 @@ void main() {
     late MockRef mockRef;
     late WorkLogService workLogService;
 
-    setUp(() {
-      provideDummy<Future<UserProfile?>>(_dummyUserProfileFuture());
+    setUpAll(() {
+      registerFallbackValue(
+        WorkLog(
+          id: 'fallback-id',
+          houseWorkId: 'fallback-house-work-id',
+          completedAt: DateTime.now(),
+          completedBy: 'fallback-user',
+        ),
+      );
+    });
 
+    setUp(() {
       mockWorkLogRepository = MockWorkLogRepository();
       mockAuthService = MockAuthService();
       mockSystemService = MockSystemService();
@@ -50,11 +62,13 @@ void main() {
       );
 
       // モックの設定
-      when(mockSystemService.getCurrentDateTime()).thenReturn(now);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
-        mockRef.read(currentUserProfileProvider.future),
+        () => mockRef.read(currentUserProfileProvider.future),
       ).thenAnswer((_) async => userProfile);
-      when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
+      when(
+        () => mockWorkLogRepository.save(any()),
+      ).thenAnswer((_) async => 'test-id');
 
       // 実行
       final result = await workLogService.recordWorkLog(
@@ -63,7 +77,7 @@ void main() {
 
       // 検証
       expect(result, isTrue);
-      verify(mockWorkLogRepository.save(any)).called(1);
+      verify(() => mockWorkLogRepository.save(any())).called(1);
     });
 
     test('3秒以内の連続登録は拒否されること', () async {
@@ -80,18 +94,20 @@ void main() {
 
       // モックの設定
       when(
-        mockRef.read(currentUserProfileProvider.future),
+        () => mockRef.read(currentUserProfileProvider.future),
       ).thenAnswer((_) async => userProfile);
-      when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
+      when(
+        () => mockWorkLogRepository.save(any()),
+      ).thenAnswer((_) async => 'test-id');
 
       // 1回目の登録
-      when(mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
       final firstResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
 
       // 2回目の登録（1.5秒後）
-      when(mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
       final secondResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
@@ -99,7 +115,7 @@ void main() {
       // 検証
       expect(firstResult, isTrue);
       expect(secondResult, isFalse); // 連打防止により拒否される
-      verify(mockWorkLogRepository.save(any)).called(1); // 1回のみ保存される
+      verify(() => mockWorkLogRepository.save(any())).called(1); // 1回のみ保存される
     });
 
     test('3秒後の登録は許可されること', () async {
@@ -116,18 +132,20 @@ void main() {
 
       // モックの設定
       when(
-        mockRef.read(currentUserProfileProvider.future),
+        () => mockRef.read(currentUserProfileProvider.future),
       ).thenAnswer((_) async => userProfile);
-      when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
+      when(
+        () => mockWorkLogRepository.save(any()),
+      ).thenAnswer((_) async => 'test-id');
 
       // 1回目の登録
-      when(mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
       final firstResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
 
       // 2回目の登録（3秒後）
-      when(mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
       final secondResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
@@ -135,7 +153,7 @@ void main() {
       // 検証
       expect(firstResult, isTrue);
       expect(secondResult, isTrue); // 3秒経過しているので許可される
-      verify(mockWorkLogRepository.save(any)).called(2); // 2回とも保存される
+      verify(() => mockWorkLogRepository.save(any())).called(2); // 2回とも保存される
     });
 
     test('異なる家事の連続登録は許可されること', () async {
@@ -151,11 +169,13 @@ void main() {
       );
 
       // モックの設定
-      when(mockSystemService.getCurrentDateTime()).thenReturn(now);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
-        mockRef.read(currentUserProfileProvider.future),
+        () => mockRef.read(currentUserProfileProvider.future),
       ).thenAnswer((_) async => userProfile);
-      when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
+      when(
+        () => mockWorkLogRepository.save(any()),
+      ).thenAnswer((_) async => 'test-id');
 
       // 異なる家事の連続登録
       final result1 = await workLogService.recordWorkLog(
@@ -168,7 +188,7 @@ void main() {
       // 検証
       expect(result1, isTrue);
       expect(result2, isTrue); // 異なる家事なので許可される
-      verify(mockWorkLogRepository.save(any)).called(2); // 2回とも保存される
+      verify(() => mockWorkLogRepository.save(any())).called(2); // 2回とも保存される
     });
 
     test('ユーザープロファイルがnullの場合は登録が失敗すること', () async {
@@ -177,9 +197,9 @@ void main() {
       const houseWorkId = 'house-work-1';
 
       // モックの設定
-      when(mockSystemService.getCurrentDateTime()).thenReturn(now);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
-        mockRef.read(currentUserProfileProvider.future),
+        () => mockRef.read(currentUserProfileProvider.future),
       ).thenAnswer((_) async => null); // ユーザープロファイルがnull
 
       // 実行
@@ -189,7 +209,7 @@ void main() {
 
       // 検証
       expect(result, isFalse);
-      verifyNever(mockWorkLogRepository.save(any)); // 保存は呼ばれない
+      verifyNever(() => mockWorkLogRepository.save(any())); // 保存は呼ばれない
     });
 
     test('リポジトリで例外が発生した場合は登録が失敗すること', () async {
@@ -204,11 +224,13 @@ void main() {
       );
 
       // モックの設定
-      when(mockSystemService.getCurrentDateTime()).thenReturn(now);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
-        mockRef.read(currentUserProfileProvider.future),
+        () => mockRef.read(currentUserProfileProvider.future),
       ).thenAnswer((_) async => userProfile);
-      when(mockWorkLogRepository.save(any)).thenThrow(Exception('DB Error'));
+      when(
+        () => mockWorkLogRepository.save(any()),
+      ).thenThrow(Exception('DB Error'));
 
       // 実行
       final result = await workLogService.recordWorkLog(
@@ -217,7 +239,7 @@ void main() {
 
       // 検証
       expect(result, isFalse);
-      verify(mockWorkLogRepository.save(any)).called(1);
+      verify(() => mockWorkLogRepository.save(any())).called(1);
     });
 
     test('2999msの連続登録は拒否され、3000msの登録は許可されること', () async {
@@ -235,24 +257,26 @@ void main() {
 
       // モックの設定
       when(
-        mockRef.read(currentUserProfileProvider.future),
+        () => mockRef.read(currentUserProfileProvider.future),
       ).thenAnswer((_) async => userProfile);
-      when(mockWorkLogRepository.save(any)).thenAnswer((_) async => 'test-id');
+      when(
+        () => mockWorkLogRepository.save(any()),
+      ).thenAnswer((_) async => 'test-id');
 
       // 1回目の登録
-      when(mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
       final firstResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
 
       // 2回目の登録（2999ms後）
-      when(mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
       final secondResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
 
       // 3回目の登録（3000ms後）
-      when(mockSystemService.getCurrentDateTime()).thenReturn(thirdTime);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(thirdTime);
       final thirdResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
@@ -261,7 +285,9 @@ void main() {
       expect(firstResult, isTrue);
       expect(secondResult, isFalse); // 2999msなので拒否される
       expect(thirdResult, isTrue); // 3000msなので許可される
-      verify(mockWorkLogRepository.save(any)).called(2); // 1回目と3回目のみ保存される
+      verify(
+        () => mockWorkLogRepository.save(any()),
+      ).called(2); // 1回目と3回目のみ保存される
     });
   });
 }
