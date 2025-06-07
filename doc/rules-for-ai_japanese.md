@@ -258,6 +258,10 @@ class SomeScreen extends StatelessWidget {
 Navigator.of(context).push(SomeScreen.route);
 ```
 
+### ユニットテスト
+
+- モックは `mocktail` を使用する。
+
 ## トラブルシューティング
 
 ### 方針

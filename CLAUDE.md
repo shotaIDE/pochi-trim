@@ -253,6 +253,10 @@ class SomeScreen extends StatelessWidget {
 Navigator.of(context).push(SomeScreen.route);
 ```
 
+### Unit testing
+
+- Use `mocktail` for mocks.
+
 ## Troubleshooting
 
 ### Policy
