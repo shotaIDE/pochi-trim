@@ -5,10 +5,10 @@ import 'package:mockito/mockito.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
-import 'package:pochi_trim/data/service/time_provider.dart';
+import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
 
-@GenerateMocks([WorkLogRepository, AuthService, TimeProvider, Ref])
+@GenerateMocks([WorkLogRepository, AuthService, SystemService, Ref])
 import 'work_log_service_test.mocks.dart';
 
 Future<UserProfile?> _dummyUserProfileFuture() async => null;

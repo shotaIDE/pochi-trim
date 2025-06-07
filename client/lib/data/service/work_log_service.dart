@@ -4,7 +4,7 @@ import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
-import 'package:pochi_trim/data/service/time_provider.dart';
+import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -44,7 +44,7 @@ class WorkLogService {
   final WorkLogRepository workLogRepository;
   final AuthService authService;
   final String currentHouseId;
-  final TimeProvider timeProvider;
+  final SystemService timeProvider;
   final Ref ref;
 
   /// 各家事の最終登録時刻を追跡するMap（連打防止用）
@@ -52,9 +52,9 @@ class WorkLogService {
 
   Future<bool> recordWorkLog({required String houseWorkId}) async {
     // 連打防止：同じ家事の場合は1秒以内の連続登録を無視する
-    final now = timeProvider.now();
+    final now = timeProvider.getCurrentDateTime();
     final lastRegistrationTime = _lastRegistrationTimes[houseWorkId];
-    
+
     if (lastRegistrationTime != null) {
       final timeDifference = now.difference(lastRegistrationTime);
       if (timeDifference.inMilliseconds < 1000) {
