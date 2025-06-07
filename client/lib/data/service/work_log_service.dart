@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
@@ -9,6 +11,58 @@ import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'work_log_service.g.dart';
+
+/// デバウンス閾値（ミリ秒）
+const _debounceThresholdMilliseconds = 3000;
+
+@riverpod
+class DebounceManager extends _$DebounceManager {
+  Timer? _keepAliveTimer;
+
+  @override
+  Map<String, DateTime> build() {
+    // 3秒間プロバイダーを維持するタイマーを設定
+    _keepProviderAlive();
+
+    // プロバイダーが破棄される際にタイマーをクリア
+    ref.onDispose(() {
+      _keepAliveTimer?.cancel();
+    });
+
+    return <String, DateTime>{};
+  }
+
+  /// プロバイダーを3秒間維持する
+  void _keepProviderAlive() {
+    _keepAliveTimer?.cancel();
+    _keepAliveTimer = Timer(
+      const Duration(milliseconds: _debounceThresholdMilliseconds),
+      () {
+        // タイマー終了時は何もしない（自然に破棄される）
+      },
+    );
+  }
+
+  /// 家事の最終登録時刻を記録し、デバウンス判定を行う
+  bool shouldRecordWorkLog(String houseWorkId, DateTime currentTime) {
+    final lastRegistrationTime = state[houseWorkId];
+
+    if (lastRegistrationTime != null) {
+      final timeDifference = currentTime.difference(lastRegistrationTime);
+      if (timeDifference.inMilliseconds < _debounceThresholdMilliseconds) {
+        return false; // デバウンス期間内なので記録しない
+      }
+    }
+
+    // 記録可能な場合は最終登録時刻を更新
+    state = {...state, houseWorkId: currentTime};
+
+    // プロバイダーを再度3秒間維持
+    _keepProviderAlive();
+
+    return true;
+  }
+}
 
 @riverpod
 WorkLogService workLogService(Ref ref) {
