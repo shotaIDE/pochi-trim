@@ -33,8 +33,6 @@ WorkLogService workLogService(Ref ref) {
 
 /// 家事ログに関する共通操作を提供するサービスクラス
 class WorkLogService {
-  /// デバウンス閾値（ミリ秒）
-  static const int debounceThresholdMs = 3000;
   WorkLogService({
     required this.workLogRepository,
     required this.authService,
@@ -42,6 +40,9 @@ class WorkLogService {
     required this.systemService,
     required this.ref,
   });
+
+  /// デバウンス閾値（ミリ秒）
+  static const _debounceThresholdMilliseconds = 3000;
 
   final WorkLogRepository workLogRepository;
   final AuthService authService;
@@ -59,7 +60,7 @@ class WorkLogService {
 
     if (lastRegistrationTime != null) {
       final timeDifference = now.difference(lastRegistrationTime);
-      if (timeDifference.inMilliseconds < debounceThresholdMs) {
+      if (timeDifference.inMilliseconds < _debounceThresholdMilliseconds) {
         // 3秒以内の連続登録は無視
         return false;
       }
