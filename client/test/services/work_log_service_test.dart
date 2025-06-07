@@ -23,7 +23,6 @@ void main() {
     late MockWorkLogRepository mockWorkLogRepository;
     late MockAuthService mockAuthService;
     late MockSystemService mockSystemService;
-    late MockRef mockRef;
 
     // 共通のテストデータ
     const testUserProfile = UserProfile.withGoogleAccount(
@@ -48,7 +47,6 @@ void main() {
       mockWorkLogRepository = MockWorkLogRepository();
       mockAuthService = MockAuthService();
       mockSystemService = MockSystemService();
-      mockRef = MockRef();
     });
 
     test('初回の家事登録は成功すること', () async {
@@ -58,9 +56,6 @@ void main() {
 
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
-      when(
-        () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => testUserProfile);
       when(
         () => mockWorkLogRepository.save(any()),
       ).thenAnswer((_) async => 'test-id');
@@ -96,15 +91,26 @@ void main() {
       const houseWorkId = 'house-work-1';
 
       // モックの設定
-      when(
-        () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => testUserProfile);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
       when(
         () => mockWorkLogRepository.save(any()),
       ).thenAnswer((_) async => 'test-id');
+      final container = ProviderContainer(
+        overrides: [
+          unwrappedCurrentAppSessionProvider.overrideWith(
+            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+          ),
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          authServiceProvider.overrideWith((_) => mockAuthService),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+          currentUserProfileProvider.overrideWith(
+            (_) => Stream.value(testUserProfile),
+          ),
+        ],
+      );
 
-      // 1回目の登録
-      when(() => mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
+      // 実行
+      final workLogService = container.read(workLogServiceProvider);
       final firstResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
@@ -128,15 +134,26 @@ void main() {
       const houseWorkId = 'house-work-1';
 
       // モックの設定
-      when(
-        () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => testUserProfile);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
       when(
         () => mockWorkLogRepository.save(any()),
       ).thenAnswer((_) async => 'test-id');
+      final container = ProviderContainer(
+        overrides: [
+          unwrappedCurrentAppSessionProvider.overrideWith(
+            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+          ),
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          authServiceProvider.overrideWith((_) => mockAuthService),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+          currentUserProfileProvider.overrideWith(
+            (_) => Stream.value(testUserProfile),
+          ),
+        ],
+      );
 
-      // 1回目の登録
-      when(() => mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
+      // 実行
+      final workLogService = container.read(workLogServiceProvider);
       final firstResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
@@ -162,13 +179,24 @@ void main() {
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
-        () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => testUserProfile);
-      when(
         () => mockWorkLogRepository.save(any()),
       ).thenAnswer((_) async => 'test-id');
+      final container = ProviderContainer(
+        overrides: [
+          unwrappedCurrentAppSessionProvider.overrideWith(
+            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+          ),
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          authServiceProvider.overrideWith((_) => mockAuthService),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+          currentUserProfileProvider.overrideWith(
+            (_) => Stream.value(testUserProfile),
+          ),
+        ],
+      );
 
-      // 異なる家事の連続登録
+      // 実行
+      final workLogService = container.read(workLogServiceProvider);
       final result1 = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId1,
       );
@@ -189,11 +217,22 @@ void main() {
 
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
-      when(
-        () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => null); // ユーザープロファイルがnull
+      final container = ProviderContainer(
+        overrides: [
+          unwrappedCurrentAppSessionProvider.overrideWith(
+            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+          ),
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          authServiceProvider.overrideWith((_) => mockAuthService),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+          currentUserProfileProvider.overrideWith(
+            (_) => Stream.value(null), // ユーザープロファイルがnull
+          ),
+        ],
+      );
 
       // 実行
+      final workLogService = container.read(workLogServiceProvider);
       final result = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
@@ -211,13 +250,24 @@ void main() {
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
-        () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => testUserProfile);
-      when(
         () => mockWorkLogRepository.save(any()),
       ).thenThrow(Exception('DB Error'));
+      final container = ProviderContainer(
+        overrides: [
+          unwrappedCurrentAppSessionProvider.overrideWith(
+            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+          ),
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          authServiceProvider.overrideWith((_) => mockAuthService),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+          currentUserProfileProvider.overrideWith(
+            (_) => Stream.value(testUserProfile),
+          ),
+        ],
+      );
 
       // 実行
+      final workLogService = container.read(workLogServiceProvider);
       final result = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
@@ -235,15 +285,26 @@ void main() {
       const houseWorkId = 'house-work-1';
 
       // モックの設定
-      when(
-        () => mockRef.read(currentUserProfileProvider.future),
-      ).thenAnswer((_) async => testUserProfile);
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
       when(
         () => mockWorkLogRepository.save(any()),
       ).thenAnswer((_) async => 'test-id');
+      final container = ProviderContainer(
+        overrides: [
+          unwrappedCurrentAppSessionProvider.overrideWith(
+            (_) => AppSession.signedIn(currentHouseId: 'house-1', isPro: false),
+          ),
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          authServiceProvider.overrideWith((_) => mockAuthService),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+          currentUserProfileProvider.overrideWith(
+            (_) => Stream.value(testUserProfile),
+          ),
+        ],
+      );
 
-      // 1回目の登録
-      when(() => mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
+      // 実行
+      final workLogService = container.read(workLogServiceProvider);
       final firstResult = await workLogService.recordWorkLog(
         houseWorkId: houseWorkId,
       );
