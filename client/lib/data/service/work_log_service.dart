@@ -28,7 +28,8 @@ extension CacheForExtension on Ref {
 class DebounceManager extends _$DebounceManager {
   @override
   Map<String, DateTime> build() {
-    // 初期状態では維持しない（最初のアクセス時に維持を開始）
+    // プロバイダーを3秒間維持
+    ref.cacheFor(const Duration(milliseconds: _debounceThresholdMilliseconds));
     return <String, DateTime>{};
   }
 
@@ -43,13 +44,14 @@ class DebounceManager extends _$DebounceManager {
       }
     }
 
-    // 記録可能な場合は最終登録時刻を更新
-    state = {...state, houseWorkId: currentTime};
-
-    // プロバイダーを3秒間維持
-    ref.cacheFor(const Duration(milliseconds: _debounceThresholdMilliseconds));
-
     return true;
+  }
+
+  /// 家事の最終登録時刻を記録する
+  void recordRegistration(String houseWorkId, DateTime currentTime) {
+    state = {...state, houseWorkId: currentTime};
+    // 記録時に再度3秒間維持
+    ref.cacheFor(const Duration(milliseconds: _debounceThresholdMilliseconds));
   }
 }
 
@@ -114,6 +116,9 @@ class WorkLogService {
     }
 
     onRequestAccepted?.call();
+
+    // デバウンス管理に登録時刻を記録
+    debounceManager.recordRegistration(houseWorkId, now);
 
     final workLog = WorkLog(
       id: '', // 新規登録のため空文字列
