@@ -95,17 +95,11 @@ class WorkLogService {
     required this.ref,
   });
 
-  /// デバウンス閾値（ミリ秒）
-  static const _debounceThresholdMilliseconds = 3000;
-
   final WorkLogRepository workLogRepository;
   final AuthService authService;
   final String currentHouseId;
   final SystemService systemService;
   final Ref ref;
-
-  /// 各家事の最終登録時刻を追跡するMap（連打防止用）
-  final Map<String, DateTime> _lastRegistrationTimes = {};
 
   Future<bool> recordWorkLog({
     required String houseWorkId,
@@ -118,14 +112,11 @@ class WorkLogService {
   }) async {
     // 連打防止：同じ家事の場合は3秒以内の連続登録を無視する
     final now = systemService.getCurrentDateTime();
-    final lastRegistrationTime = _lastRegistrationTimes[houseWorkId];
+    final debounceManager = ref.read(debounceManagerProvider.notifier);
 
-    if (lastRegistrationTime != null) {
-      final timeDifference = now.difference(lastRegistrationTime);
-      if (timeDifference.inMilliseconds < _debounceThresholdMilliseconds) {
-        // 3秒以内の連続登録は無視
-        return false;
-      }
+    if (!debounceManager.shouldRecordWorkLog(houseWorkId, now)) {
+      // デバウンス期間内なので記録しない
+      return false;
     }
 
     final userProfile = await ref.read(currentUserProfileProvider.future);
@@ -134,8 +125,6 @@ class WorkLogService {
     }
 
     onRequestAccepted?.call();
-
-    _lastRegistrationTimes[houseWorkId] = now;
 
     final workLog = WorkLog(
       id: '', // 新規登録のため空文字列
