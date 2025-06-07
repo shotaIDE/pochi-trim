@@ -261,6 +261,7 @@ Navigator.of(context).push(SomeScreen.route);
 ### ユニットテスト
 
 - モックは `mocktail` を使用する。
+- ダミーの定数について、テストケース間で同一のものを利用する場合は、`group`関数の先頭や`main`関数の先頭、または`setUp`関数内に定義して共通化する。
 
 ## トラブルシューティング
 
