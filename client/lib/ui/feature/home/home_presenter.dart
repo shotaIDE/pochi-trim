@@ -4,6 +4,7 @@ import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
+import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -20,20 +21,18 @@ Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
   final completionCountOfHouseWorks = <HouseWork, int>{};
 
   for (final houseWork in houseWorks) {
-    final completionCount =
-        completedWorkLogs
-            .where((workLog) => workLog.houseWorkId == houseWork.id)
-            .length;
+    final completionCount = completedWorkLogs
+        .where((workLog) => workLog.houseWorkId == houseWork.id)
+        .length;
 
     completionCountOfHouseWorks[houseWork] = completionCount;
   }
 
-  final sortedHouseWorksByCompletionCount =
-      completionCountOfHouseWorks.entries
-          .sortedBy((entry) => entry.value)
-          .reversed
-          .map((entry) => entry.key)
-          .toList();
+  final sortedHouseWorksByCompletionCount = completionCountOfHouseWorks.entries
+      .sortedBy((entry) => entry.value)
+      .reversed
+      .map((entry) => entry.key)
+      .toList();
 
   return sortedHouseWorksByCompletionCount;
 }
@@ -44,8 +43,12 @@ Future<bool> onCompleteHouseWorkButtonTappedResult(
   HouseWork houseWork,
 ) {
   final workLogService = ref.read(workLogServiceProvider);
+  final systemService = ref.read(systemServiceProvider);
 
-  return workLogService.recordWorkLog(houseWorkId: houseWork.id);
+  return workLogService.recordWorkLog(
+    houseWorkId: houseWork.id,
+    onRequestAccepted: systemService.doHapticFeedbackActionReceived,
+  );
 }
 
 @riverpod
@@ -54,9 +57,11 @@ Future<bool> onDuplicateWorkLogButtonTappedResult(
   WorkLogIncludedHouseWork workLogIncludedHouseWork,
 ) {
   final workLogService = ref.read(workLogServiceProvider);
+  final systemService = ref.read(systemServiceProvider);
 
   return workLogService.recordWorkLog(
     houseWorkId: workLogIncludedHouseWork.houseWork.id,
+    onRequestAccepted: systemService.doHapticFeedbackActionReceived,
   );
 }
 

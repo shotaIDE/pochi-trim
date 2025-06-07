@@ -71,6 +71,16 @@ try {
 return customerInfo.entitlements;
 ```
 
+If you do not use a function argument, explicitly indicate that it is unused by naming it `_`.
+
+Example:
+
+```dart
+onTap: (_) { // If you do not use an argument, explicitly state that it is unused as "_"
+// ...
+},
+```
+
 Immediately delete unused code.
 
 ### Maintain code consistency
@@ -252,6 +262,11 @@ class SomeScreen extends StatelessWidget {
 // When transitioning
 Navigator.of(context).push(SomeScreen.route);
 ```
+
+### Unit testing
+
+- Use `mocktail` for mocks.
+- If you want to use the same dummy constants between test cases, define them at the beginning of the `group` function, the beginning of the `main` function, or in the `setUp` function to make them common.
 
 ## Troubleshooting
 

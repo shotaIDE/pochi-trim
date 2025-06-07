@@ -76,6 +76,16 @@ try {
 return customerInfo.entitlements;
 ```
 
+関数引数における利用しない引数は、`_` という名前をつけて明示的に未使用であることを示しなさい。
+
+例:
+
+```dart
+onTap: (_) { // 引数を使用しない場合、"_" として明示する
+  // ...
+},
+```
+
 利用されていないコードは、即時削除する。
 
 ### コードの一貫性を保つ
@@ -257,6 +267,11 @@ class SomeScreen extends StatelessWidget {
 // 遷移する際
 Navigator.of(context).push(SomeScreen.route);
 ```
+
+### ユニットテスト
+
+- モックは `mocktail` を使用する。
+- ダミーの定数について、テストケース間で同一のものを利用する場合は、`group`関数の先頭や`main`関数の先頭、または`setUp`関数内に定義して共通化する。
 
 ## トラブルシューティング
 
