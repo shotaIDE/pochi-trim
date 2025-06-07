@@ -77,11 +77,12 @@ class WorkLogService {
 
     try {
       await workLogRepository.save(workLog);
-      // 成功時に最終登録時刻を更新
-      _lastRegistrationTimes[houseWorkId] = now;
     } on Exception {
       return false;
     }
+
+    // 成功時に最終登録時刻を更新
+    _lastRegistrationTimes[houseWorkId] = now;
 
     return true;
   }
