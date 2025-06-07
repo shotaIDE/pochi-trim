@@ -14,7 +14,7 @@ import 'work_log_service_test.mocks.dart';
 Future<UserProfile?> _dummyUserProfileFuture() async => null;
 
 void main() {
-  group('WorkLogService 連打防止テスト', () {
+  group('家事ログの連続登録禁止', () {
     late MockWorkLogRepository mockWorkLogRepository;
     late MockAuthService mockAuthService;
     late MockSystemService mockSystemService;
