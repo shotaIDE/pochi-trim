@@ -19,18 +19,32 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
 
     firestore_client: google.cloud.firestore.Client = firestore.client()
 
+    # すでに家に参加しているかチェック
+    permissions_ref = firestore_client.collection("permissions")
+    existing_houses = permissions_ref.get()
+    
+    for house_doc in existing_houses:
+        house_id = house_doc.id
+        admin_doc_ref = permissions_ref.document(house_id).collection("admin").document(user_id)
+        admin_doc = admin_doc_ref.get()
+        
+        # ユーザーがこの家の管理者として登録されている場合
+        if admin_doc.exists:
+            print(f"User {user_id} is already admin of house: {house_id}")
+            return {
+                "houseDocId": house_id
+            }
+    
+    # 家に参加していない場合、新規で家を作成
     _, house_doc_ref = firestore_client.collection("permissions").add({})
+    house_doc_id = house_doc_ref.id
 
-    # TODO: デバッグ用のコメントアウトなので、リリース時には元に戻す
-    # house_doc_id = house_doc_ref.id
-    house_doc_id = 'default-house-id'
-
+    # 新規作成した家の管理者として権限を設定
     admin_doc_ref = firestore_client.collection("permissions").document(house_doc_id).collection("admin").document(user_id)
     admin_doc_ref.set({})
 
-    print(f"House document has been created: ID = {house_doc_id}, admin user = {user_id}")
+    print(f"New house created: ID = {house_doc_id}, admin user = {user_id}")
 
     return {
-        "houseDocId": house_doc_id,
-        "adminUser": user_id
+        "houseDocId": house_doc_id
     }
