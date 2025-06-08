@@ -22,19 +22,19 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
     # すでに家に参加しているかチェック
     permissions_ref = firestore_client.collection("permissions")
     existing_houses = permissions_ref.get()
-    
+
     for house_doc in existing_houses:
         house_id = house_doc.id
         admin_doc_ref = permissions_ref.document(house_id).collection("admin").document(user_id)
         admin_doc = admin_doc_ref.get()
-        
+
         # ユーザーがこの家の管理者として登録されている場合
         if admin_doc.exists:
             print(f"User {user_id} is already admin of house: {house_id}")
             return {
                 "houseDocId": house_id
             }
-    
+
     # 家に参加していない場合、新規で家を作成
     _, house_doc_ref = firestore_client.collection("permissions").add({})
     house_doc_id = house_doc_ref.id
