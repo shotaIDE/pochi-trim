@@ -2,7 +2,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function isAdminOfHouse(houseId) {
-      return request.auth != null && exists(/databases/$(database)/documents/permissions/$(houseId)/admin/$(request.auth.uid));
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/permissions/$(houseId)) &&
+             request.auth.uid in get(/databases/$(database)/documents/permissions/$(houseId)).data.adminUserIds;
     }
 
     match /users/{userId} {

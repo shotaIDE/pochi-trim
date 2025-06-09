@@ -19,18 +19,33 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
 
     firestore_client: google.cloud.firestore.Client = firestore.client()
 
-    _, house_doc_ref = firestore_client.collection("permissions").add({})
+    # すでに家に参加しているかチェック
+    # adminUserIdsにuser_idが含まれる権限ドキュメントを検索
+    permissions_collection = firestore_client.collection("permissions")
+    permission_docs = permissions_collection.where("adminUserIds", "array_contains", user_id).get()
 
-    # TODO: デバッグ用のコメントアウトなので、リリース時には元に戻す
-    # house_doc_id = house_doc_ref.id
-    house_doc_id = 'default-house-id'
+    if permission_docs and len(permission_docs) >= 1:
+        # ユーザーが管理者として登録されている家が見つかった場合
+        house_id_list = [permission_doc.id for permission_doc in permission_docs]
+        print(f"User \"{user_id}\" is already admin of houses: {house_id_list}")
 
-    admin_doc_ref = firestore_client.collection("permissions").document(house_doc_id).collection("admin").document(user_id)
-    admin_doc_ref.set({})
+        first_house_id = house_id_list[0]
+        print(f"Returning first house ID: {first_house_id}")
 
-    print(f"House document has been created: ID = {house_doc_id}, admin user = {user_id}")
+        return {
+            "houseDocId": first_house_id
+        }
+
+    print(f"User \"{user_id}\" is not belongs to any house, creating a new house...")
+
+    # 家に参加していない場合、新規で家を作成
+    _, house_doc_ref = firestore_client.collection("permissions").add({
+        "adminUserIds": [user_id]
+    })
+    house_doc_id = house_doc_ref.id
+
+    print(f"New house created: ID = {house_doc_id}, admin user = {user_id}")
 
     return {
-        "houseDocId": house_doc_id,
-        "adminUser": user_id
+        "houseDocId": house_doc_id
     }

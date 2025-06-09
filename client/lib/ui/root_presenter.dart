@@ -50,14 +50,14 @@ class CurrentAppSession extends _$CurrentAppSession {
 
     final preferenceService = ref.read(preferenceServiceProvider);
 
-    final houseId =
-        await preferenceService.getString(PreferenceKey.currentHouseId) ??
-        // TODO(ide): 開発用。本番リリース時には削除する
-        'default-house-id';
+    final houseId = await preferenceService.getString(
+      PreferenceKey.currentHouseId,
+    );
 
     final isPro = await ref.read(isProUserProvider.future);
 
-    return AppSession.signedIn(currentHouseId: houseId, isPro: isPro);
+    // TODO(ide): houseId が null の場合の処理を追加する
+    return AppSession.signedIn(currentHouseId: houseId!, isPro: isPro);
   }
 
   Future<void> signIn({required String userId, required String houseId}) async {
