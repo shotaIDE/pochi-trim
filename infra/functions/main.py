@@ -21,7 +21,7 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
 
     # すでに家に参加しているかチェック
     # adminUserIdsにuser_idが含まれる権限ドキュメントを検索
-    permission_docs = firestore_client.collection("permissions").where("adminUserIds", "array-contains", user_id).limit(1).get()
+    permission_docs = firestore_client.collection("permissions").where("adminUserIds", "array_contains", user_id).limit(1).get()
 
     if permission_docs:
         # ユーザーが管理者として登録されている家が見つかった場合
