@@ -27,7 +27,7 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
     if permission_docs and len(permission_docs) >= 1:
         # ユーザーが管理者として登録されている家が見つかった場合
         house_id_list = [permission_doc.id for permission_doc in permission_docs]
-        print(f"User {user_id} is already admin of houses: {house_id_list}")
+        print(f"User \"{user_id}\" is already admin of houses: {house_id_list}")
 
         first_house_id = house_id_list[0]
         print(f"Returning first house ID: {first_house_id}")
@@ -36,7 +36,7 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
             "houseDocId": first_house_id
         }
 
-    print(f"User {user_id} is not belongs to any house, creating a new house...")
+    print(f"User \"{user_id}\" is not belongs to any house, creating a new house...")
 
     # 家に参加していない場合、新規で家を作成
     _, house_doc_ref = firestore_client.collection("permissions").add({
