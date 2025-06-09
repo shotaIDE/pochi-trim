@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:in_app_review/in_app_review.dart';
@@ -98,7 +99,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ? CircleAvatar(backgroundImage: NetworkImage(photoUrl), radius: 20)
             : const Icon(Icons.person);
         titleText = displayName ?? '名前未設定';
-        subtitle = email != null ? Text(email) : null;
+        subtitle = _buildUserInfoSubtitle(email, userProfile.id);
         onTap = null;
 
       case UserProfileWithAppleAccount(
@@ -107,21 +108,62 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ):
         leading = const Icon(FontAwesomeIcons.apple);
         titleText = displayName ?? '名前未設定';
-        subtitle = email != null ? Text(email) : null;
+        subtitle = _buildUserInfoSubtitle(email, userProfile.id);
         onTap = null;
 
       case UserProfileAnonymous():
         leading = const Icon(Icons.person);
         titleText = 'ゲストユーザー';
-        subtitle = null;
+        subtitle = _buildUserInfoSubtitle(null, userProfile.id);
         onTap = () => _showAnonymousUserInfoDialog(context);
     }
 
-    return ListTile(
-      leading: leading,
-      title: Text(titleText),
-      subtitle: subtitle,
-      onTap: onTap,
+    return GestureDetector(
+      onLongPress: () => _copyUserIdToClipboard(context, userProfile.id),
+      child: ListTile(
+        leading: leading,
+        title: Text(titleText),
+        subtitle: subtitle,
+        onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildUserInfoSubtitle(String? email, String userId) {
+    final children = <Widget>[];
+
+    if (email != null) {
+      children.add(Text(email));
+    }
+
+    children.add(
+      Text(
+        'ユーザーID: $userId',
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.grey,
+        ),
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
+    );
+  }
+
+  Future<void> _copyUserIdToClipboard(BuildContext context, String userId) async {
+    await Clipboard.setData(ClipboardData(text: userId));
+
+    if (!context.mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('ユーザーIDをコピーしました'),
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 
