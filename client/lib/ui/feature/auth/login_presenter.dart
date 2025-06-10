@@ -1,6 +1,8 @@
 import 'package:logging/logging.dart';
+import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/functions_service.dart';
+import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -29,6 +31,13 @@ class StartResult extends _$StartResult {
 
     final myHouseId = await ref.read(generateMyHouseProvider.future);
 
+    // 家IDを永続化する
+    final preferenceService = ref.read(preferenceServiceProvider);
+    await preferenceService.setString(
+      PreferenceKey.currentHouseId,
+      value: myHouseId,
+    );
+
     await ref
         .read(currentAppSessionProvider.notifier)
         .signIn(userId: userId, houseId: myHouseId);
@@ -48,6 +57,13 @@ class StartResult extends _$StartResult {
 
     final myHouseId = await ref.read(generateMyHouseProvider.future);
 
+    // 家IDを永続化する
+    final preferenceService = ref.read(preferenceServiceProvider);
+    await preferenceService.setString(
+      PreferenceKey.currentHouseId,
+      value: myHouseId,
+    );
+
     await ref
         .read(currentAppSessionProvider.notifier)
         .signIn(userId: userId, houseId: myHouseId);
@@ -60,6 +76,13 @@ class StartResult extends _$StartResult {
     final userId = await authService.signInAnonymously();
 
     final myHouseId = await ref.read(generateMyHouseProvider.future);
+
+    // 家IDを永続化する
+    final preferenceService = ref.read(preferenceServiceProvider);
+    await preferenceService.setString(
+      PreferenceKey.currentHouseId,
+      value: myHouseId,
+    );
 
     await ref
         .read(currentAppSessionProvider.notifier)
