@@ -3,6 +3,7 @@ import 'package:pochi_trim/data/model/generate_my_house_exception.dart';
 import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/model/sign_in_result.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/data/service/functions_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
@@ -73,6 +74,10 @@ class StartResult extends _$StartResult {
   }
 
   Future<void> _completeSignIn({required String userId}) async {
+    // CrashlyticsにユーザーIDを設定
+    final errorReportService = ref.read(errorReportServiceProvider);
+    await errorReportService.setUserId(userId);
+
     final myHouseId = await ref.read(generateMyHouseProvider.future);
 
     // 家IDを永続化する
