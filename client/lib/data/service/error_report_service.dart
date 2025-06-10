@@ -22,4 +22,14 @@ class ErrorReportService {
       _logger.warning('CrashlyticsのユーザーID設定に失敗しました', e);
     }
   }
+
+  /// CrashlyticsのユーザーIDをクリアする
+  Future<void> clearUserId() async {
+    try {
+      await FirebaseCrashlytics.instance.setUserIdentifier('');
+      _logger.info('CrashlyticsのユーザーIDをクリアしました');
+    } on Exception catch (e) {
+      _logger.warning('CrashlyticsのユーザーIDクリアに失敗しました', e);
+    }
+  }
 }
