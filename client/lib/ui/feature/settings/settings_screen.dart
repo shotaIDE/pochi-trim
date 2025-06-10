@@ -10,6 +10,7 @@ import 'package:pochi_trim/data/model/sign_in_result.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
 import 'package:pochi_trim/data/service/app_info_service.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/ui/component/color.dart';
 import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
@@ -371,6 +372,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           TextButton(
             onPressed: () async {
               try {
+                // CrashlyticsのユーザーIDをクリア
+                final errorReportService = ref.read(errorReportServiceProvider);
+                await errorReportService.clearUserId();
+
                 await ref.read(authServiceProvider).signOut();
                 await ref.read(currentAppSessionProvider.notifier).signOut();
               } on Exception catch (e) {
@@ -409,6 +414,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             onPressed: () async {
               try {
+                // CrashlyticsのユーザーIDをクリア
+                final errorReportService = ref.read(errorReportServiceProvider);
+                await errorReportService.clearUserId();
+
                 // Firebase認証からのサインアウト
                 await ref.read(authServiceProvider).signOut();
                 await ref.read(currentAppSessionProvider.notifier).signOut();
