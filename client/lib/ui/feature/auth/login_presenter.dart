@@ -29,18 +29,7 @@ class StartResult extends _$StartResult {
       'Google sign-in successful. User ID = $userId, new user = $isNewUser',
     );
 
-    final myHouseId = await ref.read(generateMyHouseProvider.future);
-
-    // 家IDを永続化する
-    final preferenceService = ref.read(preferenceServiceProvider);
-    await preferenceService.setString(
-      PreferenceKey.currentHouseId,
-      value: myHouseId,
-    );
-
-    await ref
-        .read(currentAppSessionProvider.notifier)
-        .signIn(userId: userId, houseId: myHouseId);
+    await _completeSignIn(userId: userId);
   }
 
   Future<void> startWithApple() async {
@@ -55,18 +44,7 @@ class StartResult extends _$StartResult {
       'Apple sign-in successful. User ID = $userId, new user = $isNewUser',
     );
 
-    final myHouseId = await ref.read(generateMyHouseProvider.future);
-
-    // 家IDを永続化する
-    final preferenceService = ref.read(preferenceServiceProvider);
-    await preferenceService.setString(
-      PreferenceKey.currentHouseId,
-      value: myHouseId,
-    );
-
-    await ref
-        .read(currentAppSessionProvider.notifier)
-        .signIn(userId: userId, houseId: myHouseId);
+    await _completeSignIn(userId: userId);
   }
 
   Future<void> startWithoutAccount() async {
@@ -75,6 +53,11 @@ class StartResult extends _$StartResult {
     final authService = ref.read(authServiceProvider);
     final userId = await authService.signInAnonymously();
 
+    await _completeSignIn(userId: userId);
+  }
+
+  /// 家ID取得・永続化・サインイン処理を実行する共通メソッド
+  Future<void> _completeSignIn({required String userId}) async {
     final myHouseId = await ref.read(generateMyHouseProvider.future);
 
     // 家IDを永続化する
