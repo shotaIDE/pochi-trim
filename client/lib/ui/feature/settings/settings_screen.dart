@@ -10,16 +10,13 @@ import 'package:pochi_trim/data/model/sign_in_result.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
 import 'package:pochi_trim/data/service/app_info_service.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
-import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/ui/component/color.dart';
 import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/debug_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/section_header.dart';
-import 'package:pochi_trim/ui/root_presenter.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:pochi_trim/ui/feature/settings/settings_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -52,7 +49,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           return ListView(
             children: [
               const SectionHeader(title: 'ユーザー情報'),
-              _buildUserInfoTile(context, userProfile, ref),
+              _buildUserInfoTile(context, userProfile),
               const Divider(),
               const SectionHeader(title: 'アプリについて'),
               const _PlanInfoPanel(),
@@ -68,8 +65,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const _AppVersionTile(),
               const Divider(),
               const SectionHeader(title: 'アカウント管理'),
-              _buildLogoutTile(context, ref),
-              _buildDeleteAccountTile(context, ref, userProfile),
+              _buildLogoutTile(context),
+              _buildDeleteAccountTile(context, userProfile),
             ],
           );
         },
@@ -82,7 +79,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildUserInfoTile(
     BuildContext context,
     UserProfile userProfile,
-    WidgetRef ref,
   ) {
     final String titleText;
     final Widget? subtitle;
@@ -130,17 +126,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return ListTile(
       leading: const Icon(Icons.share),
       title: const Text('友達に教える'),
-      onTap: () {
-        // シェア機能
-        SharePlus.instance.share(
-          ShareParams(
-            text:
-                // TODO(ide): アプリのURLを取得する
-                '家事の可視化と削減アプリ「ぽちそぎ」を使ってみませんか？ ',
-            title: '家事の可視化と削減アプリ「ぽちそぎ」',
-          ),
-        );
-      },
+      onTap: () => ref.read(settingsPresenterProvider).shareApp(),
     );
   }
 
@@ -150,16 +136,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       title: const Text('利用規約'),
       trailing: const _OpenTrailingIcon(),
       onTap: () async {
-        // 利用規約ページへのリンク
-        final url = Uri.parse('https://example.com/terms');
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url);
-        } else {
-          if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
-          }
+final success = await ref
+            .read(settingsPresenterProvider)
+            .openTermsOfService();
+        if (!success && context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
         }
       },
     );
@@ -171,16 +154,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       title: const Text('プライバシーポリシー'),
       trailing: const _OpenTrailingIcon(),
       onTap: () async {
-        // プライバシーポリシーページへのリンク
-        final url = Uri.parse('https://example.com/privacy');
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url);
-        } else {
-          if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
-          }
+final success = await ref
+            .read(settingsPresenterProvider)
+            .openPrivacyPolicy();
+        if (!success && context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
         }
       },
     );
@@ -191,14 +171,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       leading: const Icon(Icons.description_outlined),
       title: const Text('ライセンス'),
       trailing: const _MoveScreenTrailingIcon(),
-      onTap: () {
-        // ライセンス表示画面へ遷移
-        showLicensePage(
-          context: context,
-          applicationName: 'ぽちそぎ',
-          applicationLegalese: '2025 colomney',
-        );
-      },
+      onTap: () =>
+          ref.read(settingsPresenterProvider).showLicenses(context),
     );
   }
 
@@ -211,23 +185,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildLogoutTile(BuildContext context, WidgetRef ref) {
+  Widget _buildLogoutTile(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.logout, color: Colors.red),
       title: const Text('ログアウト', style: TextStyle(color: Colors.red)),
-      onTap: () => _showLogoutConfirmDialog(context, ref),
+      onTap: () => _showLogoutConfirmDialog(context),
     );
   }
 
   Widget _buildDeleteAccountTile(
     BuildContext context,
-    WidgetRef ref,
     UserProfile userProfile,
   ) {
     return ListTile(
       leading: const Icon(Icons.delete_forever, color: Colors.red),
       title: const Text('アカウントを削除', style: TextStyle(color: Colors.red)),
-      onTap: () => _showDeleteAccountConfirmDialog(context, ref, userProfile),
+      onTap: () => _showDeleteAccountConfirmDialog(context, userProfile),
     );
   }
 
@@ -289,7 +262,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Navigator.of(context).pop();
 
     try {
-      await ref.read(authServiceProvider).linkWithGoogle();
+await ref.read(settingsPresenterProvider).linkWithGoogle();
     } on LinkWithGoogleException catch (error) {
       if (!mounted) {
         return;
@@ -325,7 +298,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Navigator.of(context).pop();
 
     try {
-      await ref.read(authServiceProvider).linkWithApple();
+await ref.read(settingsPresenterProvider).linkWithApple();
     } on LinkWithAppleException catch (error) {
       if (!mounted) {
         return;
@@ -358,7 +331,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   // ログアウト確認ダイアログ
-  void _showLogoutConfirmDialog(BuildContext context, WidgetRef ref) {
+  void _showLogoutConfirmDialog(BuildContext context) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -372,12 +345,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           TextButton(
             onPressed: () async {
               try {
-                // CrashlyticsのユーザーIDをクリア
-                final errorReportService = ref.read(errorReportServiceProvider);
-                await errorReportService.clearUserId();
-
-                await ref.read(authServiceProvider).signOut();
-                await ref.read(currentAppSessionProvider.notifier).signOut();
+await ref.read(settingsPresenterProvider).logout();
               } on Exception catch (e) {
                 if (context.mounted) {
                   Navigator.of(context).pop();
@@ -397,7 +365,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   // アカウント削除確認ダイアログ
   void _showDeleteAccountConfirmDialog(
     BuildContext context,
-    WidgetRef ref,
     UserProfile userProfile,
   ) {
     showDialog<void>(
@@ -414,13 +381,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             onPressed: () async {
               try {
-                // CrashlyticsのユーザーIDをクリア
-                final errorReportService = ref.read(errorReportServiceProvider);
-                await errorReportService.clearUserId();
-
-                // Firebase認証からのサインアウト
-                await ref.read(authServiceProvider).signOut();
-                await ref.read(currentAppSessionProvider.notifier).signOut();
+await ref.read(settingsPresenterProvider).deleteAccount();
               } on Exception catch (e) {
                 if (context.mounted) {
                   Navigator.of(context).pop();
