@@ -18,8 +18,10 @@ class ErrorReportService {
     try {
       await FirebaseCrashlytics.instance.setUserIdentifier(userId);
       _logger.info('CrashlyticsにユーザーID設定完了: $userId');
-    } on Exception catch (e) {
+    } on Exception catch (e, stack) {
       _logger.warning('CrashlyticsのユーザーID設定に失敗しました', e);
+
+      await FirebaseCrashlytics.instance.recordError(e, stack);
     }
   }
 
@@ -28,8 +30,10 @@ class ErrorReportService {
     try {
       await FirebaseCrashlytics.instance.setUserIdentifier('');
       _logger.info('CrashlyticsのユーザーIDをクリアしました');
-    } on Exception catch (e) {
+    } on Exception catch (e, stack) {
       _logger.warning('CrashlyticsのユーザーIDクリアに失敗しました', e);
+
+      await FirebaseCrashlytics.instance.recordError(e, stack);
     }
   }
 }
