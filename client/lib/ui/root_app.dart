@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/definition/app_feature.dart';
 import 'package:pochi_trim/data/definition/flavor.dart';
-import 'package:pochi_trim/data/service/auth_service.dart';
-import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/data/service/remote_config_service.dart';
 import 'package:pochi_trim/ui/app_initial_route.dart';
 import 'package:pochi_trim/ui/component/app_theme.dart';
@@ -37,24 +35,14 @@ class _RootAppState extends ConsumerState<RootApp> {
           orElse: () {},
         );
       })
-      // currentUserProfileの変更を監視してCrashlyticsのユーザーIDを同期
-      ..listenManual(currentUserProfileProvider, (_, next) {
-        final errorReportService = ref.read(errorReportServiceProvider);
-
+      // ユーザープロファイルの変更を監視してCrashlyticsのユーザーIDを同期
+      ..listenManual(updatedUserIdProvider, (_, next) {
         next.maybeWhen(
-          data: (userProfile) async {
-            if (userProfile == null) {
-              // ユーザーがサインアウトしている場合、CrashlyticsのユーザーIDをクリア
-              await errorReportService.clearUserId();
-              return;
-            }
-
-            // ユーザーがサインインしている場合、CrashlyticsにユーザーIDを設定
-            await errorReportService.setUserId(userProfile.id);
+          data: (maybeUserId) {
+            final userId = maybeUserId ?? '(null)';
+            debugPrint('Updated user ID: $userId');
           },
-          orElse: () {
-            // ローディング中やエラー時は何もしない
-          },
+          orElse: () {},
         );
       });
   }
