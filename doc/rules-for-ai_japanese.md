@@ -273,6 +273,10 @@ Navigator.of(context).push(SomeScreen.route);
 - モックは `mocktail` を使用する。
 - ダミーの定数について、テストケース間で同一のものを利用する場合は、`group`関数の先頭や`main`関数の先頭、または`setUp`関数内に定義して共通化する。
 
+### 運用
+
+- 実装時に想定していない Exception や Error が実行時に発生した場合は、Crashlytics でレポートを送信する処理を実装する。
+
 ## トラブルシューティング
 
 ### 方針

@@ -268,6 +268,10 @@ Navigator.of(context).push(SomeScreen.route);
 - Use `mocktail` for mocks.
 - If you want to use the same dummy constants between test cases, define them at the beginning of the `group` function, the beginning of the `main` function, or in the `setUp` function to make them common.
 
+### Operation
+
+- Implement a process to send a report via Crashlytics if an exception or error that was not anticipated during implementation occurs at runtime.
+
 ## Troubleshooting
 
 ### Policy
