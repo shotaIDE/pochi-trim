@@ -170,6 +170,13 @@ class _PurchasablesPanel extends ConsumerStatefulWidget {
 }
 
 class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
+  var _isPurchasing = false;
+  var _isRestoring = false;
+  var _purchaseProgress = 0.0;
+  var _purchaseProgressMessage = '';
+  var _restoreProgress = 0.0;
+  var _restoreProgressMessage = '';
+
   @override
   Widget build(BuildContext context) {
     final purchasablesFuture = ref.watch(currentPurchasablesProvider.future);
@@ -201,7 +208,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
         }
 
         final purchaseButton = ElevatedButton(
-          onPressed: purchasables == null
+          onPressed: (purchasables == null || _isPurchasing || _isRestoring)
               ? null
               : () => _purchase(purchasables.first),
           style: ElevatedButton.styleFrom(
@@ -212,23 +219,64 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                '購入する',
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimary,
+              if (_isPurchasing) ...[
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Text(
+                  '購入中...',
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              ] else
+                Text(
+                  '購入する',
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
             ],
           ),
         );
 
         final restoreButton = TextButton(
-          onPressed: _restorePurchases,
-          child: Text(
-            '購入履歴を復元する',
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
+          onPressed: (_isPurchasing || _isRestoring) ? null : _restorePurchases,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (_isRestoring) ...[
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '復元中...',
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.primary.withAlpha(150),
+                  ),
+                ),
+              ] else
+                Text(
+                  '購入履歴を復元する',
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+            ],
           ),
         );
 
@@ -239,6 +287,8 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
             children: [
               priceTile,
               const SizedBox(height: 20),
+              if (_isPurchasing) _buildPurchaseProgress(),
+              if (_isRestoring) _buildRestoreProgress(),
               purchaseButton,
               restoreButton,
             ],
@@ -249,8 +299,38 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
   }
 
   Future<void> _purchase(Purchasable productInfo) async {
+    setState(() {
+      _isPurchasing = true;
+      _purchaseProgress = 0.0;
+      _purchaseProgressMessage = '課金処理を開始しています...';
+    });
+
     try {
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      setState(() {
+        _purchaseProgress = 0.25;
+        _purchaseProgressMessage = 'App Store/Google Playで処理中...';
+      });
+
       await ref.read(purchaseResultProvider(productInfo).future);
+
+      setState(() {
+        _purchaseProgress = 0.75;
+        _purchaseProgressMessage = '購入を確認しています...';
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+
+      setState(() {
+        _purchaseProgress = 0.9;
+        _purchaseProgressMessage = 'アプリの設定を更新中...';
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+
+      setState(() {
+        _purchaseProgress = 1.0;
+        _purchaseProgressMessage = '完了しました！';
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 800));
     } on PurchaseException catch (e) {
       switch (e) {
         case PurchaseExceptionCancelled():
@@ -265,12 +345,50 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
             const SnackBar(content: Text('購入中にエラーが発生しました。しばらくしてから再度お試しください。')),
           );
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPurchasing = false;
+          _purchaseProgress = 0.0;
+          _purchaseProgressMessage = '';
+        });
+      }
     }
   }
 
   Future<void> _restorePurchases() async {
+    setState(() {
+      _isRestoring = true;
+      _restoreProgress = 0.0;
+      _restoreProgressMessage = '復元処理を開始しています...';
+    });
+
     try {
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      setState(() {
+        _restoreProgress = 0.25;
+        _restoreProgressMessage = '購入履歴を取得中...';
+      });
+
       await ref.read(restorePurchaseResultProvider.future);
+
+      setState(() {
+        _restoreProgress = 0.75;
+        _restoreProgressMessage = '購入情報を確認しています...';
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+
+      setState(() {
+        _restoreProgress = 0.9;
+        _restoreProgressMessage = 'アプリの設定を更新中...';
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+
+      setState(() {
+        _restoreProgress = 1.0;
+        _restoreProgressMessage = '完了しました！';
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 800));
     } on RestorePurchaseException catch (e) {
       switch (e) {
         case RestorePurchaseExceptionNotFound():
@@ -295,6 +413,14 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
           );
           return;
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRestoring = false;
+          _restoreProgress = 0.0;
+          _restoreProgressMessage = '';
+        });
+      }
     }
 
     if (!mounted) {
@@ -304,6 +430,60 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('購入履歴の復元が完了しました。')));
+  }
+
+  Widget _buildPurchaseProgress() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          LinearProgressIndicator(
+            value: _purchaseProgress,
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _purchaseProgressMessage,
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRestoreProgress() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          LinearProgressIndicator(
+            value: _restoreProgress,
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _restoreProgressMessage,
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 }
 
