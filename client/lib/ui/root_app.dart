@@ -35,8 +35,8 @@ class _RootAppState extends ConsumerState<RootApp> {
           orElse: () {},
         );
       })
-      // ユーザープロファイルの変更を監視してCrashlyticsのユーザーIDを同期
       ..listenManual(updatedUserIdProvider, (_, next) {
+        // ユーザーIDの変更を常に監視しておき、必要な処理が行われるようにする
         next.maybeWhen(
           data: (maybeUserId) {
             final userId = maybeUserId ?? '(null)';
