@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
-import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:share_plus/share_plus.dart';
@@ -31,20 +30,12 @@ class SettingsPresenter {
 
   /// ログアウト処理
   Future<void> logout() async {
-    // CrashlyticsのユーザーIDをクリア
-    final errorReportService = _ref.read(errorReportServiceProvider);
-    await errorReportService.clearUserId();
-
     await _ref.read(authServiceProvider).signOut();
     await _ref.read(currentAppSessionProvider.notifier).signOut();
   }
 
   /// アカウント削除処理
   Future<void> deleteAccount() async {
-    // CrashlyticsのユーザーIDをクリア
-    final errorReportService = _ref.read(errorReportServiceProvider);
-    await errorReportService.clearUserId();
-
     // Firebase認証からのサインアウト
     await _ref.read(authServiceProvider).signOut();
     await _ref.read(currentAppSessionProvider.notifier).signOut();

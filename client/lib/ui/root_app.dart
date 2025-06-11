@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/definition/app_feature.dart';
 import 'package:pochi_trim/data/definition/flavor.dart';
+import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/data/service/remote_config_service.dart';
 import 'package:pochi_trim/ui/app_initial_route.dart';
 import 'package:pochi_trim/ui/component/app_theme.dart';
@@ -23,17 +25,38 @@ class _RootAppState extends ConsumerState<RootApp> {
   void initState() {
     super.initState();
 
-    ref.listenManual(updatedRemoteConfigKeysProvider, (_, next) {
-      next.maybeWhen(
-        data: (keys) {
-          // Remote Config の変更を監視し、次回 `RootApp` が生成された際に有効になるようにする。
-          // リスナー側が何も行わなくても、ライブラリは変更された値を保持する。
-          // https://firebase.google.com/docs/remote-config/loading#strategy_3_load_new_values_for_next_startup
-          debugPrint('Updated remote config keys: $keys');
-        },
-        orElse: () {},
-      );
-    });
+    ref
+      ..listenManual(updatedRemoteConfigKeysProvider, (_, next) {
+        next.maybeWhen(
+          data: (keys) {
+            // Remote Config の変更を監視し、次回 `RootApp` が生成された際に有効になるようにする。
+            // リスナー側が何も行わなくても、ライブラリは変更された値を保持する。
+            // https://firebase.google.com/docs/remote-config/loading#strategy_3_load_new_values_for_next_startup
+            debugPrint('Updated remote config keys: $keys');
+          },
+          orElse: () {},
+        );
+      })
+      // currentUserProfileの変更を監視してCrashlyticsのユーザーIDを同期
+      ..listenManual(currentUserProfileProvider, (_, next) {
+        final errorReportService = ref.read(errorReportServiceProvider);
+
+        next.maybeWhen(
+          data: (userProfile) async {
+            if (userProfile == null) {
+              // ユーザーがサインアウトしている場合、CrashlyticsのユーザーIDをクリア
+              await errorReportService.clearUserId();
+              return;
+            }
+
+            // ユーザーがサインインしている場合、CrashlyticsにユーザーIDを設定
+            await errorReportService.setUserId(userProfile.id);
+          },
+          orElse: () {
+            // ローディング中やエラー時は何もしない
+          },
+        );
+      });
   }
 
   @override
