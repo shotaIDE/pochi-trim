@@ -32,16 +32,11 @@ class CurrentPurchaseStatus extends _$CurrentPurchaseStatus {
   Future<void> purchase(Purchasable product) async {
     state = PurchaseStatus.inPurchasing;
 
+    final CustomerInfo customerInfo;
     try {
-      final CustomerInfo customerInfo;
       customerInfo = await Purchases.purchasePackage(product.package);
-
-      if (!hasProEntitlement(customerInfo: customerInfo)) {
-        throw const PurchaseException.uncategorized();
-      }
-
-      await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
     } on PlatformException catch (e) {
+      state = PurchaseStatus.none;
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
 
       switch (errorCode) {
@@ -51,9 +46,16 @@ class CurrentPurchaseStatus extends _$CurrentPurchaseStatus {
         default:
           throw const PurchaseException.uncategorized();
       }
-    } finally {
-      state = PurchaseStatus.none;
     }
+
+    if (!hasProEntitlement(customerInfo: customerInfo)) {
+      state = PurchaseStatus.none;
+      throw const PurchaseException.uncategorized();
+    }
+
+    await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
+
+    state = PurchaseStatus.none;
   }
 
   /// 購入履歴を復元する
@@ -62,15 +64,11 @@ class CurrentPurchaseStatus extends _$CurrentPurchaseStatus {
   Future<void> restore() async {
     state = PurchaseStatus.inRestoring;
 
+    final CustomerInfo customerInfo;
     try {
-      final CustomerInfo customerInfo;
       customerInfo = await Purchases.restorePurchases();
-
-      // Pro版のエンタイトルメントがアクティブかチェック
-      if (hasProEntitlement(customerInfo: customerInfo)) {
-        await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
-      }
     } on PlatformException catch (e) {
+      state = PurchaseStatus.none;
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
 
       switch (errorCode) {
@@ -80,8 +78,13 @@ class CurrentPurchaseStatus extends _$CurrentPurchaseStatus {
         default:
           throw const PurchaseException.uncategorized();
       }
-    } finally {
-      state = PurchaseStatus.none;
     }
+
+    // Pro版のエンタイトルメントがアクティブかチェック
+    if (hasProEntitlement(customerInfo: customerInfo)) {
+      await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
+    }
+
+    state = PurchaseStatus.none;
   }
 }
