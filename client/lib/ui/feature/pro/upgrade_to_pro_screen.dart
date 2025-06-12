@@ -173,6 +173,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
   @override
   Widget build(BuildContext context) {
     final purchasablesFuture = ref.watch(currentPurchasablesProvider.future);
+    final purchaseStatus = ref.watch(currentPurchaseStatusProvider);
 
     return FutureBuilder(
       future: purchasablesFuture,
@@ -201,7 +202,8 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
         }
 
         final purchaseButton = ElevatedButton(
-          onPressed: purchasables == null
+          onPressed:
+              (purchasables == null || purchaseStatus != PurchaseStatus.none)
               ? null
               : () => _purchase(purchasables.first),
           style: ElevatedButton.styleFrom(
@@ -212,23 +214,68 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                '購入する',
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimary,
+              if (purchaseStatus == PurchaseStatus.inPurchasing) ...[
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    semanticsLabel: '購入しています',
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Text(
+                  '購入中...',
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              ] else
+                Text(
+                  '購入する',
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
             ],
           ),
         );
 
         final restoreButton = TextButton(
-          onPressed: _restorePurchases,
-          child: Text(
-            '購入履歴を復元する',
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
+          onPressed: purchaseStatus != PurchaseStatus.none
+              ? null
+              : _restorePurchases,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (purchaseStatus == PurchaseStatus.inRestoring) ...[
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).colorScheme.primary,
+                    ),
+                    semanticsLabel: '購入履歴を復元しています',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '復元中...',
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.primary.withAlpha(150),
+                  ),
+                ),
+              ] else
+                Text(
+                  '購入履歴を復元する',
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+            ],
           ),
         );
 
@@ -250,7 +297,9 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
 
   Future<void> _purchase(Purchasable productInfo) async {
     try {
-      await ref.read(purchaseResultProvider(productInfo).future);
+      await ref
+          .read(currentPurchaseStatusProvider.notifier)
+          .purchase(productInfo);
     } on PurchaseException catch (e) {
       switch (e) {
         case PurchaseExceptionCancelled():
@@ -270,7 +319,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
 
   Future<void> _restorePurchases() async {
     try {
-      await ref.read(restorePurchaseResultProvider.future);
+      await ref.read(currentPurchaseStatusProvider.notifier).restore();
     } on RestorePurchaseException catch (e) {
       switch (e) {
         case RestorePurchaseExceptionNotFound():
