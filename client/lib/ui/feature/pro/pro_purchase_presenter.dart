@@ -34,25 +34,23 @@ class CurrentPurchaseStatus extends _$CurrentPurchaseStatus {
 
     try {
       final CustomerInfo customerInfo;
-      try {
-        customerInfo = await Purchases.purchasePackage(product.package);
-      } on PlatformException catch (e) {
-        final errorCode = PurchasesErrorHelper.getErrorCode(e);
-
-        switch (errorCode) {
-          case PurchasesErrorCode.purchaseCancelledError:
-            throw const PurchaseException.cancelled();
-          // ignore: no_default_cases
-          default:
-            throw const PurchaseException.uncategorized();
-        }
-      }
+      customerInfo = await Purchases.purchasePackage(product.package);
 
       if (!hasProEntitlement(customerInfo: customerInfo)) {
         throw const PurchaseException.uncategorized();
       }
 
       await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
+    } on PlatformException catch (e) {
+      final errorCode = PurchasesErrorHelper.getErrorCode(e);
+
+      switch (errorCode) {
+        case PurchasesErrorCode.purchaseCancelledError:
+          throw const PurchaseException.cancelled();
+        // ignore: no_default_cases
+        default:
+          throw const PurchaseException.uncategorized();
+      }
     } finally {
       state = PurchaseStatus.none;
     }
@@ -66,23 +64,21 @@ class CurrentPurchaseStatus extends _$CurrentPurchaseStatus {
 
     try {
       final CustomerInfo customerInfo;
-      try {
-        customerInfo = await Purchases.restorePurchases();
-      } on PlatformException catch (e) {
-        final errorCode = PurchasesErrorHelper.getErrorCode(e);
-
-        switch (errorCode) {
-          case PurchasesErrorCode.invalidReceiptError:
-            throw const RestorePurchaseException.notFound();
-          // ignore: no_default_cases
-          default:
-            throw const PurchaseException.uncategorized();
-        }
-      }
+      customerInfo = await Purchases.restorePurchases();
 
       // Pro版のエンタイトルメントがアクティブかチェック
       if (hasProEntitlement(customerInfo: customerInfo)) {
         await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
+      }
+    } on PlatformException catch (e) {
+      final errorCode = PurchasesErrorHelper.getErrorCode(e);
+
+      switch (errorCode) {
+        case PurchasesErrorCode.invalidReceiptError:
+          throw const RestorePurchaseException.notFound();
+        // ignore: no_default_cases
+        default:
+          throw const PurchaseException.uncategorized();
       }
     } finally {
       state = PurchaseStatus.none;
