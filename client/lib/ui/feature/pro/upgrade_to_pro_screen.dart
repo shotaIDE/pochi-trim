@@ -221,6 +221,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    semanticsLabel: '購入しています',
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -257,6 +258,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
                     valueColor: AlwaysStoppedAnimation<Color>(
                       Theme.of(context).colorScheme.primary,
                     ),
+                    semanticsLabel: '購入履歴を復元しています',
                   ),
                 ),
                 const SizedBox(width: 8),
