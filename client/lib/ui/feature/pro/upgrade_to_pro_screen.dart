@@ -173,7 +173,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
   @override
   Widget build(BuildContext context) {
     final purchasablesFuture = ref.watch(currentPurchasablesProvider.future);
-    final isPurchaseActionEnabled = ref.watch(isPurchaseActionEnabledProvider);
+    final purchaseStatus = ref.watch(currentPurchaseStatusProvider);
 
     return FutureBuilder(
       future: purchasablesFuture,
@@ -202,7 +202,8 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
         }
 
         final purchaseButton = ElevatedButton(
-          onPressed: (purchasables == null || !isPurchaseActionEnabled)
+          onPressed:
+              (purchasables == null || purchaseStatus != PurchaseStatus.none)
               ? null
               : () => _purchase(purchasables.first),
           style: ElevatedButton.styleFrom(
@@ -213,7 +214,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (!isPurchaseActionEnabled) ...[
+              if (purchaseStatus == PurchaseStatus.inPurchase) ...[
                 const SizedBox(
                   width: 20,
                   height: 20,
@@ -241,11 +242,13 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
         );
 
         final restoreButton = TextButton(
-          onPressed: !isPurchaseActionEnabled ? null : _restorePurchases,
+          onPressed: purchaseStatus != PurchaseStatus.none
+              ? null
+              : _restorePurchases,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (!isPurchaseActionEnabled) ...[
+              if (purchaseStatus == PurchaseStatus.inRestoring) ...[
                 SizedBox(
                   width: 16,
                   height: 16,
@@ -293,7 +296,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
   Future<void> _purchase(Purchasable productInfo) async {
     try {
       await ref
-          .read(isPurchaseActionEnabledProvider.notifier)
+          .read(currentPurchaseStatusProvider.notifier)
           .purchase(productInfo);
     } on PurchaseException catch (e) {
       switch (e) {
@@ -314,7 +317,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
 
   Future<void> _restorePurchases() async {
     try {
-      await ref.read(isPurchaseActionEnabledProvider.notifier).restore();
+      await ref.read(currentPurchaseStatusProvider.notifier).restore();
     } on RestorePurchaseException catch (e) {
       switch (e) {
         case RestorePurchaseExceptionNotFound():

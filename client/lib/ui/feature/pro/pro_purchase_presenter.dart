@@ -8,17 +8,27 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pro_purchase_presenter.g.dart';
 
-/// 購入アクション（購入・復元）の実行状態を管理する
+/// 購入処理の状態
+enum PurchaseStatus {
+  /// 何も実行していない
+  none,
+  /// 購入中
+  inPurchase,
+  /// 復元中
+  inRestoring,
+}
+
+/// 現在の購入処理状態を管理する
 @riverpod
-class IsPurchaseActionEnabled extends _$IsPurchaseActionEnabled {
+class CurrentPurchaseStatus extends _$CurrentPurchaseStatus {
   @override
-  bool build() => true;
+  PurchaseStatus build() => PurchaseStatus.none;
 
   /// Pro版を購入する
   ///
   /// 購入に失敗した場合は、[PurchaseException]を投げる。
   Future<void> purchase(Purchasable product) async {
-    state = false;
+    state = PurchaseStatus.inPurchase;
 
     try {
       final CustomerInfo customerInfo;
@@ -42,7 +52,7 @@ class IsPurchaseActionEnabled extends _$IsPurchaseActionEnabled {
 
       await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
     } finally {
-      state = true;
+      state = PurchaseStatus.none;
     }
   }
 
@@ -50,7 +60,7 @@ class IsPurchaseActionEnabled extends _$IsPurchaseActionEnabled {
   ///
   /// 復元に失敗した場合は、[RestorePurchaseException]を投げる。
   Future<void> restore() async {
-    state = false;
+    state = PurchaseStatus.inRestoring;
 
     try {
       final CustomerInfo customerInfo;
@@ -73,7 +83,7 @@ class IsPurchaseActionEnabled extends _$IsPurchaseActionEnabled {
         await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
       }
     } finally {
-      state = true;
+      state = PurchaseStatus.none;
     }
   }
 }
