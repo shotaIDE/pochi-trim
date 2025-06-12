@@ -25,32 +25,60 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
+    final loginStatus = ref.watch(currentLoginStatusProvider);
+    final isLoading = loginStatus != LoginStatus.none;
+
     final startWithGoogleButton = ElevatedButton.icon(
-      onPressed: _startWithGoogle,
+      onPressed: isLoading ? null : _startWithGoogle,
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
-      icon: const Icon(FontAwesomeIcons.google),
+      icon: loginStatus == LoginStatus.signingInWithGoogle 
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(FontAwesomeIcons.google),
       label: const Text('Googleで続ける'),
     );
 
     final startWithAppleButton = ElevatedButton.icon(
-      onPressed: _startWithApple,
+      onPressed: isLoading ? null : _startWithApple,
       style: ElevatedButton.styleFrom(
         backgroundColor: signInWithAppleBackgroundColor(context),
         foregroundColor: signInWithAppleForegroundColor(context),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
-      icon: const Icon(FontAwesomeIcons.apple),
+      icon: loginStatus == LoginStatus.signingInWithApple 
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(FontAwesomeIcons.apple),
       label: const Text('Appleで続ける'),
     );
 
     final continueWithoutAccountButton = TextButton(
-      onPressed: _startWithoutAccount,
+      onPressed: isLoading ? null : _startWithoutAccount,
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
-      child: const Text('アカウントを利用せず続ける'),
+      child: loginStatus == LoginStatus.signingInAnonymously
+          ? const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 8),
+                Text('アカウントを利用せず続ける'),
+              ],
+            )
+          : const Text('アカウントを利用せず続ける'),
     );
 
     final children = <Widget>[

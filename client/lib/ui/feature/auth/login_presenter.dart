@@ -10,6 +10,33 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'login_presenter.g.dart';
 
+/// ログイン処理の状態
+enum LoginStatus {
+  /// 何も実行していない
+  none,
+
+  /// Googleアカウントでログイン中
+  signingInWithGoogle,
+
+  /// Appleアカウントでログイン中
+  signingInWithApple,
+
+  /// 匿名アカウントでログイン中
+  signingInAnonymously,
+}
+
+/// 現在のログイン処理状態を管理する
+@riverpod
+class CurrentLoginStatus extends _$CurrentLoginStatus {
+  @override
+  LoginStatus build() => LoginStatus.none;
+
+  /// 状態を設定する
+  void setStatus(LoginStatus status) {
+    state = status;
+  }
+}
+
 @riverpod
 class StartResult extends _$StartResult {
   final _logger = Logger('StartResult');
@@ -25,18 +52,27 @@ class StartResult extends _$StartResult {
   /// - [SignInWithGoogleException]: Google認証でエラーが発生した場合
   /// - [GenerateMyHouseException]: 家ID生成APIでエラーが発生した場合
   Future<void> startWithGoogle() async {
+    ref
+        .read(currentLoginStatusProvider.notifier)
+        .setStatus(LoginStatus.signingInWithGoogle);
     state = const AsyncValue.loading();
 
-    final authService = ref.read(authServiceProvider);
-    final result = await authService.signInWithGoogle();
+    try {
+      final authService = ref.read(authServiceProvider);
+      final result = await authService.signInWithGoogle();
 
-    final userId = result.userId;
-    final isNewUser = result.isNewUser;
-    _logger.info(
-      'Google sign-in successful. User ID = $userId, new user = $isNewUser',
-    );
+      final userId = result.userId;
+      final isNewUser = result.isNewUser;
+      _logger.info(
+        'Google sign-in successful. User ID = $userId, new user = $isNewUser',
+      );
 
-    await _completeSignIn(userId: userId);
+      await _completeSignIn(userId: userId);
+    } finally {
+      ref
+          .read(currentLoginStatusProvider.notifier)
+          .setStatus(LoginStatus.none);
+    }
   }
 
   /// Appleアカウントでサインインする
@@ -45,18 +81,27 @@ class StartResult extends _$StartResult {
   /// - [SignInWithAppleException]: Apple認証でエラーが発生した場合
   /// - [GenerateMyHouseException]: 家ID生成APIでエラーが発生した場合
   Future<void> startWithApple() async {
+    ref
+        .read(currentLoginStatusProvider.notifier)
+        .setStatus(LoginStatus.signingInWithApple);
     state = const AsyncValue.loading();
 
-    final authService = ref.read(authServiceProvider);
-    final result = await authService.signInWithApple();
+    try {
+      final authService = ref.read(authServiceProvider);
+      final result = await authService.signInWithApple();
 
-    final userId = result.userId;
-    final isNewUser = result.isNewUser;
-    _logger.info(
-      'Apple sign-in successful. User ID = $userId, new user = $isNewUser',
-    );
+      final userId = result.userId;
+      final isNewUser = result.isNewUser;
+      _logger.info(
+        'Apple sign-in successful. User ID = $userId, new user = $isNewUser',
+      );
 
-    await _completeSignIn(userId: userId);
+      await _completeSignIn(userId: userId);
+    } finally {
+      ref
+          .read(currentLoginStatusProvider.notifier)
+          .setStatus(LoginStatus.none);
+    }
   }
 
   /// 匿名アカウントでサインインする
@@ -64,12 +109,21 @@ class StartResult extends _$StartResult {
   /// Throws:
   /// - [GenerateMyHouseException]: 家ID生成APIでエラーが発生した場合
   Future<void> startWithoutAccount() async {
+    ref
+        .read(currentLoginStatusProvider.notifier)
+        .setStatus(LoginStatus.signingInAnonymously);
     state = const AsyncValue.loading();
 
-    final authService = ref.read(authServiceProvider);
-    final userId = await authService.signInAnonymously();
+    try {
+      final authService = ref.read(authServiceProvider);
+      final userId = await authService.signInAnonymously();
 
-    await _completeSignIn(userId: userId);
+      await _completeSignIn(userId: userId);
+    } finally {
+      ref
+          .read(currentLoginStatusProvider.notifier)
+          .setStatus(LoginStatus.none);
+    }
   }
 
   Future<void> _completeSignIn({required String userId}) async {
