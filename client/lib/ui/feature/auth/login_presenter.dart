@@ -28,34 +28,18 @@ enum LoginStatus {
 /// 現在のログイン処理状態を管理する
 @riverpod
 class CurrentLoginStatus extends _$CurrentLoginStatus {
+  final _logger = Logger('CurrentLoginStatus');
+
   @override
   LoginStatus build() => LoginStatus.none;
 
-  /// 状態を設定する
-  void setStatus(LoginStatus status) {
-    state = status;
-  }
-}
-
-@riverpod
-class StartResult extends _$StartResult {
-  final _logger = Logger('StartResult');
-
-  @override
-  Future<void> build() async {
-    return;
-  }
-
   /// Googleアカウントでサインインする
-  /// 
+  ///
   /// Throws:
   /// - [SignInWithGoogleException]: Google認証でエラーが発生した場合
   /// - [GenerateMyHouseException]: 家ID生成APIでエラーが発生した場合
   Future<void> startWithGoogle() async {
-    ref
-        .read(currentLoginStatusProvider.notifier)
-        .setStatus(LoginStatus.signingInWithGoogle);
-    state = const AsyncValue.loading();
+    state = LoginStatus.signingInWithGoogle;
 
     try {
       final authService = ref.read(authServiceProvider);
@@ -69,22 +53,17 @@ class StartResult extends _$StartResult {
 
       await _completeSignIn(userId: userId);
     } finally {
-      ref
-          .read(currentLoginStatusProvider.notifier)
-          .setStatus(LoginStatus.none);
+      state = LoginStatus.none;
     }
   }
 
   /// Appleアカウントでサインインする
-  /// 
+  ///
   /// Throws:
   /// - [SignInWithAppleException]: Apple認証でエラーが発生した場合
   /// - [GenerateMyHouseException]: 家ID生成APIでエラーが発生した場合
   Future<void> startWithApple() async {
-    ref
-        .read(currentLoginStatusProvider.notifier)
-        .setStatus(LoginStatus.signingInWithApple);
-    state = const AsyncValue.loading();
+    state = LoginStatus.signingInWithApple;
 
     try {
       final authService = ref.read(authServiceProvider);
@@ -98,21 +77,16 @@ class StartResult extends _$StartResult {
 
       await _completeSignIn(userId: userId);
     } finally {
-      ref
-          .read(currentLoginStatusProvider.notifier)
-          .setStatus(LoginStatus.none);
+      state = LoginStatus.none;
     }
   }
 
   /// 匿名アカウントでサインインする
-  /// 
+  ///
   /// Throws:
   /// - [GenerateMyHouseException]: 家ID生成APIでエラーが発生した場合
   Future<void> startWithoutAccount() async {
-    ref
-        .read(currentLoginStatusProvider.notifier)
-        .setStatus(LoginStatus.signingInAnonymously);
-    state = const AsyncValue.loading();
+    state = LoginStatus.signingInAnonymously;
 
     try {
       final authService = ref.read(authServiceProvider);
@@ -120,9 +94,7 @@ class StartResult extends _$StartResult {
 
       await _completeSignIn(userId: userId);
     } finally {
-      ref
-          .read(currentLoginStatusProvider.notifier)
-          .setStatus(LoginStatus.none);
+      state = LoginStatus.none;
     }
   }
 

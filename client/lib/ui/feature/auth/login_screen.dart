@@ -111,7 +111,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _startWithGoogle() async {
     try {
-      await ref.read(startResultProvider.notifier).startWithGoogle();
+      await ref.read(currentLoginStatusProvider.notifier).startWithGoogle();
     } on SignInWithGoogleException catch (error) {
       if (!mounted) {
         return;
@@ -131,7 +131,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _startWithApple() async {
     try {
-      await ref.read(startResultProvider.notifier).startWithApple();
+      await ref.read(currentLoginStatusProvider.notifier).startWithApple();
     } on SignInWithAppleException catch (error) {
       if (!mounted) {
         return;
@@ -150,7 +150,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _startWithoutAccount() async {
-    await ref.read(startResultProvider.notifier).startWithoutAccount();
+    await ref.read(currentLoginStatusProvider.notifier).startWithoutAccount();
 
     // ホーム画面への遷移は RootApp で自動で行われる
   }
