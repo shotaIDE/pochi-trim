@@ -214,7 +214,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (purchaseStatus == PurchaseStatus.inPurchase) ...[
+              if (purchaseStatus == PurchaseStatus.inPurchasing) ...[
                 const SizedBox(
                   width: 20,
                   height: 20,

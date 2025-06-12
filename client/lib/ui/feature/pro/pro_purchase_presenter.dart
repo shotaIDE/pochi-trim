@@ -12,8 +12,10 @@ part 'pro_purchase_presenter.g.dart';
 enum PurchaseStatus {
   /// 何も実行していない
   none,
+
   /// 購入中
-  inPurchase,
+  inPurchasing,
+
   /// 復元中
   inRestoring,
 }
@@ -28,7 +30,7 @@ class CurrentPurchaseStatus extends _$CurrentPurchaseStatus {
   ///
   /// 購入に失敗した場合は、[PurchaseException]を投げる。
   Future<void> purchase(Purchasable product) async {
-    state = PurchaseStatus.inPurchase;
+    state = PurchaseStatus.inPurchasing;
 
     try {
       final CustomerInfo customerInfo;
