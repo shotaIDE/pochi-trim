@@ -34,13 +34,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
       icon: loginStatus == LoginStatus.signingInWithGoogle
-          ? const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                semanticsLabel: 'Googleでログインしています',
-              ),
+          ? const _LoadingIndicatorReplacingButtonIcon(
+              semanticsLabel: 'Googleでログインしています',
             )
           : const Icon(FontAwesomeIcons.google),
       label: const Text('Googleで続ける'),
@@ -54,13 +49,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
       icon: loginStatus == LoginStatus.signingInWithApple
-          ? const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                semanticsLabel: 'Appleでログインしています',
-              ),
+          ? const _LoadingIndicatorReplacingButtonIcon(
+              semanticsLabel: 'Appleでログインしています',
             )
           : const Icon(FontAwesomeIcons.apple),
       label: const Text('Appleで続ける'),
@@ -75,13 +65,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ? const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    semanticsLabel: 'ゲストユーザーとしてログインしています',
-                  ),
+                _LoadingIndicatorReplacingButtonIcon(
+                  semanticsLabel: 'ゲストユーザーとしてログインしています',
                 ),
                 SizedBox(width: 8),
                 Text('アカウントを利用せず続ける'),
@@ -162,6 +147,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     await ref.read(currentLoginStatusProvider.notifier).startWithoutAccount();
 
     // ホーム画面への遷移は RootApp で自動で行われる
+  }
+}
+
+class _LoadingIndicatorReplacingButtonIcon extends StatelessWidget {
+  const _LoadingIndicatorReplacingButtonIcon({required this.semanticsLabel});
+
+  final String semanticsLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 16,
+      height: 16,
+      child: CircularProgressIndicator(
+        strokeWidth: 2,
+        semanticsLabel: semanticsLabel,
+      ),
+    );
   }
 }
 
