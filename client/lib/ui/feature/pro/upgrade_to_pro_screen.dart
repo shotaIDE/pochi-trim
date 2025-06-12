@@ -170,12 +170,12 @@ class _PurchasablesPanel extends ConsumerStatefulWidget {
 }
 
 class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
-  var _isPurchasing = false;
-  var _isRestoring = false;
 
   @override
   Widget build(BuildContext context) {
     final purchasablesFuture = ref.watch(currentPurchasablesProvider.future);
+    final isPurchasing = ref.watch(isPurchasingProvider);
+    final isRestoring = ref.watch(isRestoringProvider);
 
     return FutureBuilder(
       future: purchasablesFuture,
@@ -204,7 +204,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
         }
 
         final purchaseButton = ElevatedButton(
-          onPressed: (purchasables == null || _isPurchasing || _isRestoring)
+          onPressed: (purchasables == null || isPurchasing || isRestoring)
               ? null
               : () => _purchase(purchasables.first),
           style: ElevatedButton.styleFrom(
@@ -215,7 +215,7 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (_isPurchasing) ...[
+              if (isPurchasing) ...[
                 const SizedBox(
                   width: 20,
                   height: 20,
@@ -243,11 +243,11 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
         );
 
         final restoreButton = TextButton(
-          onPressed: (_isPurchasing || _isRestoring) ? null : _restorePurchases,
+          onPressed: (isPurchasing || isRestoring) ? null : _restorePurchases,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (_isRestoring) ...[
+              if (isRestoring) ...[
                 SizedBox(
                   width: 16,
                   height: 16,
@@ -293,10 +293,6 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
   }
 
   Future<void> _purchase(Purchasable productInfo) async {
-    setState(() {
-      _isPurchasing = true;
-    });
-
     try {
       await ref.read(purchaseResultProvider(productInfo).future);
     } on PurchaseException catch (e) {
@@ -313,20 +309,10 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
             const SnackBar(content: Text('購入中にエラーが発生しました。しばらくしてから再度お試しください。')),
           );
       }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isPurchasing = false;
-        });
-      }
     }
   }
 
   Future<void> _restorePurchases() async {
-    setState(() {
-      _isRestoring = true;
-    });
-
     try {
       await ref.read(restorePurchaseResultProvider.future);
     } on RestorePurchaseException catch (e) {
@@ -352,12 +338,6 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
             ),
           );
           return;
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isRestoring = false;
-        });
       }
     }
 
