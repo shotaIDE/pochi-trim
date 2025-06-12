@@ -64,13 +64,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
       child: loginStatus == LoginStatus.signingInAnonymously
-          ? Row(
+          ? const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const _LoadingIndicatorReplacingButtonIcon(
+                _LoadingIndicatorReplacingButtonIcon(
                   semanticsLabel: 'ゲストユーザーとしてログインしています',
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 continueWithoutAccountText,
               ],
             )
