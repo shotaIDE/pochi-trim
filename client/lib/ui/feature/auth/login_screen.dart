@@ -28,6 +28,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final loginStatus = ref.watch(currentLoginStatusProvider);
     final isLoading = loginStatus != LoginStatus.none;
 
+    const continueWithoutAccountText = Text('アカウントを利用せず続ける');
+
     final startWithGoogleButton = ElevatedButton.icon(
       onPressed: isLoading ? null : _startWithGoogle,
       style: ElevatedButton.styleFrom(
@@ -62,17 +64,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
       child: loginStatus == LoginStatus.signingInAnonymously
-          ? const Row(
+          ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _LoadingIndicatorReplacingButtonIcon(
+                const _LoadingIndicatorReplacingButtonIcon(
                   semanticsLabel: 'ゲストユーザーとしてログインしています',
                 ),
-                SizedBox(width: 8),
-                Text('アカウントを利用せず続ける'),
+                const SizedBox(width: 8),
+                continueWithoutAccountText,
               ],
             )
-          : const Text('アカウントを利用せず続ける'),
+          : continueWithoutAccountText,
     );
 
     final children = <Widget>[
