@@ -33,11 +33,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
-      icon: loginStatus == LoginStatus.signingInWithGoogle 
+      icon: loginStatus == LoginStatus.signingInWithGoogle
           ? const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                semanticsLabel: 'Googleでログインしています',
+              ),
             )
           : const Icon(FontAwesomeIcons.google),
       label: const Text('Googleで続ける'),
@@ -50,11 +53,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         foregroundColor: signInWithAppleForegroundColor(context),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
-      icon: loginStatus == LoginStatus.signingInWithApple 
+      icon: loginStatus == LoginStatus.signingInWithApple
           ? const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                semanticsLabel: 'Appleでログインしています',
+              ),
             )
           : const Icon(FontAwesomeIcons.apple),
       label: const Text('Appleで続ける'),
@@ -72,7 +78,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    semanticsLabel: 'ゲストユーザーとしてログインしています',
+                  ),
                 ),
                 SizedBox(width: 8),
                 Text('アカウントを利用せず続ける'),
