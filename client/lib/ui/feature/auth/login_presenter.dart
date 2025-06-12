@@ -40,17 +40,15 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
   /// - [GenerateMyHouseException]: 家ID生成APIでエラーが発生した場合
   Future<void> startWithGoogle() async {
     state = LoginStatus.signingInWithGoogle;
+    final authService = ref.read(authServiceProvider);
 
     try {
-      final authService = ref.read(authServiceProvider);
       final result = await authService.signInWithGoogle();
-
       final userId = result.userId;
-      final isNewUser = result.isNewUser;
       _logger.info(
-        'Google sign-in successful. User ID = $userId, new user = $isNewUser',
+        'Google sign-in successful. '
+        'User ID = $userId, new user = ${result.isNewUser}',
       );
-
       await _completeSignIn(userId: userId);
     } finally {
       state = LoginStatus.none;
@@ -65,14 +63,14 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
   Future<void> startWithApple() async {
     state = LoginStatus.signingInWithApple;
 
+    final authService = ref.read(authServiceProvider);
     try {
-      final authService = ref.read(authServiceProvider);
       final result = await authService.signInWithApple();
 
       final userId = result.userId;
-      final isNewUser = result.isNewUser;
       _logger.info(
-        'Apple sign-in successful. User ID = $userId, new user = $isNewUser',
+        'Apple sign-in successful. '
+        'User ID = $userId, new user = ${result.isNewUser}',
       );
 
       await _completeSignIn(userId: userId);
@@ -88,8 +86,8 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
   Future<void> startWithoutAccount() async {
     state = LoginStatus.signingInAnonymously;
 
+    final authService = ref.read(authServiceProvider);
     try {
-      final authService = ref.read(authServiceProvider);
       final userId = await authService.signInAnonymously();
 
       await _completeSignIn(userId: userId);
