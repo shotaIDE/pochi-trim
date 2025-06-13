@@ -16,6 +16,7 @@ import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/debug_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/section_header.dart';
 import 'package:pochi_trim/ui/feature/settings/settings_presenter.dart';
+import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -76,10 +77,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildUserInfoTile(
-    BuildContext context,
-    UserProfile userProfile,
-  ) {
+  Widget _buildUserInfoTile(BuildContext context, UserProfile userProfile) {
     final String titleText;
     final Widget? subtitle;
     final VoidCallback? onTap;
@@ -136,7 +134,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       title: const Text('利用規約'),
       trailing: const _OpenTrailingIcon(),
       onTap: () async {
-final success = await ref
+        final success = await ref
             .read(settingsPresenterProvider)
             .openTermsOfService();
         if (!success && context.mounted) {
@@ -154,7 +152,7 @@ final success = await ref
       title: const Text('プライバシーポリシー'),
       trailing: const _OpenTrailingIcon(),
       onTap: () async {
-final success = await ref
+        final success = await ref
             .read(settingsPresenterProvider)
             .openPrivacyPolicy();
         if (!success && context.mounted) {
@@ -171,8 +169,7 @@ final success = await ref
       leading: const Icon(Icons.description_outlined),
       title: const Text('ライセンス'),
       trailing: const _MoveScreenTrailingIcon(),
-      onTap: () =>
-          ref.read(settingsPresenterProvider).showLicenses(context),
+      onTap: () => ref.read(settingsPresenterProvider).showLicenses(context),
     );
   }
 
@@ -262,7 +259,7 @@ final success = await ref
     Navigator.of(context).pop();
 
     try {
-await ref.read(settingsPresenterProvider).linkWithGoogle();
+      await ref.read(settingsPresenterProvider).linkWithGoogle();
     } on LinkWithGoogleException catch (error) {
       if (!mounted) {
         return;
@@ -298,7 +295,7 @@ await ref.read(settingsPresenterProvider).linkWithGoogle();
     Navigator.of(context).pop();
 
     try {
-await ref.read(settingsPresenterProvider).linkWithApple();
+      await ref.read(settingsPresenterProvider).linkWithApple();
     } on LinkWithAppleException catch (error) {
       if (!mounted) {
         return;
@@ -345,7 +342,7 @@ await ref.read(settingsPresenterProvider).linkWithApple();
           TextButton(
             onPressed: () async {
               try {
-await ref.read(settingsPresenterProvider).logout();
+                await ref.read(settingsPresenterProvider).logout();
               } on Exception catch (e) {
                 if (context.mounted) {
                   Navigator.of(context).pop();
@@ -371,7 +368,25 @@ await ref.read(settingsPresenterProvider).logout();
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('アカウント削除'),
-        content: const Text('本当にアカウントを削除しますか？この操作は元に戻せません。'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('本当にアカウントを削除しますか？'),
+            SizedBox(height: 16),
+            Text('削除されるデータ:', style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            Text('• ユーザーアカウント情報'),
+            Text('• 登録した家事データ'),
+            Text('• 作業履歴'),
+            Text('• アプリ内設定'),
+            SizedBox(height: 16),
+            Text(
+              'この操作は元に戻せません。',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -380,11 +395,43 @@ await ref.read(settingsPresenterProvider).logout();
           TextButton(
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             onPressed: () async {
+              Navigator.of(context).pop();
+
               try {
-await ref.read(settingsPresenterProvider).deleteAccount();
+                // アカウントの削除
+                await ref.read(authServiceProvider).deleteAccount();
+
+                // アプリセッションのクリア
+                await ref.read(currentAppSessionProvider.notifier).signOut();
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('アカウントを削除しました')));
+                }
+              } on DeleteAccountException catch (error) {
+                if (!context.mounted) {
+                  return;
+                }
+
+                switch (error) {
+                  case DeleteAccountExceptionRequiresRecentLogin():
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'アカウント削除には最新のログインが必要です。一度ログアウトして再度ログインしてからお試しください。',
+                        ),
+                      ),
+                    );
+                  case DeleteAccountExceptionUncategorized():
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('アカウント削除に失敗しました。しばらくしてから再度お試しください。'),
+                      ),
+                    );
+                }
               } on Exception catch (e) {
                 if (context.mounted) {
-                  Navigator.of(context).pop();
                   ScaffoldMessenger.of(
                     context,
                   ).showSnackBar(SnackBar(content: Text('アカウント削除に失敗しました: $e')));
