@@ -368,25 +368,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('アカウント削除'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('本当にアカウントを削除しますか？'),
-            SizedBox(height: 16),
-            Text('削除されるデータ:', style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Text('• ユーザーアカウント情報'),
-            Text('• 登録した家事データ'),
-            Text('• 作業履歴'),
-            Text('• アプリ内設定'),
-            SizedBox(height: 16),
-            Text(
-              'この操作は元に戻せません。',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
+        content: const Text('本当にアカウントを削除しますか？この操作は元に戻せません。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -396,14 +378,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             onPressed: () async {
               Navigator.of(context).pop();
-              
+
               try {
                 await ref.read(settingsPresenterProvider).deleteAccount();
-                
+
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('アカウントを削除しました')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('アカウントを削除しました')));
                 }
               } on DeleteAccountException catch (error) {
                 if (!context.mounted) {
@@ -428,9 +410,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 }
               } on Exception catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('アカウント削除に失敗しました: $e')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('アカウント削除に失敗しました: $e')));
                 }
               }
             },
