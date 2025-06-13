@@ -8,6 +8,40 @@ import 'package:url_launcher/url_launcher.dart';
 
 part 'settings_presenter.g.dart';
 
+/// ログアウトやアカウント削除などの処理状態
+enum ClearAccountStatus {
+  /// 何も実行していない
+  none,
+
+  /// ログアウト中
+  signingOut,
+
+  /// アカウント削除中
+  deletingAccount,
+}
+
+/// 現在の設定画面の処理状態を管理する
+@riverpod
+class CurrentSettingsStatus extends _$CurrentSettingsStatus {
+  @override
+  ClearAccountStatus build() => ClearAccountStatus.none;
+
+  /// ログアウト状態に設定
+  void setSigningOut() {
+    state = ClearAccountStatus.signingOut;
+  }
+
+  /// アカウント削除中状態に設定
+  void setDeletingAccount() {
+    state = ClearAccountStatus.deletingAccount;
+  }
+
+  /// リセット
+  void reset() {
+    state = ClearAccountStatus.none;
+  }
+}
+
 @riverpod
 SettingsPresenter settingsPresenter(Ref ref) {
   return SettingsPresenter(ref);
@@ -30,17 +64,27 @@ class SettingsPresenter {
 
   /// ログアウト処理
   Future<void> logout() async {
-    await _ref.read(authServiceProvider).signOut();
-    await _ref.read(currentAppSessionProvider.notifier).signOut();
+    _ref.read(currentSettingsStatusProvider.notifier).setSigningOut();
+    try {
+      await _ref.read(authServiceProvider).signOut();
+      await _ref.read(currentAppSessionProvider.notifier).signOut();
+    } finally {
+      _ref.read(currentSettingsStatusProvider.notifier).reset();
+    }
   }
 
   /// アカウント削除処理
   Future<void> deleteAccount() async {
-    // アカウントの削除
-    await _ref.read(authServiceProvider).deleteAccount();
+    _ref.read(currentSettingsStatusProvider.notifier).setDeletingAccount();
+    try {
+      // アカウントの削除
+      await _ref.read(authServiceProvider).deleteAccount();
 
-    // アプリセッションのクリア
-    await _ref.read(currentAppSessionProvider.notifier).signOut();
+      // アプリセッションのクリア
+      await _ref.read(currentAppSessionProvider.notifier).signOut();
+    } finally {
+      _ref.read(currentSettingsStatusProvider.notifier).reset();
+    }
   }
 
   /// アプリを共有する

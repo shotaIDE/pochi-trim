@@ -183,18 +183,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildLogoutTile(BuildContext context) {
+    final settingsStatus = ref.watch(currentSettingsStatusProvider);
+    final isLoading = settingsStatus == ClearAccountStatus.signingOut;
+
     return ListTile(
-      leading: const Icon(Icons.logout, color: Colors.red),
-      title: const Text('ログアウト', style: TextStyle(color: Colors.red)),
-      onTap: () => _showLogoutConfirmDialog(context),
+      leading: isLoading
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.logout, color: Colors.red),
+      title: Text(
+        isLoading ? 'ログアウト中...' : 'ログアウト',
+        style: const TextStyle(color: Colors.red),
+      ),
+      onTap: isLoading ? null : () => _showLogoutConfirmDialog(context),
     );
   }
 
   Widget _buildDeleteAccountTile() {
+    final settingsStatus = ref.watch(currentSettingsStatusProvider);
+    final isLoading = settingsStatus == ClearAccountStatus.deletingAccount;
+
     return ListTile(
-      leading: const Icon(Icons.delete_forever, color: Colors.red),
-      title: const Text('アカウントを削除', style: TextStyle(color: Colors.red)),
-      onTap: _showDeleteAccountConfirmDialog,
+      leading: isLoading
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.delete_forever, color: Colors.red),
+      title: Text(
+        isLoading ? 'アカウント削除中...' : 'アカウントを削除',
+        style: const TextStyle(color: Colors.red),
+      ),
+      onTap: isLoading ? null : _showDeleteAccountConfirmDialog,
     );
   }
 
@@ -338,11 +362,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           TextButton(
             onPressed: () async {
+              Navigator.of(context).pop();
               try {
                 await ref.read(settingsPresenterProvider).logout();
               } on Exception catch (e) {
                 if (context.mounted) {
-                  Navigator.of(context).pop();
                   ScaffoldMessenger.of(
                     context,
                   ).showSnackBar(SnackBar(content: Text('ログアウトに失敗しました: $e')));
