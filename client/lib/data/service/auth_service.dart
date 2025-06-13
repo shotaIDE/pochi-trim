@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logging/logging.dart';
+import 'package:pochi_trim/data/model/delete_account_exception.dart';
 import 'package:pochi_trim/data/model/sign_in_result.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
 import 'package:pochi_trim/data/service/sign_in_google_exception.dart';
@@ -155,8 +156,8 @@ class AuthService {
   }
 
   Future<String> signInAnonymously() async {
-    final userCredential =
-        await firebase_auth.FirebaseAuth.instance.signInAnonymously();
+    final userCredential = await firebase_auth.FirebaseAuth.instance
+        .signInAnonymously();
 
     final user = userCredential.user!;
 

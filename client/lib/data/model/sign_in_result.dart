@@ -59,14 +59,3 @@ sealed class LinkWithAppleException
   const factory LinkWithAppleException.uncategorized() =
       LinkWithAppleExceptionUncategorized;
 }
-
-@freezed
-sealed class DeleteAccountException
-    with _$DeleteAccountException
-    implements Exception {
-  const factory DeleteAccountException.requiresRecentLogin() =
-      DeleteAccountExceptionRequiresRecentLogin;
-
-  const factory DeleteAccountException.uncategorized() =
-      DeleteAccountExceptionUncategorized;
-}
