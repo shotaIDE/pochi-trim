@@ -360,67 +360,74 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   // アカウント削除確認ダイアログ
-  void _showDeleteAccountConfirmDialog(
+  Future<void> _showDeleteAccountConfirmDialog(
     BuildContext context,
     UserProfile userProfile,
-  ) {
-    showDialog<void>(
+  ) async {
+    await showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('アカウント削除'),
-        content: const Text('本当にアカウントを削除しますか？この操作は元に戻せません。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('キャンセル'),
+      barrierDismissible: false,
+      builder: (context) {
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            title: const Text('アカウント削除'),
+            content: const Text('本当にアカウントを削除しますか？この操作は元に戻せません。'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('キャンセル'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await _executeDeleteAccount();
+                },
+                child: const Text('削除する'),
+              ),
+            ],
           ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            onPressed: () async {
-              Navigator.of(context).pop();
-
-              try {
-                await ref.read(settingsPresenterProvider).deleteAccount();
-
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('アカウントを削除しました')));
-                }
-              } on DeleteAccountException catch (error) {
-                if (!context.mounted) {
-                  return;
-                }
-
-                switch (error) {
-                  case DeleteAccountExceptionRequiresRecentLogin():
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'アカウント削除には最新のログインが必要です。一度ログアウトして再度ログインしてからお試しください。',
-                        ),
-                      ),
-                    );
-                  case DeleteAccountExceptionUncategorized():
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('アカウント削除に失敗しました。しばらくしてから再度お試しください。'),
-                      ),
-                    );
-                }
-              } on Exception catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('アカウント削除に失敗しました: $e')));
-                }
-              }
-            },
-            child: const Text('削除する'),
-          ),
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  Future<void> _executeDeleteAccount() async {
+    try {
+      await ref.read(settingsPresenterProvider).deleteAccount();
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('アカウントを削除しました')));
+      }
+    } on DeleteAccountException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      switch (error) {
+        case DeleteAccountExceptionRequiresRecentLogin():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'アカウント削除には最新のログインが必要です。一度ログアウトして再度ログインしてからお試しください。',
+              ),
+            ),
+          );
+        case DeleteAccountExceptionUncategorized():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('アカウント削除に失敗しました。しばらくしてから再度お試しください。')),
+          );
+      }
+    } on Exception catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('アカウント削除に失敗しました: $e')));
+      }
+    }
   }
 }
 
