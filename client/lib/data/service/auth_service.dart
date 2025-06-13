@@ -52,11 +52,11 @@ class AuthService {
     } on SignInGoogleException catch (error) {
       switch (error) {
         case SignInGoogleExceptionCancelled():
-          _logger.warning('Google sign-in cancelled.');
+          _logger.warning('Googleサインインがキャンセルされました。');
 
           throw const SignInWithGoogleException.cancelled();
         case SignInGoogleExceptionUncategorized():
-          _logger.warning('Google sign-in failed.');
+          _logger.warning('Googleサインインに失敗しました。');
 
           throw const SignInWithGoogleException.uncategorized();
       }
@@ -72,7 +72,7 @@ class AuthService {
 
     final user = userCredential.user!;
 
-    _logger.info('Signed in with Google.');
+    _logger.info('Googleでサインインしました。');
 
     return SignInResult(
       userId: user.uid,
@@ -89,11 +89,11 @@ class AuthService {
     } on SignInGoogleException catch (error) {
       switch (error) {
         case SignInGoogleExceptionCancelled():
-          _logger.warning('Google sign-in cancelled.');
+          _logger.warning('Googleサインインがキャンセルされました。');
 
           throw const LinkWithGoogleException.cancelled();
         case SignInGoogleExceptionUncategorized():
-          _logger.warning('Google sign-in failed.');
+          _logger.warning('Googleサインインに失敗しました。');
 
           throw const LinkWithGoogleException.uncategorized();
       }
@@ -103,7 +103,7 @@ class AuthService {
       await user.linkWithCredential(authCredential);
     } on firebase_auth.FirebaseAuthException catch (error) {
       if (error.code == 'credential-already-in-use') {
-        _logger.warning('This Google account is already in use.');
+        _logger.warning('このGoogleアカウントは既に使用されています。');
 
         throw const LinkWithGoogleException.alreadyInUse();
       }
@@ -111,7 +111,7 @@ class AuthService {
       throw const LinkWithGoogleException.uncategorized();
     }
 
-    _logger.info('Linked with Google account.');
+    _logger.info('Googleアカウントと連携しました。');
   }
 
   Future<SignInResult> signInWithApple() async {
@@ -166,7 +166,7 @@ class AuthService {
 
     final user = userCredential.user!;
 
-    _logger.info('Signed in anonymously. user ID = ${user.uid}');
+    _logger.info('匿名でサインインしました。ユーザーID = ${user.uid}');
 
     return user.uid;
   }
@@ -180,14 +180,14 @@ class AuthService {
 
     try {
       await user.delete();
-      _logger.info('User account deleted successfully.');
+      _logger.info('ユーザーアカウントを正常に削除しました。');
     } on firebase_auth.FirebaseAuthException catch (e, stack) {
       if (e.code == 'requires-recent-login') {
-        _logger.warning('Account deletion requires recent login.');
+        _logger.warning('アカウント削除には最新のログインが必要です。');
         throw const DeleteAccountException.requiresRecentLogin();
       }
 
-      _logger.severe('Account deletion failed: ${e.message}');
+      _logger.severe('アカウント削除に失敗しました: ${e.message}');
       // Crashlyticsにエラーレポートを送信（元々キャッチしたFirebaseAuthExceptionを送信）
       await _errorReportService.recordError(e, stack);
 
@@ -225,11 +225,11 @@ class AuthService {
     }
 
     _logger.info(
-      'Signed in Google account: '
-      'user ID = ${account.id}, '
-      'display name = ${account.displayName}, '
-      'email = ${account.email}, '
-      'photo URL = ${account.photoUrl}',
+      'Googleアカウントでサインインしました: '
+      'ユーザーID = ${account.id}, '
+      '表示名 = ${account.displayName}, '
+      'メール = ${account.email}, '
+      '写真URL = ${account.photoUrl}',
     );
 
     return firebase_auth.GoogleAuthProvider.credential(
