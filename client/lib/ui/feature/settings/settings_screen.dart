@@ -364,7 +364,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onPressed: () async {
               Navigator.of(context).pop();
               try {
-                await ref.read(settingsPresenterProvider).logout();
+                await ref.read(currentSettingsStatusProvider.notifier).logout();
               } on Exception catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(
@@ -406,7 +406,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
 
     try {
-      await ref.read(settingsPresenterProvider).deleteAccount();
+      await ref.read(currentSettingsStatusProvider.notifier).deleteAccount();
     } on DeleteAccountException catch (error) {
       if (!mounted) {
         return;

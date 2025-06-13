@@ -40,6 +40,34 @@ class CurrentSettingsStatus extends _$CurrentSettingsStatus {
   void reset() {
     state = ClearAccountStatus.none;
   }
+
+  /// ログアウト処理
+  Future<void> logout() async {
+    state = ClearAccountStatus.signingOut;
+
+    try {
+      await ref.read(authServiceProvider).signOut();
+
+      await ref.read(currentAppSessionProvider.notifier).signOut();
+    } finally {
+      state = ClearAccountStatus.none;
+    }
+  }
+
+  /// アカウント削除処理
+  Future<void> deleteAccount() async {
+    state = ClearAccountStatus.deletingAccount;
+
+    try {
+      // アカウントの削除
+      await ref.read(authServiceProvider).deleteAccount();
+
+      // アプリセッションのクリア
+      await ref.read(currentAppSessionProvider.notifier).signOut();
+    } finally {
+      state = ClearAccountStatus.none;
+    }
+  }
 }
 
 @riverpod
@@ -60,31 +88,6 @@ class SettingsPresenter {
   /// Appleアカウントと連携する
   Future<void> linkWithApple() async {
     await _ref.read(authServiceProvider).linkWithApple();
-  }
-
-  /// ログアウト処理
-  Future<void> logout() async {
-    _ref.read(currentSettingsStatusProvider.notifier).setSigningOut();
-    try {
-      await _ref.read(authServiceProvider).signOut();
-      await _ref.read(currentAppSessionProvider.notifier).signOut();
-    } finally {
-      _ref.read(currentSettingsStatusProvider.notifier).reset();
-    }
-  }
-
-  /// アカウント削除処理
-  Future<void> deleteAccount() async {
-    _ref.read(currentSettingsStatusProvider.notifier).setDeletingAccount();
-    try {
-      // アカウントの削除
-      await _ref.read(authServiceProvider).deleteAccount();
-
-      // アプリセッションのクリア
-      await _ref.read(currentAppSessionProvider.notifier).signOut();
-    } finally {
-      _ref.read(currentSettingsStatusProvider.notifier).reset();
-    }
   }
 
   /// アプリを共有する
