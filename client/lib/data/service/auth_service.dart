@@ -5,14 +5,15 @@ import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/model/delete_account_exception.dart';
 import 'package:pochi_trim/data/model/sign_in_result.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
+import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/data/service/sign_in_google_exception.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_service.g.dart';
 
 @riverpod
-AuthService authService(Ref _) {
-  return AuthService();
+AuthService authService(Ref ref) {
+  return AuthService(errorReportService: ref.read(errorReportServiceProvider));
 }
 
 @riverpod
@@ -38,6 +39,9 @@ Stream<UserProfile?> currentUserProfile(Ref ref) {
 }
 
 class AuthService {
+  AuthService({required this.errorReportService});
+
+  final ErrorReportService errorReportService;
   final _logger = Logger('AuthService');
 
   Future<SignInResult> signInWithGoogle() async {
@@ -171,21 +175,21 @@ class AuthService {
   }
 
   Future<void> deleteAccount() async {
-    final user = firebase_auth.FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      throw const DeleteAccountException.uncategorized();
-    }
+    final user = firebase_auth.FirebaseAuth.instance.currentUser!;
 
     try {
       await user.delete();
       _logger.info('User account deleted successfully.');
-    } on firebase_auth.FirebaseAuthException catch (e) {
+    } on firebase_auth.FirebaseAuthException catch (e, stack) {
       if (e.code == 'requires-recent-login') {
         _logger.warning('Account deletion requires recent login.');
         throw const DeleteAccountException.requiresRecentLogin();
       }
 
       _logger.severe('Account deletion failed: ${e.message}');
+      // Crashlyticsにエラーレポートを送信（元々キャッチしたFirebaseAuthExceptionを送信）
+      await errorReportService.recordError(e, stack);
+
       throw const DeleteAccountException.uncategorized();
     }
   }
