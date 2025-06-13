@@ -364,33 +364,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     BuildContext context,
     UserProfile userProfile,
   ) async {
-    await showDialog<void>(
+    final shouldDelete = await showDialog<bool>(
       context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return PopScope(
-          canPop: false,
-          child: AlertDialog(
-            title: const Text('アカウント削除'),
-            content: const Text('本当にアカウントを削除しますか？この操作は元に戻せません。'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('キャンセル'),
-              ),
-              TextButton(
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await _executeDeleteAccount();
-                },
-                child: const Text('削除する'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('アカウント削除'),
+        content: const Text('本当にアカウントを削除しますか？この操作は元に戻せません。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('キャンセル'),
           ),
-        );
-      },
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('削除する'),
+          ),
+        ],
+      ),
     );
+
+    if (shouldDelete == true) {
+      await _executeDeleteAccount();
+    }
   }
 
   Future<void> _executeDeleteAccount() async {
