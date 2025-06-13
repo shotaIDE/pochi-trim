@@ -8,6 +8,53 @@ import 'package:url_launcher/url_launcher.dart';
 
 part 'settings_presenter.g.dart';
 
+/// ログアウトやアカウント削除などの処理状態
+enum ClearAccountStatus {
+  /// 何も実行していない
+  none,
+
+  /// ログアウト中
+  signingOut,
+
+  /// アカウント削除中
+  deletingAccount,
+}
+
+/// 現在の設定画面の処理状態を管理する
+@riverpod
+class CurrentSettingsStatus extends _$CurrentSettingsStatus {
+  @override
+  ClearAccountStatus build() => ClearAccountStatus.none;
+
+  /// ログアウト処理
+  Future<void> logout() async {
+    state = ClearAccountStatus.signingOut;
+
+    try {
+      await ref.read(authServiceProvider).signOut();
+
+      await ref.read(currentAppSessionProvider.notifier).signOut();
+    } finally {
+      state = ClearAccountStatus.none;
+    }
+  }
+
+  /// アカウント削除処理
+  Future<void> deleteAccount() async {
+    state = ClearAccountStatus.deletingAccount;
+
+    try {
+      // アカウントの削除
+      await ref.read(authServiceProvider).deleteAccount();
+
+      // アプリセッションのクリア
+      await ref.read(currentAppSessionProvider.notifier).signOut();
+    } finally {
+      state = ClearAccountStatus.none;
+    }
+  }
+}
+
 @riverpod
 SettingsPresenter settingsPresenter(Ref ref) {
   return SettingsPresenter(ref);
@@ -26,19 +73,6 @@ class SettingsPresenter {
   /// Appleアカウントと連携する
   Future<void> linkWithApple() async {
     await _ref.read(authServiceProvider).linkWithApple();
-  }
-
-  /// ログアウト処理
-  Future<void> logout() async {
-    await _ref.read(authServiceProvider).signOut();
-    await _ref.read(currentAppSessionProvider.notifier).signOut();
-  }
-
-  /// アカウント削除処理
-  Future<void> deleteAccount() async {
-    // Firebase認証からのサインアウト
-    await _ref.read(authServiceProvider).signOut();
-    await _ref.read(currentAppSessionProvider.notifier).signOut();
   }
 
   /// アプリを共有する

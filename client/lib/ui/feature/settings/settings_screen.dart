@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:pochi_trim/data/definition/app_feature.dart';
+import 'package:pochi_trim/data/model/delete_account_exception.dart';
 import 'package:pochi_trim/data/model/sign_in_result.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
 import 'package:pochi_trim/data/service/app_info_service.dart';
@@ -66,7 +67,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const Divider(),
               const SectionHeader(title: 'アカウント管理'),
               _buildLogoutTile(context),
-              _buildDeleteAccountTile(context, userProfile),
+              _buildDeleteAccountTile(),
             ],
           );
         },
@@ -76,10 +77,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildUserInfoTile(
-    BuildContext context,
-    UserProfile userProfile,
-  ) {
+  Widget _buildUserInfoTile(BuildContext context, UserProfile userProfile) {
     final String titleText;
     final Widget? subtitle;
     final VoidCallback? onTap;
@@ -136,7 +134,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       title: const Text('利用規約'),
       trailing: const _OpenTrailingIcon(),
       onTap: () async {
-final success = await ref
+        final success = await ref
             .read(settingsPresenterProvider)
             .openTermsOfService();
         if (!success && context.mounted) {
@@ -154,7 +152,7 @@ final success = await ref
       title: const Text('プライバシーポリシー'),
       trailing: const _OpenTrailingIcon(),
       onTap: () async {
-final success = await ref
+        final success = await ref
             .read(settingsPresenterProvider)
             .openPrivacyPolicy();
         if (!success && context.mounted) {
@@ -171,8 +169,7 @@ final success = await ref
       leading: const Icon(Icons.description_outlined),
       title: const Text('ライセンス'),
       trailing: const _MoveScreenTrailingIcon(),
-      onTap: () =>
-          ref.read(settingsPresenterProvider).showLicenses(context),
+      onTap: () => ref.read(settingsPresenterProvider).showLicenses(context),
     );
   }
 
@@ -186,21 +183,47 @@ final success = await ref
   }
 
   Widget _buildLogoutTile(BuildContext context) {
+    final settingsStatus = ref.watch(currentSettingsStatusProvider);
+    final isLogoutLoading = settingsStatus == ClearAccountStatus.signingOut;
+
     return ListTile(
-      leading: const Icon(Icons.logout, color: Colors.red),
-      title: const Text('ログアウト', style: TextStyle(color: Colors.red)),
-      onTap: () => _showLogoutConfirmDialog(context),
+      leading: isLogoutLoading
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.logout, color: Colors.red),
+      title: Text(
+        isLogoutLoading ? 'ログアウト中...' : 'ログアウト',
+        style: const TextStyle(color: Colors.red),
+      ),
+      onTap: settingsStatus == ClearAccountStatus.none
+          ? () => _showLogoutConfirmDialog(context)
+          : null,
     );
   }
 
-  Widget _buildDeleteAccountTile(
-    BuildContext context,
-    UserProfile userProfile,
-  ) {
+  Widget _buildDeleteAccountTile() {
+    final settingsStatus = ref.watch(currentSettingsStatusProvider);
+    final isDeleteLoading =
+        settingsStatus == ClearAccountStatus.deletingAccount;
+
     return ListTile(
-      leading: const Icon(Icons.delete_forever, color: Colors.red),
-      title: const Text('アカウントを削除', style: TextStyle(color: Colors.red)),
-      onTap: () => _showDeleteAccountConfirmDialog(context, userProfile),
+      leading: isDeleteLoading
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.delete_forever, color: Colors.red),
+      title: Text(
+        isDeleteLoading ? 'アカウント削除中...' : 'アカウントを削除',
+        style: const TextStyle(color: Colors.red),
+      ),
+      onTap: settingsStatus == ClearAccountStatus.none
+          ? _showDeleteAccountConfirmDialog
+          : null,
     );
   }
 
@@ -262,7 +285,7 @@ final success = await ref
     Navigator.of(context).pop();
 
     try {
-await ref.read(settingsPresenterProvider).linkWithGoogle();
+      await ref.read(settingsPresenterProvider).linkWithGoogle();
     } on LinkWithGoogleException catch (error) {
       if (!mounted) {
         return;
@@ -298,7 +321,7 @@ await ref.read(settingsPresenterProvider).linkWithGoogle();
     Navigator.of(context).pop();
 
     try {
-await ref.read(settingsPresenterProvider).linkWithApple();
+      await ref.read(settingsPresenterProvider).linkWithApple();
     } on LinkWithAppleException catch (error) {
       if (!mounted) {
         return;
@@ -344,11 +367,11 @@ await ref.read(settingsPresenterProvider).linkWithApple();
           ),
           TextButton(
             onPressed: () async {
+              Navigator.of(context).pop();
               try {
-await ref.read(settingsPresenterProvider).logout();
+                await ref.read(currentSettingsStatusProvider.notifier).logout();
               } on Exception catch (e) {
                 if (context.mounted) {
-                  Navigator.of(context).pop();
                   ScaffoldMessenger.of(
                     context,
                   ).showSnackBar(SnackBar(content: Text('ログアウトに失敗しました: $e')));
@@ -363,39 +386,60 @@ await ref.read(settingsPresenterProvider).logout();
   }
 
   // アカウント削除確認ダイアログ
-  void _showDeleteAccountConfirmDialog(
-    BuildContext context,
-    UserProfile userProfile,
-  ) {
-    showDialog<void>(
+  Future<void> _showDeleteAccountConfirmDialog() async {
+    final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('アカウント削除'),
         content: const Text('本当にアカウントを削除しますか？この操作は元に戻せません。'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).pop(false),
             child: const Text('キャンセル'),
           ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            onPressed: () async {
-              try {
-await ref.read(settingsPresenterProvider).deleteAccount();
-              } on Exception catch (e) {
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('アカウント削除に失敗しました: $e')));
-                }
-              }
-            },
+            onPressed: () => Navigator.of(context).pop(true),
             child: const Text('削除する'),
           ),
         ],
       ),
     );
+
+    if (shouldDelete != true) {
+      return;
+    }
+
+    try {
+      await ref.read(currentSettingsStatusProvider.notifier).deleteAccount();
+    } on DeleteAccountException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      switch (error) {
+        case DeleteAccountExceptionRequiresRecentLogin():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'アカウント削除には最新のログインが必要です。一度ログアウトして再度ログインしてからお試しください。',
+              ),
+            ),
+          );
+        case DeleteAccountExceptionUncategorized():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('アカウント削除に失敗しました。しばらくしてから再度お試しください。')),
+          );
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('アカウントを削除しました')));
   }
 }
 
