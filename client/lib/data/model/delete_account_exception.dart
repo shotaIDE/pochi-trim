@@ -12,3 +12,17 @@ sealed class DeleteAccountException
   const factory DeleteAccountException.uncategorized() =
       DeleteAccountExceptionUncategorized;
 }
+
+@freezed
+sealed class DeleteAccountResult with _$DeleteAccountResult {
+  const factory DeleteAccountResult.success() = DeleteAccountResultSuccess;
+
+  const factory DeleteAccountResult.requiresRecentLogin() =
+      DeleteAccountResultRequiresRecentLogin;
+
+  const factory DeleteAccountResult.uncategorized() =
+      DeleteAccountResultUncategorized;
+
+  const factory DeleteAccountResult.generalError(String message) =
+      DeleteAccountResultGeneralError;
+}

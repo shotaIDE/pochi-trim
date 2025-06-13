@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pochi_trim/data/model/delete_account_exception.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -35,10 +36,25 @@ class SettingsPresenter {
   }
 
   /// アカウント削除処理
-  Future<void> deleteAccount() async {
-    // Firebase認証からのサインアウト
-    await _ref.read(authServiceProvider).signOut();
-    await _ref.read(currentAppSessionProvider.notifier).signOut();
+  Future<DeleteAccountResult> deleteAccount() async {
+    try {
+      // アカウントの削除
+      await _ref.read(authServiceProvider).deleteAccount();
+
+      // アプリセッションのクリア
+      await _ref.read(currentAppSessionProvider.notifier).signOut();
+
+      return const DeleteAccountResult.success();
+    } on DeleteAccountException catch (error) {
+      switch (error) {
+        case DeleteAccountExceptionRequiresRecentLogin():
+          return const DeleteAccountResult.requiresRecentLogin();
+        case DeleteAccountExceptionUncategorized():
+          return const DeleteAccountResult.uncategorized();
+      }
+    } on Exception catch (e) {
+      return DeleteAccountResult.generalError('$e');
+    }
   }
 
   /// アプリを共有する
