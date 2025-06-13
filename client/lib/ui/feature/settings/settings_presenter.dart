@@ -26,21 +26,6 @@ class CurrentSettingsStatus extends _$CurrentSettingsStatus {
   @override
   ClearAccountStatus build() => ClearAccountStatus.none;
 
-  /// ログアウト状態に設定
-  void setSigningOut() {
-    state = ClearAccountStatus.signingOut;
-  }
-
-  /// アカウント削除中状態に設定
-  void setDeletingAccount() {
-    state = ClearAccountStatus.deletingAccount;
-  }
-
-  /// リセット
-  void reset() {
-    state = ClearAccountStatus.none;
-  }
-
   /// ログアウト処理
   Future<void> logout() async {
     state = ClearAccountStatus.signingOut;
