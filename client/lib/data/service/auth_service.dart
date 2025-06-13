@@ -39,9 +39,10 @@ Stream<UserProfile?> currentUserProfile(Ref ref) {
 }
 
 class AuthService {
-  AuthService({required this.errorReportService});
+  AuthService({required ErrorReportService errorReportService})
+    : _errorReportService = errorReportService;
 
-  final ErrorReportService errorReportService;
+  final ErrorReportService _errorReportService;
   final _logger = Logger('AuthService');
 
   Future<SignInResult> signInWithGoogle() async {
@@ -188,7 +189,7 @@ class AuthService {
 
       _logger.severe('Account deletion failed: ${e.message}');
       // Crashlyticsにエラーレポートを送信（元々キャッチしたFirebaseAuthExceptionを送信）
-      await errorReportService.recordError(e, stack);
+      await _errorReportService.recordError(e, stack);
 
       throw const DeleteAccountException.uncategorized();
     }
