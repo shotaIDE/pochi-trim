@@ -184,10 +184,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildLogoutTile(BuildContext context) {
     final settingsStatus = ref.watch(currentSettingsStatusProvider);
-    final isLoading = settingsStatus == ClearAccountStatus.signingOut;
+    final isLogoutLoading = settingsStatus == ClearAccountStatus.signingOut;
 
     return ListTile(
-      leading: isLoading
+      leading: isLogoutLoading
           ? const SizedBox(
               width: 24,
               height: 24,
@@ -195,19 +195,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             )
           : const Icon(Icons.logout, color: Colors.red),
       title: Text(
-        isLoading ? 'ログアウト中...' : 'ログアウト',
+        isLogoutLoading ? 'ログアウト中...' : 'ログアウト',
         style: const TextStyle(color: Colors.red),
       ),
-      onTap: isLoading ? null : () => _showLogoutConfirmDialog(context),
+      onTap: settingsStatus == ClearAccountStatus.none
+          ? () => _showLogoutConfirmDialog(context)
+          : null,
     );
   }
 
   Widget _buildDeleteAccountTile() {
     final settingsStatus = ref.watch(currentSettingsStatusProvider);
-    final isLoading = settingsStatus == ClearAccountStatus.deletingAccount;
+    final isDeleteLoading =
+        settingsStatus == ClearAccountStatus.deletingAccount;
 
     return ListTile(
-      leading: isLoading
+      leading: isDeleteLoading
           ? const SizedBox(
               width: 24,
               height: 24,
@@ -215,10 +218,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             )
           : const Icon(Icons.delete_forever, color: Colors.red),
       title: Text(
-        isLoading ? 'アカウント削除中...' : 'アカウントを削除',
+        isDeleteLoading ? 'アカウント削除中...' : 'アカウントを削除',
         style: const TextStyle(color: Colors.red),
       ),
-      onTap: isLoading ? null : _showDeleteAccountConfirmDialog,
+      onTap: settingsStatus == ClearAccountStatus.none
+          ? _showDeleteAccountConfirmDialog
+          : null,
     );
   }
 
