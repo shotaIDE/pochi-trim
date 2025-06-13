@@ -183,6 +183,7 @@ class AuthService {
     } on firebase_auth.FirebaseAuthException catch (e, stack) {
       if (e.code == 'requires-recent-login') {
         _logger.warning('アカウント削除には最新のログインが必要です。');
+
         throw const DeleteAccountException.requiresRecentLogin();
       }
 
