@@ -360,10 +360,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   // アカウント削除確認ダイアログ
-  Future<void> _showDeleteAccountConfirmDialog(
-    BuildContext context,
-    UserProfile userProfile,
-  ) async {
+  Future<void> _showDeleteAccountConfirmDialog(UserProfile userProfile) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -383,20 +380,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
 
-    if (shouldDelete == true) {
-      await _executeDeleteAccount();
+    if (shouldDelete != true) {
+      return;
     }
-  }
 
-  Future<void> _executeDeleteAccount() async {
     try {
       await ref.read(settingsPresenterProvider).deleteAccount();
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('アカウントを削除しました')));
-      }
     } on DeleteAccountException catch (error) {
       if (!mounted) {
         return;
@@ -416,13 +405,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SnackBar(content: Text('アカウント削除に失敗しました。しばらくしてから再度お試しください。')),
           );
       }
-    } on Exception catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('アカウント削除に失敗しました: $e')));
-      }
     }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('アカウントを削除しました')));
   }
 }
 
