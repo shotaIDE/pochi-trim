@@ -67,7 +67,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const Divider(),
               const SectionHeader(title: 'アカウント管理'),
               _buildLogoutTile(context),
-              _buildDeleteAccountTile(context, userProfile),
+              _buildDeleteAccountTile(),
             ],
           );
         },
@@ -190,14 +190,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildDeleteAccountTile(
-    BuildContext context,
-    UserProfile userProfile,
-  ) {
+  Widget _buildDeleteAccountTile() {
     return ListTile(
       leading: const Icon(Icons.delete_forever, color: Colors.red),
       title: const Text('アカウントを削除', style: TextStyle(color: Colors.red)),
-      onTap: () => _showDeleteAccountConfirmDialog(context, userProfile),
+      onTap: _showDeleteAccountConfirmDialog,
     );
   }
 
@@ -360,7 +357,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   // アカウント削除確認ダイアログ
-  Future<void> _showDeleteAccountConfirmDialog(UserProfile userProfile) async {
+  Future<void> _showDeleteAccountConfirmDialog() async {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
