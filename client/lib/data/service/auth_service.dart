@@ -180,7 +180,6 @@ class AuthService {
 
     try {
       await user.delete();
-      _logger.info('ユーザーアカウントを正常に削除しました。');
     } on firebase_auth.FirebaseAuthException catch (e, stack) {
       if (e.code == 'requires-recent-login') {
         _logger.warning('アカウント削除には最新のログインが必要です。');
@@ -193,6 +192,8 @@ class AuthService {
 
       throw const DeleteAccountException.uncategorized();
     }
+
+    _logger.info('ユーザーアカウントを正常に削除しました。');
   }
 
   /// 現在のユーザー情報をチェックし、ログインしている場合はUIDをログ出力します
