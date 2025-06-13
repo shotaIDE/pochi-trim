@@ -36,4 +36,24 @@ class ErrorReportService {
       await FirebaseCrashlytics.instance.recordError(e, stack);
     }
   }
+
+  /// エラーをCrashlyticsに記録する
+  Future<void> recordError(
+    dynamic exception,
+    StackTrace stackTrace, {
+    bool fatal = false,
+  }) async {
+    try {
+      await FirebaseCrashlytics.instance.recordError(
+        exception,
+        stackTrace,
+        fatal: fatal,
+      );
+      _logger.info('Crashlyticsにエラーを記録しました: $exception');
+    } on Exception catch (e, stack) {
+      _logger.warning('Crashlyticsへのエラー記録に失敗しました', e);
+
+      await FirebaseCrashlytics.instance.recordError(e, stack);
+    }
+  }
 }
