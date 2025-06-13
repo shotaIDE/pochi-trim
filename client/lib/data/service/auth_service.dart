@@ -13,7 +13,7 @@ part 'auth_service.g.dart';
 
 @riverpod
 AuthService authService(Ref ref) {
-  return AuthService(errorReportService: ref.read(errorReportServiceProvider));
+  return AuthService(errorReportService: ref.watch(errorReportServiceProvider));
 }
 
 @riverpod
