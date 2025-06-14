@@ -129,4 +129,26 @@ class WorkLogService {
 
     return true;
   }
+
+  /// 過去1ヶ月間の家事ログをページネーションで取得
+  Future<List<WorkLog>> getCompletedWorkLogsWithPagination({
+    DateTime? lastCompletedAt,
+    int limit = 20,
+  }) {
+    return workLogRepository.getCompletedWorkLogsOnceWithPagination(
+      lastCompletedAt: lastCompletedAt,
+      limit: limit,
+    );
+  }
+
+  /// 過去1ヶ月間の家事ログをリアルタイムで取得（ストリーム）
+  Stream<List<WorkLog>> getCompletedWorkLogsStreamWithPagination({
+    DateTime? lastCompletedAt,
+    int limit = 20,
+  }) {
+    return workLogRepository.getCompletedWorkLogsWithPagination(
+      lastCompletedAt: lastCompletedAt,
+      limit: limit,
+    );
+  }
 }

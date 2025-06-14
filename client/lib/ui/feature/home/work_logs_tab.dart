@@ -20,21 +20,94 @@ class WorkLogsTab extends ConsumerStatefulWidget {
 class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
   final _listKey = GlobalKey<AnimatedListState>();
   List<WorkLogIncludedHouseWork> _currentWorkLogs = [];
+  final _scrollController = ScrollController();
+
+  // 無限スクロール用の設定
+  var _isLoadingMore = false;
+  var _usePagination = false;
 
   @override
   void initState() {
     super.initState();
 
-    ref.listenManual(workLogsIncludedHouseWorkProvider, (_, next) {
-      next.maybeWhen(data: _handleListChanges, orElse: () {});
+    // スクロールリスナーを設定（無限スクロール用）
+    _scrollController.addListener(_onScroll);
+
+    // 初期データの読み込み完了後にページネーションモードに切り替え
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(workLogsPaginationProvider.notifier).loadInitial().then((_) {
+        if (mounted) {
+          setState(() {
+            _usePagination = true;
+          });
+        }
+      });
     });
+
+    ref
+      ..listenManual(workLogsIncludedHouseWorkProvider, (_, next) {
+        if (!_usePagination) {
+          next.maybeWhen(data: _handleListChanges, orElse: () {});
+        }
+      })
+      // ページネーション対応のプロバイダーもリッスン
+      ..listenManual(workLogsIncludedHouseWorkWithPaginationProvider, (
+        _,
+        next,
+      ) {
+        if (_usePagination) {
+          next.maybeWhen(data: _handleListChanges, orElse: () {});
+        }
+      });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  // スクロール監視（無限スクロール用）
+  void _onScroll() {
+    if (!_usePagination || _isLoadingMore) {
+      return;
+    }
+
+    // 80%スクロールした時点で次のページを読み込み
+    final threshold = _scrollController.position.maxScrollExtent * 0.8;
+    if (_scrollController.position.pixels >= threshold) {
+      _loadMoreData();
+    }
+  }
+
+  // 追加データの読み込み
+  Future<void> _loadMoreData() async {
+    if (_isLoadingMore) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final paginationNotifier = ref.read(workLogsPaginationProvider.notifier);
+      await paginationNotifier.loadMore();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final workLogsIncludedHouseWorkFuture = ref.watch(
-      workLogsIncludedHouseWorkProvider.future,
-    );
+    // ページネーションモードかどうかで使用するプロバイダーを切り替え
+    final workLogsIncludedHouseWorkFuture = _usePagination
+        ? ref.watch(workLogsIncludedHouseWorkWithPaginationProvider.future)
+        : ref.watch(workLogsIncludedHouseWorkProvider.future);
 
     return FutureBuilder(
       future: workLogsIncludedHouseWorkFuture,
@@ -92,16 +165,43 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
           );
         }
 
-        return AnimatedList(
-          key: _listKey,
-          itemBuilder: (context, index, animation) {
-            final workLog = _currentWorkLogs[index];
-            return _buildAnimatedItem(context, workLog, animation);
-          },
-          initialItemCount: _currentWorkLogs.length,
+        return RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: Column(
+            children: [
+              Expanded(
+                child: AnimatedList(
+                  key: _listKey,
+                  controller: _scrollController,
+                  itemBuilder: (context, index, animation) {
+                    final workLog = _currentWorkLogs[index];
+                    return _buildAnimatedItem(context, workLog, animation);
+                  },
+                  initialItemCount: _currentWorkLogs.length,
+                ),
+              ),
+              // ローディングインジケーター
+              if (_isLoadingMore && _usePagination)
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator(),
+                ),
+            ],
+          ),
         );
       },
     );
+  }
+
+  // プルトゥリフレッシュ
+  Future<void> _onRefresh() async {
+    if (_usePagination) {
+      final paginationNotifier = ref.read(workLogsPaginationProvider.notifier);
+      await paginationNotifier.refresh();
+    } else {
+      // 通常のプロバイダーのリフレッシュ
+      ref.invalidate(workLogsIncludedHouseWorkProvider);
+    }
   }
 
   Widget _buildAnimatedItem(
@@ -112,12 +212,10 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     return SizeTransition(
       sizeFactor: animation,
       child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, -1),
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeOutQuart),
-        ),
+        position: Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero)
+            .animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutQuart),
+            ),
         child: FadeTransition(
           opacity: animation,
           child: WorkLogItem(
