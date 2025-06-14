@@ -100,22 +100,20 @@ class WorkLogRepository {
 
   /// 特定の家事に関連する家事ログを取得する
   Future<List<WorkLog>> getWorkLogsByHouseWork(String houseWorkId) async {
-    final querySnapshot =
-        await _getWorkLogsCollection()
-            .where('houseWorkId', isEqualTo: houseWorkId)
-            .orderBy('completedAt', descending: true)
-            .get();
+    final querySnapshot = await _getWorkLogsCollection()
+        .where('houseWorkId', isEqualTo: houseWorkId)
+        .orderBy('completedAt', descending: true)
+        .get();
 
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
   /// 特定のユーザーが実行した家事ログを取得する
   Future<List<WorkLog>> getWorkLogsByUser(String userId) async {
-    final querySnapshot =
-        await _getWorkLogsCollection()
-            .where('completedBy', isEqualTo: userId)
-            .orderBy('completedAt', descending: true)
-            .get();
+    final querySnapshot = await _getWorkLogsCollection()
+        .where('completedBy', isEqualTo: userId)
+        .orderBy('completedAt', descending: true)
+        .get();
 
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
@@ -134,39 +132,87 @@ class WorkLogRepository {
     DateTime startDate,
     DateTime endDate,
   ) async {
-    final querySnapshot =
-        await _getWorkLogsCollection()
-            .where(
-              'completedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
-            )
-            .where(
-              'completedAt',
-              isLessThanOrEqualTo: Timestamp.fromDate(endDate),
-            )
-            .orderBy('completedAt', descending: true)
-            .get();
+    final querySnapshot = await _getWorkLogsCollection()
+        .where(
+          'completedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+        )
+        .where('completedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+        .orderBy('completedAt', descending: true)
+        .get();
 
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
-  /// 完了済みの家事ログを取得するストリーム
+  /// 完了済みの家事ログを取得するストリーム（初期読み込み用）
   Stream<List<WorkLog>> getCompletedWorkLogs() {
     return _getWorkLogsCollection()
         .orderBy('completedAt', descending: true)
-        .limit(50) // 最新の50件に制限
+        .limit(20) // 初期読み込みは20件に制限
         .snapshots()
         .map((snapshot) => snapshot.docs.map(WorkLog.fromFirestore).toList());
+  }
+
+  /// 過去1ヶ月間の家事ログを取得するストリーム（ページネーション対応）
+  Stream<List<WorkLog>> getCompletedWorkLogsWithPagination({
+    DateTime? lastCompletedAt,
+    int limit = 20,
+  }) {
+    final now = DateTime.now();
+    final oneMonthAgo = DateTime(now.year, now.month - 1, now.day);
+
+    var query = _getWorkLogsCollection()
+        .where(
+          'completedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(oneMonthAgo),
+        )
+        .orderBy('completedAt', descending: true);
+
+    // ページネーション：前回の最後のアイテムから続きを取得
+    if (lastCompletedAt != null) {
+      query = query.startAfter([Timestamp.fromDate(lastCompletedAt)]);
+    }
+
+    query = query.limit(limit);
+
+    return query.snapshots().map(
+      (snapshot) => snapshot.docs.map(WorkLog.fromFirestore).toList(),
+    );
+  }
+
+  /// 過去1ヶ月間の家事ログを一度だけ取得（ページネーション対応）
+  Future<List<WorkLog>> getCompletedWorkLogsOnceWithPagination({
+    DateTime? lastCompletedAt,
+    int limit = 20,
+  }) async {
+    final now = DateTime.now();
+    final oneMonthAgo = DateTime(now.year, now.month - 1, now.day);
+
+    var query = _getWorkLogsCollection()
+        .where(
+          'completedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(oneMonthAgo),
+        )
+        .orderBy('completedAt', descending: true);
+
+    // ページネーション：前回の最後のアイテムから続きを取得
+    if (lastCompletedAt != null) {
+      query = query.startAfter([Timestamp.fromDate(lastCompletedAt)]);
+    }
+
+    query = query.limit(limit);
+
+    final querySnapshot = await query.get();
+    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
   /// タイトルで家事ログを検索する
   Future<List<WorkLog>> getWorkLogsByTitle(String title) async {
     // タイトルで家事ログを検索するロジック
-    final querySnapshot =
-        await _getWorkLogsCollection()
-            .where('title', isEqualTo: title)
-            .orderBy('completedAt', descending: true)
-            .get();
+    final querySnapshot = await _getWorkLogsCollection()
+        .where('title', isEqualTo: title)
+        .orderBy('completedAt', descending: true)
+        .get();
 
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
