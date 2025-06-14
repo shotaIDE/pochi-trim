@@ -139,21 +139,4 @@ class WorkLogRepository {
         .snapshots()
         .map((snapshot) => snapshot.docs.map(WorkLog.fromFirestore).toList());
   }
-
-  /// タイトルで家事ログを検索する（過去1ヶ月のみ）
-  Future<List<WorkLog>> getWorkLogsByTitle(String title) async {
-    // 過去1ヶ月の開始日時を計算
-    final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
-
-    final querySnapshot = await _getWorkLogsCollection()
-        .where('title', isEqualTo: title)
-        .where(
-          'completedAt',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(oneMonthAgo),
-        )
-        .orderBy('completedAt', descending: true)
-        .get();
-
-    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
-  }
 }

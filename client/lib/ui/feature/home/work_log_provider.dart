@@ -2,14 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 
-// タイトルでワークログを検索するプロバイダー
-final FutureProviderFamily<List<WorkLog>, String> workLogsByTitleProvider =
-    FutureProvider.family<List<WorkLog>, String>((ref, title) {
-      final workLogRepository = ref.watch(workLogRepositoryProvider);
-
-      return workLogRepository.getWorkLogsByTitle(title);
-    });
-
 // 削除されたワークログを一時的に保持するプロバイダー
 final deletedWorkLogProvider = StateProvider<WorkLog?>((ref) => null);
 
