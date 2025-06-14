@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
+import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -14,19 +15,31 @@ final _logger = Logger('WorkLogRepository');
 @riverpod
 WorkLogRepository workLogRepository(Ref ref) {
   final appSession = ref.watch(unwrappedCurrentAppSessionProvider);
+  final systemService = ref.watch(systemServiceProvider);
 
   switch (appSession) {
     case AppSessionSignedIn(currentHouseId: final currentHouseId):
-      return WorkLogRepository(houseId: currentHouseId);
+      return WorkLogRepository(
+        houseId: currentHouseId,
+        systemService: systemService,
+      );
     case AppSessionNotSignedIn():
       throw NoHouseIdError();
   }
 }
 
 class WorkLogRepository {
-  WorkLogRepository({required String houseId}) : _houseId = houseId;
+  WorkLogRepository({
+    required String houseId,
+    required SystemService systemService,
+  }) : _houseId = houseId,
+       _systemService = systemService;
 
   final String _houseId;
+  final SystemService _systemService;
+
+  // 家事ログの取得期間（過去1ヶ月）
+  static const _workLogRetentionPeriod = Duration(days: 31);
 
   // ハウスIDを指定して家事ログコレクションの参照を取得
   CollectionReference _getWorkLogsCollection() {
@@ -70,8 +83,20 @@ class WorkLogRepository {
     return null;
   }
 
+  /// 家事ログを全て取得する（過去1ヶ月のみ）
   Future<List<WorkLog>> getAllOnce() async {
-    final querySnapshot = await _getWorkLogsCollection().get();
+    // 保持期間の開始日時を計算
+    final retentionStartDate = _systemService.getCurrentDateTime().subtract(
+      _workLogRetentionPeriod,
+    );
+
+    final querySnapshot = await _getWorkLogsCollection()
+        .where(
+          'completedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(retentionStartDate),
+        )
+        .orderBy('completedAt', descending: true)
+        .get();
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
@@ -98,89 +123,37 @@ class WorkLogRepository {
     await batch.commit();
   }
 
-  /// 特定の家事に関連する家事ログを取得する
-  Future<List<WorkLog>> getWorkLogsByHouseWork(String houseWorkId) async {
-    final querySnapshot =
-        await _getWorkLogsCollection()
-            .where('houseWorkId', isEqualTo: houseWorkId)
-            .orderBy('completedAt', descending: true)
-            .get();
-
-    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
-  }
-
-  /// 特定のユーザーが実行した家事ログを取得する
-  Future<List<WorkLog>> getWorkLogsByUser(String userId) async {
-    final querySnapshot =
-        await _getWorkLogsCollection()
-            .where('completedBy', isEqualTo: userId)
-            .orderBy('completedAt', descending: true)
-            .get();
-
-    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
-  }
-
-  /// 最新の家事ログを取得するストリーム
-  Stream<List<WorkLog>> getRecentWorkLogs({int limit = 20}) {
-    return _getWorkLogsCollection()
-        .orderBy('completedAt', descending: true)
-        .limit(limit)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map(WorkLog.fromFirestore).toList());
-  }
-
   /// 特定の期間内の家事ログを取得する
   Future<List<WorkLog>> getWorkLogsByDateRange(
     DateTime startDate,
     DateTime endDate,
   ) async {
-    final querySnapshot =
-        await _getWorkLogsCollection()
-            .where(
-              'completedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
-            )
-            .where(
-              'completedAt',
-              isLessThanOrEqualTo: Timestamp.fromDate(endDate),
-            )
-            .orderBy('completedAt', descending: true)
-            .get();
-
-    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
-  }
-
-  /// 完了済みの家事ログを取得するストリーム
-  Stream<List<WorkLog>> getCompletedWorkLogs() {
-    return _getWorkLogsCollection()
+    final querySnapshot = await _getWorkLogsCollection()
+        .where(
+          'completedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+        )
+        .where('completedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
         .orderBy('completedAt', descending: true)
-        .limit(50) // 最新の50件に制限
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map(WorkLog.fromFirestore).toList());
-  }
-
-  /// タイトルで家事ログを検索する
-  Future<List<WorkLog>> getWorkLogsByTitle(String title) async {
-    // タイトルで家事ログを検索するロジック
-    final querySnapshot =
-        await _getWorkLogsCollection()
-            .where('title', isEqualTo: title)
-            .orderBy('completedAt', descending: true)
-            .get();
+        .get();
 
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
-  /// 家事ログを完了としてマークする
-  Future<String> completeWorkLog(WorkLog workLog, String userId) {
-    // 家事ログを完了としてマークするロジック
-    final updatedWorkLog = WorkLog(
-      id: workLog.id,
-      houseWorkId: workLog.houseWorkId,
-      completedAt: DateTime.now(), // 現在時刻を完了時刻として設定
-      completedBy: userId, // 完了したユーザーのIDを設定
+  /// 完了済みの家事ログを取得するストリーム（過去1ヶ月のみ）
+  Stream<List<WorkLog>> getCompletedWorkLogs() {
+    // 保持期間の開始日時を計算
+    final retentionStartDate = _systemService.getCurrentDateTime().subtract(
+      _workLogRetentionPeriod,
     );
 
-    return save(updatedWorkLog);
+    return _getWorkLogsCollection()
+        .where(
+          'completedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(retentionStartDate),
+        )
+        .orderBy('completedAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map(WorkLog.fromFirestore).toList());
   }
 }
