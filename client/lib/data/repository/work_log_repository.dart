@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
+import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -14,19 +15,28 @@ final _logger = Logger('WorkLogRepository');
 @riverpod
 WorkLogRepository workLogRepository(Ref ref) {
   final appSession = ref.watch(unwrappedCurrentAppSessionProvider);
+  final systemService = ref.watch(systemServiceProvider);
 
   switch (appSession) {
     case AppSessionSignedIn(currentHouseId: final currentHouseId):
-      return WorkLogRepository(houseId: currentHouseId);
+      return WorkLogRepository(
+        houseId: currentHouseId,
+        systemService: systemService,
+      );
     case AppSessionNotSignedIn():
       throw NoHouseIdError();
   }
 }
 
 class WorkLogRepository {
-  WorkLogRepository({required String houseId}) : _houseId = houseId;
+  WorkLogRepository({
+    required String houseId,
+    required SystemService systemService,
+  }) : _houseId = houseId,
+       _systemService = systemService;
 
   final String _houseId;
+  final SystemService _systemService;
 
   // ハウスIDを指定して家事ログコレクションの参照を取得
   CollectionReference _getWorkLogsCollection() {
@@ -73,7 +83,9 @@ class WorkLogRepository {
   /// 家事ログを全て取得する（過去1ヶ月のみ）
   Future<List<WorkLog>> getAllOnce() async {
     // 過去1ヶ月の開始日時を計算
-    final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
+    final oneMonthAgo = _systemService.getCurrentDateTime().subtract(
+      const Duration(days: 30),
+    );
 
     final querySnapshot = await _getWorkLogsCollection()
         .where(
@@ -128,7 +140,9 @@ class WorkLogRepository {
   /// 完了済みの家事ログを取得するストリーム（過去1ヶ月のみ）
   Stream<List<WorkLog>> getCompletedWorkLogs() {
     // 過去1ヶ月の開始日時を計算
-    final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
+    final oneMonthAgo = _systemService.getCurrentDateTime().subtract(
+      const Duration(days: 30),
+    );
 
     return _getWorkLogsCollection()
         .where(
