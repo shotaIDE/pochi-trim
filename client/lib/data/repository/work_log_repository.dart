@@ -74,7 +74,7 @@ class WorkLogRepository {
   Future<List<WorkLog>> getAllOnce() async {
     // 過去1ヶ月の開始日時を計算
     final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
-    
+
     final querySnapshot = await _getWorkLogsCollection()
         .where(
           'completedAt',
@@ -108,75 +108,19 @@ class WorkLogRepository {
     await batch.commit();
   }
 
-  /// 特定の家事に関連する家事ログを取得する（過去1ヶ月のみ）
-  Future<List<WorkLog>> getWorkLogsByHouseWork(String houseWorkId) async {
-    // 過去1ヶ月の開始日時を計算
-    final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
-    
-    final querySnapshot =
-        await _getWorkLogsCollection()
-            .where('houseWorkId', isEqualTo: houseWorkId)
-            .where(
-              'completedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(oneMonthAgo),
-            )
-            .orderBy('completedAt', descending: true)
-            .get();
-
-    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
-  }
-
-  /// 特定のユーザーが実行した家事ログを取得する（過去1ヶ月のみ）
-  Future<List<WorkLog>> getWorkLogsByUser(String userId) async {
-    // 過去1ヶ月の開始日時を計算
-    final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
-    
-    final querySnapshot =
-        await _getWorkLogsCollection()
-            .where('completedBy', isEqualTo: userId)
-            .where(
-              'completedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(oneMonthAgo),
-            )
-            .orderBy('completedAt', descending: true)
-            .get();
-
-    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
-  }
-
-  /// 最新の家事ログを取得するストリーム（過去1ヶ月のみ）
-  Stream<List<WorkLog>> getRecentWorkLogs({int limit = 20}) {
-    // 過去1ヶ月の開始日時を計算
-    final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
-    
-    return _getWorkLogsCollection()
-        .where(
-          'completedAt',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(oneMonthAgo),
-        )
-        .orderBy('completedAt', descending: true)
-        .limit(limit)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map(WorkLog.fromFirestore).toList());
-  }
-
   /// 特定の期間内の家事ログを取得する
   Future<List<WorkLog>> getWorkLogsByDateRange(
     DateTime startDate,
     DateTime endDate,
   ) async {
-    final querySnapshot =
-        await _getWorkLogsCollection()
-            .where(
-              'completedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
-            )
-            .where(
-              'completedAt',
-              isLessThanOrEqualTo: Timestamp.fromDate(endDate),
-            )
-            .orderBy('completedAt', descending: true)
-            .get();
+    final querySnapshot = await _getWorkLogsCollection()
+        .where(
+          'completedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+        )
+        .where('completedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+        .orderBy('completedAt', descending: true)
+        .get();
 
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
@@ -185,7 +129,7 @@ class WorkLogRepository {
   Stream<List<WorkLog>> getCompletedWorkLogs() {
     // 過去1ヶ月の開始日時を計算
     final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
-    
+
     return _getWorkLogsCollection()
         .where(
           'completedAt',
@@ -200,30 +144,16 @@ class WorkLogRepository {
   Future<List<WorkLog>> getWorkLogsByTitle(String title) async {
     // 過去1ヶ月の開始日時を計算
     final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
-    
-    final querySnapshot =
-        await _getWorkLogsCollection()
-            .where('title', isEqualTo: title)
-            .where(
-              'completedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(oneMonthAgo),
-            )
-            .orderBy('completedAt', descending: true)
-            .get();
+
+    final querySnapshot = await _getWorkLogsCollection()
+        .where('title', isEqualTo: title)
+        .where(
+          'completedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(oneMonthAgo),
+        )
+        .orderBy('completedAt', descending: true)
+        .get();
 
     return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
-  }
-
-  /// 家事ログを完了としてマークする
-  Future<String> completeWorkLog(WorkLog workLog, String userId) {
-    // 家事ログを完了としてマークするロジック
-    final updatedWorkLog = WorkLog(
-      id: workLog.id,
-      houseWorkId: workLog.houseWorkId,
-      completedAt: DateTime.now(), // 現在時刻を完了時刻として設定
-      completedBy: userId, // 完了したユーザーのIDを設定
-    );
-
-    return save(updatedWorkLog);
   }
 }
