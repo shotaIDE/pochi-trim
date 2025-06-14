@@ -85,15 +85,15 @@ class WorkLogRepository {
 
   /// 家事ログを全て取得する（過去1ヶ月のみ）
   Future<List<WorkLog>> getAllOnce() async {
-    // 過去1ヶ月の開始日時を計算
-    final oneMonthAgo = _systemService.getCurrentDateTime().subtract(
+    // 保持期間の開始日時を計算
+    final retentionStartDate = _systemService.getCurrentDateTime().subtract(
       _workLogRetentionPeriod,
     );
 
     final querySnapshot = await _getWorkLogsCollection()
         .where(
           'completedAt',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(oneMonthAgo),
+          isGreaterThanOrEqualTo: Timestamp.fromDate(retentionStartDate),
         )
         .orderBy('completedAt', descending: true)
         .get();
@@ -142,15 +142,15 @@ class WorkLogRepository {
 
   /// 完了済みの家事ログを取得するストリーム（過去1ヶ月のみ）
   Stream<List<WorkLog>> getCompletedWorkLogs() {
-    // 過去1ヶ月の開始日時を計算
-    final oneMonthAgo = _systemService.getCurrentDateTime().subtract(
+    // 保持期間の開始日時を計算
+    final retentionStartDate = _systemService.getCurrentDateTime().subtract(
       _workLogRetentionPeriod,
     );
 
     return _getWorkLogsCollection()
         .where(
           'completedAt',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(oneMonthAgo),
+          isGreaterThanOrEqualTo: Timestamp.fromDate(retentionStartDate),
         )
         .orderBy('completedAt', descending: true)
         .snapshots()
