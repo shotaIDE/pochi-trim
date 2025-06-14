@@ -38,6 +38,9 @@ class WorkLogRepository {
   final String _houseId;
   final SystemService _systemService;
 
+  // 家事ログの取得期間（過去1ヶ月）
+  static const _workLogRetentionPeriod = Duration(days: 31);
+
   // ハウスIDを指定して家事ログコレクションの参照を取得
   CollectionReference _getWorkLogsCollection() {
     return FirebaseFirestore.instance
@@ -84,7 +87,7 @@ class WorkLogRepository {
   Future<List<WorkLog>> getAllOnce() async {
     // 過去1ヶ月の開始日時を計算
     final oneMonthAgo = _systemService.getCurrentDateTime().subtract(
-      const Duration(days: 30),
+      _workLogRetentionPeriod,
     );
 
     final querySnapshot = await _getWorkLogsCollection()
@@ -141,7 +144,7 @@ class WorkLogRepository {
   Stream<List<WorkLog>> getCompletedWorkLogs() {
     // 過去1ヶ月の開始日時を計算
     final oneMonthAgo = _systemService.getCurrentDateTime().subtract(
-      const Duration(days: 30),
+      _workLogRetentionPeriod,
     );
 
     return _getWorkLogsCollection()
