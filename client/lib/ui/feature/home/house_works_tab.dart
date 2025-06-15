@@ -106,21 +106,20 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
   Future<void> _onDeleteTapped(HouseWork houseWork) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('家事の削除'),
-            content: const Text('この家事を削除してもよろしいですか？'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('キャンセル'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('削除'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('家事の削除'),
+        content: const Text('この家事を削除してもよろしいですか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('キャンセル'),
           ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('削除'),
+          ),
+        ],
+      ),
     );
 
     if (shouldDelete != true) {
@@ -128,15 +127,17 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
     }
 
     try {
-      await ref.read(deleteHouseWorkProvider(houseWork.id).future);
+      await ref.read(
+        deleteHouseWorkOfCurrentHouseProvider(houseWork.id).future,
+      );
 
       if (!mounted) {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事を削除しました')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('家事を削除しました')));
     } on DeleteHouseWorkException {
       if (!mounted) {
         return;
