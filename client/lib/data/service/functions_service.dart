@@ -48,9 +48,11 @@ Future<void> deleteHouseWork(
       'houseId': houseId,
       'houseWorkId': houseWorkId,
     });
-    logger.info('Successfully deleted house work: $houseWorkId');
   } on FirebaseFunctionsException catch (e) {
     logger.severe('Failed to delete house work: ${e.code} - ${e.message}');
+
     throw DeleteHouseWorkException();
   }
+
+  logger.info('Successfully deleted house work: $houseWorkId');
 }
