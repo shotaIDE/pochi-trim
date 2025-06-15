@@ -32,6 +32,9 @@ Future<String> generateMyHouse(Ref ref) async {
   return houseId;
 }
 
+/// 指定された家事を削除する
+///
+/// 削除に失敗した場合はDeleteHouseWorkExceptionをスローします。
 @riverpod
 Future<void> deleteHouseWork(
   Ref ref,

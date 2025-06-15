@@ -139,15 +139,6 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
         const SnackBar(content: Text('家事の削除に失敗しました。しばらくしてから再度お試しください')),
       );
       return;
-    } on Exception {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('予期しないエラーが発生しました。しばらくしてから再度お試しください')),
-      );
-      return;
     }
 
     if (!mounted) {

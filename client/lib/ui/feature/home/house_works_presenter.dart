@@ -17,6 +17,9 @@ Stream<List<HouseWork>> houseWorks(Ref ref) {
   return houseWorkRepository.getAll();
 }
 
+/// 現在の家の指定された家事を削除する
+///
+/// 削除に失敗した場合はDeleteHouseWorkExceptionをスローします。
 @riverpod
 Future<void> deleteHouseWorkOfCurrentHouse(Ref ref, String houseWorkId) async {
   final appSession = ref.read(unwrappedCurrentAppSessionProvider);
