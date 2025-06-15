@@ -108,7 +108,7 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('家事の削除'),
-        content: const Text('この家事を削除してもよろしいですか？'),
+        content: const Text('この家事を削除してもよろしいですか？\n\n※この操作は取り消すことができません。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
