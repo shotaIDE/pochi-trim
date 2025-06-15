@@ -34,7 +34,7 @@ Future<String> generateMyHouse(Ref ref) async {
 
 /// 指定された家事を削除する
 ///
-/// 削除に失敗した場合はDeleteHouseWorkExceptionをスローします。
+/// 削除に失敗した場合は[DeleteHouseWorkException]をスローします。
 @riverpod
 Future<void> deleteHouseWork(
   Ref ref,
