@@ -3,7 +3,6 @@ import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
-import 'package:pochi_trim/data/service/functions_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

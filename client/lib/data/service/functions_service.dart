@@ -51,9 +51,6 @@ Future<void> deleteHouseWork(
     logger.info('Successfully deleted house work: $houseWorkId');
   } on FirebaseFunctionsException catch (e) {
     logger.severe('Failed to delete house work: ${e.code} - ${e.message}');
-    throw DeleteHouseWorkException(
-      message: '家事の削除に失敗しました: ${e.message}',
-      errorCode: e.code,
-    );
+    throw DeleteHouseWorkException();
   }
 }
