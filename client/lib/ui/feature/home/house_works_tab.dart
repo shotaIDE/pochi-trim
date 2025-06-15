@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/ui/feature/home/house_work_item.dart';
 import 'package:pochi_trim/ui/feature/home/house_works_presenter.dart';
@@ -105,39 +106,47 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
   Future<void> _onDeleteTapped(HouseWork houseWork) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('家事の削除'),
-            content: const Text('この家事を削除してもよろしいですか？'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('キャンセル'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('削除'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('家事の削除'),
+        content: const Text(
+          'この家事を削除してもよろしいですか？\n'
+          '\n'
+          '※この操作は取り消すことができません。\n'
+          '※登録した家事ログも見れなくなります。',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('キャンセル'),
           ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('削除'),
+          ),
+        ],
+      ),
     );
 
     if (shouldDelete != true) {
       return;
     }
 
-    final isSucceeded = await ref.read(
-      deleteHouseWorkProvider(houseWork.id).future,
-    );
+    try {
+      await ref.read(
+        deleteHouseWorkOfCurrentHouseProvider(houseWork.id).future,
+      );
+    } on DeleteHouseWorkException {
+      if (!mounted) {
+        return;
+      }
 
-    if (!mounted) {
-      return;
-    }
-
-    if (!isSucceeded) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('家事の削除に失敗しました。しばらくしてから再度お試しください')),
       );
+      return;
+    }
+
+    if (!mounted) {
       return;
     }
 
