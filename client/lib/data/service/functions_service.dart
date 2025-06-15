@@ -1,6 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/generate_my_house_exception.dart';
 import 'package:pochi_trim/data/service/dao/generate_my_house_result_functions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -50,6 +51,9 @@ Future<void> deleteHouseWork(
     logger.info('Successfully deleted house work: $houseWorkId');
   } on FirebaseFunctionsException catch (e) {
     logger.severe('Failed to delete house work: ${e.code} - ${e.message}');
-    throw Exception('家事の削除に失敗しました: ${e.message}');
+    throw DeleteHouseWorkException(
+      message: '家事の削除に失敗しました: ${e.message}',
+      errorCode: e.code,
+    );
   }
 }

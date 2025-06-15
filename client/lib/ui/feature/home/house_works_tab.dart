@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/ui/feature/home/house_work_item.dart';
 import 'package:pochi_trim/ui/feature/home/house_works_presenter.dart';
@@ -136,13 +137,22 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('家事を削除しました')),
       );
+    } on DeleteHouseWorkException catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      final message = e.message ?? '家事の削除に失敗しました。しばらくしてから再度お試しください';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
     } on Exception {
       if (!mounted) {
         return;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事の削除に失敗しました。しばらくしてから再度お試しください')),
+        const SnackBar(content: Text('予期しないエラーが発生しました。しばらくしてから再度お試しください')),
       );
     }
   }
