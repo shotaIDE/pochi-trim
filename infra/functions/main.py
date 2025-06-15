@@ -49,3 +49,68 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
     return {
         "houseDocId": house_doc_id
     }
+
+
+@https_fn.on_call()
+def delete_house_work(req: https_fn.CallableRequest) -> Any:
+    """家事とその関連する家事ログを削除する関数"""
+    user_id = req.auth.uid
+    
+    if user_id is None:
+        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNAUTHENTICATED,
+                                  message="User is not authenticated")
+    
+    # リクエストパラメータの取得
+    house_id = req.data.get("houseId")
+    house_work_id = req.data.get("houseWorkId")
+    
+    if not house_id or not house_work_id:
+        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                                  message="houseId and houseWorkId are required")
+    
+    firestore_client: google.cloud.firestore.Client = firestore.client()
+    
+    # 権限チェック: ユーザーが該当する家の管理者かどうか確認
+    permissions_doc = firestore_client.collection("permissions").document(house_id).get()
+    
+    if not permissions_doc.exists:
+        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.NOT_FOUND,
+                                  message="House not found")
+    
+    permissions_data = permissions_doc.to_dict()
+    admin_user_ids = permissions_data.get("adminUserIds", [])
+    
+    if user_id not in admin_user_ids:
+        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
+                                  message="User is not authorized to delete house work in this house")
+    
+    try:
+        # バッチ処理で削除を実行
+        batch = firestore_client.batch()
+        
+        # 1. 家事ドキュメントを削除
+        house_work_ref = firestore_client.collection("houses").document(house_id).collection("houseWorks").document(house_work_id)
+        batch.delete(house_work_ref)
+        
+        # 2. 関連する家事ログを全て検索して削除
+        work_logs_query = firestore_client.collection("houses").document(house_id).collection("workLogs").where("houseWorkId", "==", house_work_id)
+        work_logs_docs = work_logs_query.get()
+        
+        for work_log_doc in work_logs_docs:
+            batch.delete(work_log_doc.reference)
+        
+        # バッチ実行
+        batch.commit()
+        
+        print(f"Successfully deleted house work {house_work_id} and {len(work_logs_docs)} related work logs from house {house_id}")
+        
+        return {
+            "success": True,
+            "deletedHouseWorkId": house_work_id,
+            "deletedWorkLogsCount": len(work_logs_docs)
+        }
+        
+    except Exception as e:
+        print(f"Error deleting house work: {e}")
+        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INTERNAL,
+                                  message=f"Failed to delete house work: {str(e)}")

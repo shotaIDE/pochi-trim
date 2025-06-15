@@ -30,3 +30,26 @@ Future<String> generateMyHouse(Ref ref) async {
 
   return houseId;
 }
+
+@riverpod
+Future<void> deleteHouseWork(
+  Ref ref,
+  String houseId,
+  String houseWorkId,
+) async {
+  final logger = Logger('FunctionsService');
+
+  final functions = FirebaseFunctions.instance;
+  final callable = functions.httpsCallable('delete_house_work');
+
+  try {
+    await callable.call<Map<String, dynamic>>({
+      'houseId': houseId,
+      'houseWorkId': houseWorkId,
+    });
+    logger.info('Successfully deleted house work: $houseWorkId');
+  } on FirebaseFunctionsException catch (e) {
+    logger.severe('Failed to delete house work: ${e.code} - ${e.message}');
+    throw Exception('家事の削除に失敗しました: ${e.message}');
+  }
+}

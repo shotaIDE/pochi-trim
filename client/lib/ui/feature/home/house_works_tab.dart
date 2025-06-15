@@ -126,24 +126,25 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
       return;
     }
 
-    final isSucceeded = await ref.read(
-      deleteHouseWorkProvider(houseWork.id).future,
-    );
+    try {
+      await ref.read(deleteHouseWorkProvider(houseWork.id).future);
 
-    if (!mounted) {
-      return;
-    }
+      if (!mounted) {
+        return;
+      }
 
-    if (!isSucceeded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事を削除しました')),
+      );
+    } on Exception {
+      if (!mounted) {
+        return;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('家事の削除に失敗しました。しばらくしてから再度お試しください')),
       );
-      return;
     }
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('家事を削除しました')));
   }
 }
 

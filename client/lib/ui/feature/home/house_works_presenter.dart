@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
+import 'package:pochi_trim/data/service/functions_service.dart';
+import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'house_works_presenter.g.dart';
@@ -14,8 +18,16 @@ Stream<List<HouseWork>> houseWorks(Ref ref) {
 }
 
 @riverpod
-Future<bool> deleteHouseWork(Ref ref, String houseWorkId) {
-  final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
+Future<void> deleteHouseWork(Ref ref, String houseWorkId) async {
+  final appSession = ref.read(unwrappedCurrentAppSessionProvider);
 
-  return houseWorkRepository.delete(houseWorkId);
+  final String houseId;
+  switch (appSession) {
+    case AppSessionSignedIn(currentHouseId: final currentHouseId):
+      houseId = currentHouseId;
+    case AppSessionNotSignedIn():
+      throw NoHouseIdError();
+  }
+
+  await ref.read(deleteHouseWorkProvider(houseId, houseWorkId).future);
 }
