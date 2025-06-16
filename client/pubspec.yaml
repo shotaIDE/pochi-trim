@@ -40,7 +40,7 @@ dependencies:
   url_launcher: 6.3.1
 
 dev_dependencies:
-  build_runner: 2.4.15
+  build_runner: 2.5.0
   cider: 0.2.8
   custom_lint: 0.7.3
   flutter_launcher_icons: 0.14.4
