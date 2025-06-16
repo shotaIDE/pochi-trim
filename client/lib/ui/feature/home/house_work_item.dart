@@ -114,6 +114,7 @@ class _HouseWorkItemState extends State<HouseWorkItem> {
           ),
         );
       },
+      clipBehavior: Clip.antiAlias,
     );
 
     if (action != _ModalAction.delete) {
