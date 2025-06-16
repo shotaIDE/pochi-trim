@@ -127,9 +127,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  spacing: 16,
                   children: [
                     const CircularProgressIndicator(),
-                    const SizedBox(height: 16),
                     Text(
                       '家事を削除しています...',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
