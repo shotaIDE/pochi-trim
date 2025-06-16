@@ -62,7 +62,7 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
               createdBy: 'DummyUser',
             ),
             onCompleteTap: (_) {},
-            onDelete: (_) {},
+            onLongPress: (_) {},
           );
 
           return Skeletonizer(
@@ -98,7 +98,7 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
             return HouseWorkItem(
               houseWork: houseWork,
               onCompleteTap: widget.onCompleteButtonTap,
-              onDelete: widget.onLongPress,
+              onLongPress: widget.onLongPress,
             );
           },
           separatorBuilder: (_, _) => const _Divider(),

@@ -13,6 +13,8 @@ import 'package:pochi_trim/ui/feature/home/work_logs_tab.dart';
 import 'package:pochi_trim/ui/feature/settings/settings_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+enum _ModalAction { delete }
+
 // 選択されたタブを管理するプロバイダー
 final selectedTabProvider = StateProvider<int>((ref) => 0);
 
@@ -111,7 +113,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 HouseWorksTab(
                   onCompleteButtonTap: _onCompleteHouseWorkButtonTap,
-                  onLongPress: _onDeleteHouseWork,
+                  onLongPress: _onLongPressHouseWork,
                 ),
                 WorkLogsTab(onDuplicateButtonTap: _onDuplicateWorkLogButtonTap),
               ],
@@ -227,7 +229,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
   }
 
-  Future<void> _onDeleteHouseWork(HouseWork houseWork) async {
+  Future<void> _onLongPressHouseWork(HouseWork houseWork) async {
+    final action = await showModalBottomSheet<_ModalAction>(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('削除する'),
+                onTap: () => Navigator.of(context).pop(_ModalAction.delete),
+              ),
+            ],
+          ),
+        );
+      },
+      clipBehavior: Clip.antiAlias,
+    );
+
+    if (action != _ModalAction.delete) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(

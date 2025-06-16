@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 
-enum _ModalAction { delete }
-
 class HouseWorkItem extends StatefulWidget {
   const HouseWorkItem({
     super.key,
     required this.houseWork,
     required this.onCompleteTap,
-    required this.onDelete,
+    required this.onLongPress,
   });
 
   final HouseWork houseWork;
   final void Function(HouseWork) onCompleteTap;
-  final void Function(HouseWork) onDelete;
+  final void Function(HouseWork) onLongPress;
 
   @override
   State<HouseWorkItem> createState() => _HouseWorkItemState();
@@ -60,7 +58,7 @@ class _HouseWorkItemState extends State<HouseWorkItem> {
     );
     final item = GestureDetector(
       onTap: _onTap,
-      onLongPress: _onLongPress,
+      onLongPress: () => widget.onLongPress(widget.houseWork),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -95,32 +93,5 @@ class _HouseWorkItemState extends State<HouseWorkItem> {
     });
 
     widget.onCompleteTap(widget.houseWork);
-  }
-
-  Future<void> _onLongPress() async {
-    final action = await showModalBottomSheet<_ModalAction>(
-      context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.delete),
-                title: const Text('削除する'),
-                onTap: () => Navigator.of(context).pop(_ModalAction.delete),
-              ),
-            ],
-          ),
-        );
-      },
-      clipBehavior: Clip.antiAlias,
-    );
-
-    if (action != _ModalAction.delete) {
-      return;
-    }
-
-    widget.onDelete(widget.houseWork);
   }
 }
