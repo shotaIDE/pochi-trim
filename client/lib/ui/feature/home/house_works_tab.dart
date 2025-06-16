@@ -9,11 +9,11 @@ class HouseWorksTab extends ConsumerStatefulWidget {
   const HouseWorksTab({
     super.key,
     required this.onCompleteButtonTap,
-    required this.onLongPress,
+    required this.onLongPressHouseWork,
   });
 
   final void Function(HouseWork) onCompleteButtonTap;
-  final void Function(HouseWork) onLongPress;
+  final void Function(HouseWork) onLongPressHouseWork;
 
   @override
   ConsumerState<HouseWorksTab> createState() => _HouseWorksTabState();
@@ -98,7 +98,7 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
             return HouseWorkItem(
               houseWork: houseWork,
               onCompleteTap: widget.onCompleteButtonTap,
-              onLongPress: widget.onLongPress,
+              onLongPress: widget.onLongPressHouseWork,
             );
           },
           separatorBuilder: (_, _) => const _Divider(),

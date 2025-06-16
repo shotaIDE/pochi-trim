@@ -113,7 +113,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 HouseWorksTab(
                   onCompleteButtonTap: _onCompleteHouseWorkButtonTap,
-                  onLongPress: _onLongPressHouseWork,
+                  onLongPressHouseWork: _onLongPressHouseWork,
                 ),
                 WorkLogsTab(onDuplicateButtonTap: _onDuplicateWorkLogButtonTap),
               ],
