@@ -301,8 +301,8 @@ class _QuickRegisterBottomBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final houseWorksAsync = ref.watch(
-      houseWorksSortedByMostFrequentlyUsedProvider,
+    final houseWorksFuture = ref.watch(
+      houseWorksSortedByMostFrequentlyUsedProvider.future,
     );
 
     return Container(
@@ -320,36 +320,46 @@ class _QuickRegisterBottomBar extends ConsumerWidget {
       ),
       child: SafeArea(
         top: false,
-        child: Skeletonizer(
-          enabled: houseWorksAsync.isLoading,
-          child: houseWorksAsync.when(
-            data: (recentHouseWorks) {
-              final items = recentHouseWorks.map((houseWork) {
-                return _QuickRegisterButton(houseWork: houseWork, onTap: onTap);
-              }).toList();
-
-              return ListView(
-                scrollDirection: Axis.horizontal,
-                children: items,
-              );
-            },
-            loading: () => ListView(
-              scrollDirection: Axis.horizontal,
-              children: List.filled(4, const _FakeQuickRegisterButton()),
-            ),
-            error: (_, _) => const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Text(
-                  'クイック登録の取得に失敗しました。アプリを再起動し、再度お試しください。',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ),
+        child: FutureBuilder<List<HouseWork>>(
+          future: houseWorksFuture,
+          builder: (context, snapshot) {
+            return Skeletonizer(
+              enabled: snapshot.data == null,
+              child: _buildContent(snapshot),
+            );
+          },
         ),
       ),
     );
+  }
+
+  Widget _buildContent(AsyncSnapshot<List<HouseWork>> snapshot) {
+    if (snapshot.hasError) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Text(
+            'クイック登録の取得に失敗しました。アプリを再起動し、再度お試しください。',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    final recentHouseWorks = snapshot.data;
+
+    if (recentHouseWorks == null) {
+      return ListView(
+        scrollDirection: Axis.horizontal,
+        children: List.filled(4, const _FakeQuickRegisterButton()),
+      );
+    }
+
+    final items = recentHouseWorks.map((houseWork) {
+      return _QuickRegisterButton(houseWork: houseWork, onTap: onTap);
+    }).toList();
+
+    return ListView(scrollDirection: Axis.horizontal, children: items);
   }
 }
 
