@@ -133,7 +133,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Text(
                       '家事を削除しています...',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.scrim,
+                        // TODO(ide): テーマの色を利用したい
+                        color: Colors.white,
                       ),
                     ),
                   ],
