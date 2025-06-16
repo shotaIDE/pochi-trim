@@ -123,9 +123,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           if (isDeletingHouseWork)
             ColoredBox(
-              color: Colors.black.withAlpha(128),
-              child: const Center(
-                child: CircularProgressIndicator(),
+              color: Theme.of(context).colorScheme.scrim.withAlpha(128),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(
+                      '家事を削除しています...',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.scrim,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
         ],
