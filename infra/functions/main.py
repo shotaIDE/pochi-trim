@@ -95,31 +95,33 @@ def delete_house_work(req: https_fn.CallableRequest) -> Any:
         )
 
     try:
-        # バッチ処理で削除を実行
-        batch = firestore_client.batch()
+        # トランザクションで削除を実行
+        @firestore.transactional
+        def delete_house_work_transaction(transaction):
+            house_ref = firestore_client.collection("houses").document(house_id)
 
-        house_ref = firestore_client.collection("houses").document(house_id)
+            # 1. 家事ドキュメントを削除
+            house_work_ref = house_ref.collection("houseWorks").document(house_work_id)
+            transaction.delete(house_work_ref)
 
-        # 1. 家事ドキュメントを削除
-        house_work_ref = house_ref.collection("houseWorks").document(house_work_id)
-        batch.delete(house_work_ref)
+            # 2. 関連する家事ログを全て検索して削除
+            work_logs_query = house_work_ref.collection("workLogs").where("houseWorkId", "==", house_work_id)
+            work_log_docs = work_logs_query.get()
 
-        # 2. 関連する家事ログを全て検索して削除
-        work_logs_query = house_work_ref.collection("workLogs").where("houseWorkId", "==", house_work_id)
-        work_logs_docs = work_logs_query.get()
+            for work_log_doc in work_log_docs:
+                transaction.delete(work_log_doc.reference)
 
-        for work_log_doc in work_logs_docs:
-            batch.delete(work_log_doc.reference)
+            return len(work_log_docs)
 
-        # バッチ実行
-        batch.commit()
+        transaction = firestore_client.transaction()
+        deleted_work_logs_count = delete_house_work_transaction(transaction)
 
-        print(f"Successfully deleted house work {house_work_id} and {len(work_logs_docs)} related work logs from house {house_id}")
+        print(f"Successfully deleted house work {house_work_id} and {deleted_work_logs_count} related work logs from house {house_id}")
 
         return {
             "success": True,
             "deletedHouseWorkId": house_work_id,
-            "deletedWorkLogsCount": len(work_logs_docs)
+            "deletedWorkLogsCount": deleted_work_logs_count
         }
 
     except Exception as e:
