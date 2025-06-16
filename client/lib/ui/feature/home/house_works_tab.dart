@@ -6,9 +6,14 @@ import 'package:pochi_trim/ui/feature/home/house_works_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HouseWorksTab extends ConsumerStatefulWidget {
-  const HouseWorksTab({super.key, required this.onCompleteButtonTap});
+  const HouseWorksTab({
+    super.key,
+    required this.onCompleteButtonTap,
+    required this.onLongPressHouseWork,
+  });
 
   final void Function(HouseWork) onCompleteButtonTap;
+  final void Function(HouseWork) onLongPressHouseWork;
 
   @override
   ConsumerState<HouseWorksTab> createState() => _HouseWorksTabState();
@@ -57,7 +62,7 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
               createdBy: 'DummyUser',
             ),
             onCompleteTap: (_) {},
-            onDelete: (_) {},
+            onLongPress: (_) {},
           );
 
           return Skeletonizer(
@@ -93,57 +98,13 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
             return HouseWorkItem(
               houseWork: houseWork,
               onCompleteTap: widget.onCompleteButtonTap,
-              onDelete: _onDeleteTapped,
+              onLongPress: widget.onLongPressHouseWork,
             );
           },
           separatorBuilder: (_, _) => const _Divider(),
         );
       },
     );
-  }
-
-  Future<void> _onDeleteTapped(HouseWork houseWork) async {
-    final shouldDelete = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('家事の削除'),
-            content: const Text('この家事を削除してもよろしいですか？'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('キャンセル'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('削除'),
-              ),
-            ],
-          ),
-    );
-
-    if (shouldDelete != true) {
-      return;
-    }
-
-    final isSucceeded = await ref.read(
-      deleteHouseWorkProvider(houseWork.id).future,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    if (!isSucceeded) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事の削除に失敗しました。しばらくしてから再度お試しください')),
-      );
-      return;
-    }
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('家事を削除しました')));
   }
 }
 

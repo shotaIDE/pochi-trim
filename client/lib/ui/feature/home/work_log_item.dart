@@ -107,7 +107,6 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
       ),
     );
 
-    // TODO(ide): `Dismissible` を共通化
     return Dismissible(
       key: Key('workLog-${widget.workLogIncludedHouseWork.id}'),
       background: Container(
