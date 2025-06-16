@@ -124,5 +124,8 @@ def delete_house_work(req: https_fn.CallableRequest) -> Any:
 
     except Exception as e:
         print(f"Error deleting house work: {e}")
-        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INTERNAL,
-                                  message=f"Failed to delete house work: {str(e)}")
+
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INTERNAL,
+            message="Failed to delete house work"
+        )
