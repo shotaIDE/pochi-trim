@@ -13,7 +13,7 @@ import 'package:pochi_trim/ui/feature/home/work_logs_tab.dart';
 import 'package:pochi_trim/ui/feature/settings/settings_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-enum _ModalAction { delete }
+enum _HouseWorkAction { delete }
 
 // 選択されたタブを管理するプロバイダー
 final selectedTabProvider = StateProvider<int>((ref) => 0);
@@ -230,7 +230,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _onLongPressHouseWork(HouseWork houseWork) async {
-    final action = await showModalBottomSheet<_ModalAction>(
+    final action = await showModalBottomSheet<_HouseWorkAction>(
       context: context,
       builder: (BuildContext context) {
         return SafeArea(
@@ -240,7 +240,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ListTile(
                 leading: const Icon(Icons.delete),
                 title: const Text('削除する'),
-                onTap: () => Navigator.of(context).pop(_ModalAction.delete),
+                onTap: () => Navigator.of(context).pop(_HouseWorkAction.delete),
               ),
             ],
           ),
@@ -249,7 +249,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       clipBehavior: Clip.antiAlias,
     );
 
-    if (action != _ModalAction.delete) {
+    if (action != _HouseWorkAction.delete) {
       return;
     }
 
