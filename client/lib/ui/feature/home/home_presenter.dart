@@ -12,6 +12,24 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'home_presenter.g.dart';
 
 @riverpod
+class IsHouseWorkDeleting extends _$IsHouseWorkDeleting {
+  @override
+  bool build() => false;
+
+  Future<void> deleteHouseWork(HouseWork houseWork) async {
+    final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
+
+    state = true;
+
+    try {
+      await houseWorkRepository.delete(houseWork.id);
+    } finally {
+      state = false;
+    }
+  }
+}
+
+@riverpod
 Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
   final houseWorks = await ref.watch(_houseWorksFilePrivateProvider.future);
   final completedWorkLogs = await ref.watch(

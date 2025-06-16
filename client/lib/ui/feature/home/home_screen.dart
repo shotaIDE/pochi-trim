@@ -7,7 +7,6 @@ import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_screen.dart';
 import 'package:pochi_trim/ui/feature/home/home_presenter.dart';
-import 'package:pochi_trim/ui/feature/home/house_works_presenter.dart';
 import 'package:pochi_trim/ui/feature/home/house_works_tab.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 import 'package:pochi_trim/ui/feature/home/work_logs_tab.dart';
@@ -37,6 +36,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final selectedTab = ref.watch(selectedTabProvider);
+    final isDeletingHouseWork = ref.watch(isHouseWorkDeletingProvider);
 
     const titleText = Text('記録');
 
@@ -99,25 +99,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return DefaultTabController(
       length: 2,
       initialIndex: selectedTab,
-      child: Scaffold(
-        appBar: AppBar(
-          title: titleText,
-          actions: [analysisButton, settingsButton],
-          bottom: tabBar,
-        ),
-        body: TabBarView(
-          children: [
-            HouseWorksTab(
-              onCompleteButtonTap: _onCompleteHouseWorkButtonTap,
-              onLongPress: _onDeleteHouseWork,
+      child: Stack(
+        children: [
+          Scaffold(
+            appBar: AppBar(
+              title: titleText,
+              actions: [analysisButton, settingsButton],
+              bottom: tabBar,
             ),
-            WorkLogsTab(onDuplicateButtonTap: _onDuplicateWorkLogButtonTap),
-          ],
-        ),
-        floatingActionButton: addHouseWorkButton,
-        bottomNavigationBar: _QuickRegisterBottomBar(
-          onTap: _onQuickRegisterButtonPressed,
-        ),
+            body: TabBarView(
+              children: [
+                HouseWorksTab(
+                  onCompleteButtonTap: _onCompleteHouseWorkButtonTap,
+                  onLongPress: _onDeleteHouseWork,
+                ),
+                WorkLogsTab(onDuplicateButtonTap: _onDuplicateWorkLogButtonTap),
+              ],
+            ),
+            floatingActionButton: addHouseWorkButton,
+            bottomNavigationBar: _QuickRegisterBottomBar(
+              onTap: _onQuickRegisterButtonPressed,
+            ),
+          ),
+          if (isDeletingHouseWork)
+            ColoredBox(
+              color: Colors.black.withAlpha(128),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -232,9 +243,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     try {
-      await ref.read(
-        deleteHouseWorkOfCurrentHouseProvider(houseWork.id).future,
-      );
+      await ref
+          .read(isHouseWorkDeletingProvider.notifier)
+          .deleteHouseWork(houseWork);
     } on DeleteHouseWorkException {
       if (!mounted) {
         return;
