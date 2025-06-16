@@ -294,43 +294,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _QuickRegisterBottomBar extends ConsumerStatefulWidget {
+class _QuickRegisterBottomBar extends ConsumerWidget {
   const _QuickRegisterBottomBar({required this.onTap});
 
   final void Function(HouseWork) onTap;
 
   @override
-  ConsumerState<_QuickRegisterBottomBar> createState() =>
-      _QuickRegisterBottomBarState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final houseWorksAsync = ref.watch(
+      houseWorksSortedByMostFrequentlyUsedProvider,
+    );
 
-class _QuickRegisterBottomBarState
-    extends ConsumerState<_QuickRegisterBottomBar> {
-  AsyncValue<List<HouseWork>> _sortedHouseWorksByCompletionCountAsync =
-      const AsyncValue.loading();
-
-  @override
-  void initState() {
-    super.initState();
-
-    ref.listenManual(houseWorksSortedByMostFrequentlyUsedProvider, (
-      previous,
-      next,
-    ) {
-      // 2回以降にデータが取得された場合は、何もしない
-      // UI上で頻繁に更新されてチラつくのを防ぐため
-      if (!_sortedHouseWorksByCompletionCountAsync.isLoading) {
-        return;
-      }
-
-      setState(() {
-        _sortedHouseWorksByCompletionCountAsync = next;
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxHeight: 130),
       decoration: BoxDecoration(
@@ -347,14 +321,11 @@ class _QuickRegisterBottomBarState
       child: SafeArea(
         top: false,
         child: Skeletonizer(
-          enabled: _sortedHouseWorksByCompletionCountAsync.isLoading,
-          child: _sortedHouseWorksByCompletionCountAsync.when(
+          enabled: houseWorksAsync.isLoading,
+          child: houseWorksAsync.when(
             data: (recentHouseWorks) {
               final items = recentHouseWorks.map((houseWork) {
-                return _QuickRegisterButton(
-                  houseWork: houseWork,
-                  onTap: (houseWork) => widget.onTap(houseWork),
-                );
+                return _QuickRegisterButton(houseWork: houseWork, onTap: onTap);
               }).toList();
 
               return ListView(
