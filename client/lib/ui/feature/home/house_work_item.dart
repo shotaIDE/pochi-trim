@@ -22,28 +22,22 @@ class _HouseWorkItemState extends State<HouseWorkItem> {
 
   @override
   Widget build(BuildContext context) {
-    final deleteIcon = Icon(
-      Icons.delete,
-      color: Theme.of(context).colorScheme.onError,
-    );
-
     final doCompleteIcon = AnimatedSwitcher(
       duration: const Duration(milliseconds: 150),
       transitionBuilder: (Widget child, Animation<double> animation) {
         return FadeTransition(opacity: animation, child: child);
       },
-      child:
-          _isCompleting
-              ? Icon(
-                Icons.check_circle,
-                key: const ValueKey('check_circle'),
-                color: Theme.of(context).colorScheme.primary,
-              )
-              : Icon(
-                Icons.check_circle_outline,
-                key: const ValueKey('check_circle_outline'),
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+      child: _isCompleting
+          ? Icon(
+              Icons.check_circle,
+              key: const ValueKey('check_circle'),
+              color: Theme.of(context).colorScheme.primary,
+            )
+          : Icon(
+              Icons.check_circle_outline,
+              key: const ValueKey('check_circle_outline'),
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
     );
     final houseWorkIcon = Container(
       alignment: Alignment.center,
@@ -62,8 +56,9 @@ class _HouseWorkItemState extends State<HouseWorkItem> {
       widget.houseWork.title,
       style: Theme.of(context).textTheme.titleMedium,
     );
-    final completeButtonPart = InkWell(
+    final item = GestureDetector(
       onTap: _onTap,
+      onLongPress: () => widget.onDelete(widget.houseWork),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -78,25 +73,8 @@ class _HouseWorkItemState extends State<HouseWorkItem> {
       ),
     );
 
-    final item = ColoredBox(
+    return ColoredBox(
       color: Theme.of(context).colorScheme.surfaceContainer,
-      child: completeButtonPart,
-    );
-
-    return Dismissible(
-      key: Key('houseWork-${widget.houseWork.id}'),
-      background: Container(
-        color: Theme.of(context).colorScheme.error,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: deleteIcon,
-      ),
-      direction: DismissDirection.endToStart,
-      confirmDismiss: (direction) async {
-        widget.onDelete(widget.houseWork);
-
-        return false;
-      },
       child: item,
     );
   }
