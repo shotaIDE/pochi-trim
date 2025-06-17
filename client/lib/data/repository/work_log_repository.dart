@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
+import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
@@ -101,13 +102,17 @@ class WorkLogRepository {
   }
 
   /// 家事ログを削除する
-  Future<bool> delete(String id) async {
+  ///
+  /// Throws:
+  ///   - [DeleteWorkLogException] - Firebaseエラー、ネットワークエラー、
+  ///     権限エラーなどで削除に失敗した場合
+  Future<void> delete(String id) async {
     try {
       await _getWorkLogsCollection().doc(id).delete();
-      return true;
     } on FirebaseException catch (e) {
       _logger.warning('家事ログ削除エラー', e);
-      return false;
+
+      throw const DeleteWorkLogException();
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
+import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
@@ -111,4 +112,29 @@ Stream<List<WorkLog>> _completedWorkLogsFilePrivate(Ref ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
 
   return workLogRepository.getCompletedWorkLogs();
+}
+
+/// 最新の家事ログを取り消す（削除する）
+///
+/// Returns:
+///   - `true` - 取り消し成功
+///   - `false` - 取り消し失敗（家事ログが存在しない、削除エラーなど）
+@riverpod
+Future<bool> undoRecentWorkLog(Ref ref) async {
+  final workLogRepository = ref.read(workLogRepositoryProvider);
+
+  try {
+    final recentWorkLogs = await workLogRepository.getAllOnce();
+
+    if (recentWorkLogs.isEmpty) {
+      return false;
+    }
+
+    // 最新の家事ログを削除対象とする
+    final mostRecentWorkLog = recentWorkLogs.first;
+    await workLogRepository.delete(mostRecentWorkLog.id);
+    return true;
+  } on DeleteWorkLogException {
+    return false;
+  }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
-import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
@@ -327,37 +326,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _undoRecentWorkLog() async {
-    try {
-      final workLogRepository = ref.read(workLogRepositoryProvider);
-      final recentWorkLogs = await workLogRepository.getAllOnce();
+    final isDeleted = await ref.read(undoRecentWorkLogProvider.future);
 
-      if (recentWorkLogs.isEmpty) {
-        _showUndoFailureMessage();
-        return;
-      }
+    if (!mounted) {
+      return;
+    }
 
-      // 最新の家事ログを削除対象とする
-      final mostRecentWorkLog = recentWorkLogs.first;
-      final isDeleted = await workLogRepository.delete(mostRecentWorkLog.id);
-
-      if (!mounted) {
-        return;
-      }
-
-      if (isDeleted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('家事ログの記録を取り消しました'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      } else {
-        _showUndoFailureMessage();
-      }
-    } on Exception {
-      if (mounted) {
-        _showUndoFailureMessage();
-      }
+    if (isDeleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('家事ログの記録を取り消しました'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      _showUndoFailureMessage();
     }
   }
 
