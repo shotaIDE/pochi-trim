@@ -91,11 +91,11 @@ Implement processes with similar functions in the same flow. Check whether a sim
 
 ### Maintain sufficient comments
 
-Add comments only when necessary to clarify the intent or purpose of the code. Avoid comments if the content of the code is clear.
+If you add code comments, finally check their sufficiency from the following perspective. If they are excessive or insufficient, delete or add them.
 
-Describe in detail, including the reasons, particularly for important points and pitfalls.
-
-Write comments in Japanese.
+- Add comments only when necessary to clarify the intent or purpose of the code. Avoid comments if the content of the code is clear.
+- Describe in detail any particularly important points to note or pitfalls, including the reasons for them.
+- Comments should be written in Japanese.
 
 ### Maintain readability of naming
 
