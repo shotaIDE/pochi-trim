@@ -112,6 +112,10 @@ onTap: (_) { // 引数を使用しない場合、"_" として明示する
 
 ## Flutter に関するルール
 
+### クラスの定義
+
+クラスを実装する際、クラスを不変にできる場合は常に `const` コンストラクタを使用する。
+
 ### ドメインモデルの定義
 
 ドメインモデルは明確に分離し、適切なファイルに配置する。
@@ -156,6 +160,20 @@ Future<String> currentUser(Ref ref) async {
 ### エラーハンドリングを適切に行う
 
 非同期処理のエラーは適切にキャッチし、ユーザーに通知する。
+
+ブール値や汎用的な例外を返す代わりに、カスタム例外クラスを使用して特定のエラー状態を表す。詳細なエラー情報が必要ない場合は、メンバー変数を持たないシンプルな例外クラスを定義する。
+
+例:
+
+```dart
+// 定義
+class DeleteWorkLogException implements Exception {
+  const DeleteWorkLogException();
+}
+
+// 使用方法
+throw const DeleteWorkLogException();
+```
 
 ### UI を適切に構築する
 

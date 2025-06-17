@@ -107,6 +107,10 @@ Use consistent naming patterns for variables that handle the same type of data.
 
 ## Rules for Flutter
 
+### Defining a Class
+
+When implementing a class, use the `const` constructor whenever you can make the class immutable.
+
 ### Defining the domain model
 
 Clearly separate the domain model and place it in the appropriate file.
@@ -151,6 +155,20 @@ Future<String> currentUser(Ref ref) async {
 ### Handle errors properly
 
 Catch asynchronous processing errors properly and notify the user.
+
+Instead of returning a Boolean value or a generic exception, use a custom exception class to represent a specific error condition. If you don't need detailed error information, define a simple exception class that has no member variables.
+
+Example:
+
+```dart
+// Definition
+class DeleteWorkLogException implements Exception {
+  const DeleteWorkLogException();
+}
+
+// Usage
+throw const DeleteWorkLogException();
+```
 
 ### Build UI properly
 
