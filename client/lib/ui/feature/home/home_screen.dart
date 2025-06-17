@@ -149,7 +149,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
-    final result = await ref.read(
+    final workLogId = await ref.read(
       onCompleteHouseWorkButtonTappedResultProvider(houseWork).future,
     );
 
@@ -157,7 +157,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
 
-    if (!result) {
+    if (workLogId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
       );
@@ -166,13 +166,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     _highlightWorkLogsTabItem();
 
-    _showWorkLogRegisteredSnackBar();
+    _showWorkLogRegisteredSnackBar(workLogId);
   }
 
   Future<void> _onDuplicateWorkLogButtonTap(
     WorkLogIncludedHouseWork workLogIncludedHouseWork,
   ) async {
-    final isSucceeded = await ref.read(
+    final workLogId = await ref.read(
       onDuplicateWorkLogButtonTappedResultProvider(
         workLogIncludedHouseWork,
       ).future,
@@ -183,21 +183,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     // TODO(ide): 共通化できる
-    if (!isSucceeded) {
+    if (workLogId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
       );
       return;
     }
 
-    _showWorkLogRegisteredSnackBar();
+    _showWorkLogRegisteredSnackBar(workLogId);
   }
 
   Future<void> _onQuickRegisterButtonPressed(HouseWork houseWork) async {
     final workLogService = ref.read(workLogServiceProvider);
     final systemService = ref.read(systemServiceProvider);
 
-    final isSucceeded = await workLogService.recordWorkLog(
+    final workLogId = await workLogService.recordWorkLog(
       houseWorkId: houseWork.id,
       onRequestAccepted: systemService.doHapticFeedbackActionReceived,
     );
@@ -207,7 +207,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     // TODO(ide): 共通化
-    if (!isSucceeded) {
+    if (workLogId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
       );
@@ -220,7 +220,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _highlightWorkLogsTabItem();
     }
 
-    _showWorkLogRegisteredSnackBar();
+    _showWorkLogRegisteredSnackBar(workLogId);
   }
 
   Future<void> _onLongPressHouseWork(HouseWork houseWork) async {
@@ -316,18 +316,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
-  void _showWorkLogRegisteredSnackBar() {
+  void _showWorkLogRegisteredSnackBar(String workLogId) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('家事ログを記録しました'),
-        action: SnackBarAction(label: '取り消す', onPressed: _undoRecentWorkLog),
+        action: SnackBarAction(
+          label: '取り消し',
+          onPressed: () => _undoWorkLog(workLogId),
+        ),
+        duration: const Duration(seconds: 5),
       ),
     );
   }
 
-  Future<void> _undoRecentWorkLog() async {
+  Future<void> _undoWorkLog(String workLogId) async {
     try {
-      await ref.read(undoRecentWorkLogProvider.future);
+      await ref.read(undoWorkLogProvider(workLogId).future);
 
       if (!mounted) {
         return;

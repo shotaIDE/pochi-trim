@@ -73,7 +73,7 @@ Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
 }
 
 @riverpod
-Future<bool> onCompleteHouseWorkButtonTappedResult(
+Future<String?> onCompleteHouseWorkButtonTappedResult(
   Ref ref,
   HouseWork houseWork,
 ) {
@@ -87,7 +87,7 @@ Future<bool> onCompleteHouseWorkButtonTappedResult(
 }
 
 @riverpod
-Future<bool> onDuplicateWorkLogButtonTappedResult(
+Future<String?> onDuplicateWorkLogButtonTappedResult(
   Ref ref,
   WorkLogIncludedHouseWork workLogIncludedHouseWork,
 ) {
@@ -114,25 +114,16 @@ Stream<List<WorkLog>> _completedWorkLogsFilePrivate(Ref ref) {
   return workLogRepository.getCompletedWorkLogs();
 }
 
-/// 最新の家事ログを取り消す（削除する）
+/// 指定されたIDの家事ログを取り消す（削除する）
 ///
-/// 過去1ヶ月の家事ログから最新のものを取得し、それを削除する。
-/// 主に家事ログ登録直後の取り消し機能で使用される。
+/// 家事ログ登録直後の取り消し機能で使用される。
+///
+/// [workLogId] 削除対象の家事ログID
 ///
 /// Throws:
 ///   - [DeleteWorkLogException] - 家事ログの削除に失敗した場合
-///   - [StateError] - 削除対象の家事ログが存在しない場合
 @riverpod
-Future<void> undoRecentWorkLog(Ref ref) async {
+Future<void> undoWorkLog(Ref ref, String workLogId) async {
   final workLogRepository = ref.read(workLogRepositoryProvider);
-
-  final recentWorkLogs = await workLogRepository.getAllOnce();
-
-  if (recentWorkLogs.isEmpty) {
-    throw StateError('削除対象の家事ログが存在しません');
-  }
-
-  // 最新の家事ログを削除対象とする
-  final mostRecentWorkLog = recentWorkLogs.first;
-  await workLogRepository.delete(mostRecentWorkLog.id);
+  await workLogRepository.delete(workLogId);
 }
