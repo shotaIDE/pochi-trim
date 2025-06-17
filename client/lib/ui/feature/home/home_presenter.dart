@@ -116,10 +116,6 @@ Stream<List<WorkLog>> _completedWorkLogsFilePrivate(Ref ref) {
 
 /// 指定されたIDの家事ログを取り消す（削除する）
 ///
-/// 家事ログ登録直後の取り消し機能で使用される。
-///
-/// [workLogId] 削除対象の家事ログID
-///
 /// Throws:
 ///   - [DeleteWorkLogException] - 家事ログの削除に失敗した場合
 @riverpod
