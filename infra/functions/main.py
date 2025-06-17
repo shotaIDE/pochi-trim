@@ -51,5 +51,3 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
     return {
         "houseDocId": house_doc_id
     }
-
-

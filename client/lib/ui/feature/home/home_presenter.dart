@@ -6,7 +6,6 @@ import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
-import 'package:pochi_trim/data/service/functions_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
@@ -26,7 +25,8 @@ class IsHouseWorkDeleting extends _$IsHouseWorkDeleting {
     state = true;
 
     try {
-      await ref.read(deleteHouseWorkProvider(houseWork.id).future);
+      final repository = ref.read(houseWorkRepositoryProvider);
+      await repository.delete(houseWork.id);
     } finally {
       state = false;
     }

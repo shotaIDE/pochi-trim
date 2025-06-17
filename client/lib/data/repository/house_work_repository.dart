@@ -68,34 +68,34 @@ class HouseWorkRepository {
   Future<void> delete(String houseWorkId) async {
     try {
       final firestore = FirebaseFirestore.instance;
-      
+
       await firestore.runTransaction((transaction) async {
         final houseWorkRef = _getAllCollectionReference().doc(houseWorkId);
-        
+
         // 家事ドキュメントを削除
         transaction.delete(houseWorkRef);
-        
+
         // 関連する家事ログを全て取得して削除
         final workLogsQuery = firestore
             .collection('houses')
             .doc(_houseId)
             .collection('workLogs')
             .where('houseWorkId', isEqualTo: houseWorkId);
-            
+
         final workLogsSnapshot = await workLogsQuery.get();
-        
+
         for (final workLogDoc in workLogsSnapshot.docs) {
           transaction.delete(workLogDoc.reference);
         }
       });
-      
+
       _logger.info(
         'Successfully deleted house work $houseWorkId and its related '
         'work logs',
       );
     } on FirebaseException catch (e) {
       _logger.warning('家事削除エラー', e);
-      
+
       throw DeleteHouseWorkException();
     }
   }
