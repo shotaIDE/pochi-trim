@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
+import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
@@ -72,7 +73,7 @@ Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
 }
 
 @riverpod
-Future<bool> onCompleteHouseWorkButtonTappedResult(
+Future<String?> onCompleteHouseWorkButtonTappedResult(
   Ref ref,
   HouseWork houseWork,
 ) {
@@ -86,7 +87,7 @@ Future<bool> onCompleteHouseWorkButtonTappedResult(
 }
 
 @riverpod
-Future<bool> onDuplicateWorkLogButtonTappedResult(
+Future<String?> onDuplicateWorkLogButtonTappedResult(
   Ref ref,
   WorkLogIncludedHouseWork workLogIncludedHouseWork,
 ) {
@@ -111,4 +112,14 @@ Stream<List<WorkLog>> _completedWorkLogsFilePrivate(Ref ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
 
   return workLogRepository.getCompletedWorkLogs();
+}
+
+/// 指定されたIDの家事ログを取り消す（削除する）
+///
+/// Throws:
+///   - [DeleteWorkLogException] - 家事ログの削除に失敗した場合
+@riverpod
+Future<void> undoWorkLog(Ref ref, String workLogId) async {
+  final workLogRepository = ref.read(workLogRepositoryProvider);
+  await workLogRepository.delete(workLogId);
 }

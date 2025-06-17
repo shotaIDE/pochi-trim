@@ -86,7 +86,7 @@ class WorkLogService {
   final SystemService systemService;
   final Ref ref;
 
-  Future<bool> recordWorkLog({
+  Future<String?> recordWorkLog({
     required String houseWorkId,
 
     /// 家事ログ登録のリクエストが承認されたときに呼び出されるコールバック
@@ -101,12 +101,12 @@ class WorkLogService {
 
     if (!debounceManager.shouldRecordWorkLog(houseWorkId, now)) {
       // デバウンス期間内なので記録しない
-      return false;
+      return null;
     }
 
     final userProfile = await ref.read(currentUserProfileProvider.future);
     if (userProfile == null) {
-      return false;
+      return null;
     }
 
     onRequestAccepted?.call();
@@ -122,11 +122,10 @@ class WorkLogService {
     );
 
     try {
-      await workLogRepository.save(workLog);
+      final workLogId = await workLogRepository.save(workLog);
+      return workLogId;
     } on Exception {
-      return false;
+      return null;
     }
-
-    return true;
   }
 }

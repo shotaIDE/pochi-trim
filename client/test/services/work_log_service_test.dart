@@ -82,7 +82,7 @@ void main() {
       );
 
       // 検証
-      expect(result, isTrue);
+      expect(result, 'test-id'); // WorkLogIDが返される
       verify(() => mockWorkLogRepository.save(any())).called(1);
     });
 
@@ -124,8 +124,8 @@ void main() {
       );
 
       // 検証
-      expect(firstResult, isTrue);
-      expect(secondResult, isFalse); // 連打防止により拒否される
+      expect(firstResult, 'test-id');
+      expect(secondResult, isNull); // 連打防止により拒否される
       verify(() => mockWorkLogRepository.save(any())).called(1); // 1回のみ保存される
     });
 
@@ -167,8 +167,8 @@ void main() {
       );
 
       // 検証
-      expect(firstResult, isTrue);
-      expect(secondResult, isTrue); // 3秒経過しているので許可される
+      expect(firstResult, 'test-id');
+      expect(secondResult, 'test-id'); // 3秒経過しているので許可される
       verify(() => mockWorkLogRepository.save(any())).called(2); // 2回とも保存される
     });
 
@@ -207,8 +207,8 @@ void main() {
       );
 
       // 検証
-      expect(result1, isTrue);
-      expect(result2, isTrue); // 異なる家事なので許可される
+      expect(result1, 'test-id');
+      expect(result2, 'test-id'); // 異なる家事なので許可される
       verify(() => mockWorkLogRepository.save(any())).called(2); // 2回とも保存される
     });
 
@@ -240,7 +240,7 @@ void main() {
       );
 
       // 検証
-      expect(result, isFalse);
+      expect(result, isNull);
       verifyNever(() => mockWorkLogRepository.save(any())); // 保存は呼ばれない
     });
 
@@ -275,7 +275,7 @@ void main() {
       );
 
       // 検証
-      expect(result, isFalse);
+      expect(result, isNull);
       verify(() => mockWorkLogRepository.save(any())).called(1);
     });
 
@@ -324,9 +324,9 @@ void main() {
       );
 
       // 検証
-      expect(firstResult, isTrue);
-      expect(secondResult, isFalse); // 2999msなので拒否される
-      expect(thirdResult, isTrue); // 3000msなので許可される
+      expect(firstResult, 'test-id');
+      expect(secondResult, isNull); // 2999msなので拒否される
+      expect(thirdResult, 'test-id'); // 3000msなので許可される
       verify(
         () => mockWorkLogRepository.save(any()),
       ).called(2); // 1回目と3回目のみ保存される
