@@ -326,21 +326,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _undoRecentWorkLog() async {
-    final isDeleted = await ref.read(undoRecentWorkLogProvider.future);
+    try {
+      await ref.read(undoRecentWorkLogProvider.future);
 
-    if (!mounted) {
-      return;
-    }
+      if (!mounted) {
+        return;
+      }
 
-    if (isDeleted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('家事ログの記録を取り消しました'),
           duration: Duration(seconds: 2),
         ),
       );
-    } else {
-      _showUndoFailureMessage();
+    } on Exception {
+      if (mounted) {
+        _showUndoFailureMessage();
+      }
     }
   }
 

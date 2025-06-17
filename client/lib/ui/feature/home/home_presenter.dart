@@ -116,25 +116,23 @@ Stream<List<WorkLog>> _completedWorkLogsFilePrivate(Ref ref) {
 
 /// 最新の家事ログを取り消す（削除する）
 ///
-/// Returns:
-///   - `true` - 取り消し成功
-///   - `false` - 取り消し失敗（家事ログが存在しない、削除エラーなど）
+/// 過去1ヶ月の家事ログから最新のものを取得し、それを削除する。
+/// 主に家事ログ登録直後の取り消し機能で使用される。
+///
+/// Throws:
+///   - [DeleteWorkLogException] - 家事ログの削除に失敗した場合
+///   - [StateError] - 削除対象の家事ログが存在しない場合
 @riverpod
-Future<bool> undoRecentWorkLog(Ref ref) async {
+Future<void> undoRecentWorkLog(Ref ref) async {
   final workLogRepository = ref.read(workLogRepositoryProvider);
 
-  try {
-    final recentWorkLogs = await workLogRepository.getAllOnce();
+  final recentWorkLogs = await workLogRepository.getAllOnce();
 
-    if (recentWorkLogs.isEmpty) {
-      return false;
-    }
-
-    // 最新の家事ログを削除対象とする
-    final mostRecentWorkLog = recentWorkLogs.first;
-    await workLogRepository.delete(mostRecentWorkLog.id);
-    return true;
-  } on DeleteWorkLogException {
-    return false;
+  if (recentWorkLogs.isEmpty) {
+    throw StateError('削除対象の家事ログが存在しません');
   }
+
+  // 最新の家事ログを削除対象とする
+  final mostRecentWorkLog = recentWorkLogs.first;
+  await workLogRepository.delete(mostRecentWorkLog.id);
 }
