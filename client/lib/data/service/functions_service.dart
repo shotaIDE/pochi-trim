@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/generate_my_house_exception.dart';
+import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/service/dao/generate_my_house_result_functions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -38,24 +39,9 @@ Future<String> generateMyHouse(Ref ref) async {
 @riverpod
 Future<void> deleteHouseWork(
   Ref ref,
-  String houseId,
   String houseWorkId,
 ) async {
-  final logger = Logger('FunctionsService');
-
-  final functions = FirebaseFunctions.instance;
-  final callable = functions.httpsCallable('delete_house_work');
-
-  try {
-    await callable.call<Map<String, dynamic>>({
-      'houseId': houseId,
-      'houseWorkId': houseWorkId,
-    });
-  } on FirebaseFunctionsException catch (e) {
-    logger.severe('Failed to delete house work: ${e.code} - ${e.message}');
-
-    throw DeleteHouseWorkException();
-  }
-
-  logger.info('Successfully deleted house work: $houseWorkId');
+  final repository = ref.watch(houseWorkRepositoryProvider);
+  
+  await repository.delete(houseWorkId);
 }
