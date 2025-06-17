@@ -324,7 +324,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           label: '取り消し',
           onPressed: () => _undoWorkLog(workLogId),
         ),
-        duration: const Duration(seconds: 5),
       ),
     );
   }
@@ -332,31 +331,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _undoWorkLog(String workLogId) async {
     try {
       await ref.read(undoWorkLogProvider(workLogId).future);
-
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('家事ログの記録を取り消しました'),
-          duration: Duration(seconds: 2),
-        ),
-      );
     } on Exception {
       if (mounted) {
-        _showUndoFailureMessage();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('家事ログの取り消しに失敗しました'),
+            duration: Duration(seconds: 2),
+          ),
+        );
       }
     }
-  }
 
-  void _showUndoFailureMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('家事ログの取り消しに失敗しました'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事ログの記録を取り消しました')));
   }
 }
 
