@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
@@ -166,9 +167,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     _highlightWorkLogsTabItem();
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
+    _showWorkLogRegisteredSnackBar();
   }
 
   Future<void> _onDuplicateWorkLogButtonTap(
@@ -192,9 +191,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
+    _showWorkLogRegisteredSnackBar();
   }
 
   Future<void> _onQuickRegisterButtonPressed(HouseWork houseWork) async {
@@ -224,9 +221,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _highlightWorkLogsTabItem();
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('家事ログを記録しました')));
+    _showWorkLogRegisteredSnackBar();
   }
 
   Future<void> _onLongPressHouseWork(HouseWork houseWork) async {
@@ -320,6 +315,59 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         });
       }
     });
+  }
+
+  void _showWorkLogRegisteredSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('家事ログを記録しました'),
+        action: SnackBarAction(label: '取り消す', onPressed: _undoRecentWorkLog),
+      ),
+    );
+  }
+
+  Future<void> _undoRecentWorkLog() async {
+    try {
+      final workLogRepository = ref.read(workLogRepositoryProvider);
+      final recentWorkLogs = await workLogRepository.getAllOnce();
+
+      if (recentWorkLogs.isEmpty) {
+        _showUndoFailureMessage();
+        return;
+      }
+
+      // 最新の家事ログを削除対象とする
+      final mostRecentWorkLog = recentWorkLogs.first;
+      final isDeleted = await workLogRepository.delete(mostRecentWorkLog.id);
+
+      if (!mounted) {
+        return;
+      }
+
+      if (isDeleted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('家事ログの記録を取り消しました'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        _showUndoFailureMessage();
+      }
+    } on Exception {
+      if (mounted) {
+        _showUndoFailureMessage();
+      }
+    }
+  }
+
+  void _showUndoFailureMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('家事ログの取り消しに失敗しました'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 }
 
