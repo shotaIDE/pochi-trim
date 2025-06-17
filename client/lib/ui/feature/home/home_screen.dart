@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
+import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
@@ -331,7 +332,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _undoWorkLog(String workLogId) async {
     try {
       await ref.read(undoWorkLogProvider(workLogId).future);
-    } on Exception {
+    } on DeleteWorkLogException {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
