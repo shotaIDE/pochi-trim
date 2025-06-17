@@ -333,12 +333,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       await ref.read(undoWorkLogProvider(workLogId).future);
     } on Exception {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('家事ログの取り消しに失敗しました'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('家事ログの取り消しに失敗しました')));
       }
     }
 
