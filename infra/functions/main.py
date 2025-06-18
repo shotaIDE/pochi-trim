@@ -55,7 +55,11 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
 
 @https_fn.on_call()
 def delete_house_work(req: https_fn.CallableRequest) -> Any:
-    """家事とその関連する家事ログを削除する関数"""
+    """家事とその関連する家事ログを削除する関数
+
+    トランザクションにおけるクエリ検索は Admin SDK でしか利用できないため、
+    クライアントではなくサーバーサイド functions を用意している。
+    """
     user_id = req.auth.uid
 
     if user_id is None:
