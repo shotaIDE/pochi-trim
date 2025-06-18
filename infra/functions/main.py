@@ -55,7 +55,11 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
 
 @https_fn.on_call()
 def delete_house_work(req: https_fn.CallableRequest) -> Any:
-    """家事とその関連する家事ログを削除する関数"""
+    """家事とその関連する家事ログを削除する関数
+
+    トランザクションにおけるクエリ検索は Admin SDK でしか利用できないため、
+    クライアントではなくサーバーサイド functions を用意している。
+    """
     user_id = req.auth.uid
 
     if user_id is None:
@@ -99,14 +103,15 @@ def delete_house_work(req: https_fn.CallableRequest) -> Any:
         @firestore.transactional
         def delete_house_work_transaction(transaction):
             house_ref = firestore_client.collection("houses").document(house_id)
-
-            # 1. 家事ドキュメントを削除
             house_work_ref = house_ref.collection("houseWorks").document(house_work_id)
-            transaction.delete(house_work_ref)
 
-            # 2. 関連する家事ログを全て検索して削除
+            # 読み込みは書き込み前に実行する（トランザクションの制約）
+            # `transaction.get()` は遅延評価されるため、`list()` で即座に読み込みを実行
             work_logs_query = house_work_ref.collection("workLogs").where("houseWorkId", "==", house_work_id)
-            work_log_docs = work_logs_query.get()
+            work_logs_stream = transaction.get(work_logs_query)
+            work_log_docs = list(work_logs_stream)
+
+            transaction.delete(house_work_ref)
 
             for work_log_doc in work_log_docs:
                 transaction.delete(work_log_doc.reference)
