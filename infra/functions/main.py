@@ -106,7 +106,7 @@ def delete_house_work(req: https_fn.CallableRequest) -> Any:
 
             # 2. 関連する家事ログを全て検索して削除
             work_logs_query = house_work_ref.collection("workLogs").where("houseWorkId", "==", house_work_id)
-            work_log_docs = work_logs_query.get()
+            work_log_docs = transaction.get(work_logs_query)
 
             for work_log_doc in work_log_docs:
                 transaction.delete(work_log_doc.reference)
