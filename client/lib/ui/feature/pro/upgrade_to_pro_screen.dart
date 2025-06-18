@@ -314,6 +314,16 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
             const SnackBar(content: Text('購入中にエラーが発生しました。しばらくしてから再度お試しください。')),
           );
       }
+
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('購入が完了しました')));
+
+      Navigator.of(context).pop();
     }
   }
 
