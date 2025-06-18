@@ -1,18 +1,14 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
-import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
-import 'package:pochi_trim/data/service/functions_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
-import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_presenter.g.dart';
@@ -26,20 +22,11 @@ class IsHouseWorkDeleting extends _$IsHouseWorkDeleting {
   ///
   /// 削除に失敗した場合は[DeleteHouseWorkException]をスローします。
   Future<void> deleteHouseWork(HouseWork houseWork) async {
-    final appSession = ref.read(unwrappedCurrentAppSessionProvider);
-
     state = true;
 
     try {
-      final String houseId;
-      switch (appSession) {
-        case AppSessionSignedIn(currentHouseId: final currentHouseId):
-          houseId = currentHouseId;
-        case AppSessionNotSignedIn():
-          throw NoHouseIdError();
-      }
-
-      await ref.read(deleteHouseWorkProvider(houseId, houseWork.id).future);
+      final repository = ref.read(houseWorkRepositoryProvider);
+      await repository.delete(houseWork.id);
     } finally {
       state = false;
     }
