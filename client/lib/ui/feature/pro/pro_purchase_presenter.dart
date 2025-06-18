@@ -2,7 +2,6 @@ import 'package:flutter/services.dart';
 import 'package:pochi_trim/data/model/purchasable.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/ui/feature/pro/purchase_exception.dart';
-import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -53,8 +52,6 @@ class CurrentPurchaseStatus extends _$CurrentPurchaseStatus {
       throw const PurchaseException.uncategorized();
     }
 
-    await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
-
     state = PurchaseStatus.none;
   }
 
@@ -81,8 +78,8 @@ class CurrentPurchaseStatus extends _$CurrentPurchaseStatus {
     }
 
     // Pro版のエンタイトルメントがアクティブかチェック
-    if (hasProEntitlement(customerInfo: customerInfo)) {
-      await ref.read(currentAppSessionProvider.notifier).upgradeToPro();
+    if (!hasProEntitlement(customerInfo: customerInfo)) {
+      throw const RestorePurchaseException.notFound();
     }
 
     state = PurchaseStatus.none;
