@@ -5,7 +5,6 @@ import 'package:pochi_trim/data/model/root_app_not_initialized.dart';
 import 'package:pochi_trim/data/service/app_info_service.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/error_report_service.dart';
-import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/remote_config_service.dart';
 import 'package:pochi_trim/ui/app_initial_route.dart';
@@ -82,32 +81,20 @@ class CurrentAppSession extends _$CurrentAppSession {
       PreferenceKey.currentHouseId,
     );
 
-    final isPro = await ref.read(isProUserProvider.future);
-
     // TODO(ide): houseId が null の場合の処理を追加する
-    return AppSession.signedIn(currentHouseId: houseId!, isPro: isPro);
+    return AppSession.signedIn(currentHouseId: houseId!);
   }
 
   Future<void> signIn({required String userId, required String houseId}) async {
-    final isPro = await ref.read(isProUserProvider.future);
-
-    state = AsyncValue.data(
-      AppSession.signedIn(currentHouseId: houseId, isPro: isPro),
-    );
+    state = AsyncValue.data(AppSession.signedIn(currentHouseId: houseId));
   }
 
   Future<void> signOut() async {
     state = AsyncValue.data(AppSession.notSignedIn());
   }
 
-  Future<void> upgradeToPro() async {
-    final currentAppSession = state.valueOrNull;
-
-    if (currentAppSession case AppSessionSignedIn()) {
-      final newState = currentAppSession.copyWith(isPro: true);
-      state = AsyncValue.data(newState);
-    }
-  }
+  // TODO(ide): 削除する
+  Future<void> upgradeToPro() async {}
 }
 
 @riverpod
