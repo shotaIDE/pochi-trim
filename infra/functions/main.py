@@ -108,6 +108,19 @@ def delete_house_work(req: https_fn.CallableRequest) -> Any:
             work_logs_query = house_work_ref.collection("workLogs").where("houseWorkId", "==", house_work_id)
             work_log_docs = transaction.get(work_logs_query)
 
+            # トランザクション内のdelete操作は500件が上限
+            # 家事ドキュメント1件 + 家事ログドキュメント数 <= 500
+            # 参考: https://firebase.google.com/docs/firestore/quotas?hl=ja#writes_and_transactions
+            total_deletes = 1 + len(work_log_docs)
+            if total_deletes > 500:
+                error_msg = f"Too many documents to delete in single transaction: {total_deletes} (max: 500)"
+                print(f"Delete limit exceeded for house work {house_work_id}: {error_msg}")
+
+                raise https_fn.HttpsError(
+                    code=https_fn.FunctionsErrorCode.INTERNAL,
+                    message="Failed to delete house work"
+                )
+
             for work_log_doc in work_log_docs:
                 transaction.delete(work_log_doc.reference)
 
