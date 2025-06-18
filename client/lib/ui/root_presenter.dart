@@ -92,9 +92,6 @@ class CurrentAppSession extends _$CurrentAppSession {
   Future<void> signOut() async {
     state = AsyncValue.data(AppSession.notSignedIn());
   }
-
-  // TODO(ide): 削除する
-  Future<void> upgradeToPro() async {}
 }
 
 @riverpod
