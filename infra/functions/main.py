@@ -103,14 +103,14 @@ def delete_house_work(req: https_fn.CallableRequest) -> Any:
         @firestore.transactional
         def delete_house_work_transaction(transaction):
             house_ref = firestore_client.collection("houses").document(house_id)
-
-            # 1. 家事ドキュメントを削除
             house_work_ref = house_ref.collection("houseWorks").document(house_work_id)
-            transaction.delete(house_work_ref)
 
-            # 2. 関連する家事ログを全て検索して削除
+            # 読み込みは書き込み前に実行する必要がある
             work_logs_query = house_work_ref.collection("workLogs").where("houseWorkId", "==", house_work_id)
             work_log_docs = transaction.get(work_logs_query)
+
+            transaction.delete(house_work_ref)
+
             for work_log_doc in work_log_docs:
                 transaction.delete(work_log_doc.reference)
 
