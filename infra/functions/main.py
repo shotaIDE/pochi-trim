@@ -108,7 +108,8 @@ def delete_house_work(req: https_fn.CallableRequest) -> Any:
             # 読み込みは書き込み前に実行する（トランザクションの制約）
             # `transaction.get()` は遅延評価されるため、`list()` で即座に読み込みを実行
             work_logs_query = house_work_ref.collection("workLogs").where("houseWorkId", "==", house_work_id)
-            work_log_docs = list(transaction.get(work_logs_query))
+            work_logs_stream = transaction.get(work_logs_query)
+            work_log_docs = list(work_logs_stream)
 
             transaction.delete(house_work_ref)
 
