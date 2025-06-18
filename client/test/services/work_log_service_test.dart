@@ -29,10 +29,7 @@ void main() {
       email: 'test@example.com',
       photoUrl: 'https://example.com/photo.jpg',
     );
-    final testAppSession = AppSession.signedIn(
-      currentHouseId: 'house-1',
-      isPro: false,
-    );
+    final testAppSession = AppSession.signedIn(currentHouseId: 'house-1');
 
     setUpAll(() {
       registerFallbackValue(
