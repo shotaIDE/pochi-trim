@@ -353,6 +353,8 @@ class _PurchasablesPanelState extends ConsumerState<_PurchasablesPanel> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('購入履歴の復元が完了しました。')));
+
+    Navigator.of(context).pop();
   }
 }
 
