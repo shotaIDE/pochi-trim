@@ -7,5 +7,7 @@ part 'debounce_work_log_exception.freezed.dart';
 class DebounceWorkLogException
     with _$DebounceWorkLogException
     implements Exception {
-  const factory DebounceWorkLogException() = _DebounceWorkLogException;
+  const factory DebounceWorkLogException({
+    required Duration restrictedDuration,
+  }) = _$DebounceWorkLogExceptionImpl;
 }

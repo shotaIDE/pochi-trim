@@ -16,13 +16,13 @@ part 'work_log_service.g.dart';
 
 @riverpod
 class DebounceManager extends _$DebounceManager {
-  /// デバウンス閾値（ミリ秒）
-  static const _debounceThresholdMilliseconds = 3000;
+  /// デバウンス閾値
+  static const debounceThresholdDuration = Duration(milliseconds: 3000);
 
   @override
   Map<String, DateTime> build() {
     // プロバイダーを3秒間維持
-    ref.cacheFor(const Duration(milliseconds: _debounceThresholdMilliseconds));
+    ref.cacheFor(debounceThresholdDuration);
 
     return <String, DateTime>{};
   }
@@ -33,7 +33,8 @@ class DebounceManager extends _$DebounceManager {
 
     if (lastRegistrationTime != null) {
       final timeDifference = currentTime.difference(lastRegistrationTime);
-      if (timeDifference.inMilliseconds < _debounceThresholdMilliseconds) {
+      if (timeDifference.inMilliseconds <
+          debounceThresholdDuration.inMilliseconds) {
         return false; // デバウンス期間内なので記録しない
       }
     }
@@ -46,7 +47,7 @@ class DebounceManager extends _$DebounceManager {
     state = {...state, houseWorkId: currentTime};
 
     // 記録時に再度3秒間維持
-    ref.cacheFor(const Duration(milliseconds: _debounceThresholdMilliseconds));
+    ref.cacheFor(debounceThresholdDuration);
   }
 }
 
@@ -102,7 +103,9 @@ class WorkLogService {
 
     if (!debounceManager.shouldRecordWorkLog(houseWorkId, now)) {
       // デバウンス期間内なので専用の例外をスローする
-      throw const DebounceWorkLogException();
+      throw const DebounceWorkLogException(
+        restrictedDuration: DebounceManager.debounceThresholdDuration,
+      );
     }
 
     final userProfile = await ref.read(currentUserProfileProvider.future);

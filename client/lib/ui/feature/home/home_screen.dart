@@ -170,13 +170,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _highlightWorkLogsTabItem();
 
       _showWorkLogRegisteredSnackBar(workLogId);
-    } on DebounceWorkLogException {
+    } on DebounceWorkLogException catch (e) {
       if (!mounted) {
         return;
       }
 
+      final secondsText = e.restrictedDuration.inSeconds;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('短時間での連続登録は制限されています。しばらく待ってから再度お試しください')),
+        SnackBar(
+          content: Text('短時間での連続登録は制限されています。$secondsText秒待ってから再度お試しください'),
+        ),
       );
     }
   }
@@ -204,13 +207,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
 
       _showWorkLogRegisteredSnackBar(workLogId);
-    } on DebounceWorkLogException {
+    } on DebounceWorkLogException catch (e) {
       if (!mounted) {
         return;
       }
 
+      final secondsText = e.restrictedDuration.inSeconds;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('短時間での連続登録は制限されています。しばらく待ってから再度お試しください')),
+        SnackBar(
+          content: Text('短時間での連続登録は制限されています。$secondsText秒待ってから再度お試しください'),
+        ),
       );
     }
   }
@@ -244,13 +250,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
 
       _showWorkLogRegisteredSnackBar(workLogId);
-    } on DebounceWorkLogException {
+    } on DebounceWorkLogException catch (e) {
       if (!mounted) {
         return;
       }
 
+      final secondsText = e.restrictedDuration.inSeconds;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('短時間での連続登録は制限されています。しばらく待ってから再度お試しください')),
+        SnackBar(
+          content: Text('短時間での連続登録は制限されています。$secondsText秒待ってから再度お試しください'),
+        ),
       );
     }
   }
