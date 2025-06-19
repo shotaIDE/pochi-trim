@@ -321,7 +321,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _showWorkLogRegisteredSnackBar(String workLogId) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('家事ログを記録しました'),
+        content: Row(
+          spacing: 12,
+          children: [
+            Icon(
+              Icons.check_circle,
+              color: Theme.of(context).colorScheme.surface,
+            ),
+            const Expanded(child: Text('家事ログを記録しました')),
+          ],
+        ),
         action: SnackBarAction(
           label: '取り消す',
           onPressed: () => _undoWorkLog(workLogId),
