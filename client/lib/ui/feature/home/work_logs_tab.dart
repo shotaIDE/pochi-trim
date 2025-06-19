@@ -112,12 +112,10 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     return SizeTransition(
       sizeFactor: animation,
       child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, -1),
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeOutQuart),
-        ),
+        position: Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero)
+            .animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutQuart),
+            ),
         child: FadeTransition(
           opacity: animation,
           child: WorkLogItem(
@@ -228,24 +226,28 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
+          spacing: 12,
           children: [
-            Icon(Icons.delete, color: Colors.white),
-            SizedBox(width: 12),
-            Expanded(child: Text('家事ログを削除しました')),
+            Icon(Icons.delete, color: Theme.of(context).colorScheme.surface),
+            const Expanded(child: Text('家事ログを削除しました。')),
           ],
         ),
-        action: SnackBarAction(
-          label: '元に戻す',
-          onPressed: () async {
-            final workLogDeletion = ref.read(workLogDeletionProvider);
-            await workLogDeletion.undoDelete();
-          },
-        ),
-        duration: const Duration(seconds: 5),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        action: SnackBarAction(label: '元に戻す', onPressed: _undoDelete),
       ),
     );
+  }
+
+  Future<void> _undoDelete() async {
+    final workLogDeletion = ref.read(workLogDeletionProvider);
+    await workLogDeletion.undoDelete();
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事ログを元に戻しました。')));
   }
 }
