@@ -225,7 +225,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _onLongPressHouseWork(HouseWork houseWork) async {
-    // TODO(ide): Haptic Feedbackが欲しい
     final action = await showModalBottomSheet<_HouseWorkAction>(
       context: context,
       builder: (BuildContext context) {
