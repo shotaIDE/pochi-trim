@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -89,7 +90,7 @@ class SettingsPresenter {
 
   /// 利用規約を開く
   Future<bool> openTermsOfService() async {
-    final url = Uri.parse('https://example.com/terms');
+    final url = Uri.parse(termsOfServiceUrl);
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
       return true;
@@ -99,7 +100,7 @@ class SettingsPresenter {
 
   /// プライバシーポリシーを開く
   Future<bool> openPrivacyPolicy() async {
-    final url = Uri.parse('https://example.com/privacy');
+    final url = Uri.parse(privacyPolicyUrl);
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
       return true;
