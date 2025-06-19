@@ -33,8 +33,7 @@ class DebounceManager extends _$DebounceManager {
 
     if (lastRegistrationTime != null) {
       final timeDifference = currentTime.difference(lastRegistrationTime);
-      if (timeDifference.inMilliseconds <
-          debounceThresholdDuration.inMilliseconds) {
+      if (timeDifference < debounceThresholdDuration) {
         return false; // デバウンス期間内なので記録しない
       }
     }
