@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pochi_trim/data/model/work_log.dart';
 
 part 'add_work_log_args.freezed.dart';
 
@@ -11,6 +12,15 @@ abstract class AddWorkLogArgs with _$AddWorkLogArgs {
   }) = _AddWorkLogArgs;
 
   const AddWorkLogArgs._();
+
+  /// WorkLogオブジェクトからAddWorkLogArgsを作成する
+  factory AddWorkLogArgs.fromWorkLog(WorkLog workLog) {
+    return AddWorkLogArgs(
+      houseWorkId: workLog.houseWorkId,
+      completedAt: workLog.completedAt,
+      completedBy: workLog.completedBy,
+    );
+  }
 
   // FirestoreへのデータマッピングのためのMap
   Map<String, dynamic> toFirestore() {

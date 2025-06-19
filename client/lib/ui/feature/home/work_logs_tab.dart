@@ -260,11 +260,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
   Future<void> _undoDelete(WorkLog workLog) async {
     final workLogRepository = ref.read(workLogRepositoryProvider);
 
-    final addWorkLogArgs = AddWorkLogArgs(
-      houseWorkId: workLog.houseWorkId,
-      completedAt: workLog.completedAt,
-      completedBy: workLog.completedBy,
-    );
+    final addWorkLogArgs = AddWorkLogArgs.fromWorkLog(workLog);
 
     try {
       await workLogRepository.add(addWorkLogArgs);
