@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/data/model/save_work_log_exception.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
@@ -227,6 +228,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
       if (!mounted) {
         return;
       }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('家事ログの削除に失敗しました。しばらくしてから再度お試しください')),
       );
@@ -259,10 +261,11 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
 
     try {
       await workLogRepository.save(workLog);
-    } on Exception {
+    } on SaveWorkLogException {
       if (!mounted) {
         return;
       }
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('家事ログの復元に失敗しました')));
