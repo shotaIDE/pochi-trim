@@ -69,23 +69,6 @@ class WorkLogRepository {
     }
   }
 
-  /// 既存の家事ログを更新する
-  ///
-  /// Throws:
-  ///   - [SaveWorkLogException] - Firebaseエラー、ネットワークエラー、
-  ///     権限エラーなどで更新に失敗した場合
-  Future<String> update(WorkLog workLog) async {
-    try {
-      final workLogsCollection = _getWorkLogsCollection();
-      await workLogsCollection.doc(workLog.id).update(workLog.toFirestore());
-      return workLog.id;
-    } on FirebaseException catch (e) {
-      _logger.warning('家事ログ更新エラー', e);
-
-      throw const SaveWorkLogException();
-    }
-  }
-
   /// 家事ログを全て取得する（過去1ヶ月のみ）
   Future<List<WorkLog>> getAllOnce() async {
     // 保持期間の開始日時を計算
