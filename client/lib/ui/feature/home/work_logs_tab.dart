@@ -260,7 +260,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     final workLogRepository = ref.read(workLogRepositoryProvider);
 
     try {
-      await workLogRepository.save(workLog);
+      await workLogRepository.update(workLog);
     } on SaveWorkLogException {
       if (!mounted) {
         return;

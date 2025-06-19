@@ -69,7 +69,7 @@ class WorkLogDeletionNotifier {
     final deletedWorkLog = ref.read(deletedWorkLogProvider);
     if (deletedWorkLog != null) {
       // ワークログを復元
-      await workLogRepository.save(deletedWorkLog);
+      await workLogRepository.update(deletedWorkLog);
 
       // 状態をリセット
       ref.read(deletedWorkLogProvider.notifier).state = null;

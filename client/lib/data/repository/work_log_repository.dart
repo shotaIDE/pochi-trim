@@ -6,6 +6,7 @@ import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/save_work_log_exception.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
+import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -51,26 +52,35 @@ class WorkLogRepository {
         .collection('workLogs');
   }
 
-  /// 家事ログを保存する
+  /// 新しい家事ログを追加する
   ///
   /// Throws:
   ///   - [SaveWorkLogException] - Firebaseエラー、ネットワークエラー、
   ///     権限エラーなどで保存に失敗した場合
-  Future<String> save(WorkLog workLog) async {
+  Future<String> add(AddWorkLogArgs args) async {
     try {
       final workLogsCollection = _getWorkLogsCollection();
-
-      if (workLog.id.isEmpty) {
-        // 新規家事ログの場合
-        final docRef = await workLogsCollection.add(workLog.toFirestore());
-        return docRef.id;
-      } else {
-        // 既存家事ログの更新
-        await workLogsCollection.doc(workLog.id).update(workLog.toFirestore());
-        return workLog.id;
-      }
+      final docRef = await workLogsCollection.add(args.toFirestore());
+      return docRef.id;
     } on FirebaseException catch (e) {
-      _logger.warning('家事ログ保存エラー', e);
+      _logger.warning('家事ログ追加エラー', e);
+
+      throw const SaveWorkLogException();
+    }
+  }
+
+  /// 既存の家事ログを更新する
+  ///
+  /// Throws:
+  ///   - [SaveWorkLogException] - Firebaseエラー、ネットワークエラー、
+  ///     権限エラーなどで更新に失敗した場合
+  Future<String> update(WorkLog workLog) async {
+    try {
+      final workLogsCollection = _getWorkLogsCollection();
+      await workLogsCollection.doc(workLog.id).update(workLog.toFirestore());
+      return workLog.id;
+    } on FirebaseException catch (e) {
+      _logger.warning('家事ログ更新エラー', e);
 
       throw const SaveWorkLogException();
     }
