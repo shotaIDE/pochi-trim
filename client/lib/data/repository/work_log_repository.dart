@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:pochi_trim/data/model/add_work_log_exception.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
+import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -50,38 +52,21 @@ class WorkLogRepository {
         .collection('workLogs');
   }
 
-  /// 家事ログを保存する
-  Future<String> save(WorkLog workLog) async {
-    final workLogsCollection = _getWorkLogsCollection();
-
-    if (workLog.id.isEmpty) {
-      // 新規家事ログの場合
-      final docRef = await workLogsCollection.add(workLog.toFirestore());
+  /// 新しい家事ログを追加する
+  ///
+  /// Throws:
+  ///   - [AddWorkLogException] - Firebaseエラー、ネットワークエラー、
+  ///     権限エラーなどで保存に失敗した場合
+  Future<String> add(AddWorkLogArgs args) async {
+    try {
+      final workLogsCollection = _getWorkLogsCollection();
+      final docRef = await workLogsCollection.add(args.toFirestore());
       return docRef.id;
-    } else {
-      // 既存家事ログの更新
-      await workLogsCollection.doc(workLog.id).update(workLog.toFirestore());
-      return workLog.id;
-    }
-  }
+    } on FirebaseException catch (e) {
+      _logger.warning('家事ログ追加エラー', e);
 
-  /// 複数の家事ログを一括保存する
-  Future<List<String>> saveAll(List<WorkLog> workLogs) async {
-    final ids = <String>[];
-    for (final workLog in workLogs) {
-      final id = await save(workLog);
-      ids.add(id);
+      throw const AddWorkLogException();
     }
-    return ids;
-  }
-
-  /// IDを指定して家事ログを取得する
-  Future<WorkLog?> getById(String id) async {
-    final doc = await _getWorkLogsCollection().doc(id).get();
-    if (doc.exists) {
-      return WorkLog.fromFirestore(doc);
-    }
-    return null;
   }
 
   /// 家事ログを全て取得する（過去1ヶ月のみ）
@@ -114,35 +99,6 @@ class WorkLogRepository {
 
       throw const DeleteWorkLogException();
     }
-  }
-
-  /// すべての家事ログを削除する
-  Future<void> deleteAll() async {
-    final querySnapshot = await _getWorkLogsCollection().get();
-    final batch = FirebaseFirestore.instance.batch();
-
-    for (final doc in querySnapshot.docs) {
-      batch.delete(doc.reference);
-    }
-
-    await batch.commit();
-  }
-
-  /// 特定の期間内の家事ログを取得する
-  Future<List<WorkLog>> getWorkLogsByDateRange(
-    DateTime startDate,
-    DateTime endDate,
-  ) async {
-    final querySnapshot = await _getWorkLogsCollection()
-        .where(
-          'completedAt',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
-        )
-        .where('completedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
-        .orderBy('completedAt', descending: true)
-        .get();
-
-    return querySnapshot.docs.map(WorkLog.fromFirestore).toList();
   }
 
   /// 完了済みの家事ログを取得するストリーム（過去1ヶ月のみ）
