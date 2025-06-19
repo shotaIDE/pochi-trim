@@ -9,3 +9,8 @@ const revenueCatProjectAppleApiKey = String.fromEnvironment(
 );
 
 const revenueCatProEntitlementId = 'pro';
+
+const termsOfServiceUrl =
+    'https://tricolor-fright-c89.notion.site/21735dfd37af80518ad0e7c394015588';
+const privacyPolicyUrl =
+    'https://tricolor-fright-c89.notion.site/1c635dfd37af8052b28be78ba38c9a70';
