@@ -323,7 +323,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       SnackBar(
         content: const Text('家事ログを記録しました'),
         action: SnackBarAction(
-          label: '取り消し',
+          label: '取り消す',
           onPressed: () => _undoWorkLog(workLogId),
         ),
       ),
