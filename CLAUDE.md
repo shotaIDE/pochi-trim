@@ -283,6 +283,7 @@ Navigator.of(context).push(SomeScreen.route);
 
 ### Unit testing
 
+- When modifying code, always run unit tests to ensure that all tests pass.
 - Use `mocktail` for mocks.
 - If you want to use the same dummy constants between test cases, define them at the beginning of the `group` function, the beginning of the `main` function, or in the `setUp` function to make them common.
 
