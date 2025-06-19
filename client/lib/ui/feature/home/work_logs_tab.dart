@@ -4,6 +4,7 @@ import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/save_work_log_exception.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
+import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_item.dart';
@@ -259,8 +260,14 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
   Future<void> _undoDelete(WorkLog workLog) async {
     final workLogRepository = ref.read(workLogRepositoryProvider);
 
+    final addWorkLogArgs = AddWorkLogArgs(
+      houseWorkId: workLog.houseWorkId,
+      completedAt: workLog.completedAt,
+      completedBy: workLog.completedBy,
+    );
+
     try {
-      await workLogRepository.update(workLog);
+      await workLogRepository.add(addWorkLogArgs);
     } on SaveWorkLogException {
       if (!mounted) {
         return;
