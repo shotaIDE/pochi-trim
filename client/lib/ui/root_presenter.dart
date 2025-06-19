@@ -81,7 +81,6 @@ class CurrentAppSession extends _$CurrentAppSession {
       PreferenceKey.currentHouseId,
     );
 
-    // TODO(ide): houseId が null の場合の処理を追加する
     return AppSession.signedIn(currentHouseId: houseId!);
   }
 

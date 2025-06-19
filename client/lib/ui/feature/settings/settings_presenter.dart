@@ -80,9 +80,7 @@ class SettingsPresenter {
   void shareApp() {
     SharePlus.instance.share(
       ShareParams(
-        text:
-            // TODO(ide): アプリのURLを取得する
-            '家事の可視化と削減アプリ「ぽちそぎ」を使ってみませんか？ ',
+        text: '家事の可視化と削減アプリ「ぽちそぎ」を使ってみませんか？ ',
         title: '家事の可視化と削減アプリ「ぽちそぎ」',
       ),
     );
