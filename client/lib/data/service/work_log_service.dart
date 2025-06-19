@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
+import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
@@ -100,8 +101,8 @@ class WorkLogService {
     final debounceManager = ref.read(debounceManagerProvider.notifier);
 
     if (!debounceManager.shouldRecordWorkLog(houseWorkId, now)) {
-      // デバウンス期間内なので記録しない
-      return null;
+      // デバウンス期間内なので専用の例外をスローする
+      throw const DebounceWorkLogException();
     }
 
     final userProfile = await ref.read(currentUserProfileProvider.future);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
@@ -150,78 +151,108 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
-    final workLogId = await ref.read(
-      onCompleteHouseWorkButtonTappedResultProvider(houseWork).future,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    if (workLogId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+    try {
+      final workLogId = await ref.read(
+        onCompleteHouseWorkButtonTappedResultProvider(houseWork).future,
       );
-      return;
+
+      if (!mounted) {
+        return;
+      }
+
+      if (workLogId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+        );
+        return;
+      }
+
+      _highlightWorkLogsTabItem();
+
+      _showWorkLogRegisteredSnackBar(workLogId);
+    } on DebounceWorkLogException {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('短時間での連続登録は制限されています。しばらく待ってから再度お試しください')),
+      );
     }
-
-    _highlightWorkLogsTabItem();
-
-    _showWorkLogRegisteredSnackBar(workLogId);
   }
 
   Future<void> _onDuplicateWorkLogButtonTap(
     WorkLogIncludedHouseWork workLogIncludedHouseWork,
   ) async {
-    final workLogId = await ref.read(
-      onDuplicateWorkLogButtonTappedResultProvider(
-        workLogIncludedHouseWork,
-      ).future,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    // TODO(ide): 共通化できる
-    if (workLogId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+    try {
+      final workLogId = await ref.read(
+        onDuplicateWorkLogButtonTappedResultProvider(
+          workLogIncludedHouseWork,
+        ).future,
       );
-      return;
-    }
 
-    _showWorkLogRegisteredSnackBar(workLogId);
+      if (!mounted) {
+        return;
+      }
+
+      // TODO(ide): 共通化できる
+      if (workLogId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+        );
+        return;
+      }
+
+      _showWorkLogRegisteredSnackBar(workLogId);
+    } on DebounceWorkLogException {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('短時間での連続登録は制限されています。しばらく待ってから再度お試しください')),
+      );
+    }
   }
 
   Future<void> _onQuickRegisterButtonPressed(HouseWork houseWork) async {
     final workLogService = ref.read(workLogServiceProvider);
     final systemService = ref.read(systemServiceProvider);
 
-    final workLogId = await workLogService.recordWorkLog(
-      houseWorkId: houseWork.id,
-      onRequestAccepted: systemService.doHapticFeedbackActionReceived,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    // TODO(ide): 共通化
-    if (workLogId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+    try {
+      final workLogId = await workLogService.recordWorkLog(
+        houseWorkId: houseWork.id,
+        onRequestAccepted: systemService.doHapticFeedbackActionReceived,
       );
-      return;
-    }
 
-    final selectedTab = ref.read(selectedTabProvider);
-    if (selectedTab == 0) {
-      // 家事タブが選択されている場合は、ログタブの方に家事の登録が完了したことを通知する
-      _highlightWorkLogsTabItem();
-    }
+      if (!mounted) {
+        return;
+      }
 
-    _showWorkLogRegisteredSnackBar(workLogId);
+      // TODO(ide): 共通化
+      if (workLogId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+        );
+        return;
+      }
+
+      final selectedTab = ref.read(selectedTabProvider);
+      if (selectedTab == 0) {
+        // 家事タブが選択されている場合は、ログタブの方に家事の登録が完了したことを通知する
+        _highlightWorkLogsTabItem();
+      }
+
+      _showWorkLogRegisteredSnackBar(workLogId);
+    } on DebounceWorkLogException {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('短時間での連続登録は制限されています。しばらく待ってから再度お試しください')),
+      );
+    }
   }
 
   Future<void> _onLongPressHouseWork(HouseWork houseWork) async {
