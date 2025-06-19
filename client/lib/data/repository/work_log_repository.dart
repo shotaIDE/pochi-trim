@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:pochi_trim/data/model/add_work_log_exception.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
-import 'package:pochi_trim/data/model/save_work_log_exception.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
@@ -55,7 +55,7 @@ class WorkLogRepository {
   /// 新しい家事ログを追加する
   ///
   /// Throws:
-  ///   - [SaveWorkLogException] - Firebaseエラー、ネットワークエラー、
+  ///   - [AddWorkLogException] - Firebaseエラー、ネットワークエラー、
   ///     権限エラーなどで保存に失敗した場合
   Future<String> add(AddWorkLogArgs args) async {
     try {
@@ -65,7 +65,7 @@ class WorkLogRepository {
     } on FirebaseException catch (e) {
       _logger.warning('家事ログ追加エラー', e);
 
-      throw const SaveWorkLogException();
+      throw const AddWorkLogException();
     }
   }
 

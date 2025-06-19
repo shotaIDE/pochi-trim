@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pochi_trim/data/model/add_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
-import 'package:pochi_trim/data/model/save_work_log_exception.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
@@ -264,7 +264,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
 
     try {
       await workLogRepository.add(addWorkLogArgs);
-    } on SaveWorkLogException {
+    } on AddWorkLogException {
       if (!mounted) {
         return;
       }
