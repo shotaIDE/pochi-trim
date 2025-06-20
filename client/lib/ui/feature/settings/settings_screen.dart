@@ -51,7 +51,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           return ListView(
             children: [
               const SectionHeader(title: 'ユーザー情報'),
-              _buildUserInfoTile(context, userProfile),
+              _buildUserInfoTile(userProfile),
               const Divider(),
               const SectionHeader(title: 'アプリについて'),
               const _PlanInfoPanel(),
@@ -78,7 +78,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildUserInfoTile(BuildContext context, UserProfile userProfile) {
+  Widget _buildUserInfoTile(UserProfile userProfile) {
     final String titleText;
     final VoidCallback? onTap;
     Widget leading;
