@@ -23,17 +23,28 @@ class _RootAppState extends ConsumerState<RootApp> {
   void initState() {
     super.initState();
 
-    ref.listenManual(updatedRemoteConfigKeysProvider, (_, next) {
-      next.maybeWhen(
-        data: (keys) {
-          // Remote Config の変更を監視し、次回 `RootApp` が生成された際に有効になるようにする。
-          // リスナー側が何も行わなくても、ライブラリは変更された値を保持する。
-          // https://firebase.google.com/docs/remote-config/loading#strategy_3_load_new_values_for_next_startup
-          debugPrint('Updated remote config keys: $keys');
-        },
-        orElse: () {},
-      );
-    });
+    ref
+      ..listenManual(updatedRemoteConfigKeysProvider, (_, next) {
+        next.maybeWhen(
+          data: (keys) {
+            // Remote Config の変更を監視し、次回 `RootApp` が生成された際に有効になるようにする。
+            // リスナー側が何も行わなくても、ライブラリは変更された値を保持する。
+            // https://firebase.google.com/docs/remote-config/loading#strategy_3_load_new_values_for_next_startup
+            debugPrint('Updated remote config keys: $keys');
+          },
+          orElse: () {},
+        );
+      })
+      ..listenManual(updatedUserIdProvider, (_, next) {
+        // ユーザーIDの変更を常に監視しておき、必要な処理が行われるようにする
+        next.maybeWhen(
+          data: (maybeUserId) {
+            final userId = maybeUserId ?? '(null)';
+            debugPrint('Updated user ID: $userId');
+          },
+          orElse: () {},
+        );
+      });
   }
 
   @override

@@ -1,5 +1,4 @@
-// TODO(ide): 本物の値に書き換える
-const appStoreId = '000000000';
+const appStoreId = '6746164058';
 
 const revenueCatProjectGoogleApiKey = String.fromEnvironment(
   'REVENUE_CAT_PROJECT_GOOGLE_API_KEY',
@@ -10,3 +9,8 @@ const revenueCatProjectAppleApiKey = String.fromEnvironment(
 );
 
 const revenueCatProEntitlementId = 'pro';
+
+const termsOfServiceUrl =
+    'https://tricolor-fright-c89.notion.site/21735dfd37af80518ad0e7c394015588';
+const privacyPolicyUrl =
+    'https://tricolor-fright-c89.notion.site/1c635dfd37af8052b28be78ba38c9a70';

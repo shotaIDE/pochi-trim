@@ -4,13 +4,40 @@ import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/model/root_app_not_initialized.dart';
 import 'package:pochi_trim/data/service/app_info_service.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
-import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
+import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/remote_config_service.dart';
 import 'package:pochi_trim/ui/app_initial_route.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'root_presenter.g.dart';
+
+@riverpod
+Future<String?> updatedUserId(Ref ref) async {
+  // currentUserProfileプロバイダーを監視し、ユーザーIDの設定/クリアを自動的に行う
+  final userProfileAsync = ref.watch(currentUserProfileProvider);
+
+  return await userProfileAsync.maybeWhen(
+    data: (userProfile) async {
+      final errorReportService = ref.read(errorReportServiceProvider);
+
+      if (userProfile == null) {
+        // ユーザーがサインアウトしている場合、CrashlyticsのユーザーIDをクリア
+        await errorReportService.clearUserId();
+        return null;
+      }
+
+      // ユーザーがサインインしている場合、CrashlyticsにユーザーIDを設定
+      await errorReportService.setUserId(userProfile.id);
+      return userProfile.id;
+    },
+    orElse: () {
+      return null;
+
+      // ローディング中やエラー時は何もしない
+    },
+  );
+}
 
 @riverpod
 Future<AppInitialRoute> appInitialRoute(Ref ref) async {
@@ -54,31 +81,15 @@ class CurrentAppSession extends _$CurrentAppSession {
       PreferenceKey.currentHouseId,
     );
 
-    final isPro = await ref.read(isProUserProvider.future);
-
-    // TODO(ide): houseId が null の場合の処理を追加する
-    return AppSession.signedIn(currentHouseId: houseId!, isPro: isPro);
+    return AppSession.signedIn(currentHouseId: houseId!);
   }
 
   Future<void> signIn({required String userId, required String houseId}) async {
-    final isPro = await ref.read(isProUserProvider.future);
-
-    state = AsyncValue.data(
-      AppSession.signedIn(currentHouseId: houseId, isPro: isPro),
-    );
+    state = AsyncValue.data(AppSession.signedIn(currentHouseId: houseId));
   }
 
   Future<void> signOut() async {
     state = AsyncValue.data(AppSession.notSignedIn());
-  }
-
-  Future<void> upgradeToPro() async {
-    final currentAppSession = state.valueOrNull;
-
-    if (currentAppSession case AppSessionSignedIn()) {
-      final newState = currentAppSession.copyWith(isPro: true);
-      state = AsyncValue.data(newState);
-    }
   }
 }
 

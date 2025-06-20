@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
-import 'package:pochi_trim/data/model/work_log.dart';
+import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
@@ -29,17 +29,13 @@ void main() {
       email: 'test@example.com',
       photoUrl: 'https://example.com/photo.jpg',
     );
-    final testAppSession = AppSession.signedIn(
-      currentHouseId: 'house-1',
-      isPro: false,
-    );
+    final testAppSession = AppSession.signedIn(currentHouseId: 'house-1');
 
     setUpAll(() {
       registerFallbackValue(
-        WorkLog(
-          id: 'fallback-id',
+        AddWorkLogArgs(
           houseWorkId: 'fallback-house-work-id',
-          completedAt: DateTime.now(),
+          completedAt: DateTime(2023),
           completedBy: 'fallback-user',
         ),
       );
@@ -59,7 +55,7 @@ void main() {
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
-        () => mockWorkLogRepository.save(any()),
+        () => mockWorkLogRepository.add(any()),
       ).thenAnswer((_) async => 'test-id');
       final container = ProviderContainer(
         overrides: [
@@ -82,8 +78,8 @@ void main() {
       );
 
       // 検証
-      expect(result, isTrue);
-      verify(() => mockWorkLogRepository.save(any())).called(1);
+      expect(result, 'test-id'); // WorkLogIDが返される
+      verify(() => mockWorkLogRepository.add(any())).called(1);
     });
 
     test('3秒以内の連続登録は拒否されること', () async {
@@ -95,7 +91,7 @@ void main() {
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
       when(
-        () => mockWorkLogRepository.save(any()),
+        () => mockWorkLogRepository.add(any()),
       ).thenAnswer((_) async => 'test-id');
       final container = ProviderContainer(
         overrides: [
@@ -124,9 +120,9 @@ void main() {
       );
 
       // 検証
-      expect(firstResult, isTrue);
-      expect(secondResult, isFalse); // 連打防止により拒否される
-      verify(() => mockWorkLogRepository.save(any())).called(1); // 1回のみ保存される
+      expect(firstResult, 'test-id');
+      expect(secondResult, isNull); // 連打防止により拒否される
+      verify(() => mockWorkLogRepository.add(any())).called(1); // 1回のみ保存される
     });
 
     test('3秒後の登録は許可されること', () async {
@@ -138,7 +134,7 @@ void main() {
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
       when(
-        () => mockWorkLogRepository.save(any()),
+        () => mockWorkLogRepository.add(any()),
       ).thenAnswer((_) async => 'test-id');
       final container = ProviderContainer(
         overrides: [
@@ -167,9 +163,9 @@ void main() {
       );
 
       // 検証
-      expect(firstResult, isTrue);
-      expect(secondResult, isTrue); // 3秒経過しているので許可される
-      verify(() => mockWorkLogRepository.save(any())).called(2); // 2回とも保存される
+      expect(firstResult, 'test-id');
+      expect(secondResult, 'test-id'); // 3秒経過しているので許可される
+      verify(() => mockWorkLogRepository.add(any())).called(2); // 2回とも保存される
     });
 
     test('異なる家事の連続登録は許可されること', () async {
@@ -181,7 +177,7 @@ void main() {
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
-        () => mockWorkLogRepository.save(any()),
+        () => mockWorkLogRepository.add(any()),
       ).thenAnswer((_) async => 'test-id');
       final container = ProviderContainer(
         overrides: [
@@ -207,9 +203,9 @@ void main() {
       );
 
       // 検証
-      expect(result1, isTrue);
-      expect(result2, isTrue); // 異なる家事なので許可される
-      verify(() => mockWorkLogRepository.save(any())).called(2); // 2回とも保存される
+      expect(result1, 'test-id');
+      expect(result2, 'test-id'); // 異なる家事なので許可される
+      verify(() => mockWorkLogRepository.add(any())).called(2); // 2回とも保存される
     });
 
     test('ユーザープロファイルがnullの場合は登録が失敗すること', () async {
@@ -240,8 +236,8 @@ void main() {
       );
 
       // 検証
-      expect(result, isFalse);
-      verifyNever(() => mockWorkLogRepository.save(any())); // 保存は呼ばれない
+      expect(result, isNull);
+      verifyNever(() => mockWorkLogRepository.add(any())); // 保存は呼ばれない
     });
 
     test('リポジトリで例外が発生した場合は登録が失敗すること', () async {
@@ -252,7 +248,7 @@ void main() {
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       when(
-        () => mockWorkLogRepository.save(any()),
+        () => mockWorkLogRepository.add(any()),
       ).thenThrow(Exception('DB Error'));
       final container = ProviderContainer(
         overrides: [
@@ -275,8 +271,8 @@ void main() {
       );
 
       // 検証
-      expect(result, isFalse);
-      verify(() => mockWorkLogRepository.save(any())).called(1);
+      expect(result, isNull);
+      verify(() => mockWorkLogRepository.add(any())).called(1);
     });
 
     test('2999msの連続登録は拒否され、3000msの登録は許可されること', () async {
@@ -289,7 +285,7 @@ void main() {
       // モックの設定
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(firstTime);
       when(
-        () => mockWorkLogRepository.save(any()),
+        () => mockWorkLogRepository.add(any()),
       ).thenAnswer((_) async => 'test-id');
       final container = ProviderContainer(
         overrides: [
@@ -324,11 +320,11 @@ void main() {
       );
 
       // 検証
-      expect(firstResult, isTrue);
-      expect(secondResult, isFalse); // 2999msなので拒否される
-      expect(thirdResult, isTrue); // 3000msなので許可される
+      expect(firstResult, 'test-id');
+      expect(secondResult, isNull); // 2999msなので拒否される
+      expect(thirdResult, 'test-id'); // 3000msなので許可される
       verify(
-        () => mockWorkLogRepository.save(any()),
+        () => mockWorkLogRepository.add(any()),
       ).called(2); // 1回目と3回目のみ保存される
     });
   });

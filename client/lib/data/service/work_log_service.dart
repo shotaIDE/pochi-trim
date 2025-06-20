@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
-import 'package:pochi_trim/data/model/work_log.dart';
+import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/riverpod_extension.dart';
@@ -86,7 +86,7 @@ class WorkLogService {
   final SystemService systemService;
   final Ref ref;
 
-  Future<bool> recordWorkLog({
+  Future<String?> recordWorkLog({
     required String houseWorkId,
 
     /// 家事ログ登録のリクエストが承認されたときに呼び出されるコールバック
@@ -101,12 +101,12 @@ class WorkLogService {
 
     if (!debounceManager.shouldRecordWorkLog(houseWorkId, now)) {
       // デバウンス期間内なので記録しない
-      return false;
+      return null;
     }
 
     final userProfile = await ref.read(currentUserProfileProvider.future);
     if (userProfile == null) {
-      return false;
+      return null;
     }
 
     onRequestAccepted?.call();
@@ -114,19 +114,17 @@ class WorkLogService {
     // デバウンス管理に登録時刻を記録
     debounceManager.recordRegistration(houseWorkId, now);
 
-    final workLog = WorkLog(
-      id: '', // 新規登録のため空文字列
+    final addWorkLogArgs = AddWorkLogArgs(
       houseWorkId: houseWorkId,
       completedAt: now,
       completedBy: userProfile.id,
     );
 
     try {
-      await workLogRepository.save(workLog);
+      final workLogId = await workLogRepository.add(addWorkLogArgs);
+      return workLogId;
     } on Exception {
-      return false;
+      return null;
     }
-
-    return true;
   }
 }

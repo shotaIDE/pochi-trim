@@ -91,11 +91,11 @@ Implement processes with similar functions in the same flow. Check whether a sim
 
 ### Maintain sufficient comments
 
-Add comments only when necessary to clarify the intent or purpose of the code. Avoid comments if the content of the code is clear.
+If you add code comments, finally check their sufficiency from the following perspective. If they are excessive or insufficient, delete or add them.
 
-Describe in detail, including the reasons, particularly for important points and pitfalls.
-
-Write comments in Japanese.
+- Add comments only when necessary to clarify the intent or purpose of the code. Avoid comments if the content of the code is clear.
+- Describe in detail any particularly important points to note or pitfalls, including the reasons for them.
+- Comments should be written in Japanese.
 
 ### Maintain readability of naming
 
@@ -106,6 +106,10 @@ Use meaningful names even for temporary variables.
 Use consistent naming patterns for variables that handle the same type of data.
 
 ## Rules for Flutter
+
+### Defining a Class
+
+When implementing a class, use the `const` constructor whenever you can make the class immutable.
 
 ### Defining the domain model
 
@@ -151,6 +155,20 @@ Future<String> currentUser(Ref ref) async {
 ### Handle errors properly
 
 Catch asynchronous processing errors properly and notify the user.
+
+Instead of returning a Boolean value or a generic exception, use a custom exception class to represent a specific error condition. If you don't need detailed error information, define a simple exception class that has no member variables.
+
+Example:
+
+```dart
+// Definition
+class DeleteWorkLogException implements Exception {
+  const DeleteWorkLogException();
+}
+
+// Usage
+throw const DeleteWorkLogException();
+```
 
 ### Build UI properly
 
@@ -267,6 +285,10 @@ Navigator.of(context).push(SomeScreen.route);
 
 - Use `mocktail` for mocks.
 - If you want to use the same dummy constants between test cases, define them at the beginning of the `group` function, the beginning of the `main` function, or in the `setUp` function to make them common.
+
+### Operation
+
+- Implement a process to send a report via Crashlytics if an exception or error that was not anticipated during implementation occurs at runtime.
 
 ## Troubleshooting
 

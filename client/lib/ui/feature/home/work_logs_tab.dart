@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pochi_trim/data/model/add_work_log_exception.dart';
+import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/data/model/work_log.dart';
+import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
+import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_item.dart';
-import 'package:pochi_trim/ui/feature/home/work_log_provider.dart';
 import 'package:pochi_trim/ui/feature/home/work_logs_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -112,12 +116,10 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     return SizeTransition(
       sizeFactor: animation,
       child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, -1),
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeOutQuart),
-        ),
+        position: Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero)
+            .animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutQuart),
+            ),
         child: FadeTransition(
           opacity: animation,
           child: WorkLogItem(
@@ -218,9 +220,21 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
   Future<void> _onDelete(
     WorkLogIncludedHouseWork workLogIncludedHouseWork,
   ) async {
-    final workLogDeletion = ref.read(workLogDeletionProvider);
+    final workLogRepository = ref.read(workLogRepositoryProvider);
+    final workLog = workLogIncludedHouseWork.toWorkLog();
 
-    await workLogDeletion.deleteWorkLog(workLogIncludedHouseWork.toWorkLog());
+    try {
+      await workLogRepository.delete(workLog.id);
+    } on DeleteWorkLogException {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事ログの削除に失敗しました。しばらくしてから再度お試しください')),
+      );
+      return;
+    }
 
     if (!mounted) {
       return;
@@ -228,24 +242,45 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
+          spacing: 12,
           children: [
-            Icon(Icons.delete, color: Colors.white),
-            SizedBox(width: 12),
-            Expanded(child: Text('家事ログを削除しました')),
+            Icon(Icons.delete, color: Theme.of(context).colorScheme.surface),
+            const Expanded(child: Text('家事ログを削除しました。')),
           ],
         ),
         action: SnackBarAction(
           label: '元に戻す',
-          onPressed: () async {
-            final workLogDeletion = ref.read(workLogDeletionProvider);
-            await workLogDeletion.undoDelete();
-          },
+          onPressed: () => _undoDelete(workLog),
         ),
-        duration: const Duration(seconds: 5),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
+  }
+
+  Future<void> _undoDelete(WorkLog workLog) async {
+    final workLogRepository = ref.read(workLogRepositoryProvider);
+
+    final addWorkLogArgs = AddWorkLogArgs.fromWorkLog(workLog);
+
+    try {
+      await workLogRepository.add(addWorkLogArgs);
+    } on AddWorkLogException {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('家事ログの復元に失敗しました')));
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事ログを元に戻しました。')));
   }
 }

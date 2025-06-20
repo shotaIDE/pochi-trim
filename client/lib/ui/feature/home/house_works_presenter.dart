@@ -12,10 +12,3 @@ Stream<List<HouseWork>> houseWorks(Ref ref) {
 
   return houseWorkRepository.getAll();
 }
-
-@riverpod
-Future<bool> deleteHouseWork(Ref ref, String houseWorkId) {
-  final houseWorkRepository = ref.read(houseWorkRepositoryProvider);
-
-  return houseWorkRepository.delete(houseWorkId);
-}

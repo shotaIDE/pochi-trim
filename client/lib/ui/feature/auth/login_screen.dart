@@ -25,32 +25,56 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
+    final loginStatus = ref.watch(currentLoginStatusProvider);
+    final isLoading = loginStatus != LoginStatus.none;
+
+    const continueWithoutAccountText = Text('アカウントを利用せず続ける');
+
     final startWithGoogleButton = ElevatedButton.icon(
-      onPressed: _startWithGoogle,
+      onPressed: isLoading ? null : _startWithGoogle,
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
-      icon: const Icon(FontAwesomeIcons.google),
+      icon: loginStatus == LoginStatus.signingInWithGoogle
+          ? const _LoadingIndicatorReplacingButtonIcon(
+              semanticsLabel: 'Googleでログインしています',
+            )
+          : const Icon(FontAwesomeIcons.google),
       label: const Text('Googleで続ける'),
     );
 
     final startWithAppleButton = ElevatedButton.icon(
-      onPressed: _startWithApple,
+      onPressed: isLoading ? null : _startWithApple,
       style: ElevatedButton.styleFrom(
         backgroundColor: signInWithAppleBackgroundColor(context),
         foregroundColor: signInWithAppleForegroundColor(context),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
-      icon: const Icon(FontAwesomeIcons.apple),
+      icon: loginStatus == LoginStatus.signingInWithApple
+          ? const _LoadingIndicatorReplacingButtonIcon(
+              semanticsLabel: 'Appleでログインしています',
+            )
+          : const Icon(FontAwesomeIcons.apple),
       label: const Text('Appleで続ける'),
     );
 
     final continueWithoutAccountButton = TextButton(
-      onPressed: _startWithoutAccount,
+      onPressed: isLoading ? null : _startWithoutAccount,
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
       ),
-      child: const Text('アカウントを利用せず続ける'),
+      child: loginStatus == LoginStatus.signingInAnonymously
+          ? const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _LoadingIndicatorReplacingButtonIcon(
+                  semanticsLabel: 'ゲストユーザーとしてログインしています',
+                ),
+                SizedBox(width: 8),
+                continueWithoutAccountText,
+              ],
+            )
+          : continueWithoutAccountText,
     );
 
     final children = <Widget>[
@@ -83,7 +107,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _startWithGoogle() async {
     try {
-      await ref.read(startResultProvider.notifier).startWithGoogle();
+      await ref.read(currentLoginStatusProvider.notifier).startWithGoogle();
     } on SignInWithGoogleException catch (error) {
       if (!mounted) {
         return;
@@ -103,7 +127,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _startWithApple() async {
     try {
-      await ref.read(startResultProvider.notifier).startWithApple();
+      await ref.read(currentLoginStatusProvider.notifier).startWithApple();
     } on SignInWithAppleException catch (error) {
       if (!mounted) {
         return;
@@ -122,9 +146,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _startWithoutAccount() async {
-    await ref.read(startResultProvider.notifier).startWithoutAccount();
+    await ref.read(currentLoginStatusProvider.notifier).startWithoutAccount();
 
     // ホーム画面への遷移は RootApp で自動で行われる
+  }
+}
+
+class _LoadingIndicatorReplacingButtonIcon extends StatelessWidget {
+  const _LoadingIndicatorReplacingButtonIcon({required this.semanticsLabel});
+
+  final String semanticsLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 16,
+      height: 16,
+      child: CircularProgressIndicator(
+        strokeWidth: 2,
+        semanticsLabel: semanticsLabel,
+      ),
+    );
   }
 }
 
