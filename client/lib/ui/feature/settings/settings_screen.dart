@@ -80,36 +80,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildUserInfoTile(BuildContext context, UserProfile userProfile) {
     final String titleText;
-    final Widget? subtitle;
     final VoidCallback? onTap;
     Widget leading;
 
     switch (userProfile) {
       case UserProfileWithGoogleAccount(
         displayName: final displayName,
-        email: final email,
         photoUrl: final photoUrl,
       ):
         leading = photoUrl != null
             ? CircleAvatar(backgroundImage: NetworkImage(photoUrl), radius: 20)
             : const Icon(Icons.person);
         titleText = displayName ?? '名前未設定';
-        subtitle = _buildUserInfoSubtitle(email, userProfile.id);
         onTap = null;
 
-      case UserProfileWithAppleAccount(
-        displayName: final displayName,
-        email: final email,
-      ):
+      case UserProfileWithAppleAccount(displayName: final displayName):
         leading = const Icon(FontAwesomeIcons.apple);
         titleText = displayName ?? '名前未設定';
-        subtitle = _buildUserInfoSubtitle(email, userProfile.id);
         onTap = null;
 
       case UserProfileAnonymous():
         leading = const Icon(Icons.person);
         titleText = 'ゲストユーザー';
-        subtitle = _buildUserInfoSubtitle(null, userProfile.id);
         onTap = () => _showAnonymousUserInfoDialog(context);
     }
 
@@ -118,29 +110,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       child: ListTile(
         leading: leading,
         title: Text(titleText),
-        subtitle: subtitle,
+        subtitle: Text(
+          'ユーザーID: ${userProfile.id}',
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
+        ),
         onTap: onTap,
       ),
-    );
-  }
-
-  Widget _buildUserInfoSubtitle(String? email, String userId) {
-    final children = <Widget>[];
-
-    if (email != null) {
-      children.add(Text(email));
-    }
-
-    children.add(
-      Text(
-        'ユーザーID: $userId',
-        style: const TextStyle(fontSize: 12, color: Colors.grey),
-      ),
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children,
     );
   }
 
