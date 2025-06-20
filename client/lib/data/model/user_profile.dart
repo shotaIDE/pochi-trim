@@ -8,14 +8,12 @@ sealed class UserProfile with _$UserProfile {
   const factory UserProfile.withGoogleAccount({
     required String id,
     required String? displayName,
-    required String? email,
     required String? photoUrl,
   }) = UserProfileWithGoogleAccount;
 
   const factory UserProfile.withAppleAccount({
     required String id,
     required String? displayName,
-    required String? email,
   }) = UserProfileWithAppleAccount;
 
   const factory UserProfile.anonymous({required String id}) =
@@ -38,14 +36,12 @@ sealed class UserProfile with _$UserProfile {
         return UserProfile.withGoogleAccount(
           id: user.uid,
           displayName: user.displayName,
-          email: user.email,
           photoUrl: user.photoURL,
         );
       case 'apple.com':
         return UserProfile.withAppleAccount(
           id: user.uid,
           displayName: user.displayName,
-          email: user.email,
         );
       default:
         throw UnsupportedProviderError(providerData.providerId);

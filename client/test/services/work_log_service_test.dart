@@ -26,7 +26,6 @@ void main() {
     const testUserProfile = UserProfile.withGoogleAccount(
       id: 'user-1',
       displayName: 'Test User',
-      email: 'test@example.com',
       photoUrl: 'https://example.com/photo.jpg',
     );
     final testAppSession = AppSession.signedIn(currentHouseId: 'house-1');
