@@ -105,36 +105,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         onTap = () => _showAnonymousUserInfoDialog(context);
     }
 
-    return GestureDetector(
-      onLongPress: () => _copyUserIdToClipboard(context, userProfile.id),
-      child: ListTile(
-        leading: leading,
-        title: Text(titleText),
-        subtitle: Text(
-          'ユーザーID: ${userProfile.id}',
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
-        onTap: onTap,
+    return ListTile(
+      leading: leading,
+      title: Text(titleText),
+      subtitle: Text(
+        'ユーザーID: ${userProfile.id}',
+        style: const TextStyle(fontSize: 12, color: Colors.grey),
       ),
+      onTap: onTap,
+      onLongPress: () => _copyUserIdToClipboard(userProfile.id),
     );
   }
 
-  Future<void> _copyUserIdToClipboard(
-    BuildContext context,
-    String userId,
-  ) async {
+  Future<void> _copyUserIdToClipboard(String userId) async {
     await Clipboard.setData(ClipboardData(text: userId));
 
-    if (!context.mounted) {
+    if (!mounted) {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('ユーザーIDをコピーしました'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('ユーザーIDをコピーしました')));
   }
 
   Widget _buildShareAppTile(BuildContext context) {
