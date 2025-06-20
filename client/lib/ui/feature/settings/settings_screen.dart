@@ -134,10 +134,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     children.add(
       Text(
         'ユーザーID: $userId',
-        style: const TextStyle(
-          fontSize: 12,
-          color: Colors.grey,
-        ),
+        style: const TextStyle(fontSize: 12, color: Colors.grey),
       ),
     );
 
@@ -147,7 +144,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Future<void> _copyUserIdToClipboard(BuildContext context, String userId) async {
+  Future<void> _copyUserIdToClipboard(
+    BuildContext context,
+    String userId,
+  ) async {
     await Clipboard.setData(ClipboardData(text: userId));
 
     if (!context.mounted) {
