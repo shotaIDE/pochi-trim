@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
+import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
@@ -76,28 +77,57 @@ Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
 Future<String?> onCompleteHouseWorkButtonTappedResult(
   Ref ref,
   HouseWork houseWork,
-) {
+) async {
   final workLogService = ref.read(workLogServiceProvider);
   final systemService = ref.read(systemServiceProvider);
 
-  return workLogService.recordWorkLog(
-    houseWorkId: houseWork.id,
-    onRequestAccepted: systemService.doHapticFeedbackActionReceived,
-  );
+  try {
+    return await workLogService.recordWorkLog(
+      houseWorkId: houseWork.id,
+      onRequestAccepted: systemService.doHapticFeedbackActionReceived,
+    );
+  } on DebounceWorkLogException {
+    await systemService.doHapticFeedbackActionRejected();
+    rethrow;
+  }
 }
 
 @riverpod
 Future<String?> onDuplicateWorkLogButtonTappedResult(
   Ref ref,
   WorkLogIncludedHouseWork workLogIncludedHouseWork,
-) {
+) async {
   final workLogService = ref.read(workLogServiceProvider);
   final systemService = ref.read(systemServiceProvider);
 
-  return workLogService.recordWorkLog(
-    houseWorkId: workLogIncludedHouseWork.houseWork.id,
-    onRequestAccepted: systemService.doHapticFeedbackActionReceived,
-  );
+  try {
+    return await workLogService.recordWorkLog(
+      houseWorkId: workLogIncludedHouseWork.houseWork.id,
+      onRequestAccepted: systemService.doHapticFeedbackActionReceived,
+    );
+  } on DebounceWorkLogException {
+    await systemService.doHapticFeedbackActionRejected();
+    rethrow;
+  }
+}
+
+@riverpod
+Future<String?> onQuickRegisterButtonPressedResult(
+  Ref ref,
+  HouseWork houseWork,
+) async {
+  final workLogService = ref.read(workLogServiceProvider);
+  final systemService = ref.read(systemServiceProvider);
+
+  try {
+    return await workLogService.recordWorkLog(
+      houseWorkId: houseWork.id,
+      onRequestAccepted: systemService.doHapticFeedbackActionReceived,
+    );
+  } on DebounceWorkLogException {
+    await systemService.doHapticFeedbackActionRejected();
+    rethrow;
+  }
 }
 
 @riverpod

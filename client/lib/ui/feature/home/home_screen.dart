@@ -4,8 +4,6 @@ import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
-import 'package:pochi_trim/data/service/system_service.dart';
-import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_screen.dart';
 import 'package:pochi_trim/ui/feature/home/home_presenter.dart';
@@ -171,11 +169,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       _showWorkLogRegisteredSnackBar(workLogId);
     } on DebounceWorkLogException {
-      if (!mounted) {
-        return;
-      }
-
-      await ref.read(systemServiceProvider).doHapticFeedbackActionRejected();
+      // エラーメッセージは表示しない
     }
   }
 
@@ -203,22 +197,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       _showWorkLogRegisteredSnackBar(workLogId);
     } on DebounceWorkLogException {
-      if (!mounted) {
-        return;
-      }
-
-      await ref.read(systemServiceProvider).doHapticFeedbackActionRejected();
+      // エラーメッセージは表示しない
     }
   }
 
   Future<void> _onQuickRegisterButtonPressed(HouseWork houseWork) async {
-    final workLogService = ref.read(workLogServiceProvider);
-    final systemService = ref.read(systemServiceProvider);
-
     try {
-      final workLogId = await workLogService.recordWorkLog(
-        houseWorkId: houseWork.id,
-        onRequestAccepted: systemService.doHapticFeedbackActionReceived,
+      final workLogId = await ref.read(
+        onQuickRegisterButtonPressedResultProvider(houseWork).future,
       );
 
       if (!mounted) {
@@ -241,11 +227,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       _showWorkLogRegisteredSnackBar(workLogId);
     } on DebounceWorkLogException {
-      if (!mounted) {
-        return;
-      }
-
-      await ref.read(systemServiceProvider).doHapticFeedbackActionRejected();
+      // エラーメッセージは表示しない
     }
   }
 
