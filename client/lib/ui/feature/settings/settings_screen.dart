@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:in_app_review/in_app_review.dart';
@@ -50,7 +51,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           return ListView(
             children: [
               const SectionHeader(title: 'ユーザー情報'),
-              _buildUserInfoTile(context, userProfile),
+              _buildUserInfoTile(userProfile),
               const Divider(),
               const SectionHeader(title: 'アプリについて'),
               const _PlanInfoPanel(),
@@ -77,47 +78,55 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildUserInfoTile(BuildContext context, UserProfile userProfile) {
+  Widget _buildUserInfoTile(UserProfile userProfile) {
     final String titleText;
-    final Widget? subtitle;
     final VoidCallback? onTap;
     Widget leading;
 
     switch (userProfile) {
       case UserProfileWithGoogleAccount(
         displayName: final displayName,
-        email: final email,
         photoUrl: final photoUrl,
       ):
         leading = photoUrl != null
             ? CircleAvatar(backgroundImage: NetworkImage(photoUrl), radius: 20)
             : const Icon(Icons.person);
         titleText = displayName ?? '名前未設定';
-        subtitle = email != null ? Text(email) : null;
         onTap = null;
 
-      case UserProfileWithAppleAccount(
-        displayName: final displayName,
-        email: final email,
-      ):
+      case UserProfileWithAppleAccount(displayName: final displayName):
         leading = const Icon(FontAwesomeIcons.apple);
         titleText = displayName ?? '名前未設定';
-        subtitle = email != null ? Text(email) : null;
         onTap = null;
 
       case UserProfileAnonymous():
         leading = const Icon(Icons.person);
         titleText = 'ゲストユーザー';
-        subtitle = null;
         onTap = () => _showAnonymousUserInfoDialog(context);
     }
 
     return ListTile(
       leading: leading,
       title: Text(titleText),
-      subtitle: subtitle,
+      subtitle: Text(
+        'ユーザーID: ${userProfile.id}',
+        style: const TextStyle(fontSize: 12, color: Colors.grey),
+      ),
       onTap: onTap,
+      onLongPress: () => _copyUserIdToClipboard(userProfile.id),
     );
+  }
+
+  Future<void> _copyUserIdToClipboard(String userId) async {
+    await Clipboard.setData(ClipboardData(text: userId));
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('ユーザーIDをコピーしました')));
   }
 
   Widget _buildShareAppTile(BuildContext context) {
