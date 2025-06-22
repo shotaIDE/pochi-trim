@@ -29,9 +29,9 @@ class SystemService {
     // パターン: 短い振動 → 休止 → 短い振動 → 休止 → 長い振動
     // `vibration` ライブラリが以下のようなパターンを表現するために適切だが、
     // ライブラリが SPM 対応しておらずメンテナンス性の懸念があるため利用していない。
-    await HapticFeedback.heavyImpact();
+    await HapticFeedback.mediumImpact();
     await Future<void>.delayed(const Duration(milliseconds: 100));
-    await HapticFeedback.heavyImpact();
+    await HapticFeedback.mediumImpact();
     await Future<void>.delayed(const Duration(milliseconds: 100));
     await HapticFeedback.heavyImpact();
   }
