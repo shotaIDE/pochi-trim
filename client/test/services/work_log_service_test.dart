@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
+import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
@@ -114,13 +115,13 @@ void main() {
 
       // 2回目の登録（1.5秒後）
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
-      final secondResult = await workLogService.recordWorkLog(
-        houseWorkId: houseWorkId,
-      );
 
       // 検証
       expect(firstResult, 'test-id');
-      expect(secondResult, isNull); // 連打防止により拒否される
+      expect(
+        () => workLogService.recordWorkLog(houseWorkId: houseWorkId),
+        throwsA(isA<DebounceWorkLogException>()),
+      ); // 連打防止により例外がスローされる
       verify(() => mockWorkLogRepository.add(any())).called(1); // 1回のみ保存される
     });
 
@@ -306,11 +307,12 @@ void main() {
         houseWorkId: houseWorkId,
       );
 
-      // 2回目の登録（2999ms後）
+      // 2回目の登録（2999ms後）- 例外がスローされることを検証
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(secondTime);
-      final secondResult = await workLogService.recordWorkLog(
-        houseWorkId: houseWorkId,
-      );
+      expect(
+        () => workLogService.recordWorkLog(houseWorkId: houseWorkId),
+        throwsA(isA<DebounceWorkLogException>()),
+      ); // 2999msなので例外がスローされる
 
       // 3回目の登録（3000ms後）
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(thirdTime);
@@ -320,7 +322,6 @@ void main() {
 
       // 検証
       expect(firstResult, 'test-id');
-      expect(secondResult, isNull); // 2999msなので拒否される
       expect(thirdResult, 'test-id'); // 3000msなので許可される
       verify(
         () => mockWorkLogRepository.add(any()),
