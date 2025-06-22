@@ -6,13 +6,10 @@ PODS:
   - PurchasesHybridCommon (13.37.0):
     - RevenueCat (= 5.29.0)
   - RevenueCat (5.29.0)
-  - vibration (3.0.0):
-    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - purchases_flutter (from `.symlinks/plugins/purchases_flutter/ios`)
-  - vibration (from `.symlinks/plugins/vibration/ios`)
 
 SPEC REPOS:
   trunk:
@@ -24,15 +21,12 @@ EXTERNAL SOURCES:
     :path: Flutter
   purchases_flutter:
     :path: ".symlinks/plugins/purchases_flutter/ios"
-  vibration:
-    :path: ".symlinks/plugins/vibration/ios"
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   purchases_flutter: 9191525a18bf11df40eb303047d507dd64cccb25
   PurchasesHybridCommon: 1583b4532763b795f8ae61913102d6ef9ed556a8
   RevenueCat: 5fa12c42c14b390dd2423897e925f407f474b8fa
-  vibration: 69774ad57825b11c951ee4c46155f455d7a592ce
 
 PODFILE CHECKSUM: 588e359dba5a61bfd2337b44fb0ff9f76afddf6a
 
