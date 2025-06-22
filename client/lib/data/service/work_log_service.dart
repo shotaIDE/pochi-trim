@@ -102,9 +102,7 @@ class WorkLogService {
 
     if (!debounceManager.shouldRecordWorkLog(houseWorkId, now)) {
       // デバウンス期間内なので専用の例外をスローする
-      throw const DebounceWorkLogException(
-        restrictedDuration: DebounceManager.debounceThresholdDuration,
-      );
+      throw const DebounceWorkLogException();
     }
 
     final userProfile = await ref.read(currentUserProfileProvider.future);
