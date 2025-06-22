@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:vibration/vibration.dart';
 
 part 'system_service.g.dart';
 
@@ -25,6 +26,25 @@ class SystemService {
 
   /// ユーザーアクションが拒否されたときの触覚フィードバックを実行する
   Future<void> doHapticFeedbackActionRejected() async {
-    await HapticFeedback.heavyImpact();
+    // vibrationが利用可能かチェック
+    final hasVibrator = await Vibration.hasVibrator();
+    if (!hasVibrator) {
+      // vibrationが利用できない場合はHapticFeedbackにフォールバック
+      await HapticFeedback.heavyImpact();
+      return;
+    }
+
+    // リジェクトされた感を伝えるため、断続的なパターンで振動させる
+    // パターン: 短い振動 → 休止 → 短い振動 → 休止 → 長い振動
+    await Vibration.vibrate(
+      pattern: [
+        0, // 開始遅延なし
+        200, // 短い振動
+        100, // 休止
+        200, // 短い振動
+        100, // 休止
+        400, // 長い振動（リジェクト感を強調）
+      ],
+    );
   }
 }
