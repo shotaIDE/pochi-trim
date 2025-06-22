@@ -22,4 +22,9 @@ class SystemService {
   Future<void> doHapticFeedbackActionReceived() async {
     await HapticFeedback.mediumImpact();
   }
+
+  /// ユーザーアクションが拒否されたときの触覚フィードバックを実行する
+  Future<void> doHapticFeedbackActionRejected() async {
+    await HapticFeedback.heavyImpact();
+  }
 }

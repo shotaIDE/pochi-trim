@@ -170,17 +170,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _highlightWorkLogsTabItem();
 
       _showWorkLogRegisteredSnackBar(workLogId);
-    } on DebounceWorkLogException catch (e) {
+    } on DebounceWorkLogException {
       if (!mounted) {
         return;
       }
 
-      final secondsText = e.restrictedDuration.inSeconds;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('短時間での連続登録は制限されています。$secondsText秒待ってから再度お試しください'),
-        ),
-      );
+      await ref.read(systemServiceProvider).doHapticFeedbackActionRejected();
     }
   }
 
@@ -207,17 +202,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
 
       _showWorkLogRegisteredSnackBar(workLogId);
-    } on DebounceWorkLogException catch (e) {
+    } on DebounceWorkLogException {
       if (!mounted) {
         return;
       }
 
-      final secondsText = e.restrictedDuration.inSeconds;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('短時間での連続登録は制限されています。$secondsText秒待ってから再度お試しください'),
-        ),
-      );
+      await ref.read(systemServiceProvider).doHapticFeedbackActionRejected();
     }
   }
 
@@ -250,17 +240,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
 
       _showWorkLogRegisteredSnackBar(workLogId);
-    } on DebounceWorkLogException catch (e) {
+    } on DebounceWorkLogException {
       if (!mounted) {
         return;
       }
 
-      final secondsText = e.restrictedDuration.inSeconds;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('短時間での連続登録は制限されています。$secondsText秒待ってから再度お試しください'),
-        ),
-      );
+      await ref.read(systemServiceProvider).doHapticFeedbackActionRejected();
     }
   }
 
