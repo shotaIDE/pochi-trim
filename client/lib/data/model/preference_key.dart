@@ -1,1 +1,6 @@
-enum PreferenceKey { currentHouseId, isProUserForDebug }
+enum PreferenceKey {
+  currentHouseId,
+  isProUserForDebug,
+  hasRequestedReview,
+  totalWorkLogCount,
+}

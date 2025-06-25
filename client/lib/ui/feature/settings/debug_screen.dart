@@ -2,6 +2,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
+import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/ui/feature/settings/section_header.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -24,6 +25,8 @@ class DebugScreen extends ConsumerWidget {
         children: const [
           SectionHeader(title: 'RevenueCat'),
           _ToggleIsProTile(),
+          SectionHeader(title: 'レビュー'),
+          _ResetReviewStatusTile(),
           SectionHeader(title: 'Crashlytics'),
           _ForceErrorTile(),
           _ForceCrashTile(),
@@ -86,6 +89,30 @@ class _ToggleIsProTile extends ConsumerWidget {
             ref.read(isProUserProvider.notifier).setProUser(isPro: !isPro);
           },
         );
+      },
+    );
+  }
+}
+
+class _ResetReviewStatusTile extends ConsumerWidget {
+  const _ResetReviewStatusTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      title: const Text('レビューリクエスト状態をリセット'),
+      subtitle: const Text('再度レビューを促すことができるようになります'),
+      onTap: () async {
+        final reviewService = ref.read(reviewServiceProvider);
+        await reviewService.resetReviewRequestStatus();
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('レビューリクエスト状態をリセットしました'),
+            ),
+          );
+        }
       },
     );
   }

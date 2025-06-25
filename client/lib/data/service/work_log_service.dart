@@ -7,6 +7,7 @@ import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/data/service/riverpod_extension.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
@@ -56,6 +57,7 @@ WorkLogService workLogService(Ref ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
   final systemService = ref.watch(systemServiceProvider);
+  final reviewService = ref.watch(reviewServiceProvider);
 
   switch (appSession) {
     case AppSessionSignedIn(currentHouseId: final currentHouseId):
@@ -64,6 +66,7 @@ WorkLogService workLogService(Ref ref) {
         authService: authService,
         currentHouseId: currentHouseId,
         systemService: systemService,
+        reviewService: reviewService,
         ref: ref,
       );
     case AppSessionNotSignedIn():
@@ -78,6 +81,7 @@ class WorkLogService {
     required this.authService,
     required this.currentHouseId,
     required this.systemService,
+    required this.reviewService,
     required this.ref,
   });
 
@@ -85,6 +89,7 @@ class WorkLogService {
   final AuthService authService;
   final String currentHouseId;
   final SystemService systemService;
+  final ReviewService reviewService;
   final Ref ref;
 
   Future<String?> recordWorkLog({
@@ -123,9 +128,33 @@ class WorkLogService {
 
     try {
       final workLogId = await workLogRepository.add(addWorkLogArgs);
+      
+      // 家事ログの総数を更新し、レビューをチェック
+      await _updateWorkLogCountAndCheckReview();
+      
       return workLogId;
     } on Exception {
       return null;
+    }
+  }
+
+  /// 家事ログの総数を更新し、レビューをチェックする
+  Future<void> _updateWorkLogCountAndCheckReview() async {
+    try {
+      // 現在の総数を取得
+      final currentCount = await reviewService.getTotalWorkLogCount();
+      
+      // 総数を増加
+      final newCount = currentCount + 1;
+      await reviewService.updateTotalWorkLogCount(newCount);
+      
+      // レビューをチェック
+      await reviewService.checkAndRequestReview(
+        totalWorkLogCount: newCount,
+      );
+    } on Exception {
+      // レビューのチェックに失敗しても、家事ログの記録は成功させる
+      // エラーは無視する
     }
   }
 }
