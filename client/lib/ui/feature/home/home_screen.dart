@@ -4,6 +4,7 @@ import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_screen.dart';
 import 'package:pochi_trim/ui/feature/home/home_presenter.dart';
@@ -32,8 +33,33 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
   var _isLogTabHighlighted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // アプリがフォアグラウンドに復帰した時に分析画面後のレビューをチェック
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(reviewServiceProvider)
+            .checkAndRequestReviewAfterAnalysis();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

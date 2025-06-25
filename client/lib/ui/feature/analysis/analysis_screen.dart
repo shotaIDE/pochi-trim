@@ -6,6 +6,7 @@ import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
+import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_period.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_presenter.dart';
 import 'package:pochi_trim/ui/feature/analysis/bar_chart_touched_position.dart';
@@ -140,7 +141,7 @@ final filteredHouseWorkFrequencyProvider =
 /// 分析画面
 ///
 /// 家事の実行頻度や曜日ごとの頻度分析を表示する
-class AnalysisScreen extends StatefulWidget {
+class AnalysisScreen extends ConsumerStatefulWidget {
   const AnalysisScreen({super.key});
 
   static const name = 'AnalysisScreen';
@@ -152,10 +153,10 @@ class AnalysisScreen extends StatefulWidget {
       );
 
   @override
-  State<AnalysisScreen> createState() => _AnalysisScreenState();
+  ConsumerState<AnalysisScreen> createState() => _AnalysisScreenState();
 }
 
-class _AnalysisScreenState extends State<AnalysisScreen> {
+class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
   /// 分析方式
   /// 0: 家事の頻度分析
   /// 1: 曜日ごとの頻度分析
@@ -166,6 +167,15 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   /// 1: 今週
   /// 2: 今月
   var _analysisPeriodLegacy = 1; // デフォルトは「今週」
+
+  @override
+  void initState() {
+    super.initState();
+    // 分析画面を表示したことを記録
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(reviewServiceProvider).markAnalysisScreenViewed();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
