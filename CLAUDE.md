@@ -1,3 +1,36 @@
+# Coding guide
+
+## Rules that must be followed
+
+### Applying the formatter
+
+After modifying code, always apply the formatter.
+
+The execution command is as follows.
+
+```bash
+dart format path/to/your/file.dart
+```
+
+### Applying Linter automatic fixes
+
+After modifying code, always apply Linter automatic fixes.
+
+The execution command is as follows.
+
+```bash
+dart fix --apply
+```
+
+### Resolving Linter warnings
+
+After modifying code, always check for Linter and compiler warnings.
+If warnings occur, resolve them.
+
+### Check that tests are passing and make corrections
+
+When modifying code, always run unit tests and make sure all tests pass.
+
 # Architecture
 
 This project is an iOS and Android application, including front-end and back-end code.
@@ -40,23 +73,6 @@ In that case, troubleshoot by investigating any reported issues in Flutter or co
 ## General rules
 
 ### Style
-
-After modifying the code, be sure to apply the formatter.
-The execution command is as follows.
-
-```bash
-dart format path/to/your/file.dart
-```
-
-After fixing the code, be sure to apply the Linter's automatic fix.
-
-The execution command is as follows:
-
-```bash
-dart fix --apply
-```
-
-Resolve linter and compiler warnings immediately.
 
 Always use early returns to reduce nesting.
 
@@ -290,7 +306,6 @@ Navigator.of(context).push(SomeScreen.route);
 
 ### Unit testing
 
-- When modifying code, always run unit tests to ensure that all tests pass.
 - Use `mocktail` for mocks.
 - If you want to use the same dummy constants between test cases, define them at the beginning of the `group` function, the beginning of the `main` function, or in the `setUp` function to make them common.
 
