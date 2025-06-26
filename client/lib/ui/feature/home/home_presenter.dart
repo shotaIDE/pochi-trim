@@ -178,10 +178,13 @@ Future<void> checkReviewAfterResuming(Ref ref) async {
 /// - 10回以上の家事ログが存在する
 /// - まだレビューリクエストしていない
 Future<bool> _shouldRequestReview(Ref ref) async {
-  final reviewService = ref.read(reviewServiceProvider);
+  final preferenceService = ref.read(preferenceServiceProvider);
 
   // 既にレビューをリクエストしているかチェック
-  if (await reviewService.hasRequestedReview()) {
+  final hasRequestedReview =
+      await preferenceService.getBool(PreferenceKey.hasRequestedReview) ??
+      false;
+  if (hasRequestedReview) {
     return false;
   }
 
@@ -223,18 +226,26 @@ Future<void> checkReviewForWorkLogThreshold(Ref ref) async {
   final reviewService = ref.read(reviewServiceProvider);
 
   // 既にレビューをリクエストしているかチェック
-  if (await reviewService.hasRequestedReview()) {
+  final preferenceService = ref.read(preferenceServiceProvider);
+  final hasRequestedReview =
+      await preferenceService.getBool(PreferenceKey.hasRequestedReview) ??
+      false;
+  if (hasRequestedReview) {
     return;
   }
 
   // 現在の総数を取得して増加
-  final currentCount = await reviewService.getTotalWorkLogCount();
+  final countString = await preferenceService.getString(
+    PreferenceKey.totalWorkLogCount,
+  );
+  final currentCount = int.tryParse(countString ?? '0') ?? 0;
   final newCount = currentCount + 1;
 
   // 総数を更新（PreferenceServiceに直接保存）
-  await ref
-      .read(preferenceServiceProvider)
-      .setString(PreferenceKey.totalWorkLogCount, value: newCount.toString());
+  await preferenceService.setString(
+    PreferenceKey.totalWorkLogCount,
+    value: newCount.toString(),
+  );
 
   // 閾値に達しているかチェック
   if (!_shouldRequestReviewForThreshold(newCount)) {
@@ -243,4 +254,14 @@ Future<void> checkReviewForWorkLogThreshold(Ref ref) async {
 
   // レビューをリクエスト
   await reviewService.requestReview();
+}
+
+/// レビューリクエスト状態をリセット（デバッグ用）
+@riverpod
+Future<void> resetReviewRequestStatus(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+  await preferenceService.setBool(
+    PreferenceKey.hasRequestedReview,
+    value: false,
+  );
 }

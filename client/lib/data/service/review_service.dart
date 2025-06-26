@@ -20,20 +20,6 @@ class ReviewService {
 
   final PreferenceService preferenceService;
 
-  /// 保存された家事ログ完了数を取得
-  Future<int> getTotalWorkLogCount() async {
-    final countString = await preferenceService.getString(
-      PreferenceKey.totalWorkLogCount,
-    );
-    return int.tryParse(countString ?? '0') ?? 0;
-  }
-
-  /// 既にレビューリクエスト済みかどうかを取得
-  Future<bool> hasRequestedReview() async {
-    return await preferenceService.getBool(PreferenceKey.hasRequestedReview) ??
-        false;
-  }
-
   /// レビューをリクエスト
   Future<void> requestReview() async {
     try {
@@ -55,13 +41,5 @@ class ReviewService {
       // エラーが発生してもレビューリクエストの失敗として扱い、
       // アプリの動作には影響させない
     }
-  }
-
-  /// レビューリクエスト状態をリセット（デバッグ用）
-  Future<void> resetReviewRequestStatus() async {
-    await preferenceService.setBool(
-      PreferenceKey.hasRequestedReview,
-      value: false,
-    );
   }
 }

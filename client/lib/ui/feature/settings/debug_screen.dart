@@ -2,7 +2,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
-import 'package:pochi_trim/data/service/review_service.dart';
+import 'package:pochi_trim/ui/feature/home/home_presenter.dart';
 import 'package:pochi_trim/ui/feature/settings/section_header.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -103,15 +103,12 @@ class _ResetReviewStatusTile extends ConsumerWidget {
       title: const Text('レビューリクエスト状態をリセット'),
       subtitle: const Text('再度レビューを促すことができるようになります'),
       onTap: () async {
-        final reviewService = ref.read(reviewServiceProvider);
-        await reviewService.resetReviewRequestStatus();
+        await ref.read(resetReviewRequestStatusProvider.future);
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('レビューリクエスト状態をリセットしました'),
-            ),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('レビューリクエスト状態をリセットしました')));
         }
       },
     );
