@@ -37,28 +37,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   var _isLogTabHighlighted = false;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      // アプリがフォアグラウンドに復帰した時に分析画面後のレビューをチェック
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(checkReviewAfterResumingProvider);
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final selectedTab = ref.watch(selectedTabProvider);
     final isDeletingHouseWork = ref.watch(isHouseWorkDeletingProvider);
@@ -66,8 +44,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     const titleText = Text('記録');
 
     final analysisButton = IconButton(
-      onPressed: () {
-        Navigator.of(context).push(AnalysisScreen.route());
+      onPressed: () async {
+        await Navigator.of(context).push(AnalysisScreen.route());
+        // 分析画面から戻ってきた際にレビューをチェック
+        if (mounted) {
+          ref.read(checkReviewAfterResumingProvider);
+        }
       },
       tooltip: '分析を表示する',
       icon: const Icon(Icons.analytics),
