@@ -167,7 +167,6 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   /// 2: 今月
   var _analysisPeriodLegacy = 1; // デフォルトは「今週」
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
