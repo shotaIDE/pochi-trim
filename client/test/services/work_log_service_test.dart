@@ -3,10 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
+import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
@@ -20,12 +22,15 @@ class MockSystemService extends Mock implements SystemService {}
 
 class MockReviewService extends Mock implements ReviewService {}
 
+class MockPreferenceService extends Mock implements PreferenceService {}
+
 void main() {
   group('家事ログの連続登録禁止', () {
     late MockWorkLogRepository mockWorkLogRepository;
     late MockAuthService mockAuthService;
     late MockSystemService mockSystemService;
     late MockReviewService mockReviewService;
+    late MockPreferenceService mockPreferenceService;
 
     // 共通のテストデータ
     const testUserProfile = UserProfile.withGoogleAccount(
@@ -43,6 +48,7 @@ void main() {
           completedBy: 'fallback-user',
         ),
       );
+      registerFallbackValue(PreferenceKey.hasRequestedReview);
     });
 
     setUp(() {
@@ -50,18 +56,21 @@ void main() {
       mockAuthService = MockAuthService();
       mockSystemService = MockSystemService();
       mockReviewService = MockReviewService();
+      mockPreferenceService = MockPreferenceService();
 
       // ReviewServiceのモックメソッドの設定
+      when(() => mockReviewService.requestReview()).thenAnswer((_) async {});
+
+      // PreferenceServiceのモックメソッドの設定
       when(
-        () => mockReviewService.getTotalWorkLogCount(),
-      ).thenAnswer((_) async => 0);
+        () => mockPreferenceService.getBool(any()),
+      ).thenAnswer((_) async => false);
       when(
-        () => mockReviewService.updateTotalWorkLogCount(any()),
-      ).thenAnswer((_) async {});
+        () => mockPreferenceService.getString(any()),
+      ).thenAnswer((_) async => '0');
       when(
-        () => mockReviewService.checkAndRequestReview(
-          totalWorkLogCount: any(named: 'totalWorkLogCount'),
-        ),
+        () =>
+            mockPreferenceService.setString(any(), value: any(named: 'value')),
       ).thenAnswer((_) async {});
     });
 
@@ -84,6 +93,7 @@ void main() {
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
           reviewServiceProvider.overrideWith((_) => mockReviewService),
+          preferenceServiceProvider.overrideWith((_) => mockPreferenceService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(testUserProfile),
           ),
@@ -121,6 +131,7 @@ void main() {
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
           reviewServiceProvider.overrideWith((_) => mockReviewService),
+          preferenceServiceProvider.overrideWith((_) => mockPreferenceService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(testUserProfile),
           ),
@@ -165,6 +176,7 @@ void main() {
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
           reviewServiceProvider.overrideWith((_) => mockReviewService),
+          preferenceServiceProvider.overrideWith((_) => mockPreferenceService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(testUserProfile),
           ),
@@ -209,6 +221,7 @@ void main() {
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
           reviewServiceProvider.overrideWith((_) => mockReviewService),
+          preferenceServiceProvider.overrideWith((_) => mockPreferenceService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(testUserProfile),
           ),
@@ -282,6 +295,7 @@ void main() {
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
           reviewServiceProvider.overrideWith((_) => mockReviewService),
+          preferenceServiceProvider.overrideWith((_) => mockPreferenceService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(testUserProfile),
           ),
@@ -320,6 +334,7 @@ void main() {
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
           reviewServiceProvider.overrideWith((_) => mockReviewService),
+          preferenceServiceProvider.overrideWith((_) => mockPreferenceService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(testUserProfile),
           ),
