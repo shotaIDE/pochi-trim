@@ -76,25 +76,9 @@ class ReviewService {
     return int.tryParse(countString ?? '0') ?? 0;
   }
 
-  /// 分析画面を表示したことを記録
-  Future<void> markAnalysisScreenViewed() async {
-    await preferenceService.setBool(
-      PreferenceKey.hasViewedAnalysisScreen,
-      value: true,
-    );
-  }
-
   /// 既にレビューリクエスト済みかどうかを取得
   Future<bool> hasRequestedReview() async {
     return await preferenceService.getBool(PreferenceKey.hasRequestedReview) ??
-        false;
-  }
-
-  /// 分析画面を表示済みかどうかを取得
-  Future<bool> hasViewedAnalysisScreen() async {
-    return await preferenceService.getBool(
-          PreferenceKey.hasViewedAnalysisScreen,
-        ) ??
         false;
   }
 
@@ -125,10 +109,6 @@ class ReviewService {
   Future<void> resetReviewRequestStatus() async {
     await preferenceService.setBool(
       PreferenceKey.hasRequestedReview,
-      value: false,
-    );
-    await preferenceService.setBool(
-      PreferenceKey.hasViewedAnalysisScreen,
       value: false,
     );
   }

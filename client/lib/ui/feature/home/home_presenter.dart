@@ -174,18 +174,12 @@ Future<void> checkReviewAfterResuming(Ref ref) async {
 /// 以下の条件をすべて満たす場合にtrueを返す：
 /// - 3種類以上の家事が登録されている
 /// - 10回以上の家事ログが存在する
-/// - 分析画面を表示済み
 /// - まだレビューリクエストしていない
 Future<bool> _shouldRequestReview(Ref ref) async {
   final reviewService = ref.read(reviewServiceProvider);
 
   // 既にレビューをリクエストしているかチェック
   if (await reviewService.hasRequestedReview()) {
-    return false;
-  }
-
-  // 分析画面を表示済みかチェック
-  if (!await reviewService.hasViewedAnalysisScreen()) {
     return false;
   }
 
