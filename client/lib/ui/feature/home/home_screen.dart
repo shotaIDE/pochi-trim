@@ -44,13 +44,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     const titleText = Text('記録');
 
     final analysisButton = IconButton(
-      onPressed: () async {
-        await Navigator.of(context).push(AnalysisScreen.route());
-        // 分析画面から戻ってきた際にレビューをチェック
-        if (mounted) {
-          ref.read(checkReviewAfterResumingProvider);
-        }
-      },
+      onPressed: _onAnalysisButtonPressed,
       tooltip: '分析を表示する',
       icon: const Icon(Icons.analytics),
     );
@@ -327,6 +321,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         });
       }
     });
+  }
+
+  Future<void> _onAnalysisButtonPressed() async {
+    await Navigator.of(context).push(AnalysisScreen.route());
+
+    if (!mounted) {
+      return;
+    }
+
+    ref.read(checkReviewAfterResumingProvider);
   }
 
   void _showWorkLogRegisteredSnackBar(String workLogId) {
