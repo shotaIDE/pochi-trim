@@ -128,27 +128,20 @@ class WorkLogService {
       completedBy: userProfile.id,
     );
 
-    final String workLogId;
     try {
-      workLogId = await workLogRepository.add(addWorkLogArgs);
+      final workLogId = await workLogRepository.add(addWorkLogArgs);
+
+      // 家事ログの総数を更新し、レビューをチェック
+      try {
+        await _checkReviewForWorkLogThreshold();
+      } on Exception {
+        // レビューのチェックに失敗しても、家事ログの記録は成功させる
+        // エラーは無視する
+      }
+
+      return workLogId;
     } on Exception {
       return null;
-    }
-
-    // 家事ログの総数を更新し、レビューをチェック
-    await _updateWorkLogCountAndCheckReview();
-
-    return workLogId;
-  }
-
-  /// 家事ログの総数を更新し、レビューをチェックする
-  Future<void> _updateWorkLogCountAndCheckReview() async {
-    try {
-      // レビューをチェック（総数の更新も含む）
-      await _checkReviewForWorkLogThreshold();
-    } on Exception {
-      // レビューのチェックに失敗しても、家事ログの記録は成功させる
-      // エラーは無視する
     }
   }
 
