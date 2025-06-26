@@ -170,10 +170,6 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
   @override
   void initState() {
     super.initState();
-    // 分析画面を表示したことを記録
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(markAnalysisScreenViewedProvider);
-    });
   }
 
   @override

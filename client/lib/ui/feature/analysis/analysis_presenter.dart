@@ -5,7 +5,6 @@ import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
-import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_period.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
 import 'package:pochi_trim/ui/feature/analysis/statistics.dart';
@@ -340,13 +339,4 @@ Future<List<WorkLog>> _workLogsFilteredByPeriodFilePrivate(Ref ref) async {
             log.completedAt.isBefore(currentAnalysisPeriod.to),
       )
       .toList();
-}
-
-/// 分析画面を表示したことをマークする
-///
-/// 分析画面の表示を記録し、レビューリクエストの条件判定に使用します。
-@riverpod
-Future<void> markAnalysisScreenViewed(Ref ref) async {
-  final reviewService = ref.read(reviewServiceProvider);
-  await reviewService.markAnalysisScreenViewed();
 }

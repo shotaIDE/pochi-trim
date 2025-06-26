@@ -3,5 +3,4 @@ enum PreferenceKey {
   isProUserForDebug,
   hasRequestedReview,
   totalWorkLogCount,
-  hasViewedAnalysisScreen,
 }
