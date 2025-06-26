@@ -10,6 +10,7 @@ import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/functions_service.dart';
+import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
@@ -152,4 +153,14 @@ Stream<List<WorkLog>> _completedWorkLogsFilePrivate(Ref ref) {
 Future<void> undoWorkLog(Ref ref, String workLogId) async {
   final workLogRepository = ref.read(workLogRepositoryProvider);
   await workLogRepository.delete(workLogId);
+}
+
+/// アプリが前面に戻った際のレビューチェック
+///
+/// 分析画面表示後のレビューリクエストをチェックし、
+/// 条件を満たしている場合にレビューダイアログを表示します。
+@riverpod
+Future<void> checkReviewAfterResuming(Ref ref) async {
+  final reviewService = ref.read(reviewServiceProvider);
+  await reviewService.checkAndRequestReviewAfterAnalysis();
 }
