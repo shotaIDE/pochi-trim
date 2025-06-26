@@ -35,19 +35,16 @@ class ReviewService {
   final WorkLogRepository workLogRepository;
 
   /// レビューリクエストが可能かどうかを確認
-  static const _reviewRequestThresholds = [5, 15, 30];
+  static const _reviewRequestThresholds = [30, 100];
 
   /// アハ・モーメントに基づいてレビューを促進する
   ///
-  /// 家事ログの完了数が特定の閾値（5、15、30個）に達した場合、
+  /// 家事ログの完了数が特定の閾値（30、100個）に達した場合、
   /// まだレビューをリクエストしていない場合にレビューダイアログを表示します。
-  Future<void> checkAndRequestReview({
-    required int totalWorkLogCount,
-  }) async {
+  Future<void> checkAndRequestReview({required int totalWorkLogCount}) async {
     // 既にレビューをリクエストしているかチェック
-    final hasRequestedReview = await preferenceService.getBool(
-          PreferenceKey.hasRequestedReview,
-        ) ??
+    final hasRequestedReview =
+        await preferenceService.getBool(PreferenceKey.hasRequestedReview) ??
         false;
     if (hasRequestedReview) {
       return;
@@ -110,16 +107,16 @@ class ReviewService {
   /// - まだレビューリクエストしていない
   Future<void> checkAndRequestReviewAfterAnalysis() async {
     // 既にレビューをリクエストしているかチェック
-    final hasRequestedReview = await preferenceService.getBool(
-          PreferenceKey.hasRequestedReview,
-        ) ??
+    final hasRequestedReview =
+        await preferenceService.getBool(PreferenceKey.hasRequestedReview) ??
         false;
     if (hasRequestedReview) {
       return;
     }
 
     // 分析画面を表示済みかチェック
-    final hasViewedAnalysisScreen = await preferenceService.getBool(
+    final hasViewedAnalysisScreen =
+        await preferenceService.getBool(
           PreferenceKey.hasViewedAnalysisScreen,
         ) ??
         false;
