@@ -10,6 +10,7 @@ import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/data/service/riverpod_extension.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
+import 'package:pochi_trim/ui/feature/home/home_presenter.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -128,10 +129,10 @@ class WorkLogService {
 
     try {
       final workLogId = await workLogRepository.add(addWorkLogArgs);
-      
+
       // 家事ログの総数を更新し、レビューをチェック
       await _updateWorkLogCountAndCheckReview();
-      
+
       return workLogId;
     } on Exception {
       return null;
@@ -143,15 +144,13 @@ class WorkLogService {
     try {
       // 現在の総数を取得
       final currentCount = await reviewService.getTotalWorkLogCount();
-      
+
       // 総数を増加
       final newCount = currentCount + 1;
       await reviewService.updateTotalWorkLogCount(newCount);
-      
+
       // レビューをチェック
-      await reviewService.checkAndRequestReview(
-        totalWorkLogCount: newCount,
-      );
+      await ref.read(checkReviewForWorkLogThresholdProvider(newCount).future);
     } on Exception {
       // レビューのチェックに失敗しても、家事ログの記録は成功させる
       // エラーは無視する

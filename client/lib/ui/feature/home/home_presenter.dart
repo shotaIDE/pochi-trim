@@ -204,3 +204,35 @@ Future<bool> _shouldRequestReview(Ref ref) async {
     return false;
   }
 }
+
+/// 家事ログ完了数が閾値に達した場合のレビューリクエスト条件をチェック
+///
+/// 家事ログ完了数が特定の閾値（30、100個）に達した場合にtrueを返す
+bool _shouldRequestReviewForThreshold(int totalWorkLogCount) {
+  const reviewRequestThresholds = [30, 100];
+  return reviewRequestThresholds.contains(totalWorkLogCount);
+}
+
+/// 家事ログ完了時のレビューリクエストをチェック
+///
+/// 家事ログ完了数が閾値に達した場合にレビューをリクエストします。
+@riverpod
+Future<void> checkReviewForWorkLogThreshold(
+  Ref ref,
+  int totalWorkLogCount,
+) async {
+  final reviewService = ref.read(reviewServiceProvider);
+
+  // 既にレビューをリクエストしているかチェック
+  if (await reviewService.hasRequestedReview()) {
+    return;
+  }
+
+  // 閾値に達しているかチェック
+  if (!_shouldRequestReviewForThreshold(totalWorkLogCount)) {
+    return;
+  }
+
+  // レビューをリクエスト
+  await reviewService.requestReview();
+}

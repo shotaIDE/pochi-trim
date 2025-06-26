@@ -20,46 +20,6 @@ class ReviewService {
 
   final PreferenceService preferenceService;
 
-  /// レビューリクエストが可能かどうかを確認
-  static const _reviewRequestThresholds = [30, 100];
-
-  /// アハ・モーメントに基づいてレビューを促進する
-  ///
-  /// 家事ログの完了数が特定の閾値（30、100個）に達した場合、
-  /// まだレビューをリクエストしていない場合にレビューダイアログを表示します。
-  Future<void> checkAndRequestReview({required int totalWorkLogCount}) async {
-    // 既にレビューをリクエストしているかチェック
-    final hasRequestedReview =
-        await preferenceService.getBool(PreferenceKey.hasRequestedReview) ??
-        false;
-    if (hasRequestedReview) {
-      return;
-    }
-
-    // 閾値に達しているかチェック
-    final shouldRequestReview = _reviewRequestThresholds.contains(
-      totalWorkLogCount,
-    );
-    if (!shouldRequestReview) {
-      return;
-    }
-
-    // アプリストアでレビューが可能かチェック
-    final inAppReview = InAppReview.instance;
-    if (!await inAppReview.isAvailable()) {
-      return;
-    }
-
-    // レビューダイアログを表示
-    await inAppReview.requestReview();
-
-    // レビューをリクエストしたことを記録
-    await preferenceService.setBool(
-      PreferenceKey.hasRequestedReview,
-      value: true,
-    );
-  }
-
   /// 現在の家事ログ完了数を保存
   Future<void> updateTotalWorkLogCount(int count) async {
     await preferenceService.setString(
