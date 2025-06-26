@@ -20,14 +20,6 @@ class ReviewService {
 
   final PreferenceService preferenceService;
 
-  /// 現在の家事ログ完了数を保存
-  Future<void> updateTotalWorkLogCount(int count) async {
-    await preferenceService.setString(
-      PreferenceKey.totalWorkLogCount,
-      value: count.toString(),
-    );
-  }
-
   /// 保存された家事ログ完了数を取得
   Future<int> getTotalWorkLogCount() async {
     final countString = await preferenceService.getString(

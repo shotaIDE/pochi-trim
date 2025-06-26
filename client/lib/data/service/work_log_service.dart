@@ -142,15 +142,8 @@ class WorkLogService {
   /// 家事ログの総数を更新し、レビューをチェックする
   Future<void> _updateWorkLogCountAndCheckReview() async {
     try {
-      // 現在の総数を取得
-      final currentCount = await reviewService.getTotalWorkLogCount();
-
-      // 総数を増加
-      final newCount = currentCount + 1;
-      await reviewService.updateTotalWorkLogCount(newCount);
-
-      // レビューをチェック
-      await ref.read(checkReviewForWorkLogThresholdProvider(newCount).future);
+      // レビューをチェック（総数の更新も含む）
+      await ref.read(checkReviewForWorkLogThresholdProvider.future);
     } on Exception {
       // レビューのチェックに失敗しても、家事ログの記録は成功させる
       // エラーは無視する

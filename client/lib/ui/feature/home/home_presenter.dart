@@ -6,10 +6,12 @@ import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
+import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/functions_service.dart';
+import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
@@ -217,10 +219,7 @@ bool _shouldRequestReviewForThreshold(int totalWorkLogCount) {
 ///
 /// 家事ログ完了数が閾値に達した場合にレビューをリクエストします。
 @riverpod
-Future<void> checkReviewForWorkLogThreshold(
-  Ref ref,
-  int totalWorkLogCount,
-) async {
+Future<void> checkReviewForWorkLogThreshold(Ref ref) async {
   final reviewService = ref.read(reviewServiceProvider);
 
   // 既にレビューをリクエストしているかチェック
@@ -228,8 +227,17 @@ Future<void> checkReviewForWorkLogThreshold(
     return;
   }
 
+  // 現在の総数を取得して増加
+  final currentCount = await reviewService.getTotalWorkLogCount();
+  final newCount = currentCount + 1;
+
+  // 総数を更新（PreferenceServiceに直接保存）
+  await ref
+      .read(preferenceServiceProvider)
+      .setString(PreferenceKey.totalWorkLogCount, value: newCount.toString());
+
   // 閾値に達しているかチェック
-  if (!_shouldRequestReviewForThreshold(totalWorkLogCount)) {
+  if (!_shouldRequestReviewForThreshold(newCount)) {
     return;
   }
 
