@@ -50,6 +50,19 @@ void main() {
       mockAuthService = MockAuthService();
       mockSystemService = MockSystemService();
       mockReviewService = MockReviewService();
+
+      // ReviewServiceのモックメソッドの設定
+      when(
+        () => mockReviewService.getTotalWorkLogCount(),
+      ).thenAnswer((_) async => 0);
+      when(
+        () => mockReviewService.updateTotalWorkLogCount(any()),
+      ).thenAnswer((_) async {});
+      when(
+        () => mockReviewService.checkAndRequestReview(
+          totalWorkLogCount: any(named: 'totalWorkLogCount'),
+        ),
+      ).thenAnswer((_) async {});
     });
 
     test('初回の家事登録は成功すること', () async {
