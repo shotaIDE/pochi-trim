@@ -41,6 +41,13 @@ In that case, troubleshoot by investigating any reported issues in Flutter or co
 
 ### Style
 
+After modifying the code, be sure to apply the formatter.
+The execution command is as follows.
+
+```bash
+dart format path/to/your/file.dart
+```
+
 After fixing the code, be sure to apply the Linter's automatic fix.
 
 The execution command is as follows:
