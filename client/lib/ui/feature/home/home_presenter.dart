@@ -210,52 +210,6 @@ Future<bool> _shouldRequestReview(Ref ref) async {
   }
 }
 
-/// 家事ログ完了数が閾値に達した場合のレビューリクエスト条件をチェック
-///
-/// 家事ログ完了数が特定の閾値（30、100個）に達した場合にtrueを返す
-bool _shouldRequestReviewForThreshold(int totalWorkLogCount) {
-  const reviewRequestThresholds = [30, 100];
-  return reviewRequestThresholds.contains(totalWorkLogCount);
-}
-
-/// 家事ログ完了時のレビューリクエストをチェック
-///
-/// 家事ログ完了数が閾値に達した場合にレビューをリクエストします。
-@riverpod
-Future<void> checkReviewForWorkLogThreshold(Ref ref) async {
-  final reviewService = ref.read(reviewServiceProvider);
-
-  // 既にレビューをリクエストしているかチェック
-  final preferenceService = ref.read(preferenceServiceProvider);
-  final hasRequestedReview =
-      await preferenceService.getBool(PreferenceKey.hasRequestedReview) ??
-      false;
-  if (hasRequestedReview) {
-    return;
-  }
-
-  // 現在の総数を取得して増加
-  final countString = await preferenceService.getString(
-    PreferenceKey.totalWorkLogCount,
-  );
-  final currentCount = int.tryParse(countString ?? '0') ?? 0;
-  final newCount = currentCount + 1;
-
-  // 総数を更新（PreferenceServiceに直接保存）
-  await preferenceService.setString(
-    PreferenceKey.totalWorkLogCount,
-    value: newCount.toString(),
-  );
-
-  // 閾値に達しているかチェック
-  if (!_shouldRequestReviewForThreshold(newCount)) {
-    return;
-  }
-
-  // レビューをリクエスト
-  await reviewService.requestReview();
-}
-
 /// レビューリクエスト状態をリセット（デバッグ用）
 @riverpod
 Future<void> resetReviewRequestStatus(Ref ref) async {

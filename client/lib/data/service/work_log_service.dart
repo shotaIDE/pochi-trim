@@ -4,13 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
+import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/data/service/riverpod_extension.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
-import 'package:pochi_trim/ui/feature/home/home_presenter.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -144,10 +145,54 @@ class WorkLogService {
   Future<void> _updateWorkLogCountAndCheckReview() async {
     try {
       // レビューをチェック（総数の更新も含む）
-      await ref.read(checkReviewForWorkLogThresholdProvider.future);
+      await _checkReviewForWorkLogThreshold();
     } on Exception {
       // レビューのチェックに失敗しても、家事ログの記録は成功させる
       // エラーは無視する
     }
+  }
+
+  /// 家事ログ完了時のレビューリクエストをチェック
+  ///
+  /// 家事ログ完了数が閾値に達した場合にレビューをリクエストします。
+  Future<void> _checkReviewForWorkLogThreshold() async {
+    final preferenceService = ref.read(preferenceServiceProvider);
+
+    // 既にレビューをリクエストしているかチェック
+    final hasRequestedReview =
+        await preferenceService.getBool(PreferenceKey.hasRequestedReview) ??
+        false;
+    if (hasRequestedReview) {
+      return;
+    }
+
+    // 現在の総数を取得して増加
+    final countString = await preferenceService.getString(
+      PreferenceKey.totalWorkLogCount,
+    );
+    final currentCount = int.tryParse(countString ?? '0') ?? 0;
+    final newCount = currentCount + 1;
+
+    // 総数を更新（PreferenceServiceに直接保存）
+    await preferenceService.setString(
+      PreferenceKey.totalWorkLogCount,
+      value: newCount.toString(),
+    );
+
+    // 閾値に達しているかチェック
+    if (!_shouldRequestReviewForThreshold(newCount)) {
+      return;
+    }
+
+    // レビューをリクエスト
+    await reviewService.requestReview();
+  }
+
+  /// 家事ログ完了数が閾値に達した場合のレビューリクエスト条件をチェック
+  ///
+  /// 家事ログ完了数が特定の閾値（30、100個）に達した場合にtrueを返す
+  bool _shouldRequestReviewForThreshold(int totalWorkLogCount) {
+    const reviewRequestThresholds = [30, 100];
+    return reviewRequestThresholds.contains(totalWorkLogCount);
   }
 }
