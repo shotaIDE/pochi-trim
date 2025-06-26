@@ -7,6 +7,7 @@ import 'package:pochi_trim/data/model/user_profile.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
@@ -17,11 +18,14 @@ class MockAuthService extends Mock implements AuthService {}
 
 class MockSystemService extends Mock implements SystemService {}
 
+class MockReviewService extends Mock implements ReviewService {}
+
 void main() {
   group('家事ログの連続登録禁止', () {
     late MockWorkLogRepository mockWorkLogRepository;
     late MockAuthService mockAuthService;
     late MockSystemService mockSystemService;
+    late MockReviewService mockReviewService;
 
     // 共通のテストデータ
     const testUserProfile = UserProfile.withGoogleAccount(
@@ -45,6 +49,7 @@ void main() {
       mockWorkLogRepository = MockWorkLogRepository();
       mockAuthService = MockAuthService();
       mockSystemService = MockSystemService();
+      mockReviewService = MockReviewService();
     });
 
     test('初回の家事登録は成功すること', () async {
@@ -65,6 +70,7 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          reviewServiceProvider.overrideWith((_) => mockReviewService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(testUserProfile),
           ),
@@ -101,6 +107,7 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          reviewServiceProvider.overrideWith((_) => mockReviewService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(testUserProfile),
           ),
@@ -144,6 +151,7 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          reviewServiceProvider.overrideWith((_) => mockReviewService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(testUserProfile),
           ),
@@ -187,6 +195,7 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          reviewServiceProvider.overrideWith((_) => mockReviewService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(testUserProfile),
           ),
@@ -223,6 +232,7 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          reviewServiceProvider.overrideWith((_) => mockReviewService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(null), // ユーザープロファイルがnull
           ),
@@ -258,6 +268,7 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          reviewServiceProvider.overrideWith((_) => mockReviewService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(testUserProfile),
           ),
@@ -295,6 +306,7 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          reviewServiceProvider.overrideWith((_) => mockReviewService),
           currentUserProfileProvider.overrideWith(
             (_) => Stream.value(testUserProfile),
           ),
