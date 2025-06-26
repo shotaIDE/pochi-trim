@@ -140,7 +140,7 @@ final filteredHouseWorkFrequencyProvider =
 /// 分析画面
 ///
 /// 家事の実行頻度や曜日ごとの頻度分析を表示する
-class AnalysisScreen extends ConsumerStatefulWidget {
+class AnalysisScreen extends StatefulWidget {
   const AnalysisScreen({super.key});
 
   static const name = 'AnalysisScreen';
@@ -152,10 +152,10 @@ class AnalysisScreen extends ConsumerStatefulWidget {
       );
 
   @override
-  ConsumerState<AnalysisScreen> createState() => _AnalysisScreenState();
+  State<AnalysisScreen> createState() => _AnalysisScreenState();
 }
 
-class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
+class _AnalysisScreenState extends State<AnalysisScreen> {
   /// 分析方式
   /// 0: 家事の頻度分析
   /// 1: 曜日ごとの頻度分析
@@ -167,10 +167,6 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
   /// 2: 今月
   var _analysisPeriodLegacy = 1; // デフォルトは「今週」
 
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
