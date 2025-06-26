@@ -127,16 +127,17 @@ class WorkLogService {
       completedBy: userProfile.id,
     );
 
+    final String workLogId;
     try {
-      final workLogId = await workLogRepository.add(addWorkLogArgs);
-
-      // 家事ログの総数を更新し、レビューをチェック
-      await _updateWorkLogCountAndCheckReview();
-
-      return workLogId;
+      workLogId = await workLogRepository.add(addWorkLogArgs);
     } on Exception {
       return null;
     }
+
+    // 家事ログの総数を更新し、レビューをチェック
+    await _updateWorkLogCountAndCheckReview();
+
+    return workLogId;
   }
 
   /// 家事ログの総数を更新し、レビューをチェックする
