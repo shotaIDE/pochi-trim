@@ -225,4 +225,8 @@ Future<void> resetReviewRequestStatus(Ref ref) async {
     PreferenceKey.hasRequestedReview,
     value: false,
   );
+  await preferenceService.setInt(
+    PreferenceKey.lastReviewRequestThreshold,
+    value: 0,
+  );
 }

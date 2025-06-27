@@ -151,14 +151,6 @@ class WorkLogService {
   Future<void> _checkReviewForWorkLogThreshold() async {
     final preferenceService = ref.read(preferenceServiceProvider);
 
-    // 既にレビューをリクエストしているかチェック
-    final hasRequestedReview =
-        await preferenceService.getBool(PreferenceKey.hasRequestedReview) ??
-        false;
-    if (hasRequestedReview) {
-      return;
-    }
-
     // 現在の総数を取得して増加
     final currentCount =
         await preferenceService.getInt(PreferenceKey.totalWorkLogCount) ?? 0;
@@ -175,10 +167,28 @@ class WorkLogService {
       return;
     }
 
+    // 最後にレビューをリクエストした閾値をチェック
+    final lastRequestThreshold =
+        await preferenceService.getInt(
+          PreferenceKey.lastReviewRequestThreshold,
+        ) ??
+        0;
+
+    // 既により大きい閾値でリクエスト済みの場合はスキップ
+    if (newCount <= lastRequestThreshold) {
+      return;
+    }
+
     // レビューをリクエスト
     await reviewService.requestReview();
 
-    // レビューをリクエストしたことを記録
+    // 今回リクエストした閾値を記録
+    await preferenceService.setInt(
+      PreferenceKey.lastReviewRequestThreshold,
+      value: newCount,
+    );
+
+    // レビューをリクエストしたことを記録（後方互換性のため残す）
     await preferenceService.setBool(
       PreferenceKey.hasRequestedReview,
       value: true,
