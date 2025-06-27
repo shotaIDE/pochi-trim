@@ -203,9 +203,39 @@ Future<void> requestAppReviewAfterFirstAnalysisIfNeeded(Ref ref) async {
   );
 }
 
-/// レビューリクエスト状態をリセット（デバッグ用）
+/// 30回レビューリクエスト状態をリセット（デバッグ用）
 @riverpod
-Future<void> resetReviewRequestStatus(Ref ref) async {
+Future<void> reset30WorkLogsReviewRequestStatus(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+  await preferenceService.setBool(
+    PreferenceKey.hasRequestedAppReviewWhenOver30WorkLogs,
+    value: false,
+  );
+}
+
+/// 100回レビューリクエスト状態をリセット（デバッグ用）
+@riverpod
+Future<void> reset100WorkLogsReviewRequestStatus(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+  await preferenceService.setBool(
+    PreferenceKey.hasRequestedReviewWhenOver100WorkLogs,
+    value: false,
+  );
+}
+
+/// 分析画面レビューリクエスト状態をリセット（デバッグ用）
+@riverpod
+Future<void> resetAnalysisReviewRequestStatus(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+  await preferenceService.setBool(
+    PreferenceKey.hasRequestedReviewForAnalysisView,
+    value: false,
+  );
+}
+
+/// 全レビューリクエスト状態をリセット（デバッグ用）
+@riverpod
+Future<void> resetAllReviewRequestStatus(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
   await preferenceService.setBool(
     PreferenceKey.hasRequestedAppReviewWhenOver30WorkLogs,

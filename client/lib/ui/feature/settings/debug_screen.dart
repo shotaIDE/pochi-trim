@@ -26,7 +26,10 @@ class DebugScreen extends ConsumerWidget {
           SectionHeader(title: 'RevenueCat'),
           _ToggleIsProTile(),
           SectionHeader(title: 'レビュー'),
-          _ResetReviewStatusTile(),
+          _Reset30WorkLogsReviewStatusTile(),
+          _Reset100WorkLogsReviewStatusTile(),
+          _ResetAnalysisReviewStatusTile(),
+          _ResetAllReviewStatusTile(),
           SectionHeader(title: 'Crashlytics'),
           _ForceErrorTile(),
           _ForceCrashTile(),
@@ -94,21 +97,84 @@ class _ToggleIsProTile extends ConsumerWidget {
   }
 }
 
-class _ResetReviewStatusTile extends ConsumerWidget {
-  const _ResetReviewStatusTile();
+class _Reset30WorkLogsReviewStatusTile extends ConsumerWidget {
+  const _Reset30WorkLogsReviewStatusTile();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
-      title: const Text('レビューリクエスト状態をリセット'),
-      subtitle: const Text('再度レビューを促すことができるようになります'),
+      title: const Text('30回レビューリクエスト状態をリセット'),
+      subtitle: const Text('30回目の家事ログ完了時のレビューを再度促すことができます'),
       onTap: () async {
-        await ref.read(resetReviewRequestStatusProvider.future);
+        await ref.read(reset30WorkLogsReviewRequestStatusProvider.future);
 
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('レビューリクエスト状態をリセットしました')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('30回レビューリクエスト状態をリセットしました')),
+          );
+        }
+      },
+    );
+  }
+}
+
+class _Reset100WorkLogsReviewStatusTile extends ConsumerWidget {
+  const _Reset100WorkLogsReviewStatusTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      title: const Text('100回レビューリクエスト状態をリセット'),
+      subtitle: const Text('100回目の家事ログ完了時のレビューを再度促すことができます'),
+      onTap: () async {
+        await ref.read(reset100WorkLogsReviewRequestStatusProvider.future);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('100回レビューリクエスト状態をリセットしました')),
+          );
+        }
+      },
+    );
+  }
+}
+
+class _ResetAnalysisReviewStatusTile extends ConsumerWidget {
+  const _ResetAnalysisReviewStatusTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      title: const Text('分析画面レビューリクエスト状態をリセット'),
+      subtitle: const Text('分析画面表示後のレビューを再度促すことができます'),
+      onTap: () async {
+        await ref.read(resetAnalysisReviewRequestStatusProvider.future);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('分析画面レビューリクエスト状態をリセットしました')),
+          );
+        }
+      },
+    );
+  }
+}
+
+class _ResetAllReviewStatusTile extends ConsumerWidget {
+  const _ResetAllReviewStatusTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      title: const Text('全レビューリクエスト状態をリセット'),
+      subtitle: const Text('すべてのレビューを再度促すことができるようになります'),
+      onTap: () async {
+        await ref.read(resetAllReviewRequestStatusProvider.future);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('全レビューリクエスト状態をリセットしました')),
+          );
         }
       },
     );
