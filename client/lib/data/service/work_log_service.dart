@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
+import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/in_app_review_service.dart';
+import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/riverpod_extension.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
@@ -56,6 +59,7 @@ WorkLogService workLogService(Ref ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
   final systemService = ref.watch(systemServiceProvider);
+  final inAppReviewService = ref.watch(inAppReviewServiceProvider);
 
   switch (appSession) {
     case AppSessionSignedIn(currentHouseId: final currentHouseId):
@@ -64,6 +68,7 @@ WorkLogService workLogService(Ref ref) {
         authService: authService,
         currentHouseId: currentHouseId,
         systemService: systemService,
+        inAppReviewService: inAppReviewService,
         ref: ref,
       );
     case AppSessionNotSignedIn():
@@ -78,6 +83,7 @@ class WorkLogService {
     required this.authService,
     required this.currentHouseId,
     required this.systemService,
+    required this.inAppReviewService,
     required this.ref,
   });
 
@@ -85,6 +91,7 @@ class WorkLogService {
   final AuthService authService;
   final String currentHouseId;
   final SystemService systemService;
+  final InAppReviewService inAppReviewService;
   final Ref ref;
 
   Future<String?> recordWorkLog({
@@ -123,9 +130,76 @@ class WorkLogService {
 
     try {
       final workLogId = await workLogRepository.add(addWorkLogArgs);
+
+      unawaited(_requestAppReviewIfNeeded());
+
       return workLogId;
     } on Exception {
       return null;
     }
+  }
+
+  /// 家事ログ記録後のアプリレビューリクエスト
+  ///
+  /// 家事ログ記録のマイルストーンを達成した際にアプリレビューダイアログを表示します。
+  /// アプリレビューはOS制限により多くの回数リクエストできないため、
+  /// 条件で縛りつつ、必要なタイミングでのみリクエストします。
+  Future<void> _requestAppReviewIfNeeded() async {
+    final preferenceService = ref.read(preferenceServiceProvider);
+
+    final currentCount =
+        await preferenceService.getInt(
+          PreferenceKey.workLogCountForAppReviewRequest,
+        ) ??
+        0;
+    final newCount = currentCount + 1;
+
+    if (newCount >= 100) {
+      final hasRequested100 =
+          await preferenceService.getBool(
+            PreferenceKey.hasRequestedReviewWhenOver100WorkLogs,
+          ) ??
+          false;
+
+      if (hasRequested100) {
+        return;
+      }
+
+      await inAppReviewService.requestReview();
+
+      await preferenceService.setBool(
+        PreferenceKey.hasRequestedReviewWhenOver100WorkLogs,
+        value: true,
+      );
+      return;
+    }
+
+    // 100件以下の場合は、永続化されているカウントを更新
+    // 100件より先はレビューリクエスト行わない関係上カウンターの値が不要になるため、更新の永続化は行わない
+    await preferenceService.setInt(
+      PreferenceKey.workLogCountForAppReviewRequest,
+      value: newCount,
+    );
+
+    if (newCount < 30) {
+      return;
+    }
+
+    final hasRequested30 =
+        await preferenceService.getBool(
+          PreferenceKey.hasRequestedAppReviewWhenOver30WorkLogs,
+        ) ??
+        false;
+
+    if (hasRequested30) {
+      return;
+    }
+
+    await inAppReviewService.requestReview();
+
+    await preferenceService.setBool(
+      PreferenceKey.hasRequestedAppReviewWhenOver30WorkLogs,
+      value: true,
+    );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
@@ -43,9 +45,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     const titleText = Text('記録');
 
     final analysisButton = IconButton(
-      onPressed: () {
-        Navigator.of(context).push(AnalysisScreen.route());
-      },
+      onPressed: _onAnalysisButtonPressed,
       tooltip: '分析を表示する',
       icon: const Icon(Icons.analytics),
     );
@@ -322,6 +322,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         });
       }
     });
+  }
+
+  Future<void> _onAnalysisButtonPressed() async {
+    await Navigator.of(context).push(AnalysisScreen.route());
+
+    if (!mounted) {
+      return;
+    }
+
+    unawaited(
+      ref.read(requestAppReviewAfterFirstAnalysisIfNeededProvider.future),
+    );
   }
 
   void _showWorkLogRegisteredSnackBar(String workLogId) {
