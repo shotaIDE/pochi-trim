@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
@@ -329,7 +331,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
 
-    ref.read(checkReviewAfterResumingProvider);
+    ref.read(requestAppReviewAfterFirstAnalysisIfNeededProvider);
   }
 
   void _showWorkLogRegisteredSnackBar(String workLogId) {

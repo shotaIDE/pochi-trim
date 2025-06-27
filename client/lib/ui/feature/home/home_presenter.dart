@@ -157,14 +157,15 @@ Future<void> undoWorkLog(Ref ref, String workLogId) async {
   await workLogRepository.delete(workLogId);
 }
 
-/// アプリが前面に戻った際のレビューチェック
+/// 初回分析画面表示後のアプリレビューリクエスト
 ///
-/// 分析画面表示後のレビューリクエストをチェックし、
-/// 条件を満たしている場合にレビューダイアログを表示します。
+/// 分析画面が初めて表示された後で条件を満たしている場合に
+/// アプリレビューダイアログを表示します。
 @riverpod
-Future<void> checkReviewAfterResuming(Ref ref) async {
+Future<void> requestAppReviewAfterFirstAnalysisIfNeeded(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
+  // 既に分析画面でのレビューをリクエスト済みかチェック
   final hasRequestedForAnalysis =
       await preferenceService.getBool(
         PreferenceKey.hasRequestedReviewForAnalysisView,
@@ -174,20 +175,25 @@ Future<void> checkReviewAfterResuming(Ref ref) async {
     return;
   }
 
+  // レビューリクエスト条件をチェック
+  // 条件：3種類以上の家事が登録されている
   final houseWorks = await ref.read(_houseWorksFilePrivateProvider.future);
   if (houseWorks.length < 3) {
     return;
   }
 
+  // 条件：10回以上の家事ログが存在する
   final totalWorkLogCount =
       await preferenceService.getInt(PreferenceKey.totalWorkLogCount) ?? 0;
   if (totalWorkLogCount < 10) {
     return;
   }
 
+  // 条件を満たしているのでアプリレビューをリクエスト
   final reviewService = ref.read(reviewServiceProvider);
   await reviewService.requestReview();
 
+  // 分析画面でのレビューリクエスト完了を記録
   await preferenceService.setBool(
     PreferenceKey.hasRequestedReviewForAnalysisView,
     value: true,
