@@ -331,7 +331,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
 
-    ref.read(requestAppReviewAfterFirstAnalysisIfNeededProvider);
+    unawaited(
+      ref.read(requestAppReviewAfterFirstAnalysisIfNeededProvider.future),
+    );
   }
 
   void _showWorkLogRegisteredSnackBar(String workLogId) {
