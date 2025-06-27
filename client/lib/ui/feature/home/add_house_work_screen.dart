@@ -177,7 +177,6 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
   }
 
   Future<void> _selectEmoji() async {
-    // 簡易的な絵文字選択ダイアログを表示
     final selectedEmoji = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -187,25 +186,36 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
           child: GridView.builder(
             shrinkWrap: true,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 6,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
+              crossAxisCount: 4,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
             ),
             itemCount: _emojiList.length,
             itemBuilder: (context, index) {
               return InkWell(
                 onTap: () => Navigator.of(context).pop(_emojiList[index]),
-                child: DecoratedBox(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
                   decoration: BoxDecoration(
                     color: Theme.of(
                       context,
                     ).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
+                    border: _icon == _emojiList[index]
+                        ? Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          )
+                        : null,
                   ),
                   child: Center(
                     child: Text(
                       _emojiList[index],
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
                 ),
@@ -213,6 +223,12 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
             },
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('キャンセル'),
+          ),
+        ],
       ),
     );
 
