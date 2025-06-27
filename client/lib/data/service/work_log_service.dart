@@ -131,7 +131,7 @@ class WorkLogService {
     try {
       final workLogId = await workLogRepository.add(addWorkLogArgs);
 
-      unawaited(_checkReviewForWorkLogThreshold());
+      unawaited(_requestAppReviewIfNeeded());
 
       return workLogId;
     } on Exception {
@@ -139,10 +139,7 @@ class WorkLogService {
     }
   }
 
-  /// 家事ログ完了時のレビューリクエストをチェック
-  ///
-  /// 家事ログ完了数が閾値に達した場合にレビューをリクエストします。
-  Future<void> _checkReviewForWorkLogThreshold() async {
+  Future<void> _requestAppReviewIfNeeded() async {
     final preferenceService = ref.read(preferenceServiceProvider);
 
     final currentCount =
