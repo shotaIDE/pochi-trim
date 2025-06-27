@@ -192,33 +192,30 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
             ),
             itemCount: _emojiList.length,
             itemBuilder: (context, index) {
-              return Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => Navigator.of(context).pop(_emojiList[index]),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    constraints: const BoxConstraints(
-                      minWidth: 44,
-                      minHeight: 44,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
-                      border: _icon == _emojiList[index]
-                          ? Border.all(
-                              color: Theme.of(context).colorScheme.primary,
-                              width: 2,
-                            )
-                          : null,
-                    ),
-                    child: Center(
-                      child: Text(
-                        _emojiList[index],
-                        style: const TextStyle(fontSize: 28),
-                      ),
+              return InkWell(
+                onTap: () => Navigator.of(context).pop(_emojiList[index]),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                    border: _icon == _emojiList[index]
+                        ? Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          )
+                        : null,
+                  ),
+                  child: Center(
+                    child: Text(
+                      _emojiList[index],
+                      style: const TextStyle(fontSize: 28),
                     ),
                   ),
                 ),
