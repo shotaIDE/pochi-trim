@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -24,8 +25,8 @@ class ReviewService {
 
       // レビューダイアログを表示
       await inAppReview.requestReview();
-    } on Exception {
-      // エラーが発生してもレビューリクエストの失敗として扱い、
+    } on PlatformException {
+      // プラットフォーム固有のエラーが発生してもレビューリクエストの失敗として扱い、
       // アプリの動作には影響させない
     }
   }
