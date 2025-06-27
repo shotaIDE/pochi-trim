@@ -160,16 +160,14 @@ class WorkLogService {
     }
 
     // 現在の総数を取得して増加
-    final countString = await preferenceService.getString(
-      PreferenceKey.totalWorkLogCount,
-    );
-    final currentCount = int.tryParse(countString ?? '0') ?? 0;
+    final currentCount =
+        await preferenceService.getInt(PreferenceKey.totalWorkLogCount) ?? 0;
     final newCount = currentCount + 1;
 
     // 総数を更新（PreferenceServiceに直接保存）
-    await preferenceService.setString(
+    await preferenceService.setInt(
       PreferenceKey.totalWorkLogCount,
-      value: newCount.toString(),
+      value: newCount,
     );
 
     // 閾値に達しているかチェック

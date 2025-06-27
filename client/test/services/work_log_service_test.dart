@@ -72,6 +72,12 @@ void main() {
         () =>
             mockPreferenceService.setString(any(), value: any(named: 'value')),
       ).thenAnswer((_) async {});
+      when(
+        () => mockPreferenceService.getInt(any()),
+      ).thenAnswer((_) async => 0);
+      when(
+        () => mockPreferenceService.setInt(any(), value: any(named: 'value')),
+      ).thenAnswer((_) async {});
     });
 
     test('初回の家事登録は成功すること', () async {
