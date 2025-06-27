@@ -11,8 +11,8 @@ import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/functions_service.dart';
+import 'package:pochi_trim/data/service/in_app_review_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
-import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
@@ -193,8 +193,8 @@ Future<void> requestAppReviewAfterFirstAnalysisIfNeeded(Ref ref) async {
   }
 
   // 条件を満たしているのでアプリレビューをリクエスト
-  final reviewService = ref.read(reviewServiceProvider);
-  await reviewService.requestReview();
+  final inAppReviewService = ref.read(inAppReviewServiceProvider);
+  await inAppReviewService.requestReview();
 
   // 分析画面でのレビューリクエスト完了を記録
   await preferenceService.setBool(

@@ -8,8 +8,8 @@ import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/in_app_review_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
-import 'package:pochi_trim/data/service/review_service.dart';
 import 'package:pochi_trim/data/service/riverpod_extension.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
@@ -59,7 +59,7 @@ WorkLogService workLogService(Ref ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
   final systemService = ref.watch(systemServiceProvider);
-  final reviewService = ref.watch(reviewServiceProvider);
+  final inAppReviewService = ref.watch(inAppReviewServiceProvider);
 
   switch (appSession) {
     case AppSessionSignedIn(currentHouseId: final currentHouseId):
@@ -68,7 +68,7 @@ WorkLogService workLogService(Ref ref) {
         authService: authService,
         currentHouseId: currentHouseId,
         systemService: systemService,
-        reviewService: reviewService,
+        inAppReviewService: inAppReviewService,
         ref: ref,
       );
     case AppSessionNotSignedIn():
@@ -83,7 +83,7 @@ class WorkLogService {
     required this.authService,
     required this.currentHouseId,
     required this.systemService,
-    required this.reviewService,
+    required this.inAppReviewService,
     required this.ref,
   });
 
@@ -91,7 +91,7 @@ class WorkLogService {
   final AuthService authService;
   final String currentHouseId;
   final SystemService systemService;
-  final ReviewService reviewService;
+  final InAppReviewService inAppReviewService;
   final Ref ref;
 
   Future<String?> recordWorkLog({
@@ -160,7 +160,7 @@ class WorkLogService {
         return;
       }
 
-      await reviewService.requestReview();
+      await inAppReviewService.requestReview();
 
       await preferenceService.setBool(
         PreferenceKey.hasRequestedReviewWhenOver100WorkLogs,
@@ -190,7 +190,7 @@ class WorkLogService {
       return;
     }
 
-    await reviewService.requestReview();
+    await inAppReviewService.requestReview();
 
     await preferenceService.setBool(
       PreferenceKey.hasRequestedAppReviewWhenOver30WorkLogs,
