@@ -157,10 +157,11 @@ Future<void> undoWorkLog(Ref ref, String workLogId) async {
   await workLogRepository.delete(workLogId);
 }
 
-/// 初回分析画面表示後のアプリレビューリクエスト
+/// 初回分析後のアプリレビューリクエスト
 ///
-/// 分析画面が初めて表示された後で条件を満たしている場合に
-/// アプリレビューダイアログを表示します。
+/// 初めて分析画面が表示されて条件を満たしている場合にアプリレビューダイアログを表示します。
+/// アプリレビューはOS制限により多くの回数リクエストできないため、
+/// 条件で縛りつつ必要なタイミングでのみリクエストします。
 @riverpod
 Future<void> requestAppReviewAfterFirstAnalysisIfNeeded(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);

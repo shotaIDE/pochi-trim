@@ -139,6 +139,11 @@ class WorkLogService {
     }
   }
 
+  /// 家事ログ記録後のアプリレビューリクエスト
+  ///
+  /// 家事ログ記録のマイルストーンを達成した際にアプリレビューダイアログを表示します。
+  /// アプリレビューはOS制限により多くの回数リクエストできないため、
+  /// 条件で縛りつつ、必要なタイミングでのみリクエストします。
   Future<void> _requestAppReviewIfNeeded() async {
     final preferenceService = ref.read(preferenceServiceProvider);
 
