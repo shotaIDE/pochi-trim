@@ -151,44 +151,54 @@ class WorkLogService {
   Future<void> _checkReviewForWorkLogThreshold() async {
     final preferenceService = ref.read(preferenceServiceProvider);
 
-    // 現在の総数を取得して増加
     final currentCount =
         await preferenceService.getInt(PreferenceKey.totalWorkLogCount) ?? 0;
     final newCount = currentCount + 1;
 
-    // 総数を更新（PreferenceServiceに直接保存）
     await preferenceService.setInt(
       PreferenceKey.totalWorkLogCount,
       value: newCount,
     );
 
-    // 各閾値での個別チェック
-    if (newCount == 30) {
-      final hasRequested30 =
-          await preferenceService.getBool(
-            PreferenceKey.hasRequestedReviewFor30WorkLogs,
-          ) ??
-          false;
-      if (!hasRequested30) {
-        await reviewService.requestReview();
-        await preferenceService.setBool(
-          PreferenceKey.hasRequestedReviewFor30WorkLogs,
-          value: true,
-        );
-      }
-    } else if (newCount == 100) {
+    if (newCount >= 100) {
       final hasRequested100 =
           await preferenceService.getBool(
             PreferenceKey.hasRequestedReviewFor100WorkLogs,
           ) ??
           false;
-      if (!hasRequested100) {
-        await reviewService.requestReview();
-        await preferenceService.setBool(
-          PreferenceKey.hasRequestedReviewFor100WorkLogs,
-          value: true,
-        );
+
+      if (hasRequested100) {
+        return;
       }
+
+      await reviewService.requestReview();
+
+      await preferenceService.setBool(
+        PreferenceKey.hasRequestedReviewFor100WorkLogs,
+        value: true,
+      );
+      return;
     }
+
+    if (newCount < 30) {
+      return;
+    }
+
+    final hasRequested30 =
+        await preferenceService.getBool(
+          PreferenceKey.hasRequestedReviewFor30WorkLogs,
+        ) ??
+        false;
+
+    if (hasRequested30) {
+      return;
+    }
+
+    await reviewService.requestReview();
+
+    await preferenceService.setBool(
+      PreferenceKey.hasRequestedReviewFor30WorkLogs,
+      value: true,
+    );
   }
 }
