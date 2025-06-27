@@ -149,7 +149,7 @@ class WorkLogService {
     if (newCount >= 100) {
       final hasRequested100 =
           await preferenceService.getBool(
-            PreferenceKey.hasRequestedReviewFor100WorkLogs,
+            PreferenceKey.hasRequestedReviewWhenOver100WorkLogs,
           ) ??
           false;
 
@@ -160,7 +160,7 @@ class WorkLogService {
       await reviewService.requestReview();
 
       await preferenceService.setBool(
-        PreferenceKey.hasRequestedReviewFor100WorkLogs,
+        PreferenceKey.hasRequestedReviewWhenOver100WorkLogs,
         value: true,
       );
       return;
@@ -179,7 +179,7 @@ class WorkLogService {
 
     final hasRequested30 =
         await preferenceService.getBool(
-          PreferenceKey.hasRequestedReviewFor30WorkLogs,
+          PreferenceKey.hasRequestedAppReviewWhenOver30WorkLogs,
         ) ??
         false;
 
@@ -190,7 +190,7 @@ class WorkLogService {
     await reviewService.requestReview();
 
     await preferenceService.setBool(
-      PreferenceKey.hasRequestedReviewFor30WorkLogs,
+      PreferenceKey.hasRequestedAppReviewWhenOver30WorkLogs,
       value: true,
     );
   }

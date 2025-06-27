@@ -48,7 +48,9 @@ void main() {
           completedBy: 'fallback-user',
         ),
       );
-      registerFallbackValue(PreferenceKey.hasRequestedReviewFor30WorkLogs);
+      registerFallbackValue(
+        PreferenceKey.hasRequestedAppReviewWhenOver30WorkLogs,
+      );
     });
 
     setUp(() {

@@ -222,11 +222,11 @@ Future<bool> _shouldRequestReview(Ref ref) async {
 Future<void> resetReviewRequestStatus(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
   await preferenceService.setBool(
-    PreferenceKey.hasRequestedReviewFor30WorkLogs,
+    PreferenceKey.hasRequestedAppReviewWhenOver30WorkLogs,
     value: false,
   );
   await preferenceService.setBool(
-    PreferenceKey.hasRequestedReviewFor100WorkLogs,
+    PreferenceKey.hasRequestedReviewWhenOver100WorkLogs,
     value: false,
   );
   await preferenceService.setBool(

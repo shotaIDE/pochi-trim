@@ -2,7 +2,7 @@ enum PreferenceKey {
   currentHouseId,
   isProUserForDebug,
   totalWorkLogCount,
-  hasRequestedReviewFor30WorkLogs,
-  hasRequestedReviewFor100WorkLogs,
+  hasRequestedAppReviewWhenOver30WorkLogs,
+  hasRequestedReviewWhenOver100WorkLogs,
   hasRequestedReviewForAnalysisView,
 }
