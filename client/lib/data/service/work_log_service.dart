@@ -131,13 +131,7 @@ class WorkLogService {
     try {
       final workLogId = await workLogRepository.add(addWorkLogArgs);
 
-      // 家事ログの総数を更新し、レビューをチェック
-      try {
-        await _checkReviewForWorkLogThreshold();
-      } on Exception {
-        // レビューのチェックに失敗しても、家事ログの記録は成功させる
-        // エラーは無視する
-      }
+      unawaited(_checkReviewForWorkLogThreshold());
 
       return workLogId;
     } on Exception {
@@ -154,11 +148,6 @@ class WorkLogService {
     final currentCount =
         await preferenceService.getInt(PreferenceKey.totalWorkLogCount) ?? 0;
     final newCount = currentCount + 1;
-
-    await preferenceService.setInt(
-      PreferenceKey.totalWorkLogCount,
-      value: newCount,
-    );
 
     if (newCount >= 100) {
       final hasRequested100 =
@@ -179,6 +168,13 @@ class WorkLogService {
       );
       return;
     }
+
+    // 100件以下の場合は、永続化されているカウントを更新
+    // 100件より先はレビューリクエスト行わない関係上カウンターの値が不要になるため、更新の永続化は行わない
+    await preferenceService.setInt(
+      PreferenceKey.totalWorkLogCount,
+      value: newCount,
+    );
 
     if (newCount < 30) {
       return;
