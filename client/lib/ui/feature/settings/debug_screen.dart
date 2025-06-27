@@ -29,7 +29,6 @@ class DebugScreen extends ConsumerWidget {
           _Reset30WorkLogsReviewStatusTile(),
           _Reset100WorkLogsReviewStatusTile(),
           _ResetAnalysisReviewStatusTile(),
-          _ResetAllReviewStatusTile(),
           SectionHeader(title: 'Crashlytics'),
           _ForceErrorTile(),
           _ForceCrashTile(),
@@ -153,27 +152,6 @@ class _ResetAnalysisReviewStatusTile extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('分析画面レビューリクエスト状態をリセットしました')),
-          );
-        }
-      },
-    );
-  }
-}
-
-class _ResetAllReviewStatusTile extends ConsumerWidget {
-  const _ResetAllReviewStatusTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
-      title: const Text('全レビューリクエスト状態をリセット'),
-      subtitle: const Text('すべてのレビューを再度促すことができるようになります'),
-      onTap: () async {
-        await ref.read(resetAllReviewRequestStatusProvider.future);
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('全レビューリクエスト状態をリセットしました')),
           );
         }
       },

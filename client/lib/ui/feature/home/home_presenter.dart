@@ -232,21 +232,3 @@ Future<void> resetAnalysisReviewRequestStatus(Ref ref) async {
     value: false,
   );
 }
-
-/// 全レビューリクエスト状態をリセット（デバッグ用）
-@riverpod
-Future<void> resetAllReviewRequestStatus(Ref ref) async {
-  final preferenceService = ref.read(preferenceServiceProvider);
-  await preferenceService.setBool(
-    PreferenceKey.hasRequestedAppReviewWhenOver30WorkLogs,
-    value: false,
-  );
-  await preferenceService.setBool(
-    PreferenceKey.hasRequestedReviewWhenOver100WorkLogs,
-    value: false,
-  );
-  await preferenceService.setBool(
-    PreferenceKey.hasRequestedReviewForAnalysisView,
-    value: false,
-  );
-}
