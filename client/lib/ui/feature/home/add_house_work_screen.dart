@@ -260,25 +260,7 @@ class _EmojiCategoryDialog extends StatefulWidget {
   State<_EmojiCategoryDialog> createState() => _EmojiCategoryDialogState();
 }
 
-class _EmojiCategoryDialogState extends State<_EmojiCategoryDialog>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(
-      length: _emojiCategories.length,
-      vsync: this,
-    );
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class _EmojiCategoryDialogState extends State<_EmojiCategoryDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -286,24 +268,31 @@ class _EmojiCategoryDialogState extends State<_EmojiCategoryDialog>
       content: SizedBox(
         width: double.maxFinite,
         height: MediaQuery.of(context).size.height * 0.6,
-        child: Column(
-          children: [
-            // カテゴリタブ
-            TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              tabs: _emojiCategories
-                  .map((category) => Tab(text: category.name))
-                  .toList(),
-            ),
-            const SizedBox(height: 16),
-            // 各カテゴリの絵文字グリッド
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: _emojiCategories.map((category) {
-                  return GridView.builder(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _emojiCategories.map((category) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // セクションヘッダー
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 4,
+                    ),
+                    child: Text(
+                      category.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  // 絵文字グリッド
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 4,
@@ -344,11 +333,14 @@ class _EmojiCategoryDialogState extends State<_EmojiCategoryDialog>
                         ),
                       );
                     },
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
+                  ),
+                  // セクション間の余白
+                  if (category != _emojiCategories.last)
+                    const SizedBox(height: 24),
+                ],
+              );
+            }).toList(),
+          ),
         ),
       ),
       actions: [
