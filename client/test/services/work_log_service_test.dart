@@ -48,7 +48,7 @@ void main() {
           completedBy: 'fallback-user',
         ),
       );
-      registerFallbackValue(PreferenceKey.hasRequestedReview);
+      registerFallbackValue(PreferenceKey.hasRequestedReviewFor30WorkLogs);
     });
 
     setUp(() {

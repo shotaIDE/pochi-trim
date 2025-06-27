@@ -163,16 +163,27 @@ Future<void> undoWorkLog(Ref ref, String workLogId) async {
 /// 条件を満たしている場合にレビューダイアログを表示します。
 @riverpod
 Future<void> checkReviewAfterResuming(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+
+  // 既に分析画面でレビューをリクエストしているかチェック
+  final hasRequestedForAnalysis =
+      await preferenceService.getBool(
+        PreferenceKey.hasRequestedReviewForAnalysisView,
+      ) ??
+      false;
+  if (hasRequestedForAnalysis) {
+    return;
+  }
+
   // 条件をチェックして、満たしている場合のみレビューをリクエスト
   final shouldRequestReview = await _shouldRequestReview(ref);
   if (shouldRequestReview) {
     final reviewService = ref.read(reviewServiceProvider);
     await reviewService.requestReview();
 
-    // レビューをリクエストしたことを記録
-    final preferenceService = ref.read(preferenceServiceProvider);
+    // 分析画面表示によるレビューリクエストを記録
     await preferenceService.setBool(
-      PreferenceKey.hasRequestedReview,
+      PreferenceKey.hasRequestedReviewForAnalysisView,
       value: true,
     );
   }
@@ -183,18 +194,7 @@ Future<void> checkReviewAfterResuming(Ref ref) async {
 /// 以下の条件をすべて満たす場合にtrueを返す：
 /// - 3種類以上の家事が登録されている
 /// - 10回以上の家事ログが存在する
-/// - まだレビューリクエストしていない
 Future<bool> _shouldRequestReview(Ref ref) async {
-  final preferenceService = ref.read(preferenceServiceProvider);
-
-  // 既にレビューをリクエストしているかチェック
-  final hasRequestedReview =
-      await preferenceService.getBool(PreferenceKey.hasRequestedReview) ??
-      false;
-  if (hasRequestedReview) {
-    return false;
-  }
-
   try {
     // 家事の種類数をチェック
     final houseWorks = await ref.read(_houseWorksFilePrivateProvider.future);
@@ -222,11 +222,15 @@ Future<bool> _shouldRequestReview(Ref ref) async {
 Future<void> resetReviewRequestStatus(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
   await preferenceService.setBool(
-    PreferenceKey.hasRequestedReview,
+    PreferenceKey.hasRequestedReviewFor30WorkLogs,
     value: false,
   );
-  await preferenceService.setInt(
-    PreferenceKey.lastReviewRequestThreshold,
-    value: 0,
+  await preferenceService.setBool(
+    PreferenceKey.hasRequestedReviewFor100WorkLogs,
+    value: false,
+  );
+  await preferenceService.setBool(
+    PreferenceKey.hasRequestedReviewForAnalysisView,
+    value: false,
   );
 }

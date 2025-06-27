@@ -162,44 +162,33 @@ class WorkLogService {
       value: newCount,
     );
 
-    // 閾値に達しているかチェック
-    if (!_shouldRequestReviewForThreshold(newCount)) {
-      return;
+    // 各閾値での個別チェック
+    if (newCount == 30) {
+      final hasRequested30 =
+          await preferenceService.getBool(
+            PreferenceKey.hasRequestedReviewFor30WorkLogs,
+          ) ??
+          false;
+      if (!hasRequested30) {
+        await reviewService.requestReview();
+        await preferenceService.setBool(
+          PreferenceKey.hasRequestedReviewFor30WorkLogs,
+          value: true,
+        );
+      }
+    } else if (newCount == 100) {
+      final hasRequested100 =
+          await preferenceService.getBool(
+            PreferenceKey.hasRequestedReviewFor100WorkLogs,
+          ) ??
+          false;
+      if (!hasRequested100) {
+        await reviewService.requestReview();
+        await preferenceService.setBool(
+          PreferenceKey.hasRequestedReviewFor100WorkLogs,
+          value: true,
+        );
+      }
     }
-
-    // 最後にレビューをリクエストした閾値をチェック
-    final lastRequestThreshold =
-        await preferenceService.getInt(
-          PreferenceKey.lastReviewRequestThreshold,
-        ) ??
-        0;
-
-    // 既により大きい閾値でリクエスト済みの場合はスキップ
-    if (newCount <= lastRequestThreshold) {
-      return;
-    }
-
-    // レビューをリクエスト
-    await reviewService.requestReview();
-
-    // 今回リクエストした閾値を記録
-    await preferenceService.setInt(
-      PreferenceKey.lastReviewRequestThreshold,
-      value: newCount,
-    );
-
-    // レビューをリクエストしたことを記録（後方互換性のため残す）
-    await preferenceService.setBool(
-      PreferenceKey.hasRequestedReview,
-      value: true,
-    );
-  }
-
-  /// 家事ログ完了数が閾値に達した場合のレビューリクエスト条件をチェック
-  ///
-  /// 家事ログ完了数が特定の閾値（30、100個）に達した場合にtrueを返す
-  bool _shouldRequestReviewForThreshold(int totalWorkLogCount) {
-    const reviewRequestThresholds = [30, 100];
-    return reviewRequestThresholds.contains(totalWorkLogCount);
   }
 }
