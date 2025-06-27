@@ -143,7 +143,10 @@ class WorkLogService {
     final preferenceService = ref.read(preferenceServiceProvider);
 
     final currentCount =
-        await preferenceService.getInt(PreferenceKey.totalWorkLogCount) ?? 0;
+        await preferenceService.getInt(
+          PreferenceKey.workLogCountForAppReviewRequest,
+        ) ??
+        0;
     final newCount = currentCount + 1;
 
     if (newCount >= 100) {
@@ -169,7 +172,7 @@ class WorkLogService {
     // 100件以下の場合は、永続化されているカウントを更新
     // 100件より先はレビューリクエスト行わない関係上カウンターの値が不要になるため、更新の永続化は行わない
     await preferenceService.setInt(
-      PreferenceKey.totalWorkLogCount,
+      PreferenceKey.workLogCountForAppReviewRequest,
       value: newCount,
     );
 

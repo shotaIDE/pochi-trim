@@ -184,7 +184,10 @@ Future<void> requestAppReviewAfterFirstAnalysisIfNeeded(Ref ref) async {
 
   // 条件：10回以上の家事ログが存在する
   final totalWorkLogCount =
-      await preferenceService.getInt(PreferenceKey.totalWorkLogCount) ?? 0;
+      await preferenceService.getInt(
+        PreferenceKey.workLogCountForAppReviewRequest,
+      ) ??
+      0;
   if (totalWorkLogCount < 10) {
     return;
   }
