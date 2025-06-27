@@ -41,6 +41,11 @@ class DebugScreen extends ConsumerWidget {
             onReset: () =>
                 ref.read(resetAnalysisReviewRequestStatusProvider.future),
           ),
+          _ResetReviewStatusTile(
+            keyDisplayName: '家事ログ完了回数',
+            onReset: () =>
+                ref.read(resetWorkLogCountForAppReviewRequestProvider.future),
+          ),
           const SectionHeader(title: 'Crashlytics'),
           const _ForceErrorTile(),
           const _ForceCrashTile(),

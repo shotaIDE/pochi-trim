@@ -34,3 +34,13 @@ Future<void> resetAnalysisReviewRequestStatus(Ref ref) async {
     value: false,
   );
 }
+
+/// 家事ログ完了回数を0にリセット（デバッグ用）
+@riverpod
+Future<void> resetWorkLogCountForAppReviewRequest(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+  await preferenceService.setInt(
+    PreferenceKey.workLogCountForAppReviewRequest,
+    value: 0,
+  );
+}
