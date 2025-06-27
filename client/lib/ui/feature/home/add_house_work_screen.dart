@@ -215,7 +215,7 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
                   child: Center(
                     child: Text(
                       _emojiList[index],
-                      style: const TextStyle(fontSize: 28),
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
                 ),
