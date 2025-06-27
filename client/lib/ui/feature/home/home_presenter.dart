@@ -203,10 +203,10 @@ Future<bool> _shouldRequestReview(Ref ref) async {
     }
 
     // 家事ログの総数をチェック
-    final workLogs = await ref.read(
-      _completedWorkLogsFilePrivateProvider.future,
-    );
-    if (workLogs.length < 10) {
+    final preferenceService = ref.read(preferenceServiceProvider);
+    final totalWorkLogCount =
+        await preferenceService.getInt(PreferenceKey.totalWorkLogCount) ?? 0;
+    if (totalWorkLogCount < 10) {
       return false;
     }
 
