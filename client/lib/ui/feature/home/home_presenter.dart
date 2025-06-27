@@ -168,6 +168,13 @@ Future<void> checkReviewAfterResuming(Ref ref) async {
   if (shouldRequestReview) {
     final reviewService = ref.read(reviewServiceProvider);
     await reviewService.requestReview();
+
+    // レビューをリクエストしたことを記録
+    final preferenceService = ref.read(preferenceServiceProvider);
+    await preferenceService.setBool(
+      PreferenceKey.hasRequestedReview,
+      value: true,
+    );
   }
 }
 

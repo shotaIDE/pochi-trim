@@ -179,6 +179,12 @@ class WorkLogService {
 
     // レビューをリクエスト
     await reviewService.requestReview();
+
+    // レビューをリクエストしたことを記録
+    await preferenceService.setBool(
+      PreferenceKey.hasRequestedReview,
+      value: true,
+    );
   }
 
   /// 家事ログ完了数が閾値に達した場合のレビューリクエスト条件をチェック
