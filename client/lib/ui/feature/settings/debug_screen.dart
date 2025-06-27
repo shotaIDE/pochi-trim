@@ -22,16 +22,28 @@ class DebugScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('デバッグ')),
       body: ListView(
-        children: const [
-          SectionHeader(title: 'RevenueCat'),
-          _ToggleIsProTile(),
-          SectionHeader(title: 'レビュー'),
-          _Reset30WorkLogsReviewStatusTile(),
-          _Reset100WorkLogsReviewStatusTile(),
-          _ResetAnalysisReviewStatusTile(),
-          SectionHeader(title: 'Crashlytics'),
-          _ForceErrorTile(),
-          _ForceCrashTile(),
+        children: [
+          const SectionHeader(title: 'RevenueCat'),
+          const _ToggleIsProTile(),
+          const SectionHeader(title: 'アプリ内レビュー'),
+          _ResetReviewStatusTile(
+            keyDisplayName: '家事ログ30回完了のフラグ',
+            onReset: () =>
+                ref.read(reset30WorkLogsReviewRequestStatusProvider.future),
+          ),
+          _ResetReviewStatusTile(
+            keyDisplayName: '家事ログ100回完了のフラグ',
+            onReset: () =>
+                ref.read(reset100WorkLogsReviewRequestStatusProvider.future),
+          ),
+          _ResetReviewStatusTile(
+            keyDisplayName: '初めて分析したフラグ',
+            onReset: () =>
+                ref.read(resetAnalysisReviewRequestStatusProvider.future),
+          ),
+          const SectionHeader(title: 'Crashlytics'),
+          const _ForceErrorTile(),
+          const _ForceCrashTile(),
         ],
       ),
     );
@@ -96,65 +108,37 @@ class _ToggleIsProTile extends ConsumerWidget {
   }
 }
 
-class _Reset30WorkLogsReviewStatusTile extends ConsumerWidget {
-  const _Reset30WorkLogsReviewStatusTile();
+class _ResetReviewStatusTile extends StatefulWidget {
+  const _ResetReviewStatusTile({
+    required this.keyDisplayName,
+    required this.onReset,
+  });
+
+  final String keyDisplayName;
+  final Future<void> Function() onReset;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
-      title: const Text('30回レビューリクエスト状態をリセット'),
-      subtitle: const Text('30回目の家事ログ完了時のレビューを再度促すことができます'),
-      onTap: () async {
-        await ref.read(reset30WorkLogsReviewRequestStatusProvider.future);
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('30回レビューリクエスト状態をリセットしました')),
-          );
-        }
-      },
-    );
-  }
+  State<_ResetReviewStatusTile> createState() => _ResetReviewStatusTileState();
 }
 
-class _Reset100WorkLogsReviewStatusTile extends ConsumerWidget {
-  const _Reset100WorkLogsReviewStatusTile();
-
+class _ResetReviewStatusTileState extends State<_ResetReviewStatusTile> {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
-      title: const Text('100回レビューリクエスト状態をリセット'),
-      subtitle: const Text('100回目の家事ログ完了時のレビューを再度促すことができます'),
-      onTap: () async {
-        await ref.read(reset100WorkLogsReviewRequestStatusProvider.future);
+  Widget build(BuildContext context) {
+    final title = '${widget.keyDisplayName}をリセット';
 
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('100回レビューリクエスト状態をリセットしました')),
-          );
-        }
-      },
-    );
+    return ListTile(title: Text(title), onTap: _onTap);
   }
-}
 
-class _ResetAnalysisReviewStatusTile extends ConsumerWidget {
-  const _ResetAnalysisReviewStatusTile();
+  Future<void> _onTap() async {
+    await widget.onReset();
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
-      title: const Text('分析画面レビューリクエスト状態をリセット'),
-      subtitle: const Text('分析画面表示後のレビューを再度促すことができます'),
-      onTap: () async {
-        await ref.read(resetAnalysisReviewRequestStatusProvider.future);
+    if (!mounted) {
+      return;
+    }
 
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('分析画面レビューリクエスト状態をリセットしました')),
-          );
-        }
-      },
-    );
+    final message = '${widget.keyDisplayName}をリセットしました';
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
