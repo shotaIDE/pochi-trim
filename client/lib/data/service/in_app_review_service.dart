@@ -6,12 +6,12 @@ part 'in_app_review_service.g.dart';
 
 @riverpod
 InAppReviewService inAppReviewService(Ref ref) {
-  return InAppReviewService();
+  return const InAppReviewService();
 }
 
 /// ストアレビューを促進するサービス
 class InAppReviewService {
-  InAppReviewService();
+  const InAppReviewService();
 
   /// レビューをリクエスト
   Future<void> requestReview() async {
