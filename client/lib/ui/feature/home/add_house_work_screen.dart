@@ -254,7 +254,6 @@ class _EmojiCategoryDialogState extends State<_EmojiCategoryDialog> {
       title: const Text('アイコンを選択'),
       content: SizedBox(
         width: double.maxFinite,
-        height: MediaQuery.of(context).size.height * 0.6,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
