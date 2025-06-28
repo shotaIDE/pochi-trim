@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
-import 'package:pochi_trim/ui/feature/home/add_house_work_screen.dart';
 import 'package:pochi_trim/ui/feature/home/house_work_item.dart';
 import 'package:pochi_trim/ui/feature/home/house_works_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -11,10 +10,12 @@ class HouseWorksTab extends ConsumerStatefulWidget {
     super.key,
     required this.onCompleteButtonTap,
     required this.onLongPressHouseWork,
+    required this.onAddHouseWorkButtonTap,
   });
 
   final void Function(HouseWork) onCompleteButtonTap;
   final void Function(HouseWork) onLongPressHouseWork;
+  final VoidCallback onAddHouseWorkButtonTap;
 
   @override
   ConsumerState<HouseWorksTab> createState() => _HouseWorksTabState();
@@ -76,7 +77,9 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
         }
 
         if (houseWorks.isEmpty) {
-          return const _EmptyStateWidget();
+          return _EmptyStateWidget(
+            onAddHouseWorkButtonTap: widget.onAddHouseWorkButtonTap,
+          );
         }
 
         return ListView.separated(
@@ -98,7 +101,11 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
 }
 
 class _EmptyStateWidget extends StatelessWidget {
-  const _EmptyStateWidget();
+  const _EmptyStateWidget({
+    required this.onAddHouseWorkButtonTap,
+  });
+
+  final VoidCallback onAddHouseWorkButtonTap;
 
   @override
   Widget build(BuildContext context) {
@@ -122,9 +129,7 @@ class _EmptyStateWidget extends StatelessWidget {
       textAlign: TextAlign.center,
     );
     final addButton = FilledButton.icon(
-      onPressed: () {
-        Navigator.of(context).push(AddHouseWorkScreen.route());
-      },
+      onPressed: onAddHouseWorkButtonTap,
       icon: const Icon(Icons.add),
       label: const Text('家事を登録する'),
       style: FilledButton.styleFrom(
