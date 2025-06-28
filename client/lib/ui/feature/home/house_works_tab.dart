@@ -103,7 +103,7 @@ class _EmptyStateWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final emptyIcon = Icon(
-      Icons.playlist_add,
+      Icons.egg,
       size: 64,
       color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
@@ -121,14 +121,21 @@ class _EmptyStateWidget extends StatelessWidget {
       ),
       textAlign: TextAlign.center,
     );
-    final addButton = ElevatedButton.icon(
+    final addButton = FilledButton.icon(
       onPressed: () {
         Navigator.of(context).push(AddHouseWorkScreen.route());
       },
       icon: const Icon(Icons.add),
       label: const Text('家事を登録する'),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        textStyle: Theme.of(context).textTheme.titleMedium,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        elevation: 4,
+        shadowColor: Theme.of(
+          context,
+        ).colorScheme.primary.withValues(alpha: 0.5),
       ),
     );
 
