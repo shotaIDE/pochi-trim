@@ -6,37 +6,27 @@ import 'package:pochi_trim/data/model/max_house_work_limit_exceeded_exception.da
 import 'package:pochi_trim/data/repository/dao/add_house_work_args.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_presenter.dart';
+import 'package:pochi_trim/ui/feature/home/emoji_category.dart';
 import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
 
-// カテゴリ別の絵文字リスト
-class _EmojiCategory {
-  const _EmojiCategory({
-    required this.name,
-    required this.emojis,
-  });
-
-  final String name;
-  final List<String> emojis;
-}
-
-const _emojiCategories = <_EmojiCategory>[
-  _EmojiCategory(
+const _emojiCategories = <EmojiCategory>[
+  EmojiCategory(
     name: 'キッチン',
     emojis: ['🍽️', '🍴', '🍔', '🦴', '🥣', '🥛', '🧂', '🫙'],
   ),
-  _EmojiCategory(
+  EmojiCategory(
     name: '水回り',
     emojis: ['🛁', '🚽', '🧻', '🧴', '💧', '💦', '🌊'],
   ),
-  _EmojiCategory(
+  EmojiCategory(
     name: '掃除',
     emojis: ['🧹', '🧽', '🧼', '🫧', '🪣', '🗑️'],
   ),
-  _EmojiCategory(
+  EmojiCategory(
     name: '洗濯',
     emojis: ['👕', '🩲', '🧺'],
   ),
-  _EmojiCategory(
+  EmojiCategory(
     name: 'その他',
     emojis: ['🚼', '🐕', '🐈', '🏠'],
   ),
