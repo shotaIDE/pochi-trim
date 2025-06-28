@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/ui/feature/home/add_house_work_screen.dart';
 import 'package:pochi_trim/ui/feature/home/house_work_item.dart';
 import 'package:pochi_trim/ui/feature/home/house_works_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -75,19 +76,7 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
         }
 
         if (houseWorks.isEmpty) {
-          const emptyIcon = Icon(Icons.home_work, size: 64, color: Colors.grey);
-          const emptyText = Text(
-            '登録されている家事はありません。\n家事を追加すると、ここに表示されます',
-            style: TextStyle(fontSize: 18, color: Colors.grey),
-          );
-
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 16,
-              children: [emptyIcon, emptyText],
-            ),
-          );
+          return const _EmptyStateWidget();
         }
 
         return ListView.separated(
@@ -104,6 +93,61 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
           separatorBuilder: (_, _) => const _Divider(),
         );
       },
+    );
+  }
+}
+
+class _EmptyStateWidget extends StatelessWidget {
+  const _EmptyStateWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    final emptyIcon = Icon(
+      Icons.playlist_add,
+      size: 64,
+      color: Theme.of(context).colorScheme.outline,
+    );
+    final emptyText = Text(
+      '家事が登録されていません',
+      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      textAlign: TextAlign.center,
+    );
+    final emptySubText = Text(
+      '家事を登録し、ログを記録する準備を完了しましょう',
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      textAlign: TextAlign.center,
+    );
+    final addButton = ElevatedButton.icon(
+      onPressed: () {
+        Navigator.of(context).push(AddHouseWorkScreen.route());
+      },
+      icon: const Icon(Icons.add),
+      label: const Text('家事を登録する'),
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      ),
+    );
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            emptyIcon,
+            const SizedBox(height: 24),
+            emptyText,
+            const SizedBox(height: 8),
+            emptySubText,
+            const SizedBox(height: 32),
+            addButton,
+          ],
+        ),
+      ),
     );
   }
 }
