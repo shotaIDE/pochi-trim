@@ -105,7 +105,7 @@ class _EmptyStateWidget extends StatelessWidget {
     final emptyIcon = Icon(
       Icons.playlist_add,
       size: 64,
-      color: Theme.of(context).colorScheme.outline,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
     final emptyText = Text(
       '家事が登録されていません',
@@ -115,7 +115,7 @@ class _EmptyStateWidget extends StatelessWidget {
       textAlign: TextAlign.center,
     );
     final emptySubText = Text(
-      '家事を登録し、ログを記録する準備を完了しましょう',
+      '家事を登録し、ログを記録する準備をしましょう',
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
@@ -141,7 +141,7 @@ class _EmptyStateWidget extends StatelessWidget {
             emptyIcon,
             const SizedBox(height: 24),
             emptyText,
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             emptySubText,
             const SizedBox(height: 32),
             addButton,
