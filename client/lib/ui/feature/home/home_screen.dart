@@ -92,9 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final addHouseWorkButton = FloatingActionButton(
       tooltip: '家事を追加する',
-      onPressed: () {
-        Navigator.of(context).push(AddHouseWorkScreen.route());
-      },
+      onPressed: _onAddHouseWorkButtonTap,
       child: const Icon(Icons.add),
     );
 
@@ -114,6 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 HouseWorksTab(
                   onCompleteButtonTap: _onCompleteHouseWorkButtonTap,
                   onLongPressHouseWork: _onLongPressHouseWork,
+                  onAddHouseWorkButtonTap: _onAddHouseWorkButtonTap,
                 ),
                 WorkLogsTab(onDuplicateButtonTap: _onDuplicateWorkLogButtonTap),
               ],
@@ -146,6 +145,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
     );
+  }
+
+  void _onAddHouseWorkButtonTap() {
+    Navigator.of(context).push(AddHouseWorkScreen.route());
   }
 
   Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
