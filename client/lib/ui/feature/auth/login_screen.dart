@@ -78,12 +78,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
 
     final children = <Widget>[
-      const Text(
-        'House Worker',
-        style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-      ),
+      Text('ぽちそぎ', style: Theme.of(context).textTheme.headlineLarge),
       const SizedBox(height: 20),
-      const Text('家事を簡単に記録・管理できるアプリ', style: TextStyle(fontSize: 16)),
+      Text(
+        '過剰な家事を「そぎ落とし」\nやりたいことに集中しましょう',
+        style: Theme.of(context).textTheme.bodyLarge,
+        textAlign: TextAlign.center,
+      ),
       const SizedBox(height: 60),
       startWithGoogleButton,
       const SizedBox(height: 16),
