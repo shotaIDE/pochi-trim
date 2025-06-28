@@ -32,9 +32,10 @@ const _emojiCategories = <EmojiCategory>[
   ),
 ];
 
-// 全ての絵文字を一つのリストにまとめる
+// 全ての絵文字を一つのリストにまとめる（重複除去）
 final List<String> _allEmojis = _emojiCategories
     .expand((category) => category.emojis)
+    .toSet()
     .toList();
 
 // ランダムな絵文字を取得する関数
