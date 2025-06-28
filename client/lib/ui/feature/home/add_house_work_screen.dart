@@ -101,7 +101,7 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
-                        ).colorScheme.surfaceContainerHighest,
+                        ).colorScheme.surfaceContainerHigh,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
@@ -261,7 +261,6 @@ class _EmojiCategoryDialogState extends State<_EmojiCategoryDialog> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // セクションヘッダー
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       vertical: 8,
@@ -271,11 +270,9 @@ class _EmojiCategoryDialogState extends State<_EmojiCategoryDialog> {
                       category.name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
-                  // 絵文字グリッド
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -313,7 +310,7 @@ class _EmojiCategoryDialogState extends State<_EmojiCategoryDialog> {
                           child: Center(
                             child: Text(
                               emoji,
-                              style: const TextStyle(fontSize: 28),
+                              style: Theme.of(context).textTheme.headlineMedium,
                             ),
                           ),
                         ),
