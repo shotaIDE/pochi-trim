@@ -6,66 +6,42 @@ import 'package:pochi_trim/data/model/max_house_work_limit_exceeded_exception.da
 import 'package:pochi_trim/data/repository/dao/add_house_work_args.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_presenter.dart';
+import 'package:pochi_trim/ui/feature/home/emoji_category.dart';
 import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
 
-// ランダムな絵文字を生成するためのリスト
-const _emojiList = <String>[
-  '🧹',
-  '🧼',
-  '🧽',
-  '🧺',
-  '🛁',
-  '🚿',
-  '🚽',
-  '🧻',
-  '🧯',
-  '🔥',
-  '💧',
-  '🌊',
-  '🍽️',
-  '🍴',
-  '🥄',
-  '🍳',
-  '🥘',
-  '🍲',
-  '🥣',
-  '🥗',
-  '🧂',
-  '🧊',
-  '🧴',
-  '🧷',
-  '🧺',
-  '🧹',
-  '🧻',
-  '🧼',
-  '🧽',
-  '🧾',
-  '📱',
-  '💻',
-  '🖥️',
-  '🖨️',
-  '⌨️',
-  '🖱️',
-  '🧮',
-  '📔',
-  '📕',
-  '📖',
-  '📗',
-  '📘',
-  '📙',
-  '📚',
-  '📓',
-  '📒',
-  '📃',
-  '📜',
-  '📄',
-  '📰',
+const _emojiCategories = <EmojiCategory>[
+  EmojiCategory(
+    name: 'キッチン',
+    emojis: ['🍽️', '🍴', '🍔', '🦴', '🥣', '🥛', '🧂', '🫙'],
+  ),
+  EmojiCategory(
+    name: '水回り',
+    emojis: ['🛁', '🚽', '🧻', '🧴', '💧', '💦', '🌊'],
+  ),
+  EmojiCategory(
+    name: '掃除',
+    emojis: ['🧹', '🧽', '🧼', '🫧', '🪣', '🗑️'],
+  ),
+  EmojiCategory(
+    name: '洗濯',
+    emojis: ['👕', '🩲', '🧺'],
+  ),
+  EmojiCategory(
+    name: 'その他',
+    emojis: ['🚼', '🐕', '🐈', '🏠'],
+  ),
 ];
+
+// 全ての絵文字を一つのリストにまとめる（重複除去）
+final List<String> _allEmojis = _emojiCategories
+    .expand((category) => category.emojis)
+    .toSet()
+    .toList();
 
 // ランダムな絵文字を取得する関数
 String getRandomEmoji() {
   final random = Random();
-  return _emojiList[random.nextInt(_emojiList.length)];
+  return _allEmojis[random.nextInt(_allEmojis.length)];
 }
 
 class AddHouseWorkScreen extends ConsumerStatefulWidget {
@@ -126,7 +102,7 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
-                        ).colorScheme.surfaceContainerHighest,
+                        ).colorScheme.surfaceContainerHigh,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
@@ -179,57 +155,7 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
   Future<void> _selectEmoji() async {
     final selectedEmoji = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('アイコンを選択'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: GridView.builder(
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-            ),
-            itemCount: _emojiList.length,
-            itemBuilder: (context, index) {
-              return InkWell(
-                onTap: () => Navigator.of(context).pop(_emojiList[index]),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  constraints: const BoxConstraints(
-                    minWidth: 44,
-                    minHeight: 44,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                    border: _icon == _emojiList[index]
-                        ? Border.all(
-                            color: Theme.of(context).colorScheme.primary,
-                            width: 2,
-                          )
-                        : null,
-                  ),
-                  child: Center(
-                    child: Text(
-                      _emojiList[index],
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('キャンセル'),
-          ),
-        ],
-      ),
+      builder: (context) => _EmojiCategoryDialog(currentIcon: _icon),
     );
 
     if (selectedEmoji != null) {
@@ -308,6 +234,104 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _EmojiCategoryDialog extends StatefulWidget {
+  const _EmojiCategoryDialog({required this.currentIcon});
+
+  final String currentIcon;
+
+  @override
+  State<_EmojiCategoryDialog> createState() => _EmojiCategoryDialogState();
+}
+
+class _EmojiCategoryDialogState extends State<_EmojiCategoryDialog> {
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('アイコンを選択'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _emojiCategories.map((category) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 4,
+                    ),
+                    child: Text(
+                      category.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                        ),
+                    itemCount: category.emojis.length,
+                    itemBuilder: (context, index) {
+                      final emoji = category.emojis[index];
+                      return InkWell(
+                        onTap: () => Navigator.of(context).pop(emoji),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            minWidth: 44,
+                            minHeight: 44,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(12),
+                            border: widget.currentIcon == emoji
+                                ? Border.all(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    width: 2,
+                                  )
+                                : null,
+                          ),
+                          child: Center(
+                            child: Text(
+                              emoji,
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  // セクション間の余白
+                  if (category != _emojiCategories.last)
+                    const SizedBox(height: 24),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('キャンセル'),
+        ),
+      ],
     );
   }
 }
