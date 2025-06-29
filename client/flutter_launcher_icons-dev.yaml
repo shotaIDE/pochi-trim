@@ -1,9 +1,3 @@
 flutter_launcher_icons:
   image_path: "assets/launcher-icon/launcher-icon-ios_dev.png"
   ios: true
-  android: true
-  adaptive_icon_background: "#ffffff"
-  adaptive_icon_foreground: "assets/launcher-icon/adaptive-launcher-icon_dev.png"
-  # 余白込みの画像を使用するため、ライブラリでは余白を追加しない
-  adaptive_icon_foreground_inset: 0
-  min_sdk_android: 26
