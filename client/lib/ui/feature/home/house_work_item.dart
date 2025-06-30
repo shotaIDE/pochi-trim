@@ -56,7 +56,7 @@ class _HouseWorkItemState extends State<HouseWorkItem> {
       widget.houseWork.title,
       style: Theme.of(context).textTheme.titleMedium,
     );
-    final item = GestureDetector(
+    final item = InkWell(
       onTap: _onTap,
       onLongPress: () => widget.onLongPress(widget.houseWork),
       child: Padding(
