@@ -190,6 +190,11 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
       createdBy: userProfile.id,
     );
 
+    // チュートリアル表示判定を登録前に行う
+    final shouldShowTutorial = await ref.read(
+      shouldShowTutorialProvider(args).future,
+    );
+
     try {
       await ref.read(saveHouseWorkResultProvider(args).future);
     } on MaxHouseWorkLimitExceededException {
@@ -211,7 +216,7 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
       context,
     ).showSnackBar(const SnackBar(content: Text('家事を登録しました')));
 
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(shouldShowTutorial);
   }
 
   Future<void> _showProUpgradeDialog(String message) async {

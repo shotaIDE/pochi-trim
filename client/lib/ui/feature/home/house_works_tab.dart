@@ -11,11 +11,13 @@ class HouseWorksTab extends ConsumerStatefulWidget {
     required this.onCompleteButtonTap,
     required this.onLongPressHouseWork,
     required this.onAddHouseWorkButtonTap,
+    this.houseWorkTileKey,
   });
 
   final void Function(HouseWork) onCompleteButtonTap;
   final void Function(HouseWork) onLongPressHouseWork;
   final VoidCallback onAddHouseWorkButtonTap;
+  final GlobalKey? houseWorkTileKey;
 
   @override
   ConsumerState<HouseWorksTab> createState() => _HouseWorksTabState();
@@ -88,6 +90,7 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
             final houseWork = houseWorks[index];
 
             return HouseWorkItem(
+              key: index == 0 ? widget.houseWorkTileKey : null,
               houseWork: houseWork,
               onCompleteTap: widget.onCompleteButtonTap,
               onLongPress: widget.onLongPressHouseWork,

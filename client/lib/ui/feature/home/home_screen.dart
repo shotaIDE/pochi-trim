@@ -6,6 +6,7 @@ import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/data/service/tutorial_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_screen.dart';
 import 'package:pochi_trim/ui/feature/home/home_presenter.dart';
@@ -36,6 +37,10 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   var _isLogTabHighlighted = false;
+
+  // チュートリアル用のGlobalKeys
+  final GlobalKey<State<StatefulWidget>> _houseWorkTileKey = GlobalKey();
+  final GlobalKey<State<StatefulWidget>> _quickRegistrationBarKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -113,12 +118,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   onCompleteButtonTap: _onCompleteHouseWorkButtonTap,
                   onLongPressHouseWork: _onLongPressHouseWork,
                   onAddHouseWorkButtonTap: _onAddHouseWorkButtonTap,
+                  houseWorkTileKey: _houseWorkTileKey,
                 ),
                 WorkLogsTab(onDuplicateButtonTap: _onDuplicateWorkLogButtonTap),
               ],
             ),
             floatingActionButton: addHouseWorkButton,
             bottomNavigationBar: _QuickRegisterBottomBar(
+              key: _quickRegistrationBarKey,
               onTap: _onQuickRegisterButtonPressed,
             ),
           ),
@@ -147,8 +154,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _onAddHouseWorkButtonTap() {
-    Navigator.of(context).push(AddHouseWorkScreen.route());
+  Future<void> _onAddHouseWorkButtonTap() async {
+    final result = await Navigator.of(context).push(
+      AddHouseWorkScreen.route(),
+    );
+
+    if (result is bool) {
+      final shouldShow = result! as bool;
+      if (shouldShow && mounted) {
+        // チュートリアルを表示
+        await _showTutorial();
+      }
+    }
+  }
+
+  Future<void> _showTutorial() async {
+    final tutorialService = ref.read(tutorialServiceProvider);
+    await tutorialService.showFirstHouseWorkTutorial(
+      context: context,
+      houseWorkTileKey: _houseWorkTileKey,
+      quickRegistrationBarKey: _quickRegistrationBarKey,
+    );
   }
 
   Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
@@ -382,7 +408,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 class _QuickRegisterBottomBar extends ConsumerWidget {
-  const _QuickRegisterBottomBar({required this.onTap});
+  const _QuickRegisterBottomBar({super.key, required this.onTap});
 
   final void Function(HouseWork) onTap;
 

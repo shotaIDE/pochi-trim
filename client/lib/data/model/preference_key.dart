@@ -5,4 +5,5 @@ enum PreferenceKey {
   hasRequestedAppReviewWhenOver30WorkLogs,
   hasRequestedReviewWhenOver100WorkLogs,
   hasRequestedReviewForAnalysisView,
+  hasShownFirstHouseWorkTutorial,
 }
