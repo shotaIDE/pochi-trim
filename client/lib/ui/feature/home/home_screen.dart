@@ -8,6 +8,7 @@ import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/service/tutorial_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
+import 'package:pochi_trim/ui/feature/home/add_house_work_result.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_screen.dart';
 import 'package:pochi_trim/ui/feature/home/home_presenter.dart';
 import 'package:pochi_trim/ui/feature/home/house_works_tab.dart';
@@ -159,9 +160,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       AddHouseWorkScreen.route(),
     );
 
-    if (result is bool) {
-      final shouldShow = result! as bool;
-      if (shouldShow && mounted) {
+    if (result is AddHouseWorkResult && mounted) {
+      if (result.shouldShowTutorial) {
         // チュートリアルを表示
         await _showTutorial();
       }

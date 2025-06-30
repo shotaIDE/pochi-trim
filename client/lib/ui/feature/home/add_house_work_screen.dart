@@ -6,6 +6,7 @@ import 'package:pochi_trim/data/model/max_house_work_limit_exceeded_exception.da
 import 'package:pochi_trim/data/repository/dao/add_house_work_args.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_presenter.dart';
+import 'package:pochi_trim/ui/feature/home/add_house_work_result.dart';
 import 'package:pochi_trim/ui/feature/home/emoji_category.dart';
 import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
 
@@ -49,8 +50,8 @@ class AddHouseWorkScreen extends ConsumerStatefulWidget {
 
   static const name = 'AddHouseWorkScreen';
 
-  static MaterialPageRoute<AddHouseWorkScreen> route() =>
-      MaterialPageRoute<AddHouseWorkScreen>(
+  static MaterialPageRoute<AddHouseWorkResult> route() =>
+      MaterialPageRoute<AddHouseWorkResult>(
         builder: (_) => const AddHouseWorkScreen(),
         settings: const RouteSettings(name: name),
         fullscreenDialog: true,
@@ -216,7 +217,9 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
       context,
     ).showSnackBar(const SnackBar(content: Text('家事を登録しました')));
 
-    Navigator.of(context).pop(shouldShowTutorial);
+    Navigator.of(context).pop(
+      AddHouseWorkResult(shouldShowTutorial: shouldShowTutorial),
+    );
   }
 
   Future<void> _showProUpgradeDialog(String message) async {
