@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const seedColor = Color.fromRGBO(0, 122, 136, 1);
+const seedColor = Color.fromRGBO(0, 122, 204, 1);
 
 ThemeData getLightTheme() {
   return ThemeData(
