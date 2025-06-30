@@ -25,19 +25,7 @@ class TutorialService {
   }) async {
     final preferenceService = ref.read(preferenceServiceProvider);
 
-    // 既にチュートリアルを表示済みかチェック
-    final hasShownTutorial = await preferenceService.getBool(
-      PreferenceKey.hasShownFirstHouseWorkTutorial,
-    );
-
-    if (hasShownTutorial == true) {
-      return;
-    }
-
-    final targets = <TargetFocus>[];
-
-    // 家事タイルのハイライト
-    targets.add(
+    final targets = <TargetFocus>[
       TargetFocus(
         identify: 'houseWorkTile',
         keyTarget: houseWorkTileKey,
@@ -71,11 +59,8 @@ class TutorialService {
             ),
           ),
         ],
+        shape: ShapeLightFocus.RRect,
       ),
-    );
-
-    // クイック登録バーのハイライト
-    targets.add(
       TargetFocus(
         identify: 'quickRegistrationBar',
         keyTarget: quickRegistrationBarKey,
@@ -121,7 +106,7 @@ class TutorialService {
           ),
         ],
       ),
-    );
+    ];
 
     final tutorialCoachMark = TutorialCoachMark(
       targets: targets,
