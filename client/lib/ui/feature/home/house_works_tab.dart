@@ -10,10 +10,12 @@ class HouseWorksTab extends ConsumerStatefulWidget {
     super.key,
     required this.onCompleteButtonTap,
     required this.onLongPressHouseWork,
+    required this.onAddHouseWorkButtonTap,
   });
 
   final void Function(HouseWork) onCompleteButtonTap;
   final void Function(HouseWork) onLongPressHouseWork;
+  final VoidCallback onAddHouseWorkButtonTap;
 
   @override
   ConsumerState<HouseWorksTab> createState() => _HouseWorksTabState();
@@ -75,18 +77,8 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
         }
 
         if (houseWorks.isEmpty) {
-          const emptyIcon = Icon(Icons.home_work, size: 64, color: Colors.grey);
-          const emptyText = Text(
-            '登録されている家事はありません。\n家事を追加すると、ここに表示されます',
-            style: TextStyle(fontSize: 18, color: Colors.grey),
-          );
-
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 16,
-              children: [emptyIcon, emptyText],
-            ),
+          return _EmptyStateWidget(
+            onAddHouseWorkButtonTap: widget.onAddHouseWorkButtonTap,
           );
         }
 
@@ -104,6 +96,70 @@ class _HouseWorksTabState extends ConsumerState<HouseWorksTab> {
           separatorBuilder: (_, _) => const _Divider(),
         );
       },
+    );
+  }
+}
+
+class _EmptyStateWidget extends StatelessWidget {
+  const _EmptyStateWidget({
+    required this.onAddHouseWorkButtonTap,
+  });
+
+  final VoidCallback onAddHouseWorkButtonTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final emptyIcon = Icon(
+      Icons.egg,
+      size: 64,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    );
+    final emptyText = Text(
+      '家事が登録されていません',
+      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      textAlign: TextAlign.center,
+    );
+    final emptySubText = Text(
+      '家事を登録し、ログを記録する準備をしましょう',
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      textAlign: TextAlign.center,
+    );
+    final addButton = FilledButton.icon(
+      onPressed: onAddHouseWorkButtonTap,
+      icon: const Icon(Icons.add),
+      label: const Text('家事を登録する'),
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        textStyle: Theme.of(context).textTheme.titleMedium,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        elevation: 4,
+        shadowColor: Theme.of(
+          context,
+        ).colorScheme.primary.withValues(alpha: 0.5),
+      ),
+    );
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            emptyIcon,
+            const SizedBox(height: 24),
+            emptyText,
+            const SizedBox(height: 12),
+            emptySubText,
+            const SizedBox(height: 32),
+            addButton,
+          ],
+        ),
+      ),
     );
   }
 }

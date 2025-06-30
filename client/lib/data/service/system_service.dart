@@ -22,4 +22,17 @@ class SystemService {
   Future<void> doHapticFeedbackActionReceived() async {
     await HapticFeedback.mediumImpact();
   }
+
+  /// ユーザーアクションが拒否されたときの触覚フィードバックを実行する
+  Future<void> doHapticFeedbackActionRejected() async {
+    // リジェクトされた感を伝えるため、断続的なパターンで振動させる
+    // パターン: 小さい振動 → 休止 → 小さい振動 → 休止 → 大きい振動
+    // `vibration` ライブラリが以下のようなパターンを表現するために適切だが、
+    // ライブラリが SPM 対応しておらずメンテナンス性の懸念があるため利用していない。
+    await HapticFeedback.mediumImpact();
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    await HapticFeedback.mediumImpact();
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    await HapticFeedback.heavyImpact();
+  }
 }

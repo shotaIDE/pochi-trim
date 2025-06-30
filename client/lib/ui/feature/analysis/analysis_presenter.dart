@@ -108,90 +108,76 @@ Future<WeekdayStatistics> weekdayStatisticsDisplay(Ref ref) async {
   final houseWorks = await houseWorksFuture;
   final colorOfHouseWorks = await colorOfHouseWorksFuture;
 
-  final workLogCountsStatistics =
-      Weekday.values.map((weekday) {
-        final targetWorkLogs =
-            workLogs
-                .where(
-                  (workLog) => workLog.completedAt.weekday == weekday.value,
-                )
-                .toList();
+  final workLogCountsStatistics = Weekday.values.map((weekday) {
+    final targetWorkLogs = workLogs
+        .where((workLog) => workLog.completedAt.weekday == weekday.value)
+        .toList();
 
-        final workLogCountsForHouseWork =
-            houseWorks
-                .map((houseWork) {
-                  final workLogsOfTargetHouseWork = targetWorkLogs.where((
-                    workLog,
-                  ) {
-                    return workLog.houseWorkId == houseWork.id;
-                  });
+    final workLogCountsForHouseWork = houseWorks
+        .map((houseWork) {
+          final workLogsOfTargetHouseWork = targetWorkLogs.where((workLog) {
+            return workLog.houseWorkId == houseWork.id;
+          });
 
-                  return HouseWorkFrequency(
-                    houseWork: houseWork,
-                    count: workLogsOfTargetHouseWork.length,
-                    color: colorOfHouseWorks[houseWork.id] ?? Colors.grey,
-                  );
-                })
-                // 家事ログが1回以上記録されたものだけを表示する
-                .where((houseWorkFrequency) => houseWorkFrequency.count >= 1)
-                .toList();
+          return HouseWorkFrequency(
+            houseWork: houseWork,
+            count: workLogsOfTargetHouseWork.length,
+            color: colorOfHouseWorks[houseWork.id] ?? Colors.grey,
+          );
+        })
+        // 家事ログが1回以上記録されたものだけを表示する
+        .where((houseWorkFrequency) => houseWorkFrequency.count >= 1)
+        .toList();
 
-        final sortedWorkLogCountsForHouseWork =
-            workLogCountsForHouseWork
-                .sortedBy((workLogCount) => workLogCount.count)
-                .reversed
-                .toList();
+    final sortedWorkLogCountsForHouseWork = workLogCountsForHouseWork
+        .sortedBy((workLogCount) => workLogCount.count)
+        .reversed
+        .toList();
 
-        final totalCount = targetWorkLogs.length;
+    final totalCount = targetWorkLogs.length;
 
-        return WeekdayFrequency(
-          weekday: weekday,
-          houseWorkFrequencies: sortedWorkLogCountsForHouseWork,
-          totalCount: totalCount,
-        );
-      }).toList();
+    return WeekdayFrequency(
+      weekday: weekday,
+      houseWorkFrequencies: sortedWorkLogCountsForHouseWork,
+      totalCount: totalCount,
+    );
+  }).toList();
 
-  final houseWorksSortedByStatistics =
-      workLogCountsStatistics
-          .expand((weekdayFrequency) => weekdayFrequency.houseWorkFrequencies)
-          .map((houseWorkFrequency) => houseWorkFrequency.houseWork)
-          // 重複を排除
-          .toSet()
-          .toList();
-  final houseWorkLegends =
-      houseWorksSortedByStatistics.map((houseWork) {
-        final color = colorOfHouseWorks[houseWork.id] ?? Colors.grey;
-        final isVisible = houseWorkVisibilities[houseWork.id] ?? true;
+  final houseWorksSortedByStatistics = workLogCountsStatistics
+      .expand((weekdayFrequency) => weekdayFrequency.houseWorkFrequencies)
+      .map((houseWorkFrequency) => houseWorkFrequency.houseWork)
+      // 重複を排除
+      .toSet()
+      .toList();
+  final houseWorkLegends = houseWorksSortedByStatistics.map((houseWork) {
+    final color = colorOfHouseWorks[houseWork.id] ?? Colors.grey;
+    final isVisible = houseWorkVisibilities[houseWork.id] ?? true;
 
-        return HouseWorkLegends(
-          houseWork: houseWork,
-          color: color,
-          isVisible: isVisible,
-        );
-      }).toList();
+    return HouseWorkLegends(
+      houseWork: houseWork,
+      color: color,
+      isVisible: isVisible,
+    );
+  }).toList();
 
   // 表示・非表示の状態に基づいて、各曜日のデータをフィルタリング
-  final filteredWeekdayData =
-      workLogCountsStatistics.map((day) {
-        final visibleFrequencies =
-            day.houseWorkFrequencies
-                .where(
-                  (freq) => houseWorkVisibilities[freq.houseWork.id] ?? true,
-                )
-                .toList();
+  final filteredWeekdayData = workLogCountsStatistics.map((day) {
+    final visibleFrequencies = day.houseWorkFrequencies
+        .where((freq) => houseWorkVisibilities[freq.houseWork.id] ?? true)
+        .toList();
 
-        // 表示する家事の合計回数を計算
-        final visibleTotalCount = visibleFrequencies.fold(
-          0,
-          (sum, freq) => sum + freq.count,
-        );
+    // 表示する家事の合計回数を計算
+    final visibleTotalCount = visibleFrequencies.fold(
+      0,
+      (sum, freq) => sum + freq.count,
+    );
 
-        return WeekdayFrequency(
-          weekday: day.weekday,
-          houseWorkFrequencies: visibleFrequencies,
-          totalCount: visibleTotalCount,
-        );
-      }).toList();
+    return WeekdayFrequency(
+      weekday: day.weekday,
+      houseWorkFrequencies: visibleFrequencies,
+      totalCount: visibleTotalCount,
+    );
+  }).toList();
 
   return WeekdayStatistics(
     weekdayFrequencies: filteredWeekdayData,
@@ -225,33 +211,30 @@ Future<TimeSlotStatistics> currentTimeSlotStatistics(Ref ref) async {
   ];
 
   final workLogCountsStatistics = List.generate(8, (timeSlotIndex) {
-    final targetWorkLogs =
-        workLogs
-            .where((workLog) => workLog.completedAt.hour ~/ 3 == timeSlotIndex)
-            .toList();
+    final targetWorkLogs = workLogs
+        .where((workLog) => workLog.completedAt.hour ~/ 3 == timeSlotIndex)
+        .toList();
 
-    final workLogCountsForHouseWork =
-        houseWorks
-            .map((houseWork) {
-              final workLogsOfTargetHouseWork = targetWorkLogs.where((workLog) {
-                return workLog.houseWorkId == houseWork.id;
-              });
+    final workLogCountsForHouseWork = houseWorks
+        .map((houseWork) {
+          final workLogsOfTargetHouseWork = targetWorkLogs.where((workLog) {
+            return workLog.houseWorkId == houseWork.id;
+          });
 
-              return HouseWorkFrequency(
-                houseWork: houseWork,
-                count: workLogsOfTargetHouseWork.length,
-                color: colorOfHouseWorks[houseWork.id] ?? Colors.grey,
-              );
-            })
-            // 家事ログが1回以上記録されたものだけを表示する
-            .where((houseWorkFrequency) => houseWorkFrequency.count >= 1)
-            .toList();
+          return HouseWorkFrequency(
+            houseWork: houseWork,
+            count: workLogsOfTargetHouseWork.length,
+            color: colorOfHouseWorks[houseWork.id] ?? Colors.grey,
+          );
+        })
+        // 家事ログが1回以上記録されたものだけを表示する
+        .where((houseWorkFrequency) => houseWorkFrequency.count >= 1)
+        .toList();
 
-    final sortedWorkLogCountsForHouseWork =
-        workLogCountsForHouseWork
-            .sortedBy((workLogCount) => workLogCount.count)
-            .reversed
-            .toList();
+    final sortedWorkLogCountsForHouseWork = workLogCountsForHouseWork
+        .sortedBy((workLogCount) => workLogCount.count)
+        .reversed
+        .toList();
 
     final totalCount = targetWorkLogs.length;
 
@@ -262,47 +245,41 @@ Future<TimeSlotStatistics> currentTimeSlotStatistics(Ref ref) async {
     );
   });
 
-  final houseWorksSortedByStatistics =
-      workLogCountsStatistics
-          .expand((weekdayFrequency) => weekdayFrequency.houseWorkFrequencies)
-          .map((houseWorkFrequency) => houseWorkFrequency.houseWork)
-          // 重複を排除
-          .toSet()
-          .toList();
-  final houseWorkLegends =
-      houseWorksSortedByStatistics.map((houseWork) {
-        final color = colorOfHouseWorks[houseWork.id] ?? Colors.grey;
-        final isVisible = houseWorkVisibilities[houseWork.id] ?? true;
+  final houseWorksSortedByStatistics = workLogCountsStatistics
+      .expand((weekdayFrequency) => weekdayFrequency.houseWorkFrequencies)
+      .map((houseWorkFrequency) => houseWorkFrequency.houseWork)
+      // 重複を排除
+      .toSet()
+      .toList();
+  final houseWorkLegends = houseWorksSortedByStatistics.map((houseWork) {
+    final color = colorOfHouseWorks[houseWork.id] ?? Colors.grey;
+    final isVisible = houseWorkVisibilities[houseWork.id] ?? true;
 
-        return HouseWorkLegends(
-          houseWork: houseWork,
-          color: color,
-          isVisible: isVisible,
-        );
-      }).toList();
+    return HouseWorkLegends(
+      houseWork: houseWork,
+      color: color,
+      isVisible: isVisible,
+    );
+  }).toList();
 
   // 表示・非表示の状態に基づいて、各時間帯のデータをフィルタリング
-  final filteredTimeSlotData =
-      workLogCountsStatistics.map((timeSlotFrequency) {
-        final visibleFrequencies =
-            timeSlotFrequency.houseWorkFrequencies
-                .where(
-                  (freq) => houseWorkVisibilities[freq.houseWork.id] ?? true,
-                )
-                .toList();
+  final filteredTimeSlotData = workLogCountsStatistics.map((timeSlotFrequency) {
+    final visibleFrequencies = timeSlotFrequency.houseWorkFrequencies
+        .where((freq) => houseWorkVisibilities[freq.houseWork.id] ?? true)
+        .toList();
 
-        // 表示する家事の合計回数を計算
-        final visibleTotalCount = visibleFrequencies.fold(
-          0,
-          (sum, freq) => sum + freq.count,
-        );
+    // 表示する家事の合計回数を計算
+    final visibleTotalCount = visibleFrequencies.fold(
+      0,
+      (sum, freq) => sum + freq.count,
+    );
 
-        return TimeSlotFrequency(
-          timeSlot: timeSlotFrequency.timeSlot,
-          houseWorkFrequencies: visibleFrequencies,
-          totalCount: visibleTotalCount,
-        );
-      }).toList();
+    return TimeSlotFrequency(
+      timeSlot: timeSlotFrequency.timeSlot,
+      houseWorkFrequencies: visibleFrequencies,
+      totalCount: visibleTotalCount,
+    );
+  }).toList();
 
   return TimeSlotStatistics(
     timeSlotFrequencies: filteredTimeSlotData,

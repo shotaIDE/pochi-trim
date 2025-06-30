@@ -1,14 +1,18 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
+import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
+import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/functions_service.dart';
+import 'package:pochi_trim/data/service/in_app_review_service.dart';
+import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
@@ -76,28 +80,57 @@ Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
 Future<String?> onCompleteHouseWorkButtonTappedResult(
   Ref ref,
   HouseWork houseWork,
-) {
+) async {
   final workLogService = ref.read(workLogServiceProvider);
   final systemService = ref.read(systemServiceProvider);
 
-  return workLogService.recordWorkLog(
-    houseWorkId: houseWork.id,
-    onRequestAccepted: systemService.doHapticFeedbackActionReceived,
-  );
+  try {
+    return await workLogService.recordWorkLog(
+      houseWorkId: houseWork.id,
+      onRequestAccepted: systemService.doHapticFeedbackActionReceived,
+    );
+  } on DebounceWorkLogException {
+    await systemService.doHapticFeedbackActionRejected();
+    rethrow;
+  }
 }
 
 @riverpod
 Future<String?> onDuplicateWorkLogButtonTappedResult(
   Ref ref,
   WorkLogIncludedHouseWork workLogIncludedHouseWork,
-) {
+) async {
   final workLogService = ref.read(workLogServiceProvider);
   final systemService = ref.read(systemServiceProvider);
 
-  return workLogService.recordWorkLog(
-    houseWorkId: workLogIncludedHouseWork.houseWork.id,
-    onRequestAccepted: systemService.doHapticFeedbackActionReceived,
-  );
+  try {
+    return await workLogService.recordWorkLog(
+      houseWorkId: workLogIncludedHouseWork.houseWork.id,
+      onRequestAccepted: systemService.doHapticFeedbackActionReceived,
+    );
+  } on DebounceWorkLogException {
+    await systemService.doHapticFeedbackActionRejected();
+    rethrow;
+  }
+}
+
+@riverpod
+Future<String?> onQuickRegisterButtonPressedResult(
+  Ref ref,
+  HouseWork houseWork,
+) async {
+  final workLogService = ref.read(workLogServiceProvider);
+  final systemService = ref.read(systemServiceProvider);
+
+  try {
+    return await workLogService.recordWorkLog(
+      houseWorkId: houseWork.id,
+      onRequestAccepted: systemService.doHapticFeedbackActionReceived,
+    );
+  } on DebounceWorkLogException {
+    await systemService.doHapticFeedbackActionRejected();
+    rethrow;
+  }
 }
 
 @riverpod
@@ -122,4 +155,51 @@ Stream<List<WorkLog>> _completedWorkLogsFilePrivate(Ref ref) {
 Future<void> undoWorkLog(Ref ref, String workLogId) async {
   final workLogRepository = ref.read(workLogRepositoryProvider);
   await workLogRepository.delete(workLogId);
+}
+
+/// 初回分析後のアプリレビューリクエスト
+///
+/// 初めて分析画面が表示されて条件を満たしている場合にアプリレビューダイアログを表示します。
+/// アプリレビューはOS制限により多くの回数リクエストできないため、
+/// 条件で縛りつつ必要なタイミングでのみリクエストします。
+@riverpod
+Future<void> requestAppReviewAfterFirstAnalysisIfNeeded(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+
+  // 既に分析画面でのレビューをリクエスト済みかチェック
+  final hasRequestedForAnalysis =
+      await preferenceService.getBool(
+        PreferenceKey.hasRequestedReviewForAnalysisView,
+      ) ??
+      false;
+  if (hasRequestedForAnalysis) {
+    return;
+  }
+
+  // レビューリクエスト条件をチェック
+  // 条件：3種類以上の家事が登録されている
+  final houseWorks = await ref.read(_houseWorksFilePrivateProvider.future);
+  if (houseWorks.length < 3) {
+    return;
+  }
+
+  // 条件：10回以上の家事ログが存在する
+  final totalWorkLogCount =
+      await preferenceService.getInt(
+        PreferenceKey.workLogCountForAppReviewRequest,
+      ) ??
+      0;
+  if (totalWorkLogCount < 10) {
+    return;
+  }
+
+  // 条件を満たしているのでアプリレビューをリクエスト
+  final inAppReviewService = ref.read(inAppReviewServiceProvider);
+  await inAppReviewService.requestReview();
+
+  // 分析画面でのレビューリクエスト完了を記録
+  await preferenceService.setBool(
+    PreferenceKey.hasRequestedReviewForAnalysisView,
+    value: true,
+  );
 }

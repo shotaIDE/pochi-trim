@@ -319,10 +319,9 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error:
-              (error, stackTrace) => Center(
-                child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
-              ),
+          error: (error, stackTrace) => Center(
+            child: Text('エラーが発生しました: $error', textAlign: TextAlign.center),
+          ),
         );
       },
     );
@@ -500,37 +499,38 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
             barTouchData: BarTouchData(
               touchTooltipData: BarTouchTooltipData(
                 tooltipMargin: -40,
-                getTooltipColor:
-                    (_) => Theme.of(context).colorScheme.surfaceContainerHigh,
-                getTooltipItem: (
-                  BarChartGroupData group,
-                  int groupIndex,
-                  BarChartRodData rod,
-                  int rodIndex,
-                ) {
-                  final touchedPosition = _touchedPosition;
-                  if (touchedPosition == null) {
-                    return null;
-                  }
+                getTooltipColor: (_) =>
+                    Theme.of(context).colorScheme.surfaceContainerHigh,
+                getTooltipItem:
+                    (
+                      BarChartGroupData group,
+                      int groupIndex,
+                      BarChartRodData rod,
+                      int rodIndex,
+                    ) {
+                      final touchedPosition = _touchedPosition;
+                      if (touchedPosition == null) {
+                        return null;
+                      }
 
-                  final touchedFrequency =
-                      weekdayFrequencies[touchedPosition.groupIndex];
-                  final totalCount = touchedFrequency.totalCount;
-                  final touchedHouseWorkFrequency =
-                      touchedFrequency.houseWorkFrequencies[touchedPosition
-                          .stackItemIndex];
-                  final touchedHouseWorkName =
-                      touchedHouseWorkFrequency.houseWork.title;
-                  final touchedHouseWorkCount = touchedHouseWorkFrequency.count;
+                      final touchedFrequency =
+                          weekdayFrequencies[touchedPosition.groupIndex];
+                      final totalCount = touchedFrequency.totalCount;
+                      final touchedHouseWorkFrequency = touchedFrequency
+                          .houseWorkFrequencies[touchedPosition.stackItemIndex];
+                      final touchedHouseWorkName =
+                          touchedHouseWorkFrequency.houseWork.title;
+                      final touchedHouseWorkCount =
+                          touchedHouseWorkFrequency.count;
 
-                  return BarTooltipItem(
-                    '$touchedHouseWorkCount / $totalCount\n'
-                    '$touchedHouseWorkName / 合計',
-                    Theme.of(context).textTheme.bodySmall!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  );
-                },
+                      return BarTooltipItem(
+                        '$touchedHouseWorkCount / $totalCount\n'
+                        '$touchedHouseWorkName / 合計',
+                        Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      );
+                    },
               ),
               handleBuiltInTouches: true,
               touchCallback: (FlTouchEvent event, barTouchResponse) {
@@ -578,49 +578,46 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
                 bottom: BorderSide(color: Theme.of(context).dividerColor),
               ),
             ),
-            barGroups:
-                weekdayFrequencies.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final frequency = entry.value;
+            barGroups: weekdayFrequencies.asMap().entries.map((entry) {
+              final index = entry.key;
+              final frequency = entry.value;
 
-                  // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
-                  final rodStackItems = <BarChartRodStackItem>[];
-                  double fromY = 0;
+              // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
+              final rodStackItems = <BarChartRodStackItem>[];
+              double fromY = 0;
 
-                  // 表示されている家事だけを処理
-                  for (final freq in frequency.houseWorkFrequencies) {
-                    final toY = fromY + freq.count;
+              // 表示されている家事だけを処理
+              for (final freq in frequency.houseWorkFrequencies) {
+                final toY = fromY + freq.count;
 
-                    rodStackItems.add(
-                      BarChartRodStackItem(fromY, toY, freq.color),
-                    );
+                rodStackItems.add(BarChartRodStackItem(fromY, toY, freq.color));
 
-                    fromY = toY;
-                  }
+                fromY = toY;
+              }
 
-                  final List<int> showingTooltipIndicators;
-                  final touchedPosition = _touchedPosition;
-                  if (touchedPosition != null &&
-                      touchedPosition.groupIndex == index) {
-                    showingTooltipIndicators = [touchedPosition.rodDataIndex];
-                  } else {
-                    showingTooltipIndicators = [];
-                  }
+              final List<int> showingTooltipIndicators;
+              final touchedPosition = _touchedPosition;
+              if (touchedPosition != null &&
+                  touchedPosition.groupIndex == index) {
+                showingTooltipIndicators = [touchedPosition.rodDataIndex];
+              } else {
+                showingTooltipIndicators = [];
+              }
 
-                  return BarChartGroupData(
-                    x: index,
-                    barRods: [
-                      BarChartRodData(
-                        toY: frequency.totalCount.toDouble(),
-                        width: 20,
-                        color: Colors.transparent,
-                        rodStackItems: rodStackItems,
-                        borderRadius: BorderRadius.zero,
-                      ),
-                    ],
-                    showingTooltipIndicators: showingTooltipIndicators,
-                  );
-                }).toList(),
+              return BarChartGroupData(
+                x: index,
+                barRods: [
+                  BarChartRodData(
+                    toY: frequency.totalCount.toDouble(),
+                    width: 20,
+                    color: Colors.transparent,
+                    rodStackItems: rodStackItems,
+                    borderRadius: BorderRadius.zero,
+                  ),
+                ],
+                showingTooltipIndicators: showingTooltipIndicators,
+              );
+            }).toList(),
             rotationQuarterTurns: 1,
           ),
         );
@@ -757,39 +754,36 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                 bottom: BorderSide(color: Theme.of(context).dividerColor),
               ),
             ),
-            barGroups:
-                timeSlotFrequencies.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final data = entry.value;
+            barGroups: timeSlotFrequencies.asMap().entries.map((entry) {
+              final index = entry.key;
+              final data = entry.value;
 
-                  // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
-                  final rodStackItems = <BarChartRodStackItem>[];
-                  double fromY = 0;
+              // 家事ごとの色を一貫させるために、houseWorkIdに基づいて色を割り当てる
+              final rodStackItems = <BarChartRodStackItem>[];
+              double fromY = 0;
 
-                  // 表示されている家事だけを処理
-                  for (final freq in data.houseWorkFrequencies) {
-                    final toY = fromY + freq.count;
+              // 表示されている家事だけを処理
+              for (final freq in data.houseWorkFrequencies) {
+                final toY = fromY + freq.count;
 
-                    rodStackItems.add(
-                      BarChartRodStackItem(fromY, toY, freq.color),
-                    );
+                rodStackItems.add(BarChartRodStackItem(fromY, toY, freq.color));
 
-                    fromY = toY;
-                  }
+                fromY = toY;
+              }
 
-                  return BarChartGroupData(
-                    x: index,
-                    barRods: [
-                      BarChartRodData(
-                        toY: data.totalCount.toDouble(),
-                        width: 20,
-                        color: Colors.transparent,
-                        rodStackItems: rodStackItems,
-                        borderRadius: BorderRadius.zero,
-                      ),
-                    ],
-                  );
-                }).toList(),
+              return BarChartGroupData(
+                x: index,
+                barRods: [
+                  BarChartRodData(
+                    toY: data.totalCount.toDouble(),
+                    width: 20,
+                    color: Colors.transparent,
+                    rodStackItems: rodStackItems,
+                    borderRadius: BorderRadius.zero,
+                  ),
+                ],
+              );
+            }).toList(),
             rotationQuarterTurns: 1,
           ),
         );
@@ -921,40 +915,34 @@ class _Legends extends StatelessWidget {
           const SizedBox(height: 8),
           Wrap(
             spacing: 4,
-            children:
-                legends.map((legend) {
-                  return InkWell(
-                    onTap: () => onTap(legend.houseWork.id),
-                    onLongPress: () => onLongPress(legend.houseWork.id),
-                    child: Opacity(
-                      opacity: legend.isVisible ? 1.0 : 0.3,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 16,
-                              height: 16,
-                              color: legend.color,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              legend.houseWork.title,
-                              style: TextStyle(
-                                fontSize: 12,
-                                decoration:
-                                    legend.isVisible
-                                        ? null
-                                        : TextDecoration.lineThrough,
-                              ),
-                            ),
-                          ],
+            children: legends.map((legend) {
+              return InkWell(
+                onTap: () => onTap(legend.houseWork.id),
+                onLongPress: () => onLongPress(legend.houseWork.id),
+                child: Opacity(
+                  opacity: legend.isVisible ? 1.0 : 0.3,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(width: 16, height: 16, color: legend.color),
+                        const SizedBox(width: 4),
+                        Text(
+                          legend.houseWork.title,
+                          style: TextStyle(
+                            fontSize: 12,
+                            decoration: legend.isVisible
+                                ? null
+                                : TextDecoration.lineThrough,
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  );
-                }).toList(),
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ],
       ),

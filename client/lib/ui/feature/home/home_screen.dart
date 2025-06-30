@@ -1,10 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
-import 'package:pochi_trim/data/service/system_service.dart';
-import 'package:pochi_trim/data/service/work_log_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_screen.dart';
 import 'package:pochi_trim/ui/feature/home/home_presenter.dart';
@@ -44,9 +45,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     const titleText = Text('記録');
 
     final analysisButton = IconButton(
-      onPressed: () {
-        Navigator.of(context).push(AnalysisScreen.route());
-      },
+      onPressed: _onAnalysisButtonPressed,
       tooltip: '分析を表示する',
       icon: const Icon(Icons.analytics),
     );
@@ -93,9 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final addHouseWorkButton = FloatingActionButton(
       tooltip: '家事を追加する',
-      onPressed: () {
-        Navigator.of(context).push(AddHouseWorkScreen.route());
-      },
+      onPressed: _onAddHouseWorkButtonTap,
       child: const Icon(Icons.add),
     );
 
@@ -115,6 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 HouseWorksTab(
                   onCompleteButtonTap: _onCompleteHouseWorkButtonTap,
                   onLongPressHouseWork: _onLongPressHouseWork,
+                  onAddHouseWorkButtonTap: _onAddHouseWorkButtonTap,
                 ),
                 WorkLogsTab(onDuplicateButtonTap: _onDuplicateWorkLogButtonTap),
               ],
@@ -149,79 +147,91 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  void _onAddHouseWorkButtonTap() {
+    Navigator.of(context).push(AddHouseWorkScreen.route());
+  }
+
   Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
-    final workLogId = await ref.read(
-      onCompleteHouseWorkButtonTappedResultProvider(houseWork).future,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    if (workLogId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+    try {
+      final workLogId = await ref.read(
+        onCompleteHouseWorkButtonTappedResultProvider(houseWork).future,
       );
-      return;
+
+      if (!mounted) {
+        return;
+      }
+
+      if (workLogId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+        );
+        return;
+      }
+
+      _highlightWorkLogsTabItem();
+
+      _showWorkLogRegisteredSnackBar(workLogId);
+    } on DebounceWorkLogException {
+      // エラーメッセージは表示しない
     }
-
-    _highlightWorkLogsTabItem();
-
-    _showWorkLogRegisteredSnackBar(workLogId);
   }
 
   Future<void> _onDuplicateWorkLogButtonTap(
     WorkLogIncludedHouseWork workLogIncludedHouseWork,
   ) async {
-    final workLogId = await ref.read(
-      onDuplicateWorkLogButtonTappedResultProvider(
-        workLogIncludedHouseWork,
-      ).future,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    // TODO(ide): 共通化できる
-    if (workLogId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+    try {
+      final workLogId = await ref.read(
+        onDuplicateWorkLogButtonTappedResultProvider(
+          workLogIncludedHouseWork,
+        ).future,
       );
-      return;
-    }
 
-    _showWorkLogRegisteredSnackBar(workLogId);
+      if (!mounted) {
+        return;
+      }
+
+      // TODO(ide): 共通化できる
+      if (workLogId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+        );
+        return;
+      }
+
+      _showWorkLogRegisteredSnackBar(workLogId);
+    } on DebounceWorkLogException {
+      // エラーメッセージは表示しない
+    }
   }
 
   Future<void> _onQuickRegisterButtonPressed(HouseWork houseWork) async {
-    final workLogService = ref.read(workLogServiceProvider);
-    final systemService = ref.read(systemServiceProvider);
-
-    final workLogId = await workLogService.recordWorkLog(
-      houseWorkId: houseWork.id,
-      onRequestAccepted: systemService.doHapticFeedbackActionReceived,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    // TODO(ide): 共通化
-    if (workLogId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+    try {
+      final workLogId = await ref.read(
+        onQuickRegisterButtonPressedResultProvider(houseWork).future,
       );
-      return;
-    }
 
-    final selectedTab = ref.read(selectedTabProvider);
-    if (selectedTab == 0) {
-      // 家事タブが選択されている場合は、ログタブの方に家事の登録が完了したことを通知する
-      _highlightWorkLogsTabItem();
-    }
+      if (!mounted) {
+        return;
+      }
 
-    _showWorkLogRegisteredSnackBar(workLogId);
+      // TODO(ide): 共通化
+      if (workLogId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+        );
+        return;
+      }
+
+      final selectedTab = ref.read(selectedTabProvider);
+      if (selectedTab == 0) {
+        // 家事タブが選択されている場合は、ログタブの方に家事の登録が完了したことを通知する
+        _highlightWorkLogsTabItem();
+      }
+
+      _showWorkLogRegisteredSnackBar(workLogId);
+    } on DebounceWorkLogException {
+      // エラーメッセージは表示しない
+    }
   }
 
   Future<void> _onLongPressHouseWork(HouseWork houseWork) async {
@@ -315,6 +325,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         });
       }
     });
+  }
+
+  Future<void> _onAnalysisButtonPressed() async {
+    await Navigator.of(context).push(AnalysisScreen.route());
+
+    if (!mounted) {
+      return;
+    }
+
+    unawaited(
+      ref.read(requestAppReviewAfterFirstAnalysisIfNeededProvider.future),
+    );
   }
 
   void _showWorkLogRegisteredSnackBar(String workLogId) {
