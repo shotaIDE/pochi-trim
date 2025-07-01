@@ -30,7 +30,7 @@ Future<GenerateMyHouseResult> generateMyHouse(Ref ref) async {
   final result = resultDao.toGenerateMyHouseResult();
 
   logger.info(
-    'Got house ID: ${result.houseDocId}, created: ${result.created}',
+    'Got house ID: ${result.houseId}, created: ${result.created}',
   );
 
   return result;

@@ -17,7 +17,7 @@ abstract class GenerateMyHouseResultFunctions
 
   GenerateMyHouseResult toGenerateMyHouseResult() {
     return GenerateMyHouseResult(
-      houseDocId: houseDocId,
+      houseId: houseDocId,
       created: created,
     );
   }

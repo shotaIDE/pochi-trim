@@ -5,7 +5,7 @@ part 'generate_my_house_result.freezed.dart';
 @freezed
 abstract class GenerateMyHouseResult with _$GenerateMyHouseResult {
   const factory GenerateMyHouseResult({
-    required String houseDocId,
+    required String houseId,
     required bool created,
   }) = _GenerateMyHouseResult;
 }

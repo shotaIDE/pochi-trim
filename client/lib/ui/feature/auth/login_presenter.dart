@@ -103,7 +103,7 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
     final preferenceService = ref.read(preferenceServiceProvider);
     await preferenceService.setString(
       PreferenceKey.currentHouseId,
-      value: result.houseDocId,
+      value: result.houseId,
     );
 
     // 新しい家が作成された場合のみ、チュートリアルを表示するフラグを設定
@@ -116,6 +116,6 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
 
     await ref
         .read(currentAppSessionProvider.notifier)
-        .signIn(userId: userId, houseId: result.houseDocId);
+        .signIn(userId: userId, houseId: result.houseId);
   }
 }
