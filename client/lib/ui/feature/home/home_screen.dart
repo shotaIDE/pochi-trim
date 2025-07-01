@@ -6,7 +6,6 @@ import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
-import 'package:pochi_trim/data/service/tutorial_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_result.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_screen.dart';
@@ -16,6 +15,7 @@ import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 import 'package:pochi_trim/ui/feature/home/work_logs_tab.dart';
 import 'package:pochi_trim/ui/feature/settings/settings_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 enum _HouseWorkAction { delete }
 
@@ -121,7 +121,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   onAddHouseWorkButtonTap: _onAddHouseWorkButtonTap,
                   houseWorkTileKey: _houseWorkTileKey,
                 ),
-                WorkLogsTab(onDuplicateButtonTap: _onDuplicateWorkLogButtonTap),
+                WorkLogsTab(
+                  onDuplicateButtonTap: _onDuplicateWorkLogButtonTap,
+                ),
               ],
             ),
             floatingActionButton: addHouseWorkButton,
@@ -169,12 +171,107 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _showTutorial() async {
-    final tutorialService = ref.read(tutorialServiceProvider);
-    await tutorialService.showFirstHouseWorkTutorial(
-      context: context,
-      houseWorkTileKey: _houseWorkTileKey,
-      quickRegistrationBarKey: _quickRegistrationBarKey,
+    final targets = <TargetFocus>[
+      TargetFocus(
+        identify: 'houseWorkTile',
+        keyTarget: _houseWorkTileKey,
+        alignSkip: Alignment.bottomRight,
+        enableOverlayTab: true,
+        contents: [
+          TargetContent(
+            builder: (context, controller) => Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '家事をタップして記録',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '家事タイルをタップすると、家事ログを簡単に記録できます。',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        shape: ShapeLightFocus.RRect,
+      ),
+      TargetFocus(
+        identify: 'quickRegistrationBar',
+        keyTarget: _quickRegistrationBarKey,
+        alignSkip: Alignment.topRight,
+        enableOverlayTab: true,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) => Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'クイック登録バー',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'よく使う家事は、下のクイック登録バーからも記録できます。',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => controller.next(),
+                        child: const Text('完了'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ];
+
+    final tutorialCoachMark = TutorialCoachMark(
+      targets: targets,
+      colorShadow: Theme.of(context).colorScheme.primary,
+      onFinish: () async {
+        await ref.read(onFinishHouseWorkTutorialProvider.future);
+      },
+      onSkip: () {
+        ref.read(onSkipHouseWorkTutorialProvider.future);
+
+        return true;
+      },
     );
+
+    if (!mounted) {
+      return;
+    }
+
+    tutorialCoachMark.show(context: context);
   }
 
   Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
