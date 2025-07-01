@@ -43,28 +43,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final GlobalKey<State<StatefulWidget>> _quickRegistrationBarKey = GlobalKey();
 
   @override
-  void initState() {
-    super.initState();
-    // 新しい家のチュートリアルをチェック
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAndShowNewHouseTutorial();
-    });
-  }
-
-  Future<void> _checkAndShowNewHouseTutorial() async {
-    if (!mounted) {
-      return;
-    }
-
-    final shouldShow = await ref.read(
-      shouldShowNewHouseTutorialProvider.future,
-    );
-    if (shouldShow && mounted) {
-      await _showTutorial();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final selectedTab = ref.watch(selectedTabProvider);
     final isDeletingHouseWork = ref.watch(isHouseWorkDeletingProvider);
@@ -182,9 +160,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     await Navigator.of(context).push(
       AddHouseWorkScreen.route(),
     );
+
+    await _checkAndShowNewHouseTutorial();
   }
 
-  Future<void> _showTutorial() async {
+  Future<void> _checkAndShowNewHouseTutorial() async {
+    final shouldShow = await ref.read(
+      shouldShowFirstHouseWorkTutorialProvider.future,
+    );
+    if (!shouldShow) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
     final targets = <TargetFocus>[
       TargetFocus(
         identify: 'houseWorkTile',
@@ -293,10 +284,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       targets: targets,
       colorShadow: Theme.of(context).colorScheme.primary,
       onFinish: () async {
-        await ref.read(onFinishNewHouseTutorialProvider.future);
+        await ref.read(onFinishHouseWorkTutorialProvider.future);
       },
       onSkip: () {
-        ref.read(onSkipNewHouseTutorialProvider.future);
+        ref.read(onSkipHouseWorkTutorialProvider.future);
 
         return true;
       },
