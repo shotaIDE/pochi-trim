@@ -9,6 +9,8 @@ abstract class GenerateMyHouseResultFunctions
     with _$GenerateMyHouseResultFunctions {
   const factory GenerateMyHouseResultFunctions({
     required String houseDocId,
+
+    /// 家が新規に作成されたかどうか
     required bool created,
   }) = _GenerateMyHouseResultFunctions;
 
