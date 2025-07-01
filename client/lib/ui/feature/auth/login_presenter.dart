@@ -107,7 +107,7 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
     );
 
     // 新しい家が作成された場合のみ、チュートリアルを表示するフラグを設定
-    if (result.created) {
+    if (result.isNewHouse) {
       await preferenceService.setBool(
         PreferenceKey.shouldShowNewHouseTutorial,
         value: true,
