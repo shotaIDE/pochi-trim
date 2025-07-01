@@ -12,6 +12,8 @@ abstract class GenerateMyHouseResultFunctions
     required bool isNewHouse,
   }) = _GenerateMyHouseResultFunctions;
 
+  const GenerateMyHouseResultFunctions._();
+
   factory GenerateMyHouseResultFunctions.fromJson(Map<String, dynamic> json) =>
       _$GenerateMyHouseResultFunctionsFromJson(json);
 
