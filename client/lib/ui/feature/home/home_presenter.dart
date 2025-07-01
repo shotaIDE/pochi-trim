@@ -22,6 +22,37 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'home_presenter.g.dart';
 
 @riverpod
+Future<bool> shouldShowNewHouseTutorial(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+
+  final shouldShow = await preferenceService.getBool(
+    PreferenceKey.shouldShowNewHouseTutorial,
+  );
+
+  return shouldShow == true;
+}
+
+@riverpod
+Future<void> onFinishNewHouseTutorial(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+
+  await preferenceService.setBool(
+    PreferenceKey.shouldShowNewHouseTutorial,
+    value: false,
+  );
+}
+
+@riverpod
+Future<void> onSkipNewHouseTutorial(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+
+  await preferenceService.setBool(
+    PreferenceKey.shouldShowNewHouseTutorial,
+    value: false,
+  );
+}
+
+@riverpod
 Future<void> onFinishHouseWorkTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 

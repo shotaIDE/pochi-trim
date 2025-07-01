@@ -7,7 +7,6 @@ import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
-import 'package:pochi_trim/ui/feature/home/add_house_work_result.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_screen.dart';
 import 'package:pochi_trim/ui/feature/home/home_presenter.dart';
 import 'package:pochi_trim/ui/feature/home/house_works_tab.dart';
@@ -42,6 +41,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // チュートリアル用のGlobalKeys
   final GlobalKey<State<StatefulWidget>> _houseWorkTileKey = GlobalKey();
   final GlobalKey<State<StatefulWidget>> _quickRegistrationBarKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    // 新しい家のチュートリアルをチェック
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowNewHouseTutorial();
+    });
+  }
+
+  Future<void> _checkAndShowNewHouseTutorial() async {
+    if (!mounted) {
+      return;
+    }
+
+    final shouldShow = await ref.read(
+      shouldShowNewHouseTutorialProvider.future,
+    );
+    if (shouldShow && mounted) {
+      await _showTutorial();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,16 +179,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _onAddHouseWorkButtonTap() async {
-    final result = await Navigator.of(context).push(
+    await Navigator.of(context).push(
       AddHouseWorkScreen.route(),
     );
-
-    if (result is AddHouseWorkResult && mounted) {
-      if (result.shouldShowTutorial) {
-        // チュートリアルを表示
-        await _showTutorial();
-      }
-    }
   }
 
   Future<void> _showTutorial() async {
@@ -279,10 +293,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       targets: targets,
       colorShadow: Theme.of(context).colorScheme.primary,
       onFinish: () async {
-        await ref.read(onFinishHouseWorkTutorialProvider.future);
+        await ref.read(onFinishNewHouseTutorialProvider.future);
       },
       onSkip: () {
-        ref.read(onSkipHouseWorkTutorialProvider.future);
+        ref.read(onSkipNewHouseTutorialProvider.future);
 
         return true;
       },

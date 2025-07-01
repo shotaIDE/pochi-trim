@@ -106,6 +106,12 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
       value: myHouseId,
     );
 
+    // 新しい家が作成されたため、チュートリアルを表示するフラグを設定
+    await preferenceService.setBool(
+      PreferenceKey.shouldShowNewHouseTutorial,
+      value: true,
+    );
+
     await ref
         .read(currentAppSessionProvider.notifier)
         .signIn(userId: userId, houseId: myHouseId);
