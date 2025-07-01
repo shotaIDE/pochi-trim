@@ -18,9 +18,6 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 enum _HouseWorkAction { delete }
 
-// 選択されたタブを管理するプロバイダー
-final selectedTabProvider = StateProvider<int>((ref) => 0);
-
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -37,8 +34,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with TickerProviderStateMixin {
-  var _isLogTabHighlighted = false;
   late TabController _tabController;
+  var _isLogTabHighlighted = false;
 
   // チュートリアル用のGlobalKeys
   final GlobalKey<State<StatefulWidget>> _firstHouseWorkTileKey = GlobalKey();
@@ -50,22 +47,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void initState() {
     super.initState();
-    final selectedTab = ref.read(selectedTabProvider);
+
     _tabController = TabController(
       length: 2,
-      initialIndex: selectedTab,
       vsync: this,
     );
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging) {
-        ref.read(selectedTabProvider.notifier).state = _tabController.index;
-      }
-    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+
     super.dispose();
   }
 
@@ -117,9 +109,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
     final tabBar = TabBar(
       controller: _tabController,
-      onTap: (index) {
-        ref.read(selectedTabProvider.notifier).state = index;
-      },
       tabs: [homeWorksTabItem, workLogsTabItem],
     );
 
@@ -344,7 +333,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     // ログタブに切り替える
     _tabController.animateTo(1);
-    ref.read(selectedTabProvider.notifier).state = 1;
 
     // 切り替えが完了し、ワークログがレンダリングされるまで待つ
     await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -553,8 +541,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         return;
       }
 
-      final selectedTab = ref.read(selectedTabProvider);
-      if (selectedTab == 0) {
+      if (_tabController.index == 0) {
         // 家事タブが選択されている場合は、ログタブの方に家事の登録が完了したことを通知する
         _highlightWorkLogsTabItem();
       }
