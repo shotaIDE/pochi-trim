@@ -34,7 +34,7 @@ Future<bool> shouldShowTutorial(Ref ref, AddHouseWorkArgs args) async {
 
   final preferenceService = ref.read(preferenceServiceProvider);
   final hasShownTutorial = await preferenceService.getBool(
-    PreferenceKey.hasShownFirstHouseWorkTutorial,
+    PreferenceKey.firstHouseWorkTutorialHasShown,
   );
 
   return hasShownTutorial != true;

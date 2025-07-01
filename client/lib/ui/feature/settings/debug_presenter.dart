@@ -10,7 +10,7 @@ part 'debug_presenter.g.dart';
 Future<void> resetFirstHouseWorkTutorialStatus(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
   await preferenceService.setBool(
-    PreferenceKey.hasShownFirstHouseWorkTutorial,
+    PreferenceKey.firstHouseWorkTutorialHasShown,
     value: false,
   );
 }
