@@ -165,10 +165,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
 
-    await _checkAndShowNewHouseTutorial();
+    await _showNewHouseWorkTutorialIfNeeded();
   }
 
-  Future<void> _checkAndShowNewHouseTutorial() async {
+  Future<void> _showNewHouseWorkTutorialIfNeeded() async {
     final shouldShow = await ref.read(
       shouldShowFirstHouseWorkTutorialProvider.future,
     );
