@@ -39,8 +39,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   var _isLogTabHighlighted = false;
 
   // チュートリアル用のGlobalKeys
-  final GlobalKey<State<StatefulWidget>> _houseWorkTileKey = GlobalKey();
-  final GlobalKey<State<StatefulWidget>> _quickRegistrationBarKey = GlobalKey();
+  final GlobalKey<State<StatefulWidget>> _firstHouseWorkTileKey = GlobalKey();
+  final GlobalKey<State<StatefulWidget>> _quickRegisterBottomBarKey =
+      GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +119,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   onCompleteButtonTap: _onCompleteHouseWorkButtonTap,
                   onLongPressHouseWork: _onLongPressHouseWork,
                   onAddHouseWorkButtonTap: _onAddHouseWorkButtonTap,
-                  houseWorkTileKey: _houseWorkTileKey,
+                  firstHouseWorkTileKey: _firstHouseWorkTileKey,
                 ),
                 WorkLogsTab(
                   onDuplicateButtonTap: _onDuplicateWorkLogButtonTap,
@@ -127,7 +128,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             floatingActionButton: addHouseWorkButton,
             bottomNavigationBar: _QuickRegisterBottomBar(
-              key: _quickRegistrationBarKey,
+              key: _quickRegisterBottomBarKey,
               onTap: _onQuickRegisterButtonPressed,
             ),
           ),
@@ -182,7 +183,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final targets = <TargetFocus>[
       TargetFocus(
         identify: 'houseWorkTile',
-        keyTarget: _houseWorkTileKey,
+        keyTarget: _firstHouseWorkTileKey,
         alignSkip: Alignment.bottomRight,
         enableOverlayTab: true,
         contents: [
@@ -227,7 +228,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       TargetFocus(
         identify: 'quickRegistrationBar',
-        keyTarget: _quickRegistrationBarKey,
+        keyTarget: _quickRegisterBottomBarKey,
         alignSkip: Alignment.topRight,
         enableOverlayTab: true,
         contents: [
