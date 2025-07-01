@@ -64,6 +64,7 @@ class AddHouseWorkScreen extends ConsumerStatefulWidget {
 class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
+  late final FocusNode _titleFocusNode;
 
   var _icon = '🏠';
 
@@ -72,12 +73,15 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
     super.initState();
 
     _titleController = TextEditingController();
+    _titleFocusNode = FocusNode();
     _icon = getRandomEmoji();
   }
 
   @override
   void dispose() {
     _titleController.dispose();
+    _titleFocusNode.dispose();
+
     super.dispose();
   }
 
@@ -118,6 +122,8 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _titleController,
+                      focusNode: _titleFocusNode,
+                      autofocus: true,
                       decoration: const InputDecoration(
                         labelText: '家事名',
                         border: OutlineInputBorder(),
