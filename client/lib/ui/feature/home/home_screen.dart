@@ -188,16 +188,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 8,
                 children: [
                   Text(
-                    '家事をタップして記録',
+                    '家事をタップして完了ログを記録',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
                   Text(
-                    '家事タイルをタップすると、家事ログを簡単に記録できます。',
+                    '家事を終えたらこのタイルをタップします。すると、タップした時刻に家事が完了したログが記録されます。',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -226,14 +226,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'クイック登録バー',
+                    'クイック登録バーから完了ログを記録',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'よく使う家事は、下のクイック登録バーからも記録できます。',
+                    'よく使う家事は、下のクイック登録バーからの記録が便利です。',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
@@ -251,6 +251,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
         ],
+        shape: ShapeLightFocus.RRect,
       ),
     ];
 
@@ -265,6 +266,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
         return true;
       },
+      textSkip: 'ガイドをスキップする',
     );
 
     if (!mounted) {
