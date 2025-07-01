@@ -28,7 +28,6 @@ Future<bool> shouldShowFirstHouseWorkTutorial(Ref ref) async {
   final shouldShow = await preferenceService.getBool(
     PreferenceKey.shouldShowNewHouseTutorial,
   );
-
   if (shouldShow != true) {
     return false;
   }
@@ -36,7 +35,6 @@ Future<bool> shouldShowFirstHouseWorkTutorial(Ref ref) async {
   final hasShown = await preferenceService.getBool(
     PreferenceKey.hasShownFirstHouseWorkTutorial,
   );
-
   return hasShown != true;
 }
 
