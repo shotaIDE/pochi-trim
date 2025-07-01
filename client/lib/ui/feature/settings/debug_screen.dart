@@ -27,8 +27,9 @@ class DebugScreen extends ConsumerWidget {
           const _ToggleIsProTile(),
           const SectionHeader(title: 'チュートリアル'),
           _ResetReviewStatusTile(
-            keyDisplayName: '新しい家チュートリアル',
-            onReset: () => ref.read(resetNewHouseTutorialStatusProvider.future),
+            keyDisplayName: '最初の家事のチュートリアル',
+            onReset: () =>
+                ref.read(resetFirstHouseWorkTutorialStatusProvider.future),
           ),
           const SectionHeader(title: 'アプリ内レビュー'),
           _ResetReviewStatusTile(

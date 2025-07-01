@@ -5,12 +5,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'debug_presenter.g.dart';
 
-/// 新しい家チュートリアル状態をリセット（デバッグ用）
+/// 最初の家事チュートリアル状態をリセット（デバッグ用）
 @riverpod
-Future<void> resetNewHouseTutorialStatus(Ref ref) async {
+Future<void> resetFirstHouseWorkTutorialStatus(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
   await preferenceService.setBool(
-    PreferenceKey.shouldShowNewHouseTutorial,
+    PreferenceKey.hasShownFirstHouseWorkTutorial,
     value: true,
   );
 }
