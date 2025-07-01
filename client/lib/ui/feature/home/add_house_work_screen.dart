@@ -49,12 +49,11 @@ class AddHouseWorkScreen extends ConsumerStatefulWidget {
 
   static const name = 'AddHouseWorkScreen';
 
-  static MaterialPageRoute<AddHouseWorkScreen> route() =>
-      MaterialPageRoute<AddHouseWorkScreen>(
-        builder: (_) => const AddHouseWorkScreen(),
-        settings: const RouteSettings(name: name),
-        fullscreenDialog: true,
-      );
+  static MaterialPageRoute<bool> route() => MaterialPageRoute<bool>(
+    builder: (_) => const AddHouseWorkScreen(),
+    settings: const RouteSettings(name: name),
+    fullscreenDialog: true,
+  );
 
   @override
   ConsumerState<AddHouseWorkScreen> createState() => _AddHouseWorkScreenState();
@@ -217,7 +216,7 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
       context,
     ).showSnackBar(const SnackBar(content: Text('家事を登録しました')));
 
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(true);
   }
 
   Future<void> _showProUpgradeDialog(String message) async {

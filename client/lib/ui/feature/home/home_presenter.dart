@@ -22,6 +22,46 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'home_presenter.g.dart';
 
 @riverpod
+Future<bool> shouldShowFirstHouseWorkTutorial(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+
+  final shouldShow = await preferenceService.getBool(
+    PreferenceKey.shouldShowNewHouseTutorial,
+  );
+  if (shouldShow != true) {
+    return false;
+  }
+
+  final hasShown = await preferenceService.getBool(
+    PreferenceKey.hasShownFirstHouseWorkTutorial,
+  );
+  return hasShown != true;
+}
+
+@riverpod
+Future<void> onFinishHouseWorkTutorial(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+
+  await preferenceService.setBool(
+    PreferenceKey.hasShownFirstHouseWorkTutorial,
+    value: true,
+  );
+}
+
+/// 家事チュートリアルをスキップする
+///
+/// 家事チュートリアルをスキップした場合、以降の家事チュートリアルは表示されません。
+@riverpod
+Future<void> onSkipHouseWorkTutorial(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+
+  await preferenceService.setBool(
+    PreferenceKey.hasShownFirstHouseWorkTutorial,
+    value: true,
+  );
+}
+
+@riverpod
 class IsHouseWorkDeleting extends _$IsHouseWorkDeleting {
   @override
   bool build() => false;
@@ -133,20 +173,6 @@ Future<String?> onQuickRegisterButtonPressedResult(
   }
 }
 
-@riverpod
-Stream<List<HouseWork>> _houseWorksFilePrivate(Ref ref) {
-  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-
-  return houseWorkRepository.getAll();
-}
-
-@riverpod
-Stream<List<WorkLog>> _completedWorkLogsFilePrivate(Ref ref) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
-
-  return workLogRepository.getCompletedWorkLogs();
-}
-
 /// 指定されたIDの家事ログを取り消す（削除する）
 ///
 /// Throws:
@@ -202,4 +228,18 @@ Future<void> requestAppReviewAfterFirstAnalysisIfNeeded(Ref ref) async {
     PreferenceKey.hasRequestedReviewForAnalysisView,
     value: true,
   );
+}
+
+@riverpod
+Stream<List<HouseWork>> _houseWorksFilePrivate(Ref ref) {
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+
+  return houseWorkRepository.getAll();
+}
+
+@riverpod
+Stream<List<WorkLog>> _completedWorkLogsFilePrivate(Ref ref) {
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
+
+  return workLogRepository.getCompletedWorkLogs();
 }

@@ -3,33 +3,37 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/generate_my_house_exception.dart';
+import 'package:pochi_trim/data/model/generate_my_house_result.dart';
 import 'package:pochi_trim/data/service/dao/generate_my_house_result_functions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'functions_service.g.dart';
 
 @riverpod
-Future<String> generateMyHouse(Ref ref) async {
+Future<GenerateMyHouseResult> generateMyHouse(Ref ref) async {
   final logger = Logger('FunctionsService');
 
   final functions = FirebaseFunctions.instance;
   final callable = functions.httpsCallable('generate_my_house');
 
-  final HttpsCallableResult<Map<String, dynamic>> rawResult;
+  final HttpsCallableResult<Map<String, dynamic>> resultMap;
   try {
-    rawResult = await callable.call<Map<String, dynamic>>();
+    resultMap = await callable.call<Map<String, dynamic>>();
   } on FirebaseFunctionsException catch (e) {
     logger.info('Call error: ${e.code}');
 
     throw GenerateMyHouseException();
   }
 
-  final result = GenerateMyHouseResultFunctions.fromJson(rawResult.data);
-  final houseId = result.houseDocId;
+  final resultDao = GenerateMyHouseResultFunctions.fromJson(resultMap.data);
 
-  logger.info('Got house ID: $houseId');
+  final result = resultDao.toGenerateMyHouseResult();
 
-  return houseId;
+  logger.info(
+    'Got house ID: ${result.houseId}, new house: ${result.isNewHouse}',
+  );
+
+  return result;
 }
 
 /// 指定された家事を削除する
