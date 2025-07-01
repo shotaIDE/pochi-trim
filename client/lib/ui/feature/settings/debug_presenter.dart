@@ -11,7 +11,7 @@ Future<void> resetFirstHouseWorkTutorialStatus(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
   await preferenceService.setBool(
     PreferenceKey.hasShownFirstHouseWorkTutorial,
-    value: true,
+    value: false,
   );
 }
 
