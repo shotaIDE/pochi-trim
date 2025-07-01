@@ -35,8 +35,10 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with TickerProviderStateMixin {
   var _isLogTabHighlighted = false;
+  late TabController _tabController;
 
   // チュートリアル用のGlobalKeys
   final GlobalKey<State<StatefulWidget>> _firstHouseWorkTileKey = GlobalKey();
@@ -46,8 +48,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final GlobalKey<State<StatefulWidget>> _analysisButtonKey = GlobalKey();
 
   @override
+  void initState() {
+    super.initState();
+    final selectedTab = ref.read(selectedTabProvider);
+    _tabController = TabController(
+      length: 2,
+      initialIndex: selectedTab,
+      vsync: this,
+    );
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) {
+        ref.read(selectedTabProvider.notifier).state = _tabController.index;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final selectedTab = ref.watch(selectedTabProvider);
     final isDeletingHouseWork = ref.watch(isHouseWorkDeletingProvider);
 
     const titleText = Text('記録');
@@ -93,6 +116,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
     final tabBar = TabBar(
+      controller: _tabController,
       onTap: (index) {
         ref.read(selectedTabProvider.notifier).state = index;
       },
@@ -105,59 +129,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: const Icon(Icons.add),
     );
 
-    return DefaultTabController(
-      length: 2,
-      initialIndex: selectedTab,
-      child: Stack(
-        children: [
-          Scaffold(
-            appBar: AppBar(
-              title: titleText,
-              actions: [analysisButton, settingsButton],
-              bottom: tabBar,
-            ),
-            body: TabBarView(
-              children: [
-                HouseWorksTab(
-                  onCompleteButtonTap: _onCompleteHouseWorkButtonTap,
-                  onLongPressHouseWork: _onLongPressHouseWork,
-                  onAddHouseWorkButtonTap: _onAddHouseWorkButtonTap,
-                  firstHouseWorkTileKey: _firstHouseWorkTileKey,
-                ),
-                WorkLogsTab(
-                  onDuplicateButtonTap: _onDuplicateWorkLogButtonTap,
-                  firstWorkLogKey: _firstWorkLogKey,
-                ),
-              ],
-            ),
-            floatingActionButton: addHouseWorkButton,
-            bottomNavigationBar: _QuickRegisterBottomBar(
-              key: _quickRegisterBottomBarKey,
-              onTap: _onQuickRegisterButtonPressed,
-            ),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: titleText,
+            actions: [analysisButton, settingsButton],
+            bottom: tabBar,
           ),
-          if (isDeletingHouseWork)
-            ColoredBox(
-              color: Theme.of(context).colorScheme.scrim.withAlpha(128),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 16,
-                  children: [
-                    const CircularProgressIndicator(),
-                    Text(
-                      '家事を削除しています...',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        // TODO(ide): テーマの色を利用したい
-                        color: Colors.white,
-                      ),
+          body: TabBarView(
+            controller: _tabController,
+            children: [
+              HouseWorksTab(
+                onCompleteButtonTap: _onCompleteHouseWorkButtonTap,
+                onLongPressHouseWork: _onLongPressHouseWork,
+                onAddHouseWorkButtonTap: _onAddHouseWorkButtonTap,
+                firstHouseWorkTileKey: _firstHouseWorkTileKey,
+              ),
+              WorkLogsTab(
+                onDuplicateButtonTap: _onDuplicateWorkLogButtonTap,
+                firstWorkLogKey: _firstWorkLogKey,
+              ),
+            ],
+          ),
+          floatingActionButton: addHouseWorkButton,
+          bottomNavigationBar: _QuickRegisterBottomBar(
+            key: _quickRegisterBottomBarKey,
+            onTap: _onQuickRegisterButtonPressed,
+          ),
+        ),
+        if (isDeletingHouseWork)
+          ColoredBox(
+            color: Theme.of(context).colorScheme.scrim.withAlpha(128),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 16,
+                children: [
+                  const CircularProgressIndicator(),
+                  Text(
+                    '家事を削除しています...',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      // TODO(ide): テーマの色を利用したい
+                      color: Colors.white,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 
@@ -322,10 +343,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     // ログタブに切り替える
+    _tabController.animateTo(1);
     ref.read(selectedTabProvider.notifier).state = 1;
 
-    // 切り替えが完了するまで少し待つ
-    await Future.delayed(const Duration(milliseconds: 300));
+    // 切り替えが完了し、ワークログがレンダリングされるまで待つ
+    await Future<void>.delayed(const Duration(milliseconds: 500));
 
     if (!mounted) {
       return;
@@ -367,7 +389,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ],
                   ),
                   Text(
-                    'ここにログが記録されています。完了した家事の履歴を確認できます。',
+                    'ここにログが記録されています。完了した家事ログを確認できます。',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -399,7 +421,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          '分析結果を確認',
+                          '分析結果を確認する',
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -412,7 +434,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'ここをタップすることで分析結果を見ることができます。家事の実行状況を確認してみましょう。',
+                    'ここをタップすることで分析結果を見ることができます。家事の実行状況を確認し、削減に繋げましょう。',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),

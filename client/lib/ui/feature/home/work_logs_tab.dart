@@ -105,7 +105,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
           key: _listKey,
           itemBuilder: (context, index, animation) {
             final workLog = _currentWorkLogs[index];
-            return _buildAnimatedItem(context, workLog, animation);
+            return _buildAnimatedItem(context, workLog, animation, index);
           },
           initialItemCount: _currentWorkLogs.length,
         );
@@ -117,8 +117,8 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     BuildContext context,
     WorkLogIncludedHouseWork workLogIncludedHouseWork,
     Animation<double> animation,
+    int index,
   ) {
-    final index = _currentWorkLogs.indexOf(workLogIncludedHouseWork);
     final isFirstItem = index == 0;
 
     return SizeTransition(
@@ -169,6 +169,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
           context,
           removedItem,
           animation.drive(Tween(begin: 1, end: 0)),
+          index,
         ),
       );
     }
