@@ -5,8 +5,11 @@ enum PreferenceKey {
   /// チュートリアル全般を表示するかどうか
   shouldShowNewHouseTutorial,
 
-  /// チュートリアルのうち、家事に関するチュートリアルを表示したかどうか
+  /// チュートリアルのうち、最初の家事登録後のチュートリアルを表示したかどうか
   hasShownFirstHouseWorkTutorial,
+
+  /// チュートリアルのうち、最初の家事ログ記録後のチュートリアルを表示したかどうか
+  hasShownFirstWorkLogTutorial,
   workLogCountForAppReviewRequest,
   hasRequestedAppReviewWhenOver30WorkLogs,
   hasRequestedReviewWhenOver100WorkLogs,

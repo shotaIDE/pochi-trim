@@ -42,6 +42,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final GlobalKey<State<StatefulWidget>> _firstHouseWorkTileKey = GlobalKey();
   final GlobalKey<State<StatefulWidget>> _quickRegisterBottomBarKey =
       GlobalKey();
+  final GlobalKey<State<StatefulWidget>> _firstWorkLogKey = GlobalKey();
+  final GlobalKey<State<StatefulWidget>> _analysisButtonKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +53,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     const titleText = Text('記録');
 
     final analysisButton = IconButton(
+      key: _analysisButtonKey,
       onPressed: _onAnalysisButtonPressed,
       tooltip: '分析を表示する',
       icon: const Icon(Icons.analytics),
@@ -123,6 +126,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 WorkLogsTab(
                   onDuplicateButtonTap: _onDuplicateWorkLogButtonTap,
+                  firstWorkLogKey: _firstWorkLogKey,
                 ),
               ],
             ),
@@ -305,6 +309,151 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     tutorialCoachMark.show(context: context);
   }
 
+  Future<void> _showFirstWorkLogTutorialIfNeeded() async {
+    final shouldShow = await ref.read(
+      shouldShowFirstWorkLogTutorialProvider.future,
+    );
+    if (!shouldShow) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    // ログタブに切り替える
+    ref.read(selectedTabProvider.notifier).state = 1;
+
+    // 切り替えが完了するまで少し待つ
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    if (!mounted) {
+      return;
+    }
+
+    final targets = <TargetFocus>[
+      TargetFocus(
+        identify: 'firstWorkLog',
+        keyTarget: _firstWorkLogKey,
+        alignSkip: Alignment.bottomRight,
+        enableOverlayTab: true,
+        contents: [
+          TargetContent(
+            builder: (context, controller) => Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 8,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'ログが記録されています',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const _TutorialStepChip(currentStep: 1, totalSteps: 2),
+                    ],
+                  ),
+                  Text(
+                    'ここにログが記録されています。完了した家事の履歴を確認できます。',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        shape: ShapeLightFocus.RRect,
+      ),
+      TargetFocus(
+        identify: 'analysisButton',
+        keyTarget: _analysisButtonKey,
+        alignSkip: Alignment.bottomLeft,
+        enableOverlayTab: true,
+        contents: [
+          TargetContent(
+            builder: (context, controller) => Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '分析結果を確認',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const _TutorialStepChip(currentStep: 2, totalSteps: 2),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'ここをタップすることで分析結果を見ることができます。家事の実行状況を確認してみましょう。',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => controller.next(),
+                        child: const Text('完了'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        shape: ShapeLightFocus.RRect,
+      ),
+    ];
+
+    final tutorialCoachMark = TutorialCoachMark(
+      targets: targets,
+      colorShadow: Theme.of(context).colorScheme.primary,
+      onFinish: () async {
+        await ref.read(onFinishFirstWorkLogTutorialProvider.future);
+      },
+      onSkip: () {
+        ref.read(onSkipFirstWorkLogTutorialProvider.future);
+        return true;
+      },
+      textSkip: 'ガイドをスキップする',
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    tutorialCoachMark.show(context: context);
+  }
+
   Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
     try {
       final workLogId = await ref.read(
@@ -325,6 +474,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _highlightWorkLogsTabItem();
 
       _showWorkLogRegisteredSnackBar(workLogId);
+
+      // 最初の家事ログ記録後のチュートリアルを表示
+      await _showFirstWorkLogTutorialIfNeeded();
     } on DebounceWorkLogException {
       // エラーメッセージは表示しない
     }
@@ -353,6 +505,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
 
       _showWorkLogRegisteredSnackBar(workLogId);
+
+      // 最初の家事ログ記録後のチュートリアルを表示
+      await _showFirstWorkLogTutorialIfNeeded();
     } on DebounceWorkLogException {
       // エラーメッセージは表示しない
     }
@@ -383,6 +538,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
 
       _showWorkLogRegisteredSnackBar(workLogId);
+
+      // 最初の家事ログ記録後のチュートリアルを表示
+      await _showFirstWorkLogTutorialIfNeeded();
     } on DebounceWorkLogException {
       // エラーメッセージは表示しない
     }
