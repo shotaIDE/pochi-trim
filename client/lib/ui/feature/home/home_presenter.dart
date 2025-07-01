@@ -57,7 +57,7 @@ Future<void> onFinishHouseWorkTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
   await preferenceService.setBool(
-    PreferenceKey.firstHouseWorkTutorialHasShown,
+    PreferenceKey.hasShownFirstHouseWorkTutorial,
     value: true,
   );
 }
@@ -70,7 +70,7 @@ Future<void> onSkipHouseWorkTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
   await preferenceService.setBool(
-    PreferenceKey.firstHouseWorkTutorialHasShown,
+    PreferenceKey.hasShownFirstHouseWorkTutorial,
     value: true,
   );
 }

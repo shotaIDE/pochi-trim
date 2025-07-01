@@ -1,7 +1,7 @@
 enum PreferenceKey {
   currentHouseId,
   isProUserForDebug,
-  firstHouseWorkTutorialHasShown,
+  hasShownFirstHouseWorkTutorial,
   shouldShowNewHouseTutorial,
   workLogCountForAppReviewRequest,
   hasRequestedAppReviewWhenOver30WorkLogs,
