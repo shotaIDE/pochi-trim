@@ -157,9 +157,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _onAddHouseWorkButtonTap() async {
-    await Navigator.of(context).push(
+    final added = await Navigator.of(context).push(
       AddHouseWorkScreen.route(),
     );
+    if (added != true) {
+      return;
+    }
 
     await _checkAndShowNewHouseTutorial();
   }
