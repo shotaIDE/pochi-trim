@@ -31,6 +31,11 @@ class DebugScreen extends ConsumerWidget {
             onReset: () =>
                 ref.read(resetFirstHouseWorkTutorialStatusProvider.future),
           ),
+          _ResetReviewStatusTile(
+            keyDisplayName: '最初の家事ログのチュートリアル',
+            onReset: () =>
+                ref.read(resetFirstWorkLogTutorialStatusProvider.future),
+          ),
           const SectionHeader(title: 'アプリ内レビュー'),
           _ResetReviewStatusTile(
             keyDisplayName: '家事ログ30回完了のフラグ',
