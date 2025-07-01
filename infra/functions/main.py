@@ -36,7 +36,7 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
 
         return {
             "houseDocId": first_house_id,
-            "created": False
+            "isNewHouse": False
         }
 
     print(f"User \"{user_id}\" is not belongs to any house, creating a new house...")
@@ -51,7 +51,7 @@ def generate_my_house(req: https_fn.CallableRequest) -> Any:
 
     return {
         "houseDocId": house_doc_id,
-        "created": True
+        "isNewHouse": True
     }
 
 
