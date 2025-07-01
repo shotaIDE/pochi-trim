@@ -97,23 +97,25 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
   }
 
   Future<void> _completeSignIn({required String userId}) async {
-    final myHouseId = await ref.read(generateMyHouseProvider.future);
+    final result = await ref.read(generateMyHouseProvider.future);
 
     // 家IDを永続化する
     final preferenceService = ref.read(preferenceServiceProvider);
     await preferenceService.setString(
       PreferenceKey.currentHouseId,
-      value: myHouseId,
+      value: result.houseDocId,
     );
 
-    // 新しい家が作成されたため、チュートリアルを表示するフラグを設定
-    await preferenceService.setBool(
-      PreferenceKey.shouldShowNewHouseTutorial,
-      value: true,
-    );
+    // 新しい家が作成された場合のみ、チュートリアルを表示するフラグを設定
+    if (result.created) {
+      await preferenceService.setBool(
+        PreferenceKey.shouldShowNewHouseTutorial,
+        value: true,
+      );
+    }
 
     await ref
         .read(currentAppSessionProvider.notifier)
-        .signIn(userId: userId, houseId: myHouseId);
+        .signIn(userId: userId, houseId: result.houseDocId);
   }
 }
