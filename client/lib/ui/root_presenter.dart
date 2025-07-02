@@ -80,8 +80,12 @@ class CurrentAppSession extends _$CurrentAppSession {
     final houseId = await preferenceService.getString(
       PreferenceKey.currentHouseId,
     );
+    if (houseId == null) {
+      // 現在のハウスIDが設定されていない場合は、サインアウト状態にする
+      return AppSession.notSignedIn();
+    }
 
-    return AppSession.signedIn(currentHouseId: houseId!);
+    return AppSession.signedIn(currentHouseId: houseId);
   }
 
   Future<void> signIn({required String userId, required String houseId}) async {
