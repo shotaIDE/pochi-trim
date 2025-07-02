@@ -316,11 +316,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
 
       if (workLogId == null) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
-          );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+        );
         return;
       }
 
@@ -348,11 +346,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       // TODO(ide): 共通化できる
       if (workLogId == null) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
-          );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+        );
         return;
       }
 
@@ -374,11 +370,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       // TODO(ide): 共通化
       if (workLogId == null) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
-          );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
+        );
         return;
       }
 
@@ -458,11 +452,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(content: Text('家事の削除に失敗しました。しばらくしてから再度お試しください')),
-        );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('家事の削除に失敗しました。しばらくしてから再度お試しください')),
+      );
       return;
     }
 
@@ -470,9 +462,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('家事を削除しました')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事を削除しました')));
   }
 
   void _highlightWorkLogsTabItem() {
@@ -502,26 +494,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showWorkLogRegisteredSnackBar(String workLogId) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Row(
-            spacing: 12,
-            children: [
-              Icon(
-                Icons.check_circle,
-                color: Theme.of(context).colorScheme.surface,
-              ),
-              const Expanded(child: Text('家事ログを記録しました')),
-            ],
-          ),
-          action: SnackBarAction(
-            label: '取り消す',
-            onPressed: () => _undoWorkLog(workLogId),
-          ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          spacing: 12,
+          children: [
+            Icon(
+              Icons.check_circle,
+              color: Theme.of(context).colorScheme.surface,
+            ),
+            const Expanded(child: Text('家事ログを記録しました')),
+          ],
         ),
-      );
+        action: SnackBarAction(
+          label: '取り消す',
+          onPressed: () => _undoWorkLog(workLogId),
+        ),
+      ),
+    );
   }
 
   Future<void> _undoWorkLog(String workLogId) async {
@@ -529,9 +519,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       await ref.read(undoWorkLogProvider(workLogId).future);
     } on DeleteWorkLogException {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(const SnackBar(content: Text('家事ログの取り消しに失敗しました')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('家事ログの取り消しに失敗しました')));
       }
     }
 
@@ -539,9 +529,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('家事ログの記録を取り消しました')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事ログの記録を取り消しました')));
   }
 }
 

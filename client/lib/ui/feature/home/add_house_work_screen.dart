@@ -182,9 +182,9 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
     }
 
     if (userProfile == null) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(content: Text('ユーザー情報が取得できませんでした')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('ユーザー情報が取得できませんでした')));
       return;
     }
 
@@ -212,9 +212,9 @@ class _AddHouseWorkScreenState extends ConsumerState<AddHouseWorkScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('家事を登録しました')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('家事を登録しました')));
 
     Navigator.of(context).pop(true);
   }
