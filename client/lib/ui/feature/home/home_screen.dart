@@ -48,10 +48,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void initState() {
     super.initState();
 
-    _tabController = TabController(
-      length: 2,
-      vsync: this,
-    );
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -172,9 +169,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Future<void> _onAddHouseWorkButtonTap() async {
-    final added = await Navigator.of(context).push(
-      AddHouseWorkScreen.route(),
-    );
+    final added = await Navigator.of(context).push(AddHouseWorkScreen.route());
     if (added != true) {
       return;
     }
@@ -220,9 +215,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         child: Text(
                           'タップしてログを記録',
                           style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -265,9 +258,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         child: Text(
                           'クイック登録バーでも記録',
                           style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -367,9 +358,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         child: Text(
                           'ログが記録されています',
                           style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -411,9 +400,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         child: Text(
                           '分析結果を確認する',
                           style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -863,10 +850,7 @@ class _TutorialStepChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary,
         borderRadius: BorderRadius.circular(12),
