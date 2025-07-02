@@ -464,18 +464,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       }
 
       if (workLogId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
-        );
+        _showWorkLogRegistrationFailedSnackBar();
         return;
       }
 
       _highlightWorkLogsTabItem();
 
-      _showWorkLogRegisteredSnackBar(workLogId);
-
-      // 最初の家事ログ記録後のチュートリアルを表示
-      await _showHowToCheckWorkLogsAndAnalysisTutorialIfNeeded();
+      await _onWorkLogRegistered(workLogId);
     } on DebounceWorkLogException {
       // エラーメッセージは表示しない
     }
@@ -495,18 +490,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         return;
       }
 
-      // TODO(ide): 共通化できる
       if (workLogId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
-        );
+        _showWorkLogRegistrationFailedSnackBar();
         return;
       }
 
-      _showWorkLogRegisteredSnackBar(workLogId);
-
-      // 最初の家事ログ記録後のチュートリアルを表示
-      await _showHowToCheckWorkLogsAndAnalysisTutorialIfNeeded();
+      await _onWorkLogRegistered(workLogId);
     } on DebounceWorkLogException {
       // エラーメッセージは表示しない
     }
@@ -522,11 +511,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         return;
       }
 
-      // TODO(ide): 共通化
       if (workLogId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
-        );
+        _showWorkLogRegistrationFailedSnackBar();
         return;
       }
 
@@ -535,10 +521,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         _highlightWorkLogsTabItem();
       }
 
-      _showWorkLogRegisteredSnackBar(workLogId);
-
-      // 最初の家事ログ記録後のチュートリアルを表示
-      await _showHowToCheckWorkLogsAndAnalysisTutorialIfNeeded();
+      await _onWorkLogRegistered(workLogId);
     } on DebounceWorkLogException {
       // エラーメッセージは表示しない
     }
@@ -649,6 +632,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
+  Future<void> _onWorkLogRegistered(String workLogId) async {
+    _showWorkLogRegisteredSnackBar(workLogId);
+
+    await _showHowToCheckWorkLogsAndAnalysisTutorialIfNeeded();
+  }
+
   void _showWorkLogRegisteredSnackBar(String workLogId) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -667,6 +656,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           onPressed: () => _undoWorkLog(workLogId),
         ),
       ),
+    );
+  }
+
+  void _showWorkLogRegistrationFailedSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('家事ログの記録に失敗しました。しばらくしてから再度お試しください')),
     );
   }
 
