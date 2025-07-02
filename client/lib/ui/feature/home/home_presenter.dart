@@ -22,7 +22,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'home_presenter.g.dart';
 
 @riverpod
-Future<bool> shouldShowFirstHouseWorkTutorial(Ref ref) async {
+Future<bool> shouldShowHowToRegisterWorkLogsTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
   final shouldShow = await preferenceService.getBool(
@@ -33,30 +33,64 @@ Future<bool> shouldShowFirstHouseWorkTutorial(Ref ref) async {
   }
 
   final hasShown = await preferenceService.getBool(
-    PreferenceKey.hasShownFirstHouseWorkTutorial,
+    PreferenceKey.hasShownHowToRegisterWorkLogsTutorial,
   );
   return hasShown != true;
 }
 
 @riverpod
-Future<void> onFinishHouseWorkTutorial(Ref ref) async {
+Future<void> onFinishHowToRegisterWorkLogsTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
   await preferenceService.setBool(
-    PreferenceKey.hasShownFirstHouseWorkTutorial,
+    PreferenceKey.hasShownHowToRegisterWorkLogsTutorial,
     value: true,
   );
 }
 
-/// 家事チュートリアルをスキップする
-///
-/// 家事チュートリアルをスキップした場合、以降の家事チュートリアルは表示されません。
 @riverpod
-Future<void> onSkipHouseWorkTutorial(Ref ref) async {
+Future<void> onSkipHowToRegisterWorkLogsTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
   await preferenceService.setBool(
-    PreferenceKey.hasShownFirstHouseWorkTutorial,
+    PreferenceKey.hasShownHowToRegisterWorkLogsTutorial,
+    value: true,
+  );
+}
+
+@riverpod
+Future<bool> shouldShowHowToCheckWorkLogsAndAnalysisTutorial(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+
+  final shouldShow = await preferenceService.getBool(
+    PreferenceKey.shouldShowNewHouseTutorial,
+  );
+  if (shouldShow != true) {
+    return false;
+  }
+
+  final hasShown = await preferenceService.getBool(
+    PreferenceKey.hasShownHowToCheckWorkLogsAndAnalysisTutorial,
+  );
+  return hasShown != true;
+}
+
+@riverpod
+Future<void> onFinishHowToCheckWorkLogsAndAnalysisTutorial(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+
+  await preferenceService.setBool(
+    PreferenceKey.hasShownHowToCheckWorkLogsAndAnalysisTutorial,
+    value: true,
+  );
+}
+
+@riverpod
+Future<void> onSkipHowToCheckWorkLogsAndAnalysisTutorial(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+
+  await preferenceService.setBool(
+    PreferenceKey.hasShownHowToCheckWorkLogsAndAnalysisTutorial,
     value: true,
   );
 }

@@ -31,6 +31,22 @@ If warnings occur, resolve them.
 
 When modifying code, always run unit tests and make sure all tests pass.
 
+### Adding unit tests
+
+When you make code modifications, consider whether there is room to add unit tests.
+If you can add unit tests, be sure to add them.
+
+### Refactoring
+
+When you make code modifications, consider whether there is room to refactor.
+If you can refactor, be sure to refactor.
+
+### Appropriate use of SDK functions, etc.
+
+When using new SDK functions that have not been used in the code base until now, check the following.
+
+- Check the official documentation to make sure the usage is simple. If the usage is complicated, revise it to a simpler usage.
+
 # Architecture
 
 This project is an iOS and Android application, including front-end and back-end code.
