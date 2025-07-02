@@ -13,9 +13,14 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 // 完了した家事ログ一覧のタブ
 class WorkLogsTab extends ConsumerStatefulWidget {
-  const WorkLogsTab({super.key, required this.onDuplicateButtonTap});
+  const WorkLogsTab({
+    super.key,
+    required this.onDuplicateButtonTap,
+    this.firstWorkLogKey,
+  });
 
   final void Function(WorkLogIncludedHouseWork) onDuplicateButtonTap;
+  final GlobalKey<State<StatefulWidget>>? firstWorkLogKey;
 
   @override
   ConsumerState<WorkLogsTab> createState() => _WorkLogsTabState();
@@ -100,7 +105,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
           key: _listKey,
           itemBuilder: (context, index, animation) {
             final workLog = _currentWorkLogs[index];
-            return _buildAnimatedItem(context, workLog, animation);
+            return _buildAnimatedItem(context, workLog, animation, index);
           },
           initialItemCount: _currentWorkLogs.length,
         );
@@ -112,7 +117,10 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     BuildContext context,
     WorkLogIncludedHouseWork workLogIncludedHouseWork,
     Animation<double> animation,
+    int index,
   ) {
+    final isFirstItem = index == 0;
+
     return SizeTransition(
       sizeFactor: animation,
       child: SlideTransition(
@@ -123,6 +131,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
         child: FadeTransition(
           opacity: animation,
           child: WorkLogItem(
+            key: isFirstItem ? widget.firstWorkLogKey : null,
             workLogIncludedHouseWork: workLogIncludedHouseWork,
             onDuplicate: widget.onDuplicateButtonTap,
             onDelete: _onDelete,
@@ -160,6 +169,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
           context,
           removedItem,
           animation.drive(Tween(begin: 1, end: 0)),
+          index,
         ),
       );
     }
