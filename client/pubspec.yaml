@@ -8,15 +8,15 @@ environment:
   sdk: 3.8.1
 
 dependencies:
-  cloud_firestore: 5.6.9
-  cloud_functions: 5.5.2
+  cloud_firestore: 5.6.10
+  cloud_functions: 5.6.0
   collection: 1.19.1
   cupertino_icons: 1.0.8
-  firebase_analytics: 11.5.0
-  firebase_auth: 5.6.0
-  firebase_core: 3.14.0
-  firebase_crashlytics: 4.3.7
-  firebase_remote_config: 5.4.5
+  firebase_analytics: 11.5.1
+  firebase_auth: 5.6.1
+  firebase_core: 3.15.0
+  firebase_crashlytics: 4.3.8
+  firebase_remote_config: 5.4.6
   fl_chart: 1.0.0
   flutter:
     sdk: flutter
