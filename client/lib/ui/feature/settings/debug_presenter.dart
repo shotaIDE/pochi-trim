@@ -15,6 +15,16 @@ Future<void> resetFirstHouseWorkTutorialStatus(Ref ref) async {
   );
 }
 
+/// 最初の家事ログチュートリアル状態をリセット（デバッグ用）
+@riverpod
+Future<void> resetFirstWorkLogTutorialStatus(Ref ref) async {
+  final preferenceService = ref.read(preferenceServiceProvider);
+  await preferenceService.setBool(
+    PreferenceKey.hasShownFirstWorkLogTutorial,
+    value: false,
+  );
+}
+
 /// 30回レビューリクエスト状態をリセット（デバッグ用）
 @riverpod
 Future<void> reset30WorkLogsReviewRequestStatus(Ref ref) async {
@@ -52,15 +62,5 @@ Future<void> resetWorkLogCountForAppReviewRequest(Ref ref) async {
   await preferenceService.setInt(
     PreferenceKey.workLogCountForAppReviewRequest,
     value: 0,
-  );
-}
-
-/// 最初の家事ログチュートリアル状態をリセット（デバッグ用）
-@riverpod
-Future<void> resetFirstWorkLogTutorialStatus(Ref ref) async {
-  final preferenceService = ref.read(preferenceServiceProvider);
-  await preferenceService.setBool(
-    PreferenceKey.hasShownFirstWorkLogTutorial,
-    value: false,
   );
 }
