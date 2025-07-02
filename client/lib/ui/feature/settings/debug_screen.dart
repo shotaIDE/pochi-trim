@@ -27,13 +27,13 @@ class DebugScreen extends ConsumerWidget {
           const _ToggleIsProTile(),
           const SectionHeader(title: 'チュートリアル'),
           _ResetReviewStatusTile(
-            keyDisplayName: '最初の家事のチュートリアル',
+            keyDisplayName: '家事ログ登録のチュートリアル',
             onReset: () => ref.read(
               resetHowToRegisterWorkLogsTutorialStatusProvider.future,
             ),
           ),
           _ResetReviewStatusTile(
-            keyDisplayName: '最初の家事ログのチュートリアル',
+            keyDisplayName: '家事ログと分析の確認のチュートリアル',
             onReset: () => ref.read(
               resetHowToCheckWorkLogsAndAnalysisTutorialStatusProvider.future,
             ),
