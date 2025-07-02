@@ -61,7 +61,7 @@ Future<void> onSkipHowToRegisterWorkLogsTutorial(Ref ref) async {
 
 /// 最初の家事ログ記録後のチュートリアルを表示するかどうかを判定する
 @riverpod
-Future<bool> shouldShowFirstWorkLogTutorial(Ref ref) async {
+Future<bool> shouldShowHowToCheckWorkLogsAndAnalysisTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
   final shouldShow = await preferenceService.getBool(
@@ -79,7 +79,7 @@ Future<bool> shouldShowFirstWorkLogTutorial(Ref ref) async {
 
 /// 最初の家事ログ記録後のチュートリアルを完了する
 @riverpod
-Future<void> onFinishFirstWorkLogTutorial(Ref ref) async {
+Future<void> onFinishHowToCheckWorkLogsAndAnalysisTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
   await preferenceService.setBool(
@@ -90,7 +90,7 @@ Future<void> onFinishFirstWorkLogTutorial(Ref ref) async {
 
 /// 最初の家事ログ記録後のチュートリアルをスキップする
 @riverpod
-Future<void> onSkipFirstWorkLogTutorial(Ref ref) async {
+Future<void> onSkipHowToCheckWorkLogsAndAnalysisTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
   await preferenceService.setBool(

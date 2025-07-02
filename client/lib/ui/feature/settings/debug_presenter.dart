@@ -5,9 +5,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'debug_presenter.g.dart';
 
-/// 最初の家事チュートリアル状態をリセット（デバッグ用）
 @riverpod
-Future<void> resetFirstHouseWorkTutorialStatus(Ref ref) async {
+Future<void> resetHowToRegisterWorkLogsTutorialStatus(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
   await preferenceService.setBool(
     PreferenceKey.hasShownHowToRegisterWorkLogsTutorial,
@@ -15,9 +14,8 @@ Future<void> resetFirstHouseWorkTutorialStatus(Ref ref) async {
   );
 }
 
-/// 最初の家事ログチュートリアル状態をリセット（デバッグ用）
 @riverpod
-Future<void> resetFirstWorkLogTutorialStatus(Ref ref) async {
+Future<void> resetHowToCheckWorkLogsAndAnalysisTutorialStatus(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
   await preferenceService.setBool(
     PreferenceKey.hasShownHowToCheckWorkLogsAndAnalysisTutorial,

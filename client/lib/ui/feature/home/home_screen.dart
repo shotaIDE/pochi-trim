@@ -310,9 +310,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     tutorialCoachMark.show(context: context);
   }
 
-  Future<void> _showFirstWorkLogTutorialIfNeeded() async {
+  Future<void> _showHowToCheckWorkLogsAndAnalysisTutorialIfNeeded() async {
     final shouldShow = await ref.read(
-      shouldShowFirstWorkLogTutorialProvider.future,
+      shouldShowHowToCheckWorkLogsAndAnalysisTutorialProvider.future,
     );
     if (!shouldShow) {
       return;
@@ -435,10 +435,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       targets: targets,
       colorShadow: Theme.of(context).colorScheme.primary,
       onFinish: () async {
-        await ref.read(onFinishFirstWorkLogTutorialProvider.future);
+        await ref.read(
+          onFinishHowToCheckWorkLogsAndAnalysisTutorialProvider.future,
+        );
       },
       onSkip: () {
-        ref.read(onSkipFirstWorkLogTutorialProvider.future);
+        ref.read(onSkipHowToCheckWorkLogsAndAnalysisTutorialProvider.future);
         return true;
       },
       textSkip: 'ガイドをスキップする',
@@ -473,7 +475,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       _showWorkLogRegisteredSnackBar(workLogId);
 
       // 最初の家事ログ記録後のチュートリアルを表示
-      await _showFirstWorkLogTutorialIfNeeded();
+      await _showHowToCheckWorkLogsAndAnalysisTutorialIfNeeded();
     } on DebounceWorkLogException {
       // エラーメッセージは表示しない
     }
@@ -504,7 +506,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       _showWorkLogRegisteredSnackBar(workLogId);
 
       // 最初の家事ログ記録後のチュートリアルを表示
-      await _showFirstWorkLogTutorialIfNeeded();
+      await _showHowToCheckWorkLogsAndAnalysisTutorialIfNeeded();
     } on DebounceWorkLogException {
       // エラーメッセージは表示しない
     }
@@ -536,7 +538,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       _showWorkLogRegisteredSnackBar(workLogId);
 
       // 最初の家事ログ記録後のチュートリアルを表示
-      await _showFirstWorkLogTutorialIfNeeded();
+      await _showHowToCheckWorkLogsAndAnalysisTutorialIfNeeded();
     } on DebounceWorkLogException {
       // エラーメッセージは表示しない
     }
