@@ -230,9 +230,11 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事ログの削除に失敗しました。しばらくしてから再度お試しください')),
-      );
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('家事ログの削除に失敗しました。しばらくしてから再度お試しください')),
+        );
       return;
     }
 
@@ -240,21 +242,23 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          spacing: 12,
-          children: [
-            Icon(Icons.delete, color: Theme.of(context).colorScheme.surface),
-            const Expanded(child: Text('家事ログを削除しました。')),
-          ],
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Row(
+            spacing: 12,
+            children: [
+              Icon(Icons.delete, color: Theme.of(context).colorScheme.surface),
+              const Expanded(child: Text('家事ログを削除しました。')),
+            ],
+          ),
+          action: SnackBarAction(
+            label: '元に戻す',
+            onPressed: () => _undoDelete(workLog),
+          ),
         ),
-        action: SnackBarAction(
-          label: '元に戻す',
-          onPressed: () => _undoDelete(workLog),
-        ),
-      ),
-    );
+      );
   }
 
   Future<void> _undoDelete(WorkLog workLog) async {
@@ -269,9 +273,9 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
         return;
       }
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('家事ログの復元に失敗しました')));
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('家事ログの復元に失敗しました')));
       return;
     }
 
@@ -279,8 +283,8 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
       return;
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('家事ログを元に戻しました。')));
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('家事ログを元に戻しました。')));
   }
 }
