@@ -686,42 +686,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 }
 
-class _QuickRegisterBottomBar extends ConsumerStatefulWidget {
+class _QuickRegisterBottomBar extends ConsumerWidget {
   const _QuickRegisterBottomBar({super.key, required this.onTap});
 
   final void Function(HouseWork) onTap;
 
   @override
-  ConsumerState<_QuickRegisterBottomBar> createState() =>
-      _QuickRegisterBottomBarState();
-}
-
-class _QuickRegisterBottomBarState
-    extends ConsumerState<_QuickRegisterBottomBar> {
-  Future<List<HouseWork>>? _houseWorksFuture;
-
-  @override
-  void initState() {
-    super.initState();
-
-    ref.listenManual(
-      houseWorksSortedByMostFrequentlyUsedProvider.future,
-      (previous, next) {
-        if (_houseWorksFuture != null) {
-          // 既に1回データ取得した場合は更新しない
-          // UIがガチャガチャ更新されるのを防ぐため
-          return;
-        }
-
-        setState(() {
-          _houseWorksFuture = next;
-        });
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final houseWorksFuture = ref.watch(
+      throttledHouseWorksSortedByMostFrequentlyUsedProvider.future,
     );
-  }
 
-  @override
-  Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxHeight: 130),
       decoration: BoxDecoration(
@@ -738,7 +713,7 @@ class _QuickRegisterBottomBarState
       child: SafeArea(
         top: false,
         child: FutureBuilder<List<HouseWork>>(
-          future: _houseWorksFuture,
+          future: houseWorksFuture,
           builder: (context, snapshot) {
             return Skeletonizer(
               enabled: snapshot.data == null,
@@ -773,7 +748,7 @@ class _QuickRegisterBottomBarState
     }
 
     final items = recentHouseWorks.map((houseWork) {
-      return _QuickRegisterButton(houseWork: houseWork, onTap: widget.onTap);
+      return _QuickRegisterButton(houseWork: houseWork, onTap: onTap);
     }).toList();
 
     return ListView(scrollDirection: Axis.horizontal, children: items);
