@@ -545,17 +545,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _QuickRegisterBottomBar extends ConsumerWidget {
+class _QuickRegisterBottomBar extends ConsumerStatefulWidget {
   const _QuickRegisterBottomBar({super.key, required this.onTap});
 
   final void Function(HouseWork) onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final houseWorksFuture = ref.watch(
-      houseWorksSortedByMostFrequentlyUsedProvider.future,
-    );
+  ConsumerState<_QuickRegisterBottomBar> createState() =>
+      _QuickRegisterBottomBarState();
+}
 
+class _QuickRegisterBottomBarState
+    extends ConsumerState<_QuickRegisterBottomBar> {
+  Future<List<HouseWork>>? _houseWorksFuture;
+
+  @override
+  void initState() {
+    super.initState();
+
+    ref.listenManual(
+      houseWorksSortedByMostFrequentlyUsedProvider.future,
+      (previous, next) {
+        if (_houseWorksFuture != null) {
+          // 既に1回データ取得した場合は更新しない
+          // UIがガチャガチャ更新されるのを防ぐため
+          return;
+        }
+
+        setState(() {
+          _houseWorksFuture = next;
+        });
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxHeight: 130),
       decoration: BoxDecoration(
@@ -572,7 +597,7 @@ class _QuickRegisterBottomBar extends ConsumerWidget {
       child: SafeArea(
         top: false,
         child: FutureBuilder<List<HouseWork>>(
-          future: houseWorksFuture,
+          future: _houseWorksFuture,
           builder: (context, snapshot) {
             return Skeletonizer(
               enabled: snapshot.data == null,
@@ -607,7 +632,7 @@ class _QuickRegisterBottomBar extends ConsumerWidget {
     }
 
     final items = recentHouseWorks.map((houseWork) {
-      return _QuickRegisterButton(houseWork: houseWork, onTap: onTap);
+      return _QuickRegisterButton(houseWork: houseWork, onTap: widget.onTap);
     }).toList();
 
     return ListView(scrollDirection: Axis.horizontal, children: items);
