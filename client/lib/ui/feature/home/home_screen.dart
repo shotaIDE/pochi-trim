@@ -174,12 +174,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return;
     }
 
-    await _showNewHouseWorkTutorialIfNeeded();
+    await _showHowToRegisterWorkLogsTutorialIfNeeded();
   }
 
-  Future<void> _showNewHouseWorkTutorialIfNeeded() async {
+  Future<void> _showHowToRegisterWorkLogsTutorialIfNeeded() async {
     final shouldShow = await ref.read(
-      shouldShowFirstHouseWorkTutorialProvider.future,
+      shouldShowHowToRegisterWorkLogsTutorialProvider.future,
     );
     if (!shouldShow) {
       return;
@@ -293,10 +293,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       targets: targets,
       colorShadow: Theme.of(context).colorScheme.primary,
       onFinish: () async {
-        await ref.read(onFinishHouseWorkTutorialProvider.future);
+        await ref.read(onFinishHowToRegisterWorkLogsTutorialProvider.future);
       },
       onSkip: () {
-        ref.read(onSkipHouseWorkTutorialProvider.future);
+        ref.read(onSkipHowToRegisterWorkLogsTutorialProvider.future);
 
         return true;
       },
