@@ -694,7 +694,7 @@ class _QuickRegisterBottomBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final houseWorksFuture = ref.watch(
-      houseWorksSortedByMostFrequentlyUsedProvider.future,
+      throttledHouseWorksSortedByMostFrequentlyUsedProvider.future,
     );
 
     return Container(

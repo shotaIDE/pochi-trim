@@ -124,30 +124,32 @@ class IsHouseWorkDeleting extends _$IsHouseWorkDeleting {
   }
 }
 
+/// 更新頻度が絞られている、頻繁に使用される家事のリスト
+///
+/// 以下の条件を満たす場合に更新されます。
+/// - 家事が追加された
+/// - 家事が削除された
 @riverpod
-Future<List<HouseWork>> houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
-  final houseWorks = await ref.watch(_houseWorksFilePrivateProvider.future);
-  final completedWorkLogs = await ref.watch(
-    _completedWorkLogsFilePrivateProvider.future,
-  );
+class ThrottledHouseWorksSortedByMostFrequentlyUsed
+    extends _$ThrottledHouseWorksSortedByMostFrequentlyUsed {
+  List<HouseWork>? _previous;
 
-  final completionCountOfHouseWorks = <HouseWork, int>{};
+  @override
+  Stream<List<HouseWork>> build() async* {
+    final next = await ref.watch(
+      _houseWorksSortedByMostFrequentlyUsedProvider.future,
+    );
 
-  for (final houseWork in houseWorks) {
-    final completionCount = completedWorkLogs
-        .where((workLog) => workLog.houseWorkId == houseWork.id)
-        .length;
+    final previous = _previous;
+    if (previous != null && previous.length == next.length) {
+      _previous = next;
+      return;
+    }
 
-    completionCountOfHouseWorks[houseWork] = completionCount;
+    _previous = next;
+
+    yield next;
   }
-
-  final sortedHouseWorksByCompletionCount = completionCountOfHouseWorks.entries
-      .sortedBy((entry) => entry.value)
-      .reversed
-      .map((entry) => entry.key)
-      .toList();
-
-  return sortedHouseWorksByCompletionCount;
 }
 
 @riverpod
@@ -276,4 +278,30 @@ Stream<List<WorkLog>> _completedWorkLogsFilePrivate(Ref ref) {
   final workLogRepository = ref.watch(workLogRepositoryProvider);
 
   return workLogRepository.getCompletedWorkLogs();
+}
+
+@riverpod
+Future<List<HouseWork>> _houseWorksSortedByMostFrequentlyUsed(Ref ref) async {
+  final houseWorks = await ref.watch(_houseWorksFilePrivateProvider.future);
+  final completedWorkLogs = await ref.watch(
+    _completedWorkLogsFilePrivateProvider.future,
+  );
+
+  final completionCountOfHouseWorks = <HouseWork, int>{};
+
+  for (final houseWork in houseWorks) {
+    final completionCount = completedWorkLogs
+        .where((workLog) => workLog.houseWorkId == houseWork.id)
+        .length;
+
+    completionCountOfHouseWorks[houseWork] = completionCount;
+  }
+
+  final sortedHouseWorksByCompletionCount = completionCountOfHouseWorks.entries
+      .sortedBy((entry) => entry.value)
+      .reversed
+      .map((entry) => entry.key)
+      .toList();
+
+  return sortedHouseWorksByCompletionCount;
 }
