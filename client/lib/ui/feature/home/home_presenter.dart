@@ -124,6 +124,11 @@ class IsHouseWorkDeleting extends _$IsHouseWorkDeleting {
   }
 }
 
+/// 更新頻度が絞られている、頻繁に使用される家事のリスト
+///
+/// 以下の条件を満たす場合に更新されます。
+/// - 家事が追加された
+/// - 家事が削除された
 @riverpod
 class ThrottledHouseWorksSortedByMostFrequentlyUsed
     extends _$ThrottledHouseWorksSortedByMostFrequentlyUsed {
