@@ -19,18 +19,20 @@ class FeedbackScreen extends ConsumerStatefulWidget {
 }
 
 class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
+  var _includeUserId = true;
+  var _isSubmitting = false;
+
   final _formKey = GlobalKey<FormState>();
   final _feedbackController = TextEditingController();
   final _emailController = TextEditingController();
   final _userIdController = TextEditingController();
-  var _includeUserId = true;
-  var _isSubmitting = false;
 
   @override
   void dispose() {
     _feedbackController.dispose();
     _emailController.dispose();
     _userIdController.dispose();
+
     super.dispose();
   }
 
