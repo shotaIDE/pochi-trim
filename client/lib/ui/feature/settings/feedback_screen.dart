@@ -146,63 +146,58 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'ユーザーID',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Row(
+          children: [
+            const Text(
+              'ユーザーID',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const Spacer(),
+            Switch(
+              value: _includeUserId,
+              onChanged: (value) {
+                setState(() {
+                  _includeUserId = value;
+                });
+              },
+            ),
+          ],
         ),
         const SizedBox(height: 8),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(4),
+        TextFormField(
+          initialValue: userId ?? 'ユーザーIDを取得できませんでした',
+          enabled: false,
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            filled: true,
+            fillColor: Colors.grey.shade100,
           ),
-          child: Column(
-            children: [
-              ListTile(
-                title: Text(
-                  userId ?? 'ユーザーIDを取得できませんでした',
-                  style: TextStyle(
-                    color: userId != null ? Colors.black : Colors.grey,
-                  ),
-                ),
-                trailing: Switch(
-                  value: _includeUserId,
-                  onChanged: (value) {
-                    setState(() {
-                      _includeUserId = value;
-                    });
-                  },
-                ),
-              ),
-              if (_includeUserId) ...[
-                const Divider(height: 1),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.info_outline,
-                        size: 16,
-                        color: Colors.blue,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'ユーザーIDを共有することで、'
-                          'バグ調査がスムーズに進みます',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.blue.shade700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
+          style: TextStyle(
+            color: userId != null ? Colors.black87 : Colors.grey.shade600,
           ),
         ),
+        if (_includeUserId) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(
+                Icons.info_outline,
+                size: 16,
+                color: Colors.blue,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'ユーザーIDを共有することで、バグ調査がスムーズに進みます',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue.shade700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
