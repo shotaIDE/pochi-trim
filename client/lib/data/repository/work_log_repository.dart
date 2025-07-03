@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
@@ -7,6 +9,7 @@ import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
+import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -19,12 +22,14 @@ final _logger = Logger('WorkLogRepository');
 WorkLogRepository workLogRepository(Ref ref) {
   final appSession = ref.watch(unwrappedCurrentAppSessionProvider);
   final systemService = ref.watch(systemServiceProvider);
+  final errorReportService = ref.watch(errorReportServiceProvider);
 
   switch (appSession) {
     case AppSessionSignedIn(currentHouseId: final currentHouseId):
       return WorkLogRepository(
         houseId: currentHouseId,
         systemService: systemService,
+        errorReportService: errorReportService,
       );
     case AppSessionNotSignedIn():
       throw NoHouseIdError();
@@ -35,11 +40,14 @@ class WorkLogRepository {
   WorkLogRepository({
     required String houseId,
     required SystemService systemService,
+    required ErrorReportService errorReportService,
   }) : _houseId = houseId,
-       _systemService = systemService;
+       _systemService = systemService,
+       _errorReportService = errorReportService;
 
   final String _houseId;
   final SystemService _systemService;
+  final ErrorReportService _errorReportService;
 
   // 家事ログの取得期間（過去1ヶ月）
   static const _workLogRetentionPeriod = Duration(days: 31);
@@ -62,8 +70,10 @@ class WorkLogRepository {
       final workLogsCollection = _getWorkLogsCollection();
       final docRef = await workLogsCollection.add(args.toFirestore());
       return docRef.id;
-    } on FirebaseException catch (e) {
+    } on FirebaseException catch (e, stack) {
       _logger.warning('家事ログ追加エラー', e);
+
+      unawaited(_errorReportService.recordError(e, stack));
 
       throw const AddWorkLogException();
     }
@@ -94,8 +104,10 @@ class WorkLogRepository {
   Future<void> delete(String id) async {
     try {
       await _getWorkLogsCollection().doc(id).delete();
-    } on FirebaseException catch (e) {
+    } on FirebaseException catch (e, stack) {
       _logger.warning('家事ログ削除エラー', e);
+
+      unawaited(_errorReportService.recordError(e, stack));
 
       throw const DeleteWorkLogException();
     }

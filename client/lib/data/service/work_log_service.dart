@@ -8,6 +8,7 @@ import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/data/service/in_app_review_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/riverpod_extension.dart';
@@ -60,6 +61,7 @@ WorkLogService workLogService(Ref ref) {
   final authService = ref.watch(authServiceProvider);
   final systemService = ref.watch(systemServiceProvider);
   final inAppReviewService = ref.watch(inAppReviewServiceProvider);
+  final errorReportService = ref.watch(errorReportServiceProvider);
 
   switch (appSession) {
     case AppSessionSignedIn(currentHouseId: final currentHouseId):
@@ -69,6 +71,7 @@ WorkLogService workLogService(Ref ref) {
         currentHouseId: currentHouseId,
         systemService: systemService,
         inAppReviewService: inAppReviewService,
+        errorReportService: errorReportService,
         ref: ref,
       );
     case AppSessionNotSignedIn():
@@ -83,6 +86,7 @@ class WorkLogService {
     required this.authService,
     required this.currentHouseId,
     required this.systemService,
+    required this.errorReportService,
     required this.inAppReviewService,
     required this.ref,
   });
@@ -91,6 +95,7 @@ class WorkLogService {
   final AuthService authService;
   final String currentHouseId;
   final SystemService systemService;
+  final ErrorReportService errorReportService;
   final InAppReviewService inAppReviewService;
   final Ref ref;
 
@@ -134,7 +139,9 @@ class WorkLogService {
       unawaited(_requestAppReviewIfNeeded());
 
       return workLogId;
-    } on Exception {
+    } on Exception catch (e, stack) {
+      unawaited(errorReportService.recordError(e, stack));
+
       return null;
     }
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
@@ -5,12 +7,15 @@ import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/generate_my_house_exception.dart';
 import 'package:pochi_trim/data/model/generate_my_house_result.dart';
 import 'package:pochi_trim/data/service/dao/generate_my_house_result_functions.dart';
+import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'functions_service.g.dart';
 
 @riverpod
 Future<GenerateMyHouseResult> generateMyHouse(Ref ref) async {
+  final errorReportService = ref.watch(errorReportServiceProvider);
+
   final logger = Logger('FunctionsService');
 
   final functions = FirebaseFunctions.instance;
@@ -19,8 +24,10 @@ Future<GenerateMyHouseResult> generateMyHouse(Ref ref) async {
   final HttpsCallableResult<Map<String, dynamic>> resultMap;
   try {
     resultMap = await callable.call<Map<String, dynamic>>();
-  } on FirebaseFunctionsException catch (e) {
+  } on FirebaseFunctionsException catch (e, stack) {
     logger.info('Call error: ${e.code}');
+
+    unawaited(errorReportService.recordError(e, stack));
 
     throw GenerateMyHouseException();
   }
@@ -45,6 +52,8 @@ Future<void> deleteHouseWork(
   String houseId,
   String houseWorkId,
 ) async {
+  final errorReportService = ref.watch(errorReportServiceProvider);
+
   final logger = Logger('FunctionsService');
 
   final functions = FirebaseFunctions.instance;
@@ -55,8 +64,10 @@ Future<void> deleteHouseWork(
       'houseId': houseId,
       'houseWorkId': houseWorkId,
     });
-  } on FirebaseFunctionsException catch (e) {
+  } on FirebaseFunctionsException catch (e, stack) {
     logger.severe('Failed to delete house work: ${e.code} - ${e.message}');
+
+    unawaited(errorReportService.recordError(e, stack));
 
     throw DeleteHouseWorkException();
   }
