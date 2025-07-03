@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -58,9 +60,11 @@ class AuthService {
         case SignInGoogleExceptionUncategorized():
           _logger.warning('Googleサインインに失敗しました。');
 
-          await _errorReportService.recordError(
-            error,
-            StackTrace.current,
+          unawaited(
+            _errorReportService.recordError(
+              error,
+              StackTrace.current,
+            ),
           );
           throw const SignInWithGoogleException.uncategorized();
       }
@@ -71,7 +75,7 @@ class AuthService {
       userCredential = await firebase_auth.FirebaseAuth.instance
           .signInWithCredential(authCredential);
     } on firebase_auth.FirebaseAuthException catch (e, stack) {
-      await _errorReportService.recordError(e, stack);
+      unawaited(_errorReportService.recordError(e, stack));
       throw const SignInWithGoogleException.uncategorized();
     }
 
@@ -100,9 +104,11 @@ class AuthService {
         case SignInGoogleExceptionUncategorized():
           _logger.warning('Googleサインインに失敗しました。');
 
-          await _errorReportService.recordError(
-            error,
-            StackTrace.current,
+          unawaited(
+            _errorReportService.recordError(
+              error,
+              StackTrace.current,
+            ),
           );
           throw const LinkWithGoogleException.uncategorized();
       }
@@ -117,7 +123,7 @@ class AuthService {
         throw const LinkWithGoogleException.alreadyInUse();
       }
 
-      await _errorReportService.recordError(error, StackTrace.current);
+      unawaited(_errorReportService.recordError(error, StackTrace.current));
       throw const LinkWithGoogleException.uncategorized();
     }
 
@@ -136,16 +142,18 @@ class AuthService {
         throw const SignInWithAppleException.cancelled();
       }
 
-      await _errorReportService.recordError(e, StackTrace.current);
+      unawaited(_errorReportService.recordError(e, StackTrace.current));
       throw const SignInWithAppleException.uncategorized();
     }
 
     final user = userCredential.user;
     if (user == null) {
       const exception = SignInWithAppleException.uncategorized();
-      await _errorReportService.recordError(
-        exception,
-        StackTrace.current,
+      unawaited(
+        _errorReportService.recordError(
+          exception,
+          StackTrace.current,
+        ),
       );
       throw exception;
     }
@@ -172,7 +180,7 @@ class AuthService {
         throw const LinkWithAppleException.alreadyInUse();
       }
 
-      await _errorReportService.recordError(e, StackTrace.current);
+      unawaited(_errorReportService.recordError(e, StackTrace.current));
       throw const LinkWithAppleException.uncategorized();
     }
   }
