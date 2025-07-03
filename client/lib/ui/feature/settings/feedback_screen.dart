@@ -22,6 +22,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   final _formKey = GlobalKey<FormState>();
   final _feedbackController = TextEditingController();
   final _emailController = TextEditingController();
+  final _userIdController = TextEditingController();
   var _includeUserId = true;
   var _isSubmitting = false;
 
@@ -29,6 +30,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   void dispose() {
     _feedbackController.dispose();
     _emailController.dispose();
+    _userIdController.dispose();
     super.dispose();
   }
 
@@ -143,6 +145,11 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   }
 
   Widget _buildUserIdSection(String? userId) {
+    // ユーザーIDコントローラーの初期化（スイッチの状態に応じて）
+    if (_includeUserId && _userIdController.text.isEmpty) {
+      _userIdController.text = userId ?? 'ユーザーIDを取得できませんでした';
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -158,6 +165,13 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
               onChanged: (value) {
                 setState(() {
                   _includeUserId = value;
+                  if (_includeUserId) {
+                    // スイッチONの場合、ユーザーIDを復元
+                    _userIdController.text = userId ?? 'ユーザーIDを取得できませんでした';
+                  } else {
+                    // スイッチOFFの場合、テキストをクリア
+                    _userIdController.clear();
+                  }
                 });
               },
             ),
@@ -165,11 +179,15 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         ),
         const SizedBox(height: 8),
         TextFormField(
-          initialValue: userId ?? 'ユーザーIDを取得できませんでした',
+          controller: _userIdController,
           enabled: false,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
             filled: true,
+            fillColor: Colors.grey.shade100,
+          ),
+          style: TextStyle(
+            color: userId != null ? Colors.black87 : Colors.grey.shade600,
           ),
         ),
         if (_includeUserId) ...[
