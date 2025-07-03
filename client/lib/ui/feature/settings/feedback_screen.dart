@@ -201,7 +201,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'ユーザーIDを共有することで、バグ調査がスムーズに進みます',
+                '不具合などのご報告は、ユーザーIDを共有していただくことで対応がスムーズに進むことがあります。',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.blue.shade700,
