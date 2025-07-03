@@ -167,13 +167,9 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         TextFormField(
           initialValue: userId ?? 'ユーザーIDを取得できませんでした',
           enabled: false,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
             filled: true,
-            fillColor: Colors.grey.shade100,
-          ),
-          style: TextStyle(
-            color: userId != null ? Colors.black87 : Colors.grey.shade600,
           ),
         ),
         if (_includeUserId) ...[
