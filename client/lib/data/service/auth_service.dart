@@ -51,7 +51,7 @@ class AuthService {
     final firebase_auth.AuthCredential authCredential;
     try {
       authCredential = await _loginGoogle();
-    } on SignInGoogleException catch (error) {
+    } on SignInGoogleException catch (error, stack) {
       switch (error) {
         case SignInGoogleExceptionCancelled():
           _logger.warning('Googleサインインがキャンセルされました。');
@@ -63,7 +63,7 @@ class AuthService {
           unawaited(
             _errorReportService.recordError(
               error,
-              StackTrace.current,
+              stack,
             ),
           );
           throw const SignInWithGoogleException.uncategorized();
@@ -95,7 +95,7 @@ class AuthService {
     final firebase_auth.AuthCredential authCredential;
     try {
       authCredential = await _loginGoogle();
-    } on SignInGoogleException catch (error) {
+    } on SignInGoogleException catch (error, stack) {
       switch (error) {
         case SignInGoogleExceptionCancelled():
           _logger.warning('Googleサインインがキャンセルされました。');
@@ -107,7 +107,7 @@ class AuthService {
           unawaited(
             _errorReportService.recordError(
               error,
-              StackTrace.current,
+              stack,
             ),
           );
           throw const LinkWithGoogleException.uncategorized();
@@ -116,14 +116,14 @@ class AuthService {
 
     try {
       await user.linkWithCredential(authCredential);
-    } on firebase_auth.FirebaseAuthException catch (error) {
+    } on firebase_auth.FirebaseAuthException catch (error, stack) {
       if (error.code == 'credential-already-in-use') {
         _logger.warning('このGoogleアカウントは既に使用されています。');
 
         throw const LinkWithGoogleException.alreadyInUse();
       }
 
-      unawaited(_errorReportService.recordError(error, StackTrace.current));
+      unawaited(_errorReportService.recordError(error, stack));
       throw const LinkWithGoogleException.uncategorized();
     }
 
@@ -137,12 +137,12 @@ class AuthService {
     try {
       userCredential = await firebase_auth.FirebaseAuth.instance
           .signInWithProvider(appleAuthProvider);
-    } on firebase_auth.FirebaseAuthException catch (e) {
+    } on firebase_auth.FirebaseAuthException catch (e, stack) {
       if (e.code == 'canceled') {
         throw const SignInWithAppleException.cancelled();
       }
 
-      unawaited(_errorReportService.recordError(e, StackTrace.current));
+      unawaited(_errorReportService.recordError(e, stack));
       throw const SignInWithAppleException.uncategorized();
     }
 
@@ -171,7 +171,7 @@ class AuthService {
 
     try {
       await user.linkWithProvider(appleAuthProvider);
-    } on firebase_auth.FirebaseAuthException catch (e) {
+    } on firebase_auth.FirebaseAuthException catch (e, stack) {
       if (e.code == 'canceled') {
         throw const LinkWithAppleException.cancelled();
       }
@@ -180,7 +180,7 @@ class AuthService {
         throw const LinkWithAppleException.alreadyInUse();
       }
 
-      unawaited(_errorReportService.recordError(e, StackTrace.current));
+      unawaited(_errorReportService.recordError(e, stack));
       throw const LinkWithAppleException.uncategorized();
     }
   }
