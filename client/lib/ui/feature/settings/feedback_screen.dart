@@ -190,28 +190,26 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
             color: userId != null ? Colors.black87 : Colors.grey.shade600,
           ),
         ),
-        if (_includeUserId) ...[
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(
-                Icons.info_outline,
-                size: 16,
-                color: Colors.blue,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'ユーザーIDを共有することで、バグ調査がスムーズに進みます',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.blue.shade700,
-                  ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Icon(
+              Icons.info_outline,
+              size: 16,
+              color: Colors.blue,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'ユーザーIDを共有することで、バグ調査がスムーズに進みます',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.blue.shade700,
                 ),
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ],
     );
   }
