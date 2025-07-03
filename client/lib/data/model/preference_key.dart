@@ -2,11 +2,6 @@ enum PreferenceKey {
   currentHouseId,
   isProUserForDebug,
 
-  /// チュートリアル全般を表示するかどうか
-  ///
-  /// 新しい家に参加した時に表示するチュートリアル全般。
-  shouldShowNewHouseTutorial,
-
   /// チュートリアルのうち、家事ログ登録方法のチュートリアルを表示したかどうか
   hasShownHowToRegisterWorkLogsTutorial,
 

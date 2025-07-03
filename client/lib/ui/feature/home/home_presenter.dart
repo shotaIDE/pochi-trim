@@ -25,13 +25,6 @@ part 'home_presenter.g.dart';
 Future<bool> shouldShowHowToRegisterWorkLogsTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
-  final shouldShow = await preferenceService.getBool(
-    PreferenceKey.shouldShowNewHouseTutorial,
-  );
-  if (shouldShow != true) {
-    return false;
-  }
-
   final hasShown = await preferenceService.getBool(
     PreferenceKey.hasShownHowToRegisterWorkLogsTutorial,
   );
@@ -61,13 +54,6 @@ Future<void> onSkipHowToRegisterWorkLogsTutorial(Ref ref) async {
 @riverpod
 Future<bool> shouldShowHowToCheckWorkLogsAndAnalysisTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
-
-  final shouldShow = await preferenceService.getBool(
-    PreferenceKey.shouldShowNewHouseTutorial,
-  );
-  if (shouldShow != true) {
-    return false;
-  }
 
   final hasShown = await preferenceService.getBool(
     PreferenceKey.hasShownHowToCheckWorkLogsAndAnalysisTutorial,

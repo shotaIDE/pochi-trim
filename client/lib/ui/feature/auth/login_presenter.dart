@@ -106,15 +106,16 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
       value: result.houseId,
     );
 
-    final shouldShowNewHouseTutorial = await preferenceService.getBool(
-      PreferenceKey.shouldShowNewHouseTutorial,
-    );
-    if (shouldShowNewHouseTutorial == null) {
-      // 端末でチュートリアル表示の有無が設定されていない場合、新しい家に参加したか否かで有無を決定する
-      // 新しい家が作成された場合はチュートリアルを表示し、既存の家に参加した場合はチュートリアルを非表示にする
+    // 既存の家に参加した場合はチュートリアルを表示しないため、チュートリアルフラグを既に表示済みに設定する
+    // 新しい家の場合はチュートリアルを表示するため、フラグを設定しない。
+    if (!result.isNewHouse) {
       await preferenceService.setBool(
-        PreferenceKey.shouldShowNewHouseTutorial,
-        value: result.isNewHouse,
+        PreferenceKey.hasShownHowToRegisterWorkLogsTutorial,
+        value: true,
+      );
+      await preferenceService.setBool(
+        PreferenceKey.hasShownHowToCheckWorkLogsAndAnalysisTutorial,
+        value: true,
       );
     }
 
