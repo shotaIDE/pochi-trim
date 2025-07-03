@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -7,10 +6,20 @@ part 'google_form_service.g.dart';
 
 @riverpod
 GoogleFormService googleFormService(Ref ref) {
-  return GoogleFormService();
+  final dio = ref.watch<Dio>(dioProvider);
+  return GoogleFormService(dio);
+}
+
+@riverpod
+Dio dio(Ref ref) {
+  return Dio();
 }
 
 class GoogleFormService {
+  const GoogleFormService(this._dio);
+
+  final Dio _dio;
+
   Future<void> sendFeedback({
     required String feedback,
     String? email,
@@ -22,23 +31,15 @@ class GoogleFormService {
       if (userId != null && userId.isNotEmpty) 'entry.1274333669': userId,
     };
 
-    final httpClient = HttpClient();
-    final uri = Uri.parse(
-      'https://docs.google.com/forms/d/1FAIpQLScS1p82L5tI4frPZLggUH35sbumRxK0EHvAEScNgck1Zv7gNg/formResponse',
+    const url =
+        'https://docs.google.com/forms/d/1FAIpQLScS1p82L5tI4frPZLggUH35sbumRxK0EHvAEScNgck1Zv7gNg/formResponse';
+
+    await _dio.post<void>(
+      url,
+      data: formData,
+      options: Options(
+        contentType: 'application/x-www-form-urlencoded',
+      ),
     );
-
-    final request = await httpClient.postUrl(uri);
-    request.headers.set('Content-Type', 'application/x-www-form-urlencoded');
-
-    final body = formData.entries
-        .map((entry) => '${entry.key}=${Uri.encodeComponent(entry.value)}')
-        .join('&');
-
-    request.write(body);
-
-    final response = await request.close();
-
-    await response.drain<void>();
-    httpClient.close();
   }
 }
