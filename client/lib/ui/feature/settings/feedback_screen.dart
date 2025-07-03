@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/google_form_service.dart';
 
 class FeedbackScreen extends ConsumerStatefulWidget {
   const FeedbackScreen({super.key});
@@ -280,29 +279,11 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     final email = _emailController.text.trim();
     final userId = _includeUserId ? userProfile?.id : null;
 
-    final formData = {
-      'entry.893089758': feedback,
-      if (email.isNotEmpty) 'entry.1495718762': email,
-      if (userId != null && userId.isNotEmpty) 'entry.1274333669': userId,
-    };
-
-    final httpClient = HttpClient();
-    final uri = Uri.parse(
-      'https://docs.google.com/forms/d/1FAIpQLScS1p82L5tI4frPZLggUH35sbumRxK0EHvAEScNgck1Zv7gNg/formResponse',
+    final googleFormService = ref.read(googleFormServiceProvider);
+    await googleFormService.sendFeedback(
+      feedback: feedback,
+      email: email.isNotEmpty ? email : null,
+      userId: userId,
     );
-
-    final request = await httpClient.postUrl(uri);
-    request.headers.set('Content-Type', 'application/x-www-form-urlencoded');
-
-    final body = formData.entries
-        .map((entry) => '${entry.key}=${Uri.encodeComponent(entry.value)}')
-        .join('&');
-
-    request.write(body);
-
-    final response = await request.close();
-
-    await response.drain<void>();
-    httpClient.close();
   }
 }
