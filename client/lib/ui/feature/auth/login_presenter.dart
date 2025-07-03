@@ -106,15 +106,27 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
       value: result.houseId,
     );
 
-    // 新しい家の場合はチュートリアルを表示するため、フラグを設定する
-    if (result.isNewHouse) {
+    // チュートリアルの表示有無が一度も設定されていない場合、設定する
+    // 新しい家が作成された場合のみ、チュートリアルを表示する
+    final shouldShowHowToRegisterWorkLogsTutorial = await preferenceService
+        .getBool(
+          PreferenceKey.shouldShowHowToRegisterWorkLogsTutorial,
+        );
+    if (shouldShowHowToRegisterWorkLogsTutorial == null) {
       await preferenceService.setBool(
         PreferenceKey.shouldShowHowToRegisterWorkLogsTutorial,
-        value: true,
+        value: result.isNewHouse,
       );
+    }
+
+    final shouldShowHowToCheckWorkLogsAndAnalysisTutorial =
+        await preferenceService.getBool(
+          PreferenceKey.shouldShowHowToCheckWorkLogsAndAnalysisTutorial,
+        );
+    if (shouldShowHowToCheckWorkLogsAndAnalysisTutorial == null) {
       await preferenceService.setBool(
         PreferenceKey.shouldShowHowToCheckWorkLogsAndAnalysisTutorial,
-        value: true,
+        value: result.isNewHouse,
       );
     }
 
