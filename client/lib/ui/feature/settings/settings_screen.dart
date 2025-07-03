@@ -16,6 +16,7 @@ import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/ui/component/color.dart';
 import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/debug_screen.dart';
+import 'package:pochi_trim/ui/feature/settings/feedback_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/section_header.dart';
 import 'package:pochi_trim/ui/feature/settings/settings_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -56,6 +57,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SectionHeader(title: 'アプリについて'),
               const _PlanInfoPanel(),
               const _ReviewAppTile(),
+              _buildFeedbackTile(context),
               _buildShareAppTile(context),
               _buildTermsOfServiceTile(context),
               _buildPrivacyPolicyTile(context),
@@ -127,6 +129,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('ユーザーIDをコピーしました')));
+  }
+
+  Widget _buildFeedbackTile(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.feedback),
+      title: const Text('フィードバック'),
+      trailing: const _MoveScreenTrailingIcon(),
+      onTap: () => Navigator.of(context).push(FeedbackScreen.route()),
+    );
   }
 
   Widget _buildShareAppTile(BuildContext context) {
