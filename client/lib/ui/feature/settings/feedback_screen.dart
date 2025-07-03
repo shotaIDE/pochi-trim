@@ -45,13 +45,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         actions: [
           TextButton(
             onPressed: isSubmitting ? null : _submitFeedback,
-            child: isSubmitting
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('送信'),
+            child: Text(isSubmitting ? '送信中' : '送信'),
           ),
         ],
       ),
@@ -74,8 +68,6 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                   _buildEmailField(),
                   const SizedBox(height: 24),
                   _buildUserIdSection(userProfile?.id),
-                  const SizedBox(height: 32),
-                  _buildSubmitButton(),
                 ],
               ),
             ),
@@ -211,27 +203,6 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildSubmitButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _isSubmitting ? null : _submitFeedback,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-        ),
-        child: _isSubmitting
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Text('送信'),
-      ),
     );
   }
 
