@@ -9,8 +9,8 @@ part 'debug_presenter.g.dart';
 Future<void> resetHowToRegisterWorkLogsTutorialStatus(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
   await preferenceService.setBool(
-    PreferenceKey.hasShownHowToRegisterWorkLogsTutorial,
-    value: false,
+    PreferenceKey.shouldShowHowToRegisterWorkLogsTutorial,
+    value: true,
   );
 }
 
@@ -18,8 +18,8 @@ Future<void> resetHowToRegisterWorkLogsTutorialStatus(Ref ref) async {
 Future<void> resetHowToCheckWorkLogsAndAnalysisTutorialStatus(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
   await preferenceService.setBool(
-    PreferenceKey.hasShownHowToCheckWorkLogsAndAnalysisTutorial,
-    value: false,
+    PreferenceKey.shouldShowHowToCheckWorkLogsAndAnalysisTutorial,
+    value: true,
   );
 }
 

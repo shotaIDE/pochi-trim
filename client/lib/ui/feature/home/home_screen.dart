@@ -185,6 +185,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return;
     }
 
+    // 家事タブ選択中でない場合、切り替える
+    await _switchToTabAndWaitIfNeeded(0);
+
     if (!mounted) {
       return;
     }
@@ -318,15 +321,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return;
     }
 
-    if (!mounted) {
-      return;
-    }
-
-    // ログタブに切り替える
-    _tabController.animateTo(1);
-
-    // 切り替えが完了し、ワークログがレンダリングされるまで待つ
-    await Future<void>.delayed(const Duration(milliseconds: 500));
+    // ログタブ選択中でない場合、切り替える
+    await _switchToTabAndWaitIfNeeded(1);
 
     if (!mounted) {
       return;
@@ -451,6 +447,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
 
     tutorialCoachMark.show(context: context);
+  }
+
+  /// 指定したタブに切り替え、アニメーション完了まで待機する
+  Future<void> _switchToTabAndWaitIfNeeded(int tabIndex) async {
+    if (_tabController.index == tabIndex) {
+      return;
+    }
+
+    _tabController.animateTo(tabIndex);
+
+    // 切り替えが完了するまで待ち、レンダリングされるまで待つ
+    final tabAnimationDurationInMilliseconds =
+        _tabController.animationDuration.inMilliseconds;
+    final waitDurationInMilliseconds =
+        tabAnimationDurationInMilliseconds + 200; // レンダリングを待つためのバッファ
+    final waitDuration = Duration(milliseconds: waitDurationInMilliseconds);
+    await Future<void>.delayed(waitDuration);
   }
 
   Future<void> _onCompleteHouseWorkButtonTap(HouseWork houseWork) async {
