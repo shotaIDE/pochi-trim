@@ -8,6 +8,7 @@ import 'package:pochi_trim/data/model/user_profile.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
+import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/data/service/in_app_review_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
@@ -20,6 +21,8 @@ class MockAuthService extends Mock implements AuthService {}
 
 class MockSystemService extends Mock implements SystemService {}
 
+class MockErrorReportService extends Mock implements ErrorReportService {}
+
 class MockInAppReviewService extends Mock implements InAppReviewService {}
 
 class MockPreferenceService extends Mock implements PreferenceService {}
@@ -29,6 +32,7 @@ void main() {
     late MockWorkLogRepository mockWorkLogRepository;
     late MockAuthService mockAuthService;
     late MockSystemService mockSystemService;
+    late MockErrorReportService mockErrorReportService;
     late MockInAppReviewService mockInAppReviewService;
     late MockPreferenceService mockPreferenceService;
 
@@ -51,14 +55,25 @@ void main() {
       registerFallbackValue(
         PreferenceKey.hasRequestedAppReviewWhenOver30WorkLogs,
       );
+      registerFallbackValue(Exception('fallback'));
+      registerFallbackValue(StackTrace.empty);
     });
 
     setUp(() {
       mockWorkLogRepository = MockWorkLogRepository();
       mockAuthService = MockAuthService();
       mockSystemService = MockSystemService();
+      mockErrorReportService = MockErrorReportService();
       mockInAppReviewService = MockInAppReviewService();
       mockPreferenceService = MockPreferenceService();
+
+      // ErrorReportServiceのモックメソッドの設定
+      when(
+        () => mockErrorReportService.recordError(
+          any<Exception>(),
+          any<StackTrace>(),
+        ),
+      ).thenAnswer((_) async {});
 
       // ReviewServiceのモックメソッドの設定
       when(
@@ -102,6 +117,9 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          errorReportServiceProvider.overrideWith(
+            (_) => mockErrorReportService,
+          ),
           inAppReviewServiceProvider.overrideWith(
             (_) => mockInAppReviewService,
           ),
@@ -142,6 +160,9 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          errorReportServiceProvider.overrideWith(
+            (_) => mockErrorReportService,
+          ),
           inAppReviewServiceProvider.overrideWith(
             (_) => mockInAppReviewService,
           ),
@@ -189,6 +210,9 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          errorReportServiceProvider.overrideWith(
+            (_) => mockErrorReportService,
+          ),
           inAppReviewServiceProvider.overrideWith(
             (_) => mockInAppReviewService,
           ),
@@ -236,6 +260,9 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          errorReportServiceProvider.overrideWith(
+            (_) => mockErrorReportService,
+          ),
           inAppReviewServiceProvider.overrideWith(
             (_) => mockInAppReviewService,
           ),
@@ -314,6 +341,9 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          errorReportServiceProvider.overrideWith(
+            (_) => mockErrorReportService,
+          ),
           inAppReviewServiceProvider.overrideWith(
             (_) => mockInAppReviewService,
           ),
@@ -355,6 +385,9 @@ void main() {
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
           systemServiceProvider.overrideWith((_) => mockSystemService),
+          errorReportServiceProvider.overrideWith(
+            (_) => mockErrorReportService,
+          ),
           inAppReviewServiceProvider.overrideWith(
             (_) => mockInAppReviewService,
           ),
