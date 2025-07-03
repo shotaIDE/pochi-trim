@@ -189,6 +189,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return;
     }
 
+    // 家事タブ選択中でない場合、切り替える
+    if (_tabController.index != 0) {
+      _tabController.animateTo(0);
+
+      // 切り替えが完了するまでまつし、レンダリングされるまで待つ
+      final tabAnimationDurationInMilliseconds =
+          _tabController.animationDuration.inMilliseconds;
+      final waitDurationInMilliseconds =
+          tabAnimationDurationInMilliseconds + 200; // 余裕を持たせる
+      final waitDuration = Duration(milliseconds: waitDurationInMilliseconds);
+      await Future<void>.delayed(waitDuration);
+    }
+
     final targets = <TargetFocus>[
       TargetFocus(
         identify: 'houseWorkTile',
@@ -322,11 +335,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return;
     }
 
-    // ログタブに切り替える
-    _tabController.animateTo(1);
+    // 家事タブ選択中でない場合、切り替える
+    if (_tabController.index != 1) {
+      _tabController.animateTo(1);
 
-    // 切り替えが完了し、ワークログがレンダリングされるまで待つ
-    await Future<void>.delayed(const Duration(milliseconds: 500));
+      // 切り替えが完了するまでまつし、レンダリングされるまで待つ
+      final tabAnimationDurationInMilliseconds =
+          _tabController.animationDuration.inMilliseconds;
+      final waitDurationInMilliseconds =
+          tabAnimationDurationInMilliseconds + 200; // 余裕を持たせる
+      final waitDuration = Duration(milliseconds: waitDurationInMilliseconds);
+      await Future<void>.delayed(waitDuration);
+    }
 
     if (!mounted) {
       return;
