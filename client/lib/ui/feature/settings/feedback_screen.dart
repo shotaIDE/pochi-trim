@@ -221,7 +221,7 @@ class _EmailField extends StatelessWidget {
   }
 }
 
-class _UserIdSection extends ConsumerWidget {
+class _UserIdSection extends ConsumerStatefulWidget {
   const _UserIdSection({
     required this.controller,
     required this.includeUserId,
@@ -233,84 +233,99 @@ class _UserIdSection extends ConsumerWidget {
   final ValueChanged<bool> onSwitchChanged;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userProfileFuture = ref.watch(currentUserProfileProvider.future);
+  ConsumerState<_UserIdSection> createState() => _UserIdSectionState();
+}
 
-    return FutureBuilder(
-      future: userProfileFuture,
-      builder: (context, snapshot) {
-        final String? sendUserId;
-        final String displayUserId;
-        if (snapshot.hasError) {
-          sendUserId = '(failed to get user ID)';
-          displayUserId = '-';
+class _UserIdSectionState extends ConsumerState<_UserIdSection> {
+  String? _sendUserId;
+  var _displayUserId = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+
+  @override
+  void initState() {
+    super.initState();
+
+    ref.listenManual(
+      currentUserProfileProvider,
+      (previous, next) {
+        if (next.hasError) {
+          _sendUserId = '(failed to get user ID)';
+          _displayUserId = '-';
         } else {
-          sendUserId = snapshot.data?.id;
-          displayUserId = sendUserId ?? 'xxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+          _sendUserId = next.value?.id;
+          _displayUserId = _sendUserId ?? 'xxxxxxxxxxxxxxxxxxxxxxxxxxxx';
         }
 
-        controller.text = displayUserId;
+        _updateDisplayUserId(includeUserId: widget.includeUserId);
+      },
+      fireImmediately: true,
+    );
+  }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                Text(
-                  'ユーザーID',
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                Switch(
-                  value: includeUserId,
-                  onChanged: (value) {
-                    if (value) {
-                      controller.text = displayUserId;
-                    } else {
-                      controller.clear();
-                    }
-
-                    onSwitchChanged(value);
-                  },
-                ),
-              ],
+            Text(
+              'ユーザーID',
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(height: 8),
-            Skeletonizer(
-              enabled: sendUserId == null,
-              child: TextFormField(
-                controller: controller,
-                enabled: false,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  filled: true,
+            const Spacer(),
+            Switch(
+              value: widget.includeUserId,
+              onChanged: (value) {
+                _updateDisplayUserId(includeUserId: value);
+
+                widget.onSwitchChanged(value);
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Skeletonizer(
+          enabled: _sendUserId == null,
+          child: TextFormField(
+            controller: widget.controller,
+            enabled: false,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              filled: true,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '不具合などのご報告は、ユーザーIDを共有していただくことで対応がスムーズに進むことがあります。',
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '不具合などのご報告は、ユーザーIDを共有していただくことで対応がスムーズに進むことがあります。',
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
-        );
-      },
+        ),
+      ],
     );
+  }
+
+  void _updateDisplayUserId({required bool includeUserId}) {
+    if (includeUserId) {
+      widget.controller.text = _displayUserId;
+      return;
+    }
+
+    widget.controller.clear();
   }
 }
