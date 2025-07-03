@@ -204,7 +204,7 @@ class _EmailField extends StatelessWidget {
         TextFormField(
           controller: controller,
           decoration: const InputDecoration(
-            hintText: 'example@email.com',
+            hintText: 'your.name@example.com',
             border: OutlineInputBorder(),
           ),
           keyboardType: TextInputType.emailAddress,
@@ -274,13 +274,9 @@ class _UserIdSection extends StatelessWidget {
         TextFormField(
           controller: controller,
           enabled: false,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
             filled: true,
-            fillColor: Colors.grey.shade100,
-          ),
-          style: TextStyle(
-            color: userId != null ? Colors.black87 : Colors.grey.shade600,
           ),
         ),
         const SizedBox(height: 16),
