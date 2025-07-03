@@ -156,12 +156,15 @@ class _FeedbackField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
       children: [
-        const Text(
+        Text(
           'ご意見、ご要望など',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        const SizedBox(height: 8),
+
         TextFormField(
           controller: controller,
           decoration: const InputDecoration(
@@ -190,12 +193,14 @@ class _EmailField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
       children: [
-        const Text(
+        Text(
           '返信用メールアドレス（任意）',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           decoration: const InputDecoration(
@@ -243,9 +248,11 @@ class _UserIdSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Text(
+            Text(
               'ユーザーID',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const Spacer(),
             Switch(
@@ -276,21 +283,20 @@ class _UserIdSection extends StatelessWidget {
             color: userId != null ? Colors.black87 : Colors.grey.shade600,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         Row(
           children: [
-            const Icon(
+            Icon(
               Icons.info_outline,
               size: 16,
-              color: Colors.blue,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 '不具合などのご報告は、ユーザーIDを共有していただくことで対応がスムーズに進むことがあります。',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.blue.shade700,
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
