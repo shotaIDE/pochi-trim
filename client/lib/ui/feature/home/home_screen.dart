@@ -189,7 +189,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (_tabController.index != 0) {
       _tabController.animateTo(0);
 
-      // 切り替えが完了するまでまつし、レンダリングされるまで待つ
+      // 切り替えが完了するまで待ち、レンダリングされるまで待つ
       final tabAnimationDurationInMilliseconds =
           _tabController.animationDuration.inMilliseconds;
       final waitDurationInMilliseconds =
@@ -335,7 +335,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (_tabController.index != 1) {
       _tabController.animateTo(1);
 
-      // 切り替えが完了するまでまつし、レンダリングされるまで待つ
+      // 切り替えが完了するまで待ち、レンダリングされるまで待つ
       final tabAnimationDurationInMilliseconds =
           _tabController.animationDuration.inMilliseconds;
       final waitDurationInMilliseconds =
