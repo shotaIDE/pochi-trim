@@ -39,7 +39,6 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUserProfileAsync = ref.watch(currentUserProfileProvider);
     final isSubmitting = _isSubmitting;
 
     return Scaffold(
@@ -129,12 +128,9 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   }
 
   Future<void> _sendFeedbackToGoogleForm() async {
-    final currentUserProfileAsync = ref.read(currentUserProfileProvider);
-    final userProfile = currentUserProfileAsync.valueOrNull;
-
     final feedback = _feedbackController.text.trim();
     final email = _emailController.text.trim();
-    final userId = _includeUserId ? userProfile?.id : null;
+    final userId = _userIdController.text.trim();
 
     final googleFormService = ref.read(googleFormServiceProvider);
     await googleFormService.sendFeedback(
