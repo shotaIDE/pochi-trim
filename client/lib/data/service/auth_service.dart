@@ -61,6 +61,7 @@ class AuthService {
           _logger.warning('Googleサインインに失敗しました。');
 
           unawaited(_errorReportService.recordError(e, stack));
+
           throw const SignInWithGoogleException.uncategorized();
       }
     }
@@ -71,6 +72,7 @@ class AuthService {
           .signInWithCredential(authCredential);
     } on firebase_auth.FirebaseAuthException catch (e, stack) {
       unawaited(_errorReportService.recordError(e, stack));
+
       throw const SignInWithGoogleException.uncategorized();
     }
 
@@ -135,6 +137,7 @@ class AuthService {
       }
 
       unawaited(_errorReportService.recordError(e, stack));
+
       throw const SignInWithAppleException.uncategorized();
     }
 
@@ -173,6 +176,7 @@ class AuthService {
       }
 
       unawaited(_errorReportService.recordError(e, stack));
+
       throw const LinkWithAppleException.uncategorized();
     }
   }
