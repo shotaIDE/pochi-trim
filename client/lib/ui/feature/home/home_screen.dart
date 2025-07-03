@@ -185,10 +185,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return;
     }
 
-    if (!mounted) {
-      return;
-    }
-
     // 家事タブ選択中でない場合、切り替える
     if (_tabController.index != 0) {
       _tabController.animateTo(0);
@@ -200,6 +196,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           tabAnimationDurationInMilliseconds + 200; // 余裕を持たせる
       final waitDuration = Duration(milliseconds: waitDurationInMilliseconds);
       await Future<void>.delayed(waitDuration);
+    }
+
+    if (!mounted) {
+      return;
     }
 
     final targets = <TargetFocus>[
@@ -328,10 +328,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       shouldShowHowToCheckWorkLogsAndAnalysisTutorialProvider.future,
     );
     if (!shouldShow) {
-      return;
-    }
-
-    if (!mounted) {
       return;
     }
 
