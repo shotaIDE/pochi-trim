@@ -62,12 +62,20 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 24,
                 children: [
-                  _buildFeedbackField(),
-                  const SizedBox(height: 24),
-                  _buildEmailField(),
-                  const SizedBox(height: 24),
-                  _buildUserIdSection(userProfile?.id),
+                  _FeedbackField(controller: _feedbackController),
+                  _EmailField(controller: _emailController),
+                  _UserIdSection(
+                    controller: _userIdController,
+                    userId: userProfile?.id,
+                    includeUserId: _includeUserId,
+                    onSwitchChanged: (value) {
+                      setState(() {
+                        _includeUserId = value;
+                      });
+                    },
+                  ),
                 ],
               ),
             ),
@@ -76,133 +84,6 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('エラーが発生しました: $error')),
       ),
-    );
-  }
-
-  Widget _buildFeedbackField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'ご意見、ご要望など',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: _feedbackController,
-          decoration: const InputDecoration(
-            hintText: 'お気づきの点やご要望をお聞かせください',
-            border: OutlineInputBorder(),
-          ),
-          maxLines: 6,
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return 'ご意見、ご要望をご入力ください';
-            }
-            return null;
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmailField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '返信用メールアドレス（任意）',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: _emailController,
-          decoration: const InputDecoration(
-            hintText: 'example@email.com',
-            border: OutlineInputBorder(),
-          ),
-          keyboardType: TextInputType.emailAddress,
-          validator: (value) {
-            if (value != null && value.isNotEmpty) {
-              final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-              if (!emailRegex.hasMatch(value)) {
-                return 'メールアドレスの形式が正しくありません';
-              }
-            }
-            return null;
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUserIdSection(String? userId) {
-    // ユーザーIDコントローラーの初期化（スイッチの状態に応じて）
-    if (_includeUserId && _userIdController.text.isEmpty) {
-      _userIdController.text = userId ?? 'ユーザーIDを取得できませんでした';
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Text(
-              'ユーザーID',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const Spacer(),
-            Switch(
-              value: _includeUserId,
-              onChanged: (value) {
-                setState(() {
-                  _includeUserId = value;
-                  if (_includeUserId) {
-                    // スイッチONの場合、ユーザーIDを復元
-                    _userIdController.text = userId ?? 'ユーザーIDを取得できませんでした';
-                  } else {
-                    // スイッチOFFの場合、テキストをクリア
-                    _userIdController.clear();
-                  }
-                });
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: _userIdController,
-          enabled: false,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            filled: true,
-            fillColor: Colors.grey.shade100,
-          ),
-          style: TextStyle(
-            color: userId != null ? Colors.black87 : Colors.grey.shade600,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            const Icon(
-              Icons.info_outline,
-              size: 16,
-              color: Colors.blue,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                '不具合などのご報告は、ユーザーIDを共有していただくことで対応がスムーズに進むことがあります。',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.blue.shade700,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
@@ -262,6 +143,160 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       feedback: feedback,
       email: email.isNotEmpty ? email : null,
       userId: userId,
+    );
+  }
+}
+
+class _FeedbackField extends StatelessWidget {
+  const _FeedbackField({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'ご意見、ご要望など',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'お気づきの点やご要望をお聞かせください',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 6,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'ご意見、ご要望をご入力ください';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _EmailField extends StatelessWidget {
+  const _EmailField({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '返信用メールアドレス（任意）',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'example@email.com',
+            border: OutlineInputBorder(),
+          ),
+          keyboardType: TextInputType.emailAddress,
+          validator: (value) {
+            if (value != null && value.isNotEmpty) {
+              final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+              if (!emailRegex.hasMatch(value)) {
+                return 'メールアドレスの形式が正しくありません';
+              }
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _UserIdSection extends StatelessWidget {
+  const _UserIdSection({
+    required this.controller,
+    required this.userId,
+    required this.includeUserId,
+    required this.onSwitchChanged,
+  });
+
+  final TextEditingController controller;
+  final String? userId;
+  final bool includeUserId;
+  final ValueChanged<bool> onSwitchChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    // ユーザーIDコントローラーの初期化（スイッチの状態に応じて）
+    if (includeUserId && controller.text.isEmpty) {
+      controller.text = userId ?? 'ユーザーIDを取得できませんでした';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text(
+              'ユーザーID',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const Spacer(),
+            Switch(
+              value: includeUserId,
+              onChanged: (value) {
+                if (value) {
+                  // スイッチONの場合、ユーザーIDを復元
+                  controller.text = userId ?? 'ユーザーIDを取得できませんでした';
+                } else {
+                  // スイッチOFFの場合、テキストをクリア
+                  controller.clear();
+                }
+                onSwitchChanged(value);
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          enabled: false,
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            filled: true,
+            fillColor: Colors.grey.shade100,
+          ),
+          style: TextStyle(
+            color: userId != null ? Colors.black87 : Colors.grey.shade600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Icon(
+              Icons.info_outline,
+              size: 16,
+              color: Colors.blue,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '不具合などのご報告は、ユーザーIDを共有していただくことで対応がスムーズに進むことがあります。',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.blue.shade700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
