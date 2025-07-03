@@ -150,6 +150,7 @@ class AuthService {
           StackTrace.current,
         ),
       );
+
       throw exception;
     }
 
