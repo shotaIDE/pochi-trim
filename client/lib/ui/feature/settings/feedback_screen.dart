@@ -51,40 +51,35 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           ),
         ],
       ),
-      body: currentUserProfileAsync.when(
-        data: (userProfile) => SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 16 + MediaQuery.of(context).viewPadding.left,
-              right: 16 + MediaQuery.of(context).viewPadding.right,
-              top: 16,
-              bottom: 16 + MediaQuery.of(context).viewPadding.bottom,
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 24,
-                children: [
-                  _FeedbackField(controller: _feedbackController),
-                  _EmailField(controller: _emailController),
-                  _UserIdSection(
-                    controller: _userIdController,
-                    userId: userProfile?.id,
-                    includeUserId: _includeUserId,
-                    onSwitchChanged: (value) {
-                      setState(() {
-                        _includeUserId = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 16 + MediaQuery.of(context).viewPadding.left,
+            right: 16 + MediaQuery.of(context).viewPadding.right,
+            top: 16,
+            bottom: 16 + MediaQuery.of(context).viewPadding.bottom,
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 24,
+              children: [
+                _FeedbackField(controller: _feedbackController),
+                _EmailField(controller: _emailController),
+                _UserIdSection(
+                  controller: _userIdController,
+                  includeUserId: _includeUserId,
+                  onSwitchChanged: (value) {
+                    setState(() {
+                      _includeUserId = value;
+                    });
+                  },
+                ),
+              ],
             ),
           ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('エラーが発生しました: $error')),
       ),
     );
   }
@@ -225,82 +220,93 @@ class _EmailField extends StatelessWidget {
   }
 }
 
-class _UserIdSection extends StatelessWidget {
+class _UserIdSection extends ConsumerWidget {
   const _UserIdSection({
     required this.controller,
-    required this.userId,
     required this.includeUserId,
     required this.onSwitchChanged,
   });
 
   final TextEditingController controller;
-  final String? userId;
   final bool includeUserId;
   final ValueChanged<bool> onSwitchChanged;
 
   @override
-  Widget build(BuildContext context) {
-    // ユーザーIDコントローラーの初期化（スイッチの状態に応じて）
-    if (includeUserId && controller.text.isEmpty) {
-      controller.text = userId ?? 'ユーザーIDを取得できませんでした';
-    }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userProfileFuture = ref.watch(currentUserProfileProvider.future);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return FutureBuilder(
+      future: userProfileFuture,
+      builder: (context, snapshot) {
+        final String? sendUserId;
+        final String displayUserId;
+        if (snapshot.hasError) {
+          sendUserId = '(failed to get user ID)';
+          displayUserId = '-';
+        } else {
+          sendUserId = snapshot.data?.id;
+          displayUserId = sendUserId ?? 'xxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+        }
+
+        controller.text = displayUserId;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'ユーザーID',
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                fontWeight: FontWeight.bold,
+            Row(
+              children: [
+                Text(
+                  'ユーザーID',
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Switch(
+                  value: includeUserId,
+                  onChanged: (value) {
+                    if (value) {
+                      controller.text = displayUserId;
+                    } else {
+                      controller.clear();
+                    }
+
+                    onSwitchChanged(value);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: controller,
+              enabled: false,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                filled: true,
               ),
             ),
-            const Spacer(),
-            Switch(
-              value: includeUserId,
-              onChanged: (value) {
-                if (value) {
-                  // スイッチONの場合、ユーザーIDを復元
-                  controller.text = userId ?? 'ユーザーIDを取得できませんでした';
-                } else {
-                  // スイッチOFFの場合、テキストをクリア
-                  controller.clear();
-                }
-                onSwitchChanged(value);
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          enabled: false,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            filled: true,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Icon(
-              Icons.info_outline,
-              size: 16,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                '不具合などのご報告は、ユーザーIDを共有していただくことで対応がスムーズに進むことがあります。',
-                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 16,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-              ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '不具合などのご報告は、ユーザーIDを共有していただくことで対応がスムーズに進むことがあります。',
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }
