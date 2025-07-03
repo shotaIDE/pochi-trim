@@ -58,6 +58,10 @@ class AuthService {
         case SignInGoogleExceptionUncategorized():
           _logger.warning('Googleサインインに失敗しました。');
 
+          await _errorReportService.recordError(
+            error,
+            StackTrace.current,
+          );
           throw const SignInWithGoogleException.uncategorized();
       }
     }
@@ -66,7 +70,8 @@ class AuthService {
     try {
       userCredential = await firebase_auth.FirebaseAuth.instance
           .signInWithCredential(authCredential);
-    } on firebase_auth.FirebaseAuthException {
+    } on firebase_auth.FirebaseAuthException catch (e, stack) {
+      await _errorReportService.recordError(e, stack);
       throw const SignInWithGoogleException.uncategorized();
     }
 
@@ -95,6 +100,10 @@ class AuthService {
         case SignInGoogleExceptionUncategorized():
           _logger.warning('Googleサインインに失敗しました。');
 
+          await _errorReportService.recordError(
+            error,
+            StackTrace.current,
+          );
           throw const LinkWithGoogleException.uncategorized();
       }
     }
@@ -108,6 +117,7 @@ class AuthService {
         throw const LinkWithGoogleException.alreadyInUse();
       }
 
+      await _errorReportService.recordError(error, StackTrace.current);
       throw const LinkWithGoogleException.uncategorized();
     }
 
@@ -126,12 +136,18 @@ class AuthService {
         throw const SignInWithAppleException.cancelled();
       }
 
+      await _errorReportService.recordError(e, StackTrace.current);
       throw const SignInWithAppleException.uncategorized();
     }
 
     final user = userCredential.user;
     if (user == null) {
-      throw const SignInWithAppleException.uncategorized();
+      const exception = SignInWithAppleException.uncategorized();
+      await _errorReportService.recordError(
+        exception,
+        StackTrace.current,
+      );
+      throw exception;
     }
 
     return SignInResult(
@@ -156,6 +172,7 @@ class AuthService {
         throw const LinkWithAppleException.alreadyInUse();
       }
 
+      await _errorReportService.recordError(e, StackTrace.current);
       throw const LinkWithAppleException.uncategorized();
     }
   }
