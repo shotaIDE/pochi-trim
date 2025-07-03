@@ -35,7 +35,7 @@ class GoogleFormService {
     };
 
     const url =
-        'https://docs.google.com/forms/u/0/d/e/1FAIpQLScS1p82L5tI4frPZLggUH35sbumRxK0EHvAEScNgck1Zv7gNg/formResponse';
+        'https://docs.google.com/forms/d/e/1FAIpQLScS1p82L5tI4frPZLggUH35sbumRxK0EHvAEScNgck1Zv7gNg/formResponse';
 
     logger.info(url);
     logger.info('Sending feedback to Google Form');
