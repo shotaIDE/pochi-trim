@@ -18,9 +18,6 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 enum _HouseWorkAction { delete }
 
-/// タブ切り替え後のレンダリング完了を待つためのバッファ時間（ミリ秒）
-const _tabSwitchBufferMilliseconds = 200;
-
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -464,7 +461,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final tabAnimationDurationInMilliseconds =
         _tabController.animationDuration.inMilliseconds;
     final waitDurationInMilliseconds =
-        tabAnimationDurationInMilliseconds + _tabSwitchBufferMilliseconds;
+        tabAnimationDurationInMilliseconds + 200; // レンダリングを待つためのバッファ
     final waitDuration = Duration(milliseconds: waitDurationInMilliseconds);
     await Future<void>.delayed(waitDuration);
   }
