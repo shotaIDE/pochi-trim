@@ -25,10 +25,10 @@ part 'home_presenter.g.dart';
 Future<bool> shouldShowHowToRegisterWorkLogsTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
-  final hasShown = await preferenceService.getBool(
-    PreferenceKey.hasShownHowToRegisterWorkLogsTutorial,
+  final shouldShow = await preferenceService.getBool(
+    PreferenceKey.shouldShowHowToRegisterWorkLogsTutorial,
   );
-  return hasShown != true;
+  return shouldShow ?? false;
 }
 
 @riverpod
@@ -36,8 +36,8 @@ Future<void> onFinishHowToRegisterWorkLogsTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
   await preferenceService.setBool(
-    PreferenceKey.hasShownHowToRegisterWorkLogsTutorial,
-    value: true,
+    PreferenceKey.shouldShowHowToRegisterWorkLogsTutorial,
+    value: false,
   );
 }
 
@@ -46,8 +46,8 @@ Future<void> onSkipHowToRegisterWorkLogsTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
   await preferenceService.setBool(
-    PreferenceKey.hasShownHowToRegisterWorkLogsTutorial,
-    value: true,
+    PreferenceKey.shouldShowHowToRegisterWorkLogsTutorial,
+    value: false,
   );
 }
 
@@ -55,10 +55,10 @@ Future<void> onSkipHowToRegisterWorkLogsTutorial(Ref ref) async {
 Future<bool> shouldShowHowToCheckWorkLogsAndAnalysisTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
-  final hasShown = await preferenceService.getBool(
-    PreferenceKey.hasShownHowToCheckWorkLogsAndAnalysisTutorial,
+  final shouldShow = await preferenceService.getBool(
+    PreferenceKey.shouldShowHowToCheckWorkLogsAndAnalysisTutorial,
   );
-  return hasShown != true;
+  return shouldShow ?? false;
 }
 
 @riverpod
@@ -66,8 +66,8 @@ Future<void> onFinishHowToCheckWorkLogsAndAnalysisTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
   await preferenceService.setBool(
-    PreferenceKey.hasShownHowToCheckWorkLogsAndAnalysisTutorial,
-    value: true,
+    PreferenceKey.shouldShowHowToCheckWorkLogsAndAnalysisTutorial,
+    value: false,
   );
 }
 
@@ -76,8 +76,8 @@ Future<void> onSkipHowToCheckWorkLogsAndAnalysisTutorial(Ref ref) async {
   final preferenceService = ref.read(preferenceServiceProvider);
 
   await preferenceService.setBool(
-    PreferenceKey.hasShownHowToCheckWorkLogsAndAnalysisTutorial,
-    value: true,
+    PreferenceKey.shouldShowHowToCheckWorkLogsAndAnalysisTutorial,
+    value: false,
   );
 }
 
