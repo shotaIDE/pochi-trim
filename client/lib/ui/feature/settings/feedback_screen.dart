@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/google_form_service.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class FeedbackScreen extends ConsumerStatefulWidget {
   const FeedbackScreen({super.key});
@@ -277,12 +278,15 @@ class _UserIdSection extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
-            TextFormField(
-              controller: controller,
-              enabled: false,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                filled: true,
+            Skeletonizer(
+              enabled: sendUserId == null,
+              child: TextFormField(
+                controller: controller,
+                enabled: false,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  filled: true,
+                ),
               ),
             ),
             const SizedBox(height: 16),
