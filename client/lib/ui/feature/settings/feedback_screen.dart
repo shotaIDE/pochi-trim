@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
-import 'package:pochi_trim/data/service/google_form_service.dart';
+import 'package:pochi_trim/ui/feature/settings/feedback_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class FeedbackScreen extends ConsumerStatefulWidget {
@@ -21,7 +21,6 @@ class FeedbackScreen extends ConsumerStatefulWidget {
 
 class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   var _includeUserId = true;
-  var _isSubmitting = false;
 
   final _formKey = GlobalKey<FormState>();
   final _feedbackController = TextEditingController();
@@ -39,7 +38,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isSubmitting = _isSubmitting;
+    final isSubmitting = ref.watch(isSubmittingFeedbackProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -89,24 +88,18 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       return;
     }
 
-    setState(() {
-      _isSubmitting = true;
-    });
+    final feedback = _feedbackController.text.trim();
+    final email = _emailController.text.trim();
+    final userId = _includeUserId ? _userIdController.text.trim() : null;
 
     try {
-      await _sendFeedbackToGoogleForm();
-
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('フィードバックを送信しました。ありがとうございました！'),
-        ),
-      );
-
-      Navigator.of(context).pop();
+      await ref
+          .read(isSubmittingFeedbackProvider.notifier)
+          .submitFeedback(
+            feedback: feedback,
+            email: email.isNotEmpty ? email : null,
+            userId: userId,
+          );
     } on Exception catch (e) {
       if (!mounted) {
         return;
@@ -118,26 +111,20 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           backgroundColor: Colors.red,
         ),
       );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
-      }
+      return;
     }
-  }
 
-  Future<void> _sendFeedbackToGoogleForm() async {
-    final feedback = _feedbackController.text.trim();
-    final email = _emailController.text.trim();
-    final userId = _userIdController.text.trim();
+    if (!mounted) {
+      return;
+    }
 
-    final googleFormService = ref.read(googleFormServiceProvider);
-    await googleFormService.sendFeedback(
-      feedback: feedback,
-      email: email.isNotEmpty ? email : null,
-      userId: userId,
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('フィードバックを送信しました。ありがとうございました！'),
+      ),
     );
+
+    Navigator.of(context).pop();
   }
 }
 
