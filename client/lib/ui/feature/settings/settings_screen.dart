@@ -16,9 +16,9 @@ import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/ui/component/color.dart';
 import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/debug_screen.dart';
-import 'package:pochi_trim/ui/feature/settings/feedback_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/section_header.dart';
 import 'package:pochi_trim/ui/feature/settings/settings_presenter.dart';
+import 'package:pochi_trim/ui/feature/settings/submit_feedback_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -579,7 +579,7 @@ class _FeedbackTile extends StatelessWidget {
       leading: const Icon(Icons.feedback),
       title: const Text('フィードバック'),
       trailing: const _MoveScreenTrailingIcon(),
-      onTap: () => Navigator.of(context).push(FeedbackScreen.route()),
+      onTap: () => Navigator.of(context).push(SubmitFeedbackScreen.route()),
     );
   }
 }

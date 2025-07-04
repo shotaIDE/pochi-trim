@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
-import 'package:pochi_trim/ui/feature/settings/feedback_presenter.dart';
+import 'package:pochi_trim/ui/feature/settings/submit_feedback_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class FeedbackScreen extends ConsumerStatefulWidget {
-  const FeedbackScreen({super.key});
+class SubmitFeedbackScreen extends ConsumerStatefulWidget {
+  const SubmitFeedbackScreen({super.key});
 
-  static const name = 'FeedbackScreen';
+  static const name = 'SubmitFeedbackScreen';
 
-  static MaterialPageRoute<FeedbackScreen> route() =>
-      MaterialPageRoute<FeedbackScreen>(
-        builder: (_) => const FeedbackScreen(),
+  static MaterialPageRoute<SubmitFeedbackScreen> route() =>
+      MaterialPageRoute<SubmitFeedbackScreen>(
+        builder: (_) => const SubmitFeedbackScreen(),
         settings: const RouteSettings(name: name),
       );
 
   @override
-  ConsumerState<FeedbackScreen> createState() => _FeedbackScreenState();
+  ConsumerState<SubmitFeedbackScreen> createState() =>
+      _SubmitFeedbackScreenState();
 }
 
-class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
+class _SubmitFeedbackScreenState extends ConsumerState<SubmitFeedbackScreen> {
   var _includeUserId = true;
 
   final _formKey = GlobalKey<FormState>();

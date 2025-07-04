@@ -1,7 +1,7 @@
 import 'package:pochi_trim/data/service/google_form_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'feedback_presenter.g.dart';
+part 'submit_feedback_presenter.g.dart';
 
 @riverpod
 class IsSubmittingFeedback extends _$IsSubmittingFeedback {
