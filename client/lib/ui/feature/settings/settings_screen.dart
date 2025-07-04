@@ -18,6 +18,7 @@ import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/debug_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/section_header.dart';
 import 'package:pochi_trim/ui/feature/settings/settings_presenter.dart';
+import 'package:pochi_trim/ui/feature/settings/submit_feedback_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -56,6 +57,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SectionHeader(title: 'アプリについて'),
               const _PlanInfoPanel(),
               const _ReviewAppTile(),
+              const _FeedbackTile(),
               _buildShareAppTile(context),
               _buildTermsOfServiceTile(context),
               _buildPrivacyPolicyTile(context),
@@ -452,40 +454,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 }
 
-class _ReviewAppTile extends StatelessWidget {
-  const _ReviewAppTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.star),
-      title: const Text('アプリをレビューする'),
-      trailing: const _OpenTrailingIcon(),
-      // アプリ内レビューは表示回数に制限があるため、ストアに移動するようにしている
-      onTap: () =>
-          InAppReview.instance.openStoreListing(appStoreId: appStoreId),
-    );
-  }
-}
-
-class _OpenTrailingIcon extends StatelessWidget {
-  const _OpenTrailingIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Icon(Icons.open_in_browser);
-  }
-}
-
-class _MoveScreenTrailingIcon extends StatelessWidget {
-  const _MoveScreenTrailingIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Icon(Icons.arrow_forward_ios, size: 16);
-  }
-}
-
 class _PlanInfoPanel extends ConsumerWidget {
   const _PlanInfoPanel();
 
@@ -586,6 +554,36 @@ class _PlanInfoTile extends StatelessWidget {
   }
 }
 
+class _ReviewAppTile extends StatelessWidget {
+  const _ReviewAppTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.star),
+      title: const Text('アプリをレビューする'),
+      trailing: const _OpenTrailingIcon(),
+      // アプリ内レビューは表示回数に制限があるため、ストアに移動するようにしている
+      onTap: () =>
+          InAppReview.instance.openStoreListing(appStoreId: appStoreId),
+    );
+  }
+}
+
+class _FeedbackTile extends StatelessWidget {
+  const _FeedbackTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.feedback),
+      title: const Text('フィードバック'),
+      trailing: const _MoveScreenTrailingIcon(),
+      onTap: () => Navigator.of(context).push(SubmitFeedbackScreen.route()),
+    );
+  }
+}
+
 class _AppVersionTile extends ConsumerWidget {
   const _AppVersionTile();
 
@@ -619,5 +617,23 @@ class _AppVersionTile extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+class _OpenTrailingIcon extends StatelessWidget {
+  const _OpenTrailingIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(Icons.open_in_browser);
+  }
+}
+
+class _MoveScreenTrailingIcon extends StatelessWidget {
+  const _MoveScreenTrailingIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(Icons.arrow_forward_ios, size: 16);
   }
 }
