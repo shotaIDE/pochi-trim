@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:pochi_trim/data/model/feedback_request.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'google_form_service.g.dart';
@@ -21,17 +22,15 @@ class GoogleFormService {
 
   final Dio _dio;
 
-  Future<void> sendFeedback({
-    required String feedback,
-    String? email,
-    String? userId,
-  }) async {
+  Future<void> sendFeedback(FeedbackRequest request) async {
     final logger = Logger('GoogleFormService');
 
     final formData = {
-      'entry.893089758': feedback,
-      if (email != null && email.isNotEmpty) 'entry.1495718762': email,
-      if (userId != null && userId.isNotEmpty) 'entry.1274333669': userId,
+      'entry.893089758': request.feedback,
+      if (request.email != null && request.email!.isNotEmpty)
+        'entry.1495718762': request.email,
+      if (request.userId != null && request.userId!.isNotEmpty)
+        'entry.1274333669': request.userId,
     };
 
     const url =

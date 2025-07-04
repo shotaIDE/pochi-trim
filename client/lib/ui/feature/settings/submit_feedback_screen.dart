@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pochi_trim/data/model/feedback_request.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/ui/feature/settings/submit_feedback_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -93,14 +94,16 @@ class _SubmitFeedbackScreenState extends ConsumerState<SubmitFeedbackScreen> {
     final email = _emailController.text.trim();
     final userId = _includeUserId ? _userIdController.text.trim() : null;
 
+    final request = FeedbackRequest(
+      feedback: feedback,
+      email: email.isNotEmpty ? email : null,
+      userId: userId,
+    );
+
     try {
       await ref
           .read(isSubmittingFeedbackProvider.notifier)
-          .submitFeedback(
-            feedback: feedback,
-            email: email.isNotEmpty ? email : null,
-            userId: userId,
-          );
+          .submitFeedback(request);
     } on Exception catch (e) {
       if (!mounted) {
         return;
