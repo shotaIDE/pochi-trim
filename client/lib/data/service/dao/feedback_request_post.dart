@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:pochi_trim/data/model/feedback_request.dart';
 
 part 'feedback_request_post.freezed.dart';
@@ -24,9 +25,9 @@ abstract class FeedbackRequestPost with _$FeedbackRequestPost {
   /// Google Formに送信するためのフォームデータに変換する
   Map<String, String> toFormData() {
     return {
-      'entry.893089758': body,
-      if (email != null && email!.isNotEmpty) 'entry.1495718762': email!,
-      if (userId != null && userId!.isNotEmpty) 'entry.1274333669': userId!,
+      GoogleForm.bodyKey: body,
+      if (email != null && email!.isNotEmpty) GoogleForm.emailKey: email!,
+      if (userId != null && userId!.isNotEmpty) GoogleForm.userIdKey: userId!,
     };
   }
 }
