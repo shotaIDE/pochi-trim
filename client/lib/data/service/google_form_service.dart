@@ -14,15 +14,10 @@ part 'google_form_service.g.dart';
 
 @riverpod
 GoogleFormService googleFormService(Ref ref) {
-  final dio = ref.watch<Dio>(dioProvider);
+  final dio = ref.watch<Dio>(_dioProvider);
   final errorReportService = ref.watch(errorReportServiceProvider);
 
   return GoogleFormService(dio: dio, errorReportService: errorReportService);
-}
-
-@riverpod
-Dio dio(Ref ref) {
-  return Dio();
 }
 
 class GoogleFormService {
@@ -70,4 +65,9 @@ class GoogleFormService {
       throw const SendFeedbackException.connection();
     }
   }
+}
+
+@riverpod
+Dio _dio(Ref ref) {
+  return Dio();
 }
