@@ -41,15 +41,15 @@ class _SubmitFeedbackScreenState extends ConsumerState<SubmitFeedbackScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isSubmitting = ref.watch(isSubmittingFeedbackProvider);
+    final isAvailable = ref.watch(isSubmissionAvailableProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('フィードバック'),
         actions: [
           TextButton(
-            onPressed: isSubmitting ? null : _submitFeedback,
-            child: Text(isSubmitting ? '送信中' : '送信'),
+            onPressed: isAvailable ? _submitFeedback : null,
+            child: Text(isAvailable ? '送信' : '送信中'),
           ),
         ],
       ),
@@ -103,7 +103,7 @@ class _SubmitFeedbackScreenState extends ConsumerState<SubmitFeedbackScreen> {
 
     try {
       await ref
-          .read(isSubmittingFeedbackProvider.notifier)
+          .read(isSubmissionAvailableProvider.notifier)
           .submitFeedback(request);
     } on SendFeedbackException catch (e) {
       if (!mounted) {
@@ -150,7 +150,7 @@ class _FeedbackField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isSubmitting = ref.watch(isSubmittingFeedbackProvider);
+    final isAvailable = ref.watch(isSubmissionAvailableProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,7 +165,7 @@ class _FeedbackField extends ConsumerWidget {
 
         TextFormField(
           controller: controller,
-          enabled: !isSubmitting,
+          enabled: isAvailable,
           decoration: const InputDecoration(
             hintText: 'お気づきの点やご要望をお聞かせください',
             border: OutlineInputBorder(),
@@ -190,7 +190,7 @@ class _EmailField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isSubmitting = ref.watch(isSubmittingFeedbackProvider);
+    final isAvailable = ref.watch(isSubmissionAvailableProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +204,7 @@ class _EmailField extends ConsumerWidget {
         ),
         TextFormField(
           controller: controller,
-          enabled: !isSubmitting,
+          enabled: isAvailable,
           decoration: const InputDecoration(
             hintText: 'your.name@example.com',
             border: OutlineInputBorder(),
@@ -267,7 +267,7 @@ class _UserIdSectionState extends ConsumerState<_UserIdSection> {
 
   @override
   Widget build(BuildContext context) {
-    final isSubmitting = ref.watch(isSubmittingFeedbackProvider);
+    final isAvailable = ref.watch(isSubmissionAvailableProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,7 +283,7 @@ class _UserIdSectionState extends ConsumerState<_UserIdSection> {
             const Spacer(),
             Switch(
               value: widget.includeUserId,
-              onChanged: !isSubmitting
+              onChanged: isAvailable
                   ? (value) {
                       _updateDisplayUserId(includeUserId: value);
 

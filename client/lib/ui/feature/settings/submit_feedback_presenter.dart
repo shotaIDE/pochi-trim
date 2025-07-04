@@ -6,27 +6,23 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'submit_feedback_presenter.g.dart';
 
 @riverpod
-class IsSubmittingFeedback extends _$IsSubmittingFeedback {
+class IsSubmissionAvailable extends _$IsSubmissionAvailable {
   @override
-  bool build() => false;
+  bool build() => true;
 
   /// フィードバックを送信する
-  ///
-  /// [request] 送信するフィードバックリクエスト
-  ///
-  /// 送信中は状態を`true`に設定し、完了後は`false`に戻す。
   ///
   /// Throws:
   /// - [SendFeedbackException]: フィードバック送信に失敗した場合
   Future<void> submitFeedback(FeedbackRequest request) async {
-    state = true;
+    state = false;
 
     final googleFormService = ref.read(googleFormServiceProvider);
 
     try {
       await googleFormService.sendFeedback(request);
     } finally {
-      state = false;
+      state = true;
     }
   }
 }
