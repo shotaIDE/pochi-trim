@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/feedback_request.dart';
@@ -211,13 +212,15 @@ class _EmailField extends ConsumerWidget {
           ),
           keyboardType: TextInputType.emailAddress,
           validator: (value) {
-            if (value != null && value.isNotEmpty) {
-              final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-              if (!emailRegex.hasMatch(value)) {
-                return 'メールアドレスの形式が正しくありません';
-              }
+            if (value == null || value.isEmpty) {
+              return null;
             }
-            return null;
+
+            if (EmailValidator.validate(value)) {
+              return null;
+            }
+
+            return '有効な形式のメールアドレスを入力してください';
           },
         ),
       ],
