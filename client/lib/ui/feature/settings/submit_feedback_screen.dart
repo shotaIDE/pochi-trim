@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/feedback_request.dart';
+import 'package:pochi_trim/data/model/send_feedback_exception.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/ui/feature/settings/submit_feedback_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -104,18 +105,28 @@ class _SubmitFeedbackScreenState extends ConsumerState<SubmitFeedbackScreen> {
       await ref
           .read(isSubmittingFeedbackProvider.notifier)
           .submitFeedback(request);
-    } on Exception catch (e) {
+    } on SendFeedbackException catch (e) {
       if (!mounted) {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('送信に失敗しました: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
+      switch (e) {
+        case SendFeedbackExceptionConnection():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('ネットワーク接続に失敗しました。インターネット接続を確認してください。'),
+            ),
+          );
+          return;
+
+        case SendFeedbackExceptionUncategorized():
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('送信に失敗しました。しばらく時間をおいてから再度お試しください。'),
+            ),
+          );
+          return;
+      }
     }
 
     if (!mounted) {
