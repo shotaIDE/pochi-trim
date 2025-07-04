@@ -1,7 +1,12 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/model/feedback_request.dart';
+import 'package:pochi_trim/data/model/send_feedback_exception.dart';
+import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'google_form_service.g.dart';
@@ -9,7 +14,9 @@ part 'google_form_service.g.dart';
 @riverpod
 GoogleFormService googleFormService(Ref ref) {
   final dio = ref.watch<Dio>(dioProvider);
-  return GoogleFormService(dio);
+  final errorReportService = ref.watch(errorReportServiceProvider);
+
+  return GoogleFormService(dio: dio, errorReportService: errorReportService);
 }
 
 @riverpod
@@ -18,37 +25,43 @@ Dio dio(Ref ref) {
 }
 
 class GoogleFormService {
-  const GoogleFormService(this._dio);
+  GoogleFormService({
+    required Dio dio,
+    required ErrorReportService errorReportService,
+  }) : _dio = dio,
+       _errorReportService = errorReportService;
 
   final Dio _dio;
+  final ErrorReportService _errorReportService;
+
+  final _logger = Logger('GoogleFormService');
 
   Future<void> sendFeedback(FeedbackRequest request) async {
-    final logger = Logger('GoogleFormService');
-
-    final formData = {
-      'entry.893089758': request.feedback,
-      if (request.email != null && request.email!.isNotEmpty)
-        'entry.1495718762': request.email,
-      if (request.userId != null && request.userId!.isNotEmpty)
-        'entry.1274333669': request.userId,
-    };
+    final formData = request.toFormData();
 
     const url =
         'https://docs.google.com/forms/d/e/1FAIpQLScS1p82L5tI4frPZLggUH35sbumRxK0EHvAEScNgck1Zv7gNg/formResponse';
 
-    logger.info(url);
-    logger.info('Sending feedback to Google Form');
+    try {
+      await _dio.post<void>(
+        url,
+        data: formData,
+        options: Options(
+          contentType: 'application/x-www-form-urlencoded',
+        ),
+      );
+    } on DioException catch (e, stack) {
+      _logger.severe('Failed to send feedback', e);
 
-    final response = await _dio.post<void>(
-      url,
-      data: formData,
-      options: Options(
-        contentType: 'application/x-www-form-urlencoded',
-      ),
-    );
+      if (e.type == DioExceptionType.unknown) {
+        unawaited(_errorReportService.recordError(e, stack));
 
-    logger.info(
-      'Google Form response: status=${response.statusCode}, statusMessage=${response.statusMessage}',
-    );
+        throw const SendFeedbackException.uncategorized();
+      }
+
+      throw const SendFeedbackException.connection();
+    } on SocketException {
+      throw const SendFeedbackException.connection();
+    }
   }
 }
