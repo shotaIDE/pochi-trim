@@ -143,13 +143,15 @@ class _SubmitFeedbackScreenState extends ConsumerState<SubmitFeedbackScreen> {
   }
 }
 
-class _FeedbackField extends StatelessWidget {
+class _FeedbackField extends ConsumerWidget {
   const _FeedbackField({required this.controller});
 
   final TextEditingController controller;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSubmitting = ref.watch(isSubmittingFeedbackProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
@@ -163,6 +165,7 @@ class _FeedbackField extends StatelessWidget {
 
         TextFormField(
           controller: controller,
+          enabled: !isSubmitting,
           decoration: const InputDecoration(
             hintText: 'お気づきの点やご要望をお聞かせください',
             border: OutlineInputBorder(),
@@ -180,13 +183,15 @@ class _FeedbackField extends StatelessWidget {
   }
 }
 
-class _EmailField extends StatelessWidget {
+class _EmailField extends ConsumerWidget {
   const _EmailField({required this.controller});
 
   final TextEditingController controller;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSubmitting = ref.watch(isSubmittingFeedbackProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
@@ -199,6 +204,7 @@ class _EmailField extends StatelessWidget {
         ),
         TextFormField(
           controller: controller,
+          enabled: !isSubmitting,
           decoration: const InputDecoration(
             hintText: 'your.name@example.com',
             border: OutlineInputBorder(),
@@ -261,6 +267,8 @@ class _UserIdSectionState extends ConsumerState<_UserIdSection> {
 
   @override
   Widget build(BuildContext context) {
+    final isSubmitting = ref.watch(isSubmittingFeedbackProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -275,11 +283,13 @@ class _UserIdSectionState extends ConsumerState<_UserIdSection> {
             const Spacer(),
             Switch(
               value: widget.includeUserId,
-              onChanged: (value) {
-                _updateDisplayUserId(includeUserId: value);
+              onChanged: !isSubmitting
+                  ? (value) {
+                      _updateDisplayUserId(includeUserId: value);
 
-                widget.onSwitchChanged(value);
-              },
+                      widget.onSwitchChanged(value);
+                    }
+                  : null,
             ),
           ],
         ),
