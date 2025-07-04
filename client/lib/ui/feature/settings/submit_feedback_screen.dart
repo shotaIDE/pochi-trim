@@ -96,7 +96,7 @@ class _SubmitFeedbackScreenState extends ConsumerState<SubmitFeedbackScreen> {
     final userId = _includeUserId ? _userIdController.text.trim() : null;
 
     final request = FeedbackRequest(
-      feedback: feedback,
+      body: feedback,
       email: email.isNotEmpty ? email : null,
       userId: userId,
     );

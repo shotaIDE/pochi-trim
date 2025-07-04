@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/model/feedback_request.dart';
 import 'package:pochi_trim/data/model/send_feedback_exception.dart';
+import 'package:pochi_trim/data/service/dao/feedback_request_post.dart';
 import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -41,7 +42,8 @@ class GoogleFormService {
   /// Throws:
   /// - [SendFeedbackException]: リクエストに失敗した場合
   Future<void> sendFeedback(FeedbackRequest request) async {
-    final formData = request.toFormData();
+    final requestPost = FeedbackRequestPost.fromFeedbackRequest(request);
+    final formData = requestPost.toFormData();
 
     const url =
         'https://docs.google.com/forms/d/e/1FAIpQLScS1p82L5tI4frPZLggUH35sbumRxK0EHvAEScNgck1Zv7gNg/formResponse';
