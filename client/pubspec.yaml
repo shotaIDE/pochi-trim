@@ -33,7 +33,7 @@ dependencies:
   intl: any
   logging: 1.3.0
   package_info_plus: 8.3.0
-  purchases_flutter: 8.10.3
+  purchases_flutter: 8.10.5
   riverpod: 2.6.1
   riverpod_annotation: 2.6.1
   share_plus: 11.0.0
