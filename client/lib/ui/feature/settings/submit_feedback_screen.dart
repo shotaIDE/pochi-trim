@@ -114,7 +114,7 @@ class _SubmitFeedbackScreenState extends ConsumerState<SubmitFeedbackScreen> {
         case SendFeedbackExceptionConnection():
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('ネットワーク接続に失敗しました。インターネット接続を確認してください。'),
+              content: Text('送信に失敗しました。インターネット接続を確認してください。'),
             ),
           );
           return;
@@ -135,7 +135,7 @@ class _SubmitFeedbackScreenState extends ConsumerState<SubmitFeedbackScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('フィードバックを送信しました。ありがとうございました！'),
+        content: Text('フィードバックを送信しました。開発者がすぐに内容を確認させていただきます。'),
       ),
     );
 
