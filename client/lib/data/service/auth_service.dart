@@ -230,21 +230,16 @@ class AuthService {
   }
 
   Future<firebase_auth.AuthCredential> _loginGoogle() async {
-    final executor = GoogleSignIn(
-      scopes: [
-        'https://www.googleapis.com/auth/userinfo.email',
-        'https://www.googleapis.com/auth/userinfo.profile',
-      ],
-    );
-    final account = await executor.signIn();
-    if (account == null) {
-      throw const SignInGoogleException.cancelled();
-    }
+    final executor = GoogleSignIn.instance;
 
-    final authentication = await account.authentication;
+    // Initialize GoogleSignIn (done once per app lifecycle)
+    await executor.initialize();
+
+    final account = await executor.authenticate();
+
+    final authentication = account.authentication;
     final idToken = authentication.idToken;
-    final accessToken = authentication.accessToken;
-    if (idToken == null || accessToken == null) {
+    if (idToken == null) {
       throw const SignInGoogleException.uncategorized();
     }
 
@@ -258,7 +253,6 @@ class AuthService {
 
     return firebase_auth.GoogleAuthProvider.credential(
       idToken: idToken,
-      accessToken: accessToken,
     );
   }
 
