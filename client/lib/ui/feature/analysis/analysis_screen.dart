@@ -6,10 +6,12 @@ import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
+import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_period.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_presenter.dart';
 import 'package:pochi_trim/ui/feature/analysis/bar_chart_touched_position.dart';
 import 'package:pochi_trim/ui/feature/analysis/statistics.dart';
+import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
 
 // 家事ごとの頻度分析のためのデータクラス
 class HouseWorkFrequency {
@@ -336,25 +338,37 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final analysisPeriod = ref.watch(currentAnalysisPeriodProvider);
+    final isProFuture = ref.watch(isProUserProvider.future);
+    final dropdownButton = FutureBuilder(
+      future: isProFuture,
+      builder: (context, snapshot) {
+        final isPro = snapshot.data ?? false;
 
-    final dropdownButton = DropdownButton<int>(
-      value: _getPeriodValue(analysisPeriod),
-      items: const [
-        DropdownMenuItem(value: 0, child: Text('今日')),
-        DropdownMenuItem(value: 1, child: Text('昨日')),
-        DropdownMenuItem(value: 2, child: Text('今週')),
-        DropdownMenuItem(value: 3, child: Text('今月')),
-        DropdownMenuItem(value: 4, child: Text('過去1週間')),
-        DropdownMenuItem(value: 5, child: Text('過去2週間')),
-        DropdownMenuItem(value: 6, child: Text('過去1ヶ月')),
-      ],
-      onChanged: (value) {
-        if (value == null) {
-          return;
-        }
+        return DropdownButton<int>(
+          value: _getPeriodValue(analysisPeriod),
+          items: const [
+            DropdownMenuItem(value: 0, child: Text('今日')),
+            DropdownMenuItem(value: 1, child: Text('昨日')),
+            DropdownMenuItem(value: 2, child: Text('今週')),
+            DropdownMenuItem(value: 3, child: Text('今月')),
+            DropdownMenuItem(value: 4, child: Text('過去1週間')),
+            DropdownMenuItem(value: 5, child: Text('過去2週間')),
+            DropdownMenuItem(value: 6, child: Text('過去1ヶ月')),
+          ],
+          onChanged: (value) async {
+            if (value == null) {
+              return;
+            }
 
-        final period = _getPeriod(value);
-        ref.read(currentAnalysisPeriodProvider.notifier).setPeriod(period);
+            if (!isPro && _isProOnlyValue(value)) {
+              await _showProUpgradeDialog(context);
+              return;
+            }
+
+            final period = _getPeriod(value);
+            ref.read(currentAnalysisPeriodProvider.notifier).setPeriod(period);
+          },
+        );
       },
     );
 
@@ -414,6 +428,33 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
       default:
         throw ArgumentError('Invalid value: $value');
     }
+  }
+
+  bool _isProOnlyValue(int value) {
+    return value == 3 || value == 5 || value == 6;
+  }
+
+  Future<void> _showProUpgradeDialog(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pro版限定機能'),
+        content: const Text('1週間を超える期間の分析はPro版でのみ利用できます。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('キャンセル'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(UpgradeToProScreen.route());
+            },
+            child: const Text('Pro版にアップグレード'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
