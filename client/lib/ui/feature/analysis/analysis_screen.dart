@@ -346,15 +346,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
 
         return DropdownButton<int>(
           value: _getPeriodValue(analysisPeriod),
-          items: const [
-            DropdownMenuItem(value: 0, child: Text('今日')),
-            DropdownMenuItem(value: 1, child: Text('昨日')),
-            DropdownMenuItem(value: 2, child: Text('今週')),
-            DropdownMenuItem(value: 3, child: Text('今月')),
-            DropdownMenuItem(value: 4, child: Text('過去1週間')),
-            DropdownMenuItem(value: 5, child: Text('過去2週間')),
-            DropdownMenuItem(value: 6, child: Text('過去1ヶ月')),
-          ],
+          items: _buildDropdownItems(isPro),
           onChanged: (value) async {
             if (value == null) {
               return;
@@ -432,6 +424,53 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
 
   bool _isProOnlyValue(int value) {
     return value == 3 || value == 5 || value == 6;
+  }
+
+  List<DropdownMenuItem<int>> _buildDropdownItems(bool isPro) {
+    final items = [
+      (0, '今日'),
+      (1, '昨日'),
+      (2, '今週'),
+      (3, '今月'),
+      (4, '過去1週間'),
+      (5, '過去2週間'),
+      (6, '過去1ヶ月'),
+    ];
+
+    return items.map((item) {
+      final value = item.$1;
+      final label = item.$2;
+      final isProOnly = _isProOnlyValue(value);
+      final shouldShowProMark = isProOnly && !isPro;
+
+      return DropdownMenuItem<int>(
+        value: value,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label),
+            if (shouldShowProMark) ...[
+              const SizedBox(width: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'Pro',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    }).toList();
   }
 
   Future<void> _showProUpgradeDialog(BuildContext context) async {
