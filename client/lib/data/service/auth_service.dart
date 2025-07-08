@@ -237,7 +237,6 @@ class AuthService {
 
     final account = await executor.authenticate(
       scopeHint: [
-        'https://www.googleapis.com/auth/userinfo.email',
         'https://www.googleapis.com/auth/userinfo.profile',
       ],
     );
