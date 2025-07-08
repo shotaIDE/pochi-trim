@@ -235,7 +235,12 @@ class AuthService {
     // Initialize GoogleSignIn (done once per app lifecycle)
     await executor.initialize();
 
-    final account = await executor.authenticate();
+    final account = await executor.authenticate(
+      scopeHint: [
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile',
+      ],
+    );
 
     final authentication = account.authentication;
     final idToken = authentication.idToken;
