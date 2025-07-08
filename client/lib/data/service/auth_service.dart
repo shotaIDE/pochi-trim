@@ -230,12 +230,7 @@ class AuthService {
   }
 
   Future<firebase_auth.AuthCredential> _loginGoogle() async {
-    final executor = GoogleSignIn.instance;
-
-    // Initialize GoogleSignIn (done once per app lifecycle)
-    await executor.initialize();
-
-    final account = await executor.authenticate(
+    final account = await GoogleSignIn.instance.authenticate(
       scopeHint: [
         'https://www.googleapis.com/auth/userinfo.profile',
       ],
