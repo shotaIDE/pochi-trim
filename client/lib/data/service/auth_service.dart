@@ -232,6 +232,7 @@ class AuthService {
   Future<firebase_auth.AuthCredential> _loginGoogle() async {
     final account = await GoogleSignIn.instance.authenticate(
       scopeHint: [
+        'https://www.googleapis.com/auth/userinfo.email',
         'https://www.googleapis.com/auth/userinfo.profile',
       ],
     );
