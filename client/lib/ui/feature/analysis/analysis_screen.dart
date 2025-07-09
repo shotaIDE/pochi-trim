@@ -417,7 +417,6 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
     return Row(
       spacing: 8,
       children: [
-        const Text('分析期間: ', style: TextStyle(fontWeight: FontWeight.bold)),
         dropdownButton,
         periodText,
       ],
