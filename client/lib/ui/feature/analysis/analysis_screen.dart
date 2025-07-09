@@ -230,7 +230,11 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
               return;
             }
 
-            if (_isProOnlyValue(value, ref)) {
+            final selectedItem = dropdownItems.firstWhere(
+              (item) => item.value == value,
+            );
+
+            if (selectedItem.unavailableBecauseProFeature) {
               await _showProUpgradeDialog(context);
               return;
             }
@@ -295,11 +299,6 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
       case AnalysisPeriodDropdownValue.pastMonth:
         return AnalysisPeriodPastMonthGenerator.fromCurrentDate(current);
     }
-  }
-
-  bool _isProOnlyValue(AnalysisPeriodDropdownValue value, WidgetRef ref) {
-    final period = _getPeriod(value);
-    return ref.read(isProOnlyPeriodProvider(period)).value ?? false;
   }
 
   List<DropdownMenuItem<AnalysisPeriodDropdownValue>> _buildDropdownItemsSync(

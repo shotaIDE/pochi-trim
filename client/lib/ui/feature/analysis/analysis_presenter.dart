@@ -402,32 +402,6 @@ Future<List<WorkLog>> _workLogsFilteredByPeriodFilePrivate(Ref ref) async {
       .toList();
 }
 
-// Pro機能判定に関するプロバイダー
-@riverpod
-Future<bool> isProOnlyPeriod(Ref ref, AnalysisPeriod period) async {
-  // Pro限定の期間を定義
-  const proOnlyPeriods = [
-    AnalysisPeriodCurrentMonth,
-    AnalysisPeriodPastTwoWeeks,
-    AnalysisPeriodPastMonth,
-  ];
-
-  return proOnlyPeriods.any((type) => period.runtimeType == type);
-}
-
-@riverpod
-Future<bool> shouldShowProUpgradeDialog(
-  Ref ref,
-  AnalysisPeriod selectedPeriod,
-) async {
-  final isPro = await ref.watch(isProUserProvider.future);
-  final isProOnly = await ref.watch(
-    isProOnlyPeriodProvider(selectedPeriod).future,
-  );
-
-  return !isPro && isProOnly;
-}
-
 @riverpod
 String getPeriodDisplayText(Ref ref, AnalysisPeriod period) {
   switch (period) {
