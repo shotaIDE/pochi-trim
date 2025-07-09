@@ -307,7 +307,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
     final dropdownItems = ref.watch(analysisPeriodDropdownItemsProvider);
 
     return dropdownItems.map((item) {
-      final shouldShowProMark = item.isProOnly && !isPro;
+      final shouldShowProMark = item.unavailableBecauseProFeature && !isPro;
 
       return DropdownMenuItem<int>(
         value: item.value,
