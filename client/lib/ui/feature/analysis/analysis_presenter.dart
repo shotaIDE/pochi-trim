@@ -15,6 +15,44 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analysis_presenter.g.dart';
 
+// 分析期間のドロップダウンアイテム
+class AnalysisPeriodDropdownItem {
+  const AnalysisPeriodDropdownItem({
+    required this.value,
+    required this.label,
+    required this.isProOnly,
+  });
+
+  final int value;
+  final String label;
+  final bool isProOnly;
+}
+
+@riverpod
+List<AnalysisPeriodDropdownItem> analysisPeriodDropdownItems(Ref ref) {
+  return const [
+    AnalysisPeriodDropdownItem(value: 0, label: '今日', isProOnly: false),
+    AnalysisPeriodDropdownItem(value: 1, label: '昨日', isProOnly: false),
+    AnalysisPeriodDropdownItem(value: 2, label: '今週', isProOnly: false),
+    AnalysisPeriodDropdownItem(value: 3, label: '今月', isProOnly: true),
+    AnalysisPeriodDropdownItem(
+      value: 4,
+      label: '過去1週間',
+      isProOnly: false,
+    ),
+    AnalysisPeriodDropdownItem(
+      value: 5,
+      label: '過去2週間',
+      isProOnly: true,
+    ),
+    AnalysisPeriodDropdownItem(
+      value: 6,
+      label: '過去1ヶ月',
+      isProOnly: true,
+    ),
+  ];
+}
+
 @riverpod
 class CurrentAnalysisPeriod extends _$CurrentAnalysisPeriod {
   @override

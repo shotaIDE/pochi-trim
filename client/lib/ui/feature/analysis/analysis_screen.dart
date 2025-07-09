@@ -9,19 +9,6 @@ import 'package:pochi_trim/ui/feature/analysis/bar_chart_touched_position.dart';
 import 'package:pochi_trim/ui/feature/analysis/statistics.dart';
 import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
 
-// 分析期間のドロップダウンアイテム
-class AnalysisPeriodDropdownItem {
-  const AnalysisPeriodDropdownItem({
-    required this.value,
-    required this.label,
-    required this.isProOnly,
-  });
-
-  final int value;
-  final String label;
-  final bool isProOnly;
-}
-
 /// 分析画面
 ///
 /// 家事の実行頻度や曜日ごとの頻度分析を表示する
@@ -218,29 +205,6 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
 
   final void Function(int period) onPeriodChangedLegacy;
 
-  // 分析期間のドロップダウンアイテム定義
-  static const _dropdownItems = [
-    AnalysisPeriodDropdownItem(value: 0, label: '今日', isProOnly: false),
-    AnalysisPeriodDropdownItem(value: 1, label: '昨日', isProOnly: false),
-    AnalysisPeriodDropdownItem(value: 2, label: '今週', isProOnly: false),
-    AnalysisPeriodDropdownItem(value: 3, label: '今月', isProOnly: true),
-    AnalysisPeriodDropdownItem(
-      value: 4,
-      label: '過去1週間',
-      isProOnly: false,
-    ),
-    AnalysisPeriodDropdownItem(
-      value: 5,
-      label: '過去2週間',
-      isProOnly: true,
-    ),
-    AnalysisPeriodDropdownItem(
-      value: 6,
-      label: '過去1ヶ月',
-      isProOnly: true,
-    ),
-  ];
-
   // Proマークのスタイル定数
   static const _proMarkSpacing = 4.0;
 
@@ -255,7 +219,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
 
         return DropdownButton<int>(
           value: _getPeriodValue(analysisPeriod),
-          items: _buildDropdownItems(isPro, context),
+          items: _buildDropdownItems(isPro, context, ref),
           onChanged: (value) async {
             if (value == null) {
               return;
@@ -338,8 +302,11 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   List<DropdownMenuItem<int>> _buildDropdownItems(
     bool isPro,
     BuildContext context,
+    WidgetRef ref,
   ) {
-    return _dropdownItems.map((item) {
+    final dropdownItems = ref.watch(analysisPeriodDropdownItemsProvider);
+
+    return dropdownItems.map((item) {
       final shouldShowProMark = item.isProOnly && !isPro;
 
       return DropdownMenuItem<int>(
