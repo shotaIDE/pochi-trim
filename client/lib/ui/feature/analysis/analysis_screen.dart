@@ -373,9 +373,6 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
 
   // Proマークのスタイル定数
   static const _proMarkFontSize = 10.0;
-  static const _proMarkHorizontalPadding = 4.0;
-  static const _proMarkVerticalPadding = 2.0;
-  static const _proMarkBorderRadius = 4.0;
   static const _proMarkSpacing = 4.0;
   static const _proMarkText = 'Pro';
 
@@ -495,23 +492,24 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   }
 
   Widget _buildProMark(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: _proMarkHorizontalPadding,
-        vertical: _proMarkVerticalPadding,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondary,
-        borderRadius: BorderRadius.circular(_proMarkBorderRadius),
-      ),
-      child: Text(
-        _proMarkText,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onSecondary,
-          fontSize: _proMarkFontSize,
-          fontWeight: FontWeight.bold,
+    return const Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.workspace_premium,
+          size: 14,
+          color: Colors.amber,
         ),
-      ),
+        SizedBox(width: 2),
+        Text(
+          _proMarkText,
+          style: TextStyle(
+            color: Colors.amber,
+            fontSize: _proMarkFontSize,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 
