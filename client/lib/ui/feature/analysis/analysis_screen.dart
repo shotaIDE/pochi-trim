@@ -481,20 +481,12 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
             Text(item.label),
             if (shouldShowProMark) ...[
               const SizedBox(width: _proMarkSpacing),
-              _buildProMark(context),
+              const _ProMark(),
             ],
           ],
         ),
       );
     }).toList();
-  }
-
-  Widget _buildProMark(BuildContext context) {
-    return const Icon(
-      Icons.workspace_premium,
-      size: 16,
-      color: Colors.amber,
-    );
   }
 
   Future<void> _showProUpgradeDialog(BuildContext context) async {
@@ -1050,6 +1042,20 @@ class _Legends extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Pro版限定機能を示すアイコン
+class _ProMark extends StatelessWidget {
+  const _ProMark();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(
+      Icons.workspace_premium,
+      size: 16,
+      color: Colors.amber,
     );
   }
 }
