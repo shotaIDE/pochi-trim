@@ -6,7 +6,7 @@ import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_period.dart';
-import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
+import 'package:pochi_trim/ui/feature/analysis/frequency.dart';
 import 'package:pochi_trim/ui/feature/analysis/statistics.dart';
 import 'package:pochi_trim/ui/feature/analysis/weekday.dart';
 import 'package:pochi_trim/ui/feature/analysis/weekday_frequency.dart';
@@ -339,4 +339,65 @@ Future<List<WorkLog>> _workLogsFilteredByPeriodFilePrivate(Ref ref) async {
             log.completedAt.isBefore(currentAnalysisPeriod.to),
       )
       .toList();
+}
+
+// 各家事の実行頻度を取得するプロバイダー
+@riverpod
+Future<List<HouseWorkFrequency>> houseWorkFrequency(Ref ref) async {
+  final workLogRepository = ref.watch(workLogRepositoryProvider);
+  final workLogs = await workLogRepository.getAllOnce();
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+
+  // 家事IDごとにグループ化して頻度をカウント
+  final frequencyMap = <String, int>{};
+  for (final workLog in workLogs) {
+    frequencyMap[workLog.houseWorkId] =
+        (frequencyMap[workLog.houseWorkId] ?? 0) + 1;
+  }
+
+  // HouseWorkFrequencyのリストを作成
+  final result = <HouseWorkFrequency>[];
+  for (final entry in frequencyMap.entries) {
+    final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
+
+    if (houseWork != null) {
+      result.add(HouseWorkFrequency(houseWork: houseWork, count: entry.value));
+    }
+  }
+
+  // 頻度の高い順にソート
+  result.sort((a, b) => b.count.compareTo(a.count));
+
+  return result;
+}
+
+// 各家事の実行頻度を取得するプロバイダー（期間フィルタリング付き）
+@riverpod
+Future<List<HouseWorkFrequency>> filteredHouseWorkFrequency(Ref ref) async {
+  final workLogs = await ref.watch(workLogsFilteredByPeriodProvider.future);
+  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
+
+  // 家事IDごとにグループ化して頻度をカウント
+  final frequencyMap = <String, int>{};
+  for (final workLog in workLogs) {
+    frequencyMap[workLog.houseWorkId] =
+        (frequencyMap[workLog.houseWorkId] ?? 0) + 1;
+  }
+
+  // HouseWorkFrequencyのリストを作成
+  final result = <HouseWorkFrequency>[];
+  for (final entry in frequencyMap.entries) {
+    final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
+
+    if (houseWork != null) {
+      result.add(
+        HouseWorkFrequency(houseWork: houseWork, count: entry.value),
+      );
+    }
+  }
+
+  // 頻度の高い順にソート
+  result.sort((a, b) => b.count.compareTo(a.count));
+
+  return result;
 }

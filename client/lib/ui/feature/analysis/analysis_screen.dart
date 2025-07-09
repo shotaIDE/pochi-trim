@@ -2,30 +2,12 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:pochi_trim/data/model/house_work.dart';
-import 'package:pochi_trim/data/model/work_log.dart';
-import 'package:pochi_trim/data/repository/house_work_repository.dart';
-import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_period.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_presenter.dart';
 import 'package:pochi_trim/ui/feature/analysis/bar_chart_touched_position.dart';
 import 'package:pochi_trim/ui/feature/analysis/statistics.dart';
 import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
-
-// 家事ごとの頻度分析のためのデータクラス
-class HouseWorkFrequency {
-  HouseWorkFrequency({
-    required this.houseWork,
-    required this.count,
-    // TODO(ide): デフォルト引数を廃止する
-    this.color = Colors.grey,
-  });
-
-  final HouseWork houseWork;
-  final int count;
-  final Color color;
-}
 
 // 分析期間のドロップダウンアイテム
 class AnalysisPeriodDropdownItem {
@@ -39,118 +21,6 @@ class AnalysisPeriodDropdownItem {
   final String label;
   final bool isProOnly;
 }
-
-// 時間帯別の家事実行頻度のためのデータクラス
-class TimeSlotFrequency {
-  TimeSlotFrequency({
-    required this.timeSlot,
-    required this.houseWorkFrequencies,
-    required this.totalCount,
-  });
-  final String timeSlot; // 時間帯の表示名（例：「0-3時」）
-  final List<HouseWorkFrequency> houseWorkFrequencies; // その時間帯での家事ごとの実行回数
-  final int totalCount; // その時間帯の合計実行回数
-
-  // fl_chartのBarChartRodData作成用のヘルパーメソッド
-  BarChartRodData toBarChartRodData({
-    required double width,
-    required double x,
-    required List<Color> colors,
-  }) {
-    // 家事の実行回数ごとにRodStackItemを作成
-    final rodStackItems = <BarChartRodStackItem>[];
-
-    double fromY = 0;
-    for (var i = 0; i < houseWorkFrequencies.length; i++) {
-      final item = houseWorkFrequencies[i];
-      final toY = fromY + item.count;
-
-      rodStackItems.add(
-        BarChartRodStackItem(fromY, toY, colors[i % colors.length]),
-      );
-
-      fromY = toY;
-    }
-
-    return BarChartRodData(
-      toY: totalCount.toDouble(),
-      width: width,
-      color: Colors.transparent,
-      rodStackItems: rodStackItems,
-      borderRadius: BorderRadius.zero,
-    );
-  }
-}
-
-// 家事ログの取得と分析のためのプロバイダー
-final workLogsForAnalysisProvider = FutureProvider<List<WorkLog>>((ref) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
-
-  return workLogRepository.getAllOnce();
-});
-
-// 各家事の実行頻度を取得するプロバイダー
-final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
-  ref,
-) async {
-  // 家事ログのデータを待機
-  final workLogs = await ref.watch(workLogsForAnalysisProvider.future);
-  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-
-  // 家事IDごとにグループ化して頻度をカウント
-  final frequencyMap = <String, int>{};
-  for (final workLog in workLogs) {
-    frequencyMap[workLog.houseWorkId] =
-        (frequencyMap[workLog.houseWorkId] ?? 0) + 1;
-  }
-
-  // HouseWorkFrequencyのリストを作成
-  final result = <HouseWorkFrequency>[];
-  for (final entry in frequencyMap.entries) {
-    final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
-
-    if (houseWork != null) {
-      result.add(HouseWorkFrequency(houseWork: houseWork, count: entry.value));
-    }
-  }
-
-  // 頻度の高い順にソート
-  result.sort((a, b) => b.count.compareTo(a.count));
-
-  return result;
-});
-
-// 各家事の実行頻度を取得するプロバイダー（期間フィルタリング付き）
-final filteredHouseWorkFrequencyProvider =
-    FutureProvider<List<HouseWorkFrequency>>((ref) async {
-      // フィルタリングされた家事ログのデータを待機
-      final workLogs = await ref.watch(workLogsFilteredByPeriodProvider.future);
-      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-
-      // 家事IDごとにグループ化して頻度をカウント
-      final frequencyMap = <String, int>{};
-      for (final workLog in workLogs) {
-        frequencyMap[workLog.houseWorkId] =
-            (frequencyMap[workLog.houseWorkId] ?? 0) + 1;
-      }
-
-      // HouseWorkFrequencyのリストを作成
-      final result = <HouseWorkFrequency>[];
-      for (final entry in frequencyMap.entries) {
-        final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
-
-        if (houseWork != null) {
-          result.add(
-            HouseWorkFrequency(houseWork: houseWork, count: entry.value),
-          );
-        }
-      }
-
-      // 頻度の高い順にソート
-      result.sort((a, b) => b.count.compareTo(a.count));
-
-      return result;
-    });
 
 /// 分析画面
 ///
@@ -818,9 +688,11 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
         final barChart = BarChart(
           BarChartData(
             alignment: BarChartAlignment.spaceAround,
-            maxY: timeSlotFrequencies
-                .map((e) => e.totalCount.toDouble())
-                .reduce((a, b) => a > b ? a : b),
+            maxY: timeSlotFrequencies.isNotEmpty
+                ? timeSlotFrequencies
+                      .map((e) => e.totalCount.toDouble())
+                      .reduce((a, b) => a > b ? a : b)
+                : 0,
             titlesData: FlTitlesData(
               leftTitles: const AxisTitles(
                 sideTitles: SideTitles(showTitles: true, reservedSize: 30),
