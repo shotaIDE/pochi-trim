@@ -29,19 +29,23 @@ class AnalysisPeriodDropdownItem {
 }
 
 @riverpod
-List<AnalysisPeriodDropdownItem> analysisPeriodDropdownItems(Ref ref) {
-  return const [
-    AnalysisPeriodDropdownItem(
+Future<List<AnalysisPeriodDropdownItem>> analysisPeriodDropdownItems(
+  Ref ref,
+) async {
+  final isPro = await ref.watch(isProUserProvider.future);
+
+  return [
+    const AnalysisPeriodDropdownItem(
       value: 0,
       label: '今日',
       unavailableBecauseProFeature: false,
     ),
-    AnalysisPeriodDropdownItem(
+    const AnalysisPeriodDropdownItem(
       value: 1,
       label: '昨日',
       unavailableBecauseProFeature: false,
     ),
-    AnalysisPeriodDropdownItem(
+    const AnalysisPeriodDropdownItem(
       value: 2,
       label: '今週',
       unavailableBecauseProFeature: false,
@@ -49,9 +53,9 @@ List<AnalysisPeriodDropdownItem> analysisPeriodDropdownItems(Ref ref) {
     AnalysisPeriodDropdownItem(
       value: 3,
       label: '今月',
-      unavailableBecauseProFeature: true,
+      unavailableBecauseProFeature: !isPro,
     ),
-    AnalysisPeriodDropdownItem(
+    const AnalysisPeriodDropdownItem(
       value: 4,
       label: '過去1週間',
       unavailableBecauseProFeature: false,
@@ -59,12 +63,12 @@ List<AnalysisPeriodDropdownItem> analysisPeriodDropdownItems(Ref ref) {
     AnalysisPeriodDropdownItem(
       value: 5,
       label: '過去2週間',
-      unavailableBecauseProFeature: true,
+      unavailableBecauseProFeature: !isPro,
     ),
     AnalysisPeriodDropdownItem(
       value: 6,
       label: '過去1ヶ月',
-      unavailableBecauseProFeature: true,
+      unavailableBecauseProFeature: !isPro,
     ),
   ];
 }

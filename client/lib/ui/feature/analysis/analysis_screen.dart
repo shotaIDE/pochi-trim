@@ -2,7 +2,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_period.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_presenter.dart';
 import 'package:pochi_trim/ui/feature/analysis/bar_chart_touched_position.dart';
@@ -211,21 +210,27 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final analysisPeriod = ref.watch(currentAnalysisPeriodProvider);
-    final isProFuture = ref.watch(isProUserProvider.future);
     final dropdownButton = FutureBuilder(
-      future: isProFuture,
+      future: ref.watch(analysisPeriodDropdownItemsProvider.future),
       builder: (context, snapshot) {
-        final isPro = snapshot.data ?? false;
+        if (!snapshot.hasData) {
+          return const SizedBox(
+            width: 150,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final dropdownItems = snapshot.data!;
 
         return DropdownButton<int>(
           value: _getPeriodValue(analysisPeriod),
-          items: _buildDropdownItems(isPro, context, ref),
+          items: _buildDropdownItemsSync(dropdownItems, context),
           onChanged: (value) async {
             if (value == null) {
               return;
             }
 
-            if (!isPro && _isProOnlyValue(value, ref)) {
+            if (_isProOnlyValue(value, ref)) {
               await _showProUpgradeDialog(context);
               return;
             }
@@ -299,15 +304,12 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
     return ref.read(isProOnlyPeriodProvider(period)).value ?? false;
   }
 
-  List<DropdownMenuItem<int>> _buildDropdownItems(
-    bool isPro,
+  List<DropdownMenuItem<int>> _buildDropdownItemsSync(
+    List<AnalysisPeriodDropdownItem> dropdownItems,
     BuildContext context,
-    WidgetRef ref,
   ) {
-    final dropdownItems = ref.watch(analysisPeriodDropdownItemsProvider);
-
     return dropdownItems.map((item) {
-      final shouldShowProMark = item.unavailableBecauseProFeature && !isPro;
+      final shouldShowProMark = item.unavailableBecauseProFeature;
 
       return DropdownMenuItem<int>(
         value: item.value,
