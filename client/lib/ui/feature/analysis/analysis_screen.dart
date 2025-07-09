@@ -27,6 +27,19 @@ class HouseWorkFrequency {
   final Color color;
 }
 
+// 分析期間のドロップダウンアイテム
+class AnalysisPeriodDropdownItem {
+  const AnalysisPeriodDropdownItem({
+    required this.value,
+    required this.label,
+    required this.isProOnly,
+  });
+
+  final int value;
+  final String label;
+  final bool isProOnly;
+}
+
 // 時間帯別の家事実行頻度のためのデータクラス
 class TimeSlotFrequency {
   TimeSlotFrequency({
@@ -335,6 +348,37 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
 
   final void Function(int period) onPeriodChangedLegacy;
 
+  // 分析期間のドロップダウンアイテム定義
+  static const _dropdownItems = [
+    AnalysisPeriodDropdownItem(value: 0, label: '今日', isProOnly: false),
+    AnalysisPeriodDropdownItem(value: 1, label: '昨日', isProOnly: false),
+    AnalysisPeriodDropdownItem(value: 2, label: '今週', isProOnly: false),
+    AnalysisPeriodDropdownItem(value: 3, label: '今月', isProOnly: true),
+    AnalysisPeriodDropdownItem(
+      value: 4,
+      label: '過去1週間',
+      isProOnly: false,
+    ),
+    AnalysisPeriodDropdownItem(
+      value: 5,
+      label: '過去2週間',
+      isProOnly: true,
+    ),
+    AnalysisPeriodDropdownItem(
+      value: 6,
+      label: '過去1ヶ月',
+      isProOnly: true,
+    ),
+  ];
+
+  // Proマークのスタイル定数
+  static const _proMarkFontSize = 10.0;
+  static const _proMarkHorizontalPadding = 4.0;
+  static const _proMarkVerticalPadding = 2.0;
+  static const _proMarkBorderRadius = 4.0;
+  static const _proMarkSpacing = 4.0;
+  static const _proMarkText = 'Pro';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final analysisPeriod = ref.watch(currentAnalysisPeriodProvider);
@@ -346,7 +390,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
 
         return DropdownButton<int>(
           value: _getPeriodValue(analysisPeriod),
-          items: _buildDropdownItems(isPro),
+          items: _buildDropdownItems(isPro, context),
           onChanged: (value) async {
             if (value == null) {
               return;
@@ -423,54 +467,53 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   }
 
   bool _isProOnlyValue(int value) {
-    return value == 3 || value == 5 || value == 6;
+    return _dropdownItems.any(
+      (item) => item.value == value && item.isProOnly,
+    );
   }
 
-  List<DropdownMenuItem<int>> _buildDropdownItems(bool isPro) {
-    final items = [
-      (0, '今日'),
-      (1, '昨日'),
-      (2, '今週'),
-      (3, '今月'),
-      (4, '過去1週間'),
-      (5, '過去2週間'),
-      (6, '過去1ヶ月'),
-    ];
-
-    return items.map((item) {
-      final value = item.$1;
-      final label = item.$2;
-      final isProOnly = _isProOnlyValue(value);
-      final shouldShowProMark = isProOnly && !isPro;
+  List<DropdownMenuItem<int>> _buildDropdownItems(
+    bool isPro,
+    BuildContext context,
+  ) {
+    return _dropdownItems.map((item) {
+      final shouldShowProMark = item.isProOnly && !isPro;
 
       return DropdownMenuItem<int>(
-        value: value,
+        value: item.value,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(label),
+            Text(item.label),
             if (shouldShowProMark) ...[
-              const SizedBox(width: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Text(
-                  'Pro',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              const SizedBox(width: _proMarkSpacing),
+              _buildProMark(context),
             ],
           ],
         ),
       );
     }).toList();
+  }
+
+  Widget _buildProMark(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: _proMarkHorizontalPadding,
+        vertical: _proMarkVerticalPadding,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondary,
+        borderRadius: BorderRadius.circular(_proMarkBorderRadius),
+      ),
+      child: Text(
+        _proMarkText,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSecondary,
+          fontSize: _proMarkFontSize,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
 
   Future<void> _showProUpgradeDialog(BuildContext context) async {
