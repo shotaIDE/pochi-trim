@@ -19,12 +19,10 @@ part 'analysis_presenter.g.dart';
 class AnalysisPeriodDropdownItem {
   const AnalysisPeriodDropdownItem({
     required this.value,
-    required this.label,
     required this.unavailableBecauseProFeature,
   });
 
   final int value;
-  final String label;
   final bool unavailableBecauseProFeature;
 }
 
@@ -37,37 +35,30 @@ Future<List<AnalysisPeriodDropdownItem>> analysisPeriodDropdownItems(
   return [
     const AnalysisPeriodDropdownItem(
       value: 0,
-      label: '今日',
       unavailableBecauseProFeature: false,
     ),
     const AnalysisPeriodDropdownItem(
       value: 1,
-      label: '昨日',
       unavailableBecauseProFeature: false,
     ),
     const AnalysisPeriodDropdownItem(
       value: 2,
-      label: '今週',
       unavailableBecauseProFeature: false,
     ),
     AnalysisPeriodDropdownItem(
       value: 3,
-      label: '今月',
       unavailableBecauseProFeature: !isPro,
     ),
     const AnalysisPeriodDropdownItem(
       value: 4,
-      label: '過去1週間',
       unavailableBecauseProFeature: false,
     ),
     AnalysisPeriodDropdownItem(
       value: 5,
-      label: '過去2週間',
       unavailableBecauseProFeature: !isPro,
     ),
     AnalysisPeriodDropdownItem(
       value: 6,
-      label: '過去1ヶ月',
       unavailableBecauseProFeature: !isPro,
     ),
   ];

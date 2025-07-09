@@ -310,13 +310,14 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   ) {
     return dropdownItems.map((item) {
       final shouldShowProMark = item.unavailableBecauseProFeature;
+      final label = _getLabelForValue(item.value);
 
       return DropdownMenuItem<int>(
         value: item.value,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(item.label),
+            Text(label),
             if (shouldShowProMark) ...[
               const SizedBox(width: _proMarkSpacing),
               const _ProMark(),
@@ -325,6 +326,27 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
         ),
       );
     }).toList();
+  }
+
+  String _getLabelForValue(int value) {
+    switch (value) {
+      case 0:
+        return '今日';
+      case 1:
+        return '昨日';
+      case 2:
+        return '今週';
+      case 3:
+        return '今月';
+      case 4:
+        return '過去1週間';
+      case 5:
+        return '過去2週間';
+      case 6:
+        return '過去1ヶ月';
+      default:
+        return '';
+    }
   }
 
   Future<void> _showProUpgradeDialog(BuildContext context) async {
