@@ -222,7 +222,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
 
         final dropdownItems = snapshot.data!;
 
-        return DropdownButton<int>(
+        return DropdownButton<AnalysisPeriodDropdownValue>(
           value: _getPeriodValue(analysisPeriod),
           items: _buildDropdownItemsSync(dropdownItems, context),
           onChanged: (value) async {
@@ -257,54 +257,52 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
     );
   }
 
-  int _getPeriodValue(AnalysisPeriod analysisPeriod) {
+  AnalysisPeriodDropdownValue _getPeriodValue(AnalysisPeriod analysisPeriod) {
     switch (analysisPeriod) {
       case AnalysisPeriodToday _:
-        return 0;
+        return AnalysisPeriodDropdownValue.today;
       case AnalysisPeriodYesterday _:
-        return 1;
+        return AnalysisPeriodDropdownValue.yesterday;
       case AnalysisPeriodCurrentWeek _:
-        return 2;
+        return AnalysisPeriodDropdownValue.currentWeek;
       case AnalysisPeriodCurrentMonth _:
-        return 3;
+        return AnalysisPeriodDropdownValue.currentMonth;
       case AnalysisPeriodPastWeek _:
-        return 4;
+        return AnalysisPeriodDropdownValue.pastWeek;
       case AnalysisPeriodPastTwoWeeks _:
-        return 5;
+        return AnalysisPeriodDropdownValue.pastTwoWeeks;
       case AnalysisPeriodPastMonth _:
-        return 6;
+        return AnalysisPeriodDropdownValue.pastMonth;
     }
   }
 
-  AnalysisPeriod _getPeriod(int value) {
+  AnalysisPeriod _getPeriod(AnalysisPeriodDropdownValue value) {
     final current = DateTime.now();
 
     switch (value) {
-      case 0:
+      case AnalysisPeriodDropdownValue.today:
         return AnalysisPeriodTodayGenerator.fromCurrentDate(current);
-      case 1:
+      case AnalysisPeriodDropdownValue.yesterday:
         return AnalysisPeriodYesterdayGenerator.fromCurrentDate(current);
-      case 2:
+      case AnalysisPeriodDropdownValue.currentWeek:
         return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(current);
-      case 3:
+      case AnalysisPeriodDropdownValue.currentMonth:
         return AnalysisPeriodCurrentMonthGenerator.fromCurrentDate(current);
-      case 4:
+      case AnalysisPeriodDropdownValue.pastWeek:
         return AnalysisPeriodPastWeekGenerator.fromCurrentDate(current);
-      case 5:
+      case AnalysisPeriodDropdownValue.pastTwoWeeks:
         return AnalysisPeriodPastTwoWeeksGenerator.fromCurrentDate(current);
-      case 6:
+      case AnalysisPeriodDropdownValue.pastMonth:
         return AnalysisPeriodPastMonthGenerator.fromCurrentDate(current);
-      default:
-        throw ArgumentError('Invalid dropdown value: $value');
     }
   }
 
-  bool _isProOnlyValue(int value, WidgetRef ref) {
+  bool _isProOnlyValue(AnalysisPeriodDropdownValue value, WidgetRef ref) {
     final period = _getPeriod(value);
     return ref.read(isProOnlyPeriodProvider(period)).value ?? false;
   }
 
-  List<DropdownMenuItem<int>> _buildDropdownItemsSync(
+  List<DropdownMenuItem<AnalysisPeriodDropdownValue>> _buildDropdownItemsSync(
     List<AnalysisPeriodDropdownItem> dropdownItems,
     BuildContext context,
   ) {
@@ -312,7 +310,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
       final shouldShowProMark = item.unavailableBecauseProFeature;
       final label = _getLabelForValue(item.value);
 
-      return DropdownMenuItem<int>(
+      return DropdownMenuItem<AnalysisPeriodDropdownValue>(
         value: item.value,
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -328,24 +326,22 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
     }).toList();
   }
 
-  String _getLabelForValue(int value) {
+  String _getLabelForValue(AnalysisPeriodDropdownValue value) {
     switch (value) {
-      case 0:
+      case AnalysisPeriodDropdownValue.today:
         return '今日';
-      case 1:
+      case AnalysisPeriodDropdownValue.yesterday:
         return '昨日';
-      case 2:
+      case AnalysisPeriodDropdownValue.currentWeek:
         return '今週';
-      case 3:
+      case AnalysisPeriodDropdownValue.currentMonth:
         return '今月';
-      case 4:
+      case AnalysisPeriodDropdownValue.pastWeek:
         return '過去1週間';
-      case 5:
+      case AnalysisPeriodDropdownValue.pastTwoWeeks:
         return '過去2週間';
-      case 6:
+      case AnalysisPeriodDropdownValue.pastMonth:
         return '過去1ヶ月';
-      default:
-        return '';
     }
   }
 

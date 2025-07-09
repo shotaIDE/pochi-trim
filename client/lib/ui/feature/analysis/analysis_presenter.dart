@@ -15,6 +15,17 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analysis_presenter.g.dart';
 
+// 分析期間の選択肢を表すenum
+enum AnalysisPeriodDropdownValue {
+  today,
+  yesterday,
+  currentWeek,
+  currentMonth,
+  pastWeek,
+  pastTwoWeeks,
+  pastMonth,
+}
+
 // 分析期間のドロップダウンアイテム
 class AnalysisPeriodDropdownItem {
   const AnalysisPeriodDropdownItem({
@@ -22,7 +33,7 @@ class AnalysisPeriodDropdownItem {
     required this.unavailableBecauseProFeature,
   });
 
-  final int value;
+  final AnalysisPeriodDropdownValue value;
   final bool unavailableBecauseProFeature;
 }
 
@@ -34,31 +45,31 @@ Future<List<AnalysisPeriodDropdownItem>> analysisPeriodDropdownItems(
 
   return [
     const AnalysisPeriodDropdownItem(
-      value: 0,
+      value: AnalysisPeriodDropdownValue.today,
       unavailableBecauseProFeature: false,
     ),
     const AnalysisPeriodDropdownItem(
-      value: 1,
+      value: AnalysisPeriodDropdownValue.yesterday,
       unavailableBecauseProFeature: false,
     ),
     const AnalysisPeriodDropdownItem(
-      value: 2,
+      value: AnalysisPeriodDropdownValue.currentWeek,
       unavailableBecauseProFeature: false,
     ),
     AnalysisPeriodDropdownItem(
-      value: 3,
+      value: AnalysisPeriodDropdownValue.currentMonth,
       unavailableBecauseProFeature: !isPro,
     ),
     const AnalysisPeriodDropdownItem(
-      value: 4,
+      value: AnalysisPeriodDropdownValue.pastWeek,
       unavailableBecauseProFeature: false,
     ),
     AnalysisPeriodDropdownItem(
-      value: 5,
+      value: AnalysisPeriodDropdownValue.pastTwoWeeks,
       unavailableBecauseProFeature: !isPro,
     ),
     AnalysisPeriodDropdownItem(
-      value: 6,
+      value: AnalysisPeriodDropdownValue.pastMonth,
       unavailableBecauseProFeature: !isPro,
     ),
   ];
