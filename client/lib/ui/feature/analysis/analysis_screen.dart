@@ -372,9 +372,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   ];
 
   // Proマークのスタイル定数
-  static const _proMarkFontSize = 10.0;
   static const _proMarkSpacing = 4.0;
-  static const _proMarkText = 'Pro';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -492,24 +490,10 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   }
 
   Widget _buildProMark(BuildContext context) {
-    return const Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          Icons.workspace_premium,
-          size: 14,
-          color: Colors.amber,
-        ),
-        SizedBox(width: 2),
-        Text(
-          _proMarkText,
-          style: TextStyle(
-            color: Colors.amber,
-            fontSize: _proMarkFontSize,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
+    return const Icon(
+      Icons.workspace_premium,
+      size: 16,
+      color: Colors.amber,
     );
   }
 
