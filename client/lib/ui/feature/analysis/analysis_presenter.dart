@@ -5,6 +5,7 @@ import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
+import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_period.dart';
 import 'package:pochi_trim/ui/feature/analysis/frequency.dart';
 import 'package:pochi_trim/ui/feature/analysis/statistics.dart';
@@ -339,6 +340,52 @@ Future<List<WorkLog>> _workLogsFilteredByPeriodFilePrivate(Ref ref) async {
             log.completedAt.isBefore(currentAnalysisPeriod.to),
       )
       .toList();
+}
+
+// Pro機能判定に関するプロバイダー
+@riverpod
+Future<bool> isProOnlyPeriod(Ref ref, AnalysisPeriod period) async {
+  // Pro限定の期間を定義
+  const proOnlyPeriods = [
+    AnalysisPeriodCurrentMonth,
+    AnalysisPeriodPastTwoWeeks,
+    AnalysisPeriodPastMonth,
+  ];
+
+  return proOnlyPeriods.any((type) => period.runtimeType == type);
+}
+
+@riverpod
+Future<bool> shouldShowProUpgradeDialog(
+  Ref ref,
+  AnalysisPeriod selectedPeriod,
+) async {
+  final isPro = await ref.watch(isProUserProvider.future);
+  final isProOnly = await ref.watch(
+    isProOnlyPeriodProvider(selectedPeriod).future,
+  );
+
+  return !isPro && isProOnly;
+}
+
+@riverpod
+String getPeriodDisplayText(Ref ref, AnalysisPeriod period) {
+  switch (period) {
+    case AnalysisPeriodToday _:
+      return '今日';
+    case AnalysisPeriodYesterday _:
+      return '昨日';
+    case AnalysisPeriodCurrentWeek _:
+      return '今週';
+    case AnalysisPeriodCurrentMonth _:
+      return '今月';
+    case AnalysisPeriodPastWeek _:
+      return '過去1週間';
+    case AnalysisPeriodPastTwoWeeks _:
+      return '過去2週間';
+    case AnalysisPeriodPastMonth _:
+      return '過去1ヶ月';
+  }
 }
 
 // 各家事の実行頻度を取得するプロバイダー

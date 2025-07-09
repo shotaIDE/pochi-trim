@@ -119,10 +119,9 @@ extension AnalysisPeriodPastTwoWeeksGenerator on AnalysisPeriodPastTwoWeeks {
 extension AnalysisPeriodCurrentMonthGenerator on AnalysisPeriodCurrentMonth {
   static AnalysisPeriod fromCurrentDate(DateTime current) {
     final startOfCurrentMonth = DateTime(current.year, current.month);
-    final startOfNextMonth =
-        (current.month < 12)
-            ? DateTime(current.year, current.month + 1)
-            : DateTime(current.year + 1);
+    final startOfNextMonth = (current.month < 12)
+        ? DateTime(current.year, current.month + 1)
+        : DateTime(current.year + 1);
     final endOfCurrentMonth = startOfNextMonth.subtract(
       const Duration(microseconds: 1),
     );

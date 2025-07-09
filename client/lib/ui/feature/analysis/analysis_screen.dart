@@ -261,7 +261,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
               return;
             }
 
-            if (!isPro && _isProOnlyValue(value)) {
+            if (!isPro && _isProOnlyValue(value, ref)) {
               await _showProUpgradeDialog(context);
               return;
             }
@@ -326,14 +326,13 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
       case 6:
         return AnalysisPeriodPastMonthGenerator.fromCurrentDate(current);
       default:
-        throw ArgumentError('Invalid value: $value');
+        throw ArgumentError('Invalid dropdown value: $value');
     }
   }
 
-  bool _isProOnlyValue(int value) {
-    return _dropdownItems.any(
-      (item) => item.value == value && item.isProOnly,
-    );
+  bool _isProOnlyValue(int value, WidgetRef ref) {
+    final period = _getPeriod(value);
+    return ref.read(isProOnlyPeriodProvider(period)).value ?? false;
   }
 
   List<DropdownMenuItem<int>> _buildDropdownItems(
