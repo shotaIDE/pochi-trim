@@ -22,6 +22,8 @@ class AnalysisPeriodSelectItem with _$AnalysisPeriodSelectItem {
 
 @freezed
 sealed class AnalysisPeriod with _$AnalysisPeriod {
+  const AnalysisPeriod._();
+
   factory AnalysisPeriod.today({required DateTime from, required DateTime to}) =
       AnalysisPeriodToday;
   factory AnalysisPeriod.yesterday({
