@@ -13,6 +13,14 @@ enum AnalysisPeriodIdentifier {
 }
 
 @freezed
+class AnalysisPeriodSelectItem with _$AnalysisPeriodSelectItem {
+  const factory AnalysisPeriodSelectItem({
+    required AnalysisPeriodIdentifier identifier,
+    required bool unavailableBecauseProFeature,
+  }) = _AnalysisPeriodSelectItem;
+}
+
+@freezed
 sealed class AnalysisPeriod with _$AnalysisPeriod {
   factory AnalysisPeriod.today({required DateTime from, required DateTime to}) =
       AnalysisPeriodToday;

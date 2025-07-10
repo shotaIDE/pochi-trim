@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
@@ -14,16 +13,7 @@ import 'package:pochi_trim/ui/feature/analysis/weekday.dart';
 import 'package:pochi_trim/ui/feature/analysis/weekday_frequency.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'analysis_presenter.freezed.dart';
 part 'analysis_presenter.g.dart';
-
-@freezed
-class AnalysisPeriodSelectItem with _$AnalysisPeriodSelectItem {
-  const factory AnalysisPeriodSelectItem({
-    required AnalysisPeriodIdentifier identifier,
-    required bool unavailableBecauseProFeature,
-  }) = _AnalysisPeriodSelectItem;
-}
 
 @riverpod
 Future<List<AnalysisPeriodSelectItem>> analysisPeriodSelectItems(
