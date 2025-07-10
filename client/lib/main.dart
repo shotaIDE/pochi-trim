@@ -10,11 +10,11 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:pochi_trim/data/definition/app_feature.dart';
 import 'package:pochi_trim/data/definition/flavor.dart';
-import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service_mock.dart';
 import 'package:pochi_trim/ui/root_app.dart';
@@ -83,21 +83,19 @@ Future<void> main() async {
     _logger.info('Firebase initialized successfully');
 
     if (useFirebaseEmulator) {
-      // エミュレーターのホスト情報を取得
       final emulatorHost = _getEmulatorHost();
       _logger.info('エミュレーターホスト: $emulatorHost');
 
-      // エミュレーターの設定を適用
       await _setupFirebaseEmulators(emulatorHost);
       _logger.info('Firebase Emulator設定を適用しました');
     }
 
-    // 既存ユーザーのログイン状態を確認してUIDをログ出力
-    final container = ProviderContainer();
-    container.read(authServiceProvider).checkCurrentUser();
+    // アプリのライフサイクル全体で一度だけの初期化する
+    await GoogleSignIn.instance.initialize();
+    _logger.info('Googleでサインインのライブラリを初期化しました');
   } on Exception catch (e) {
-    _logger.severe('Failed to initialize Firebase', e);
-    // Firebase が初期化できなくても、アプリを続行する
+    _logger.severe('認証モジュールの初期化に失敗しました', e);
+    // 初期化できなくても、アプリを続行する
   }
 
   await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(

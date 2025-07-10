@@ -2,140 +2,12 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:pochi_trim/data/model/house_work.dart';
-import 'package:pochi_trim/data/model/work_log.dart';
-import 'package:pochi_trim/data/repository/house_work_repository.dart';
-import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_period.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_presenter.dart';
 import 'package:pochi_trim/ui/feature/analysis/bar_chart_touched_position.dart';
 import 'package:pochi_trim/ui/feature/analysis/statistics.dart';
-
-// 家事ごとの頻度分析のためのデータクラス
-class HouseWorkFrequency {
-  HouseWorkFrequency({
-    required this.houseWork,
-    required this.count,
-    // TODO(ide): デフォルト引数を廃止する
-    this.color = Colors.grey,
-  });
-
-  final HouseWork houseWork;
-  final int count;
-  final Color color;
-}
-
-// 時間帯別の家事実行頻度のためのデータクラス
-class TimeSlotFrequency {
-  TimeSlotFrequency({
-    required this.timeSlot,
-    required this.houseWorkFrequencies,
-    required this.totalCount,
-  });
-  final String timeSlot; // 時間帯の表示名（例：「0-3時」）
-  final List<HouseWorkFrequency> houseWorkFrequencies; // その時間帯での家事ごとの実行回数
-  final int totalCount; // その時間帯の合計実行回数
-
-  // fl_chartのBarChartRodData作成用のヘルパーメソッド
-  BarChartRodData toBarChartRodData({
-    required double width,
-    required double x,
-    required List<Color> colors,
-  }) {
-    // 家事の実行回数ごとにRodStackItemを作成
-    final rodStackItems = <BarChartRodStackItem>[];
-
-    double fromY = 0;
-    for (var i = 0; i < houseWorkFrequencies.length; i++) {
-      final item = houseWorkFrequencies[i];
-      final toY = fromY + item.count;
-
-      rodStackItems.add(
-        BarChartRodStackItem(fromY, toY, colors[i % colors.length]),
-      );
-
-      fromY = toY;
-    }
-
-    return BarChartRodData(
-      toY: totalCount.toDouble(),
-      width: width,
-      color: Colors.transparent,
-      rodStackItems: rodStackItems,
-      borderRadius: BorderRadius.zero,
-    );
-  }
-}
-
-// 家事ログの取得と分析のためのプロバイダー
-final workLogsForAnalysisProvider = FutureProvider<List<WorkLog>>((ref) {
-  final workLogRepository = ref.watch(workLogRepositoryProvider);
-
-  return workLogRepository.getAllOnce();
-});
-
-// 各家事の実行頻度を取得するプロバイダー
-final houseWorkFrequencyProvider = FutureProvider<List<HouseWorkFrequency>>((
-  ref,
-) async {
-  // 家事ログのデータを待機
-  final workLogs = await ref.watch(workLogsForAnalysisProvider.future);
-  final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-
-  // 家事IDごとにグループ化して頻度をカウント
-  final frequencyMap = <String, int>{};
-  for (final workLog in workLogs) {
-    frequencyMap[workLog.houseWorkId] =
-        (frequencyMap[workLog.houseWorkId] ?? 0) + 1;
-  }
-
-  // HouseWorkFrequencyのリストを作成
-  final result = <HouseWorkFrequency>[];
-  for (final entry in frequencyMap.entries) {
-    final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
-
-    if (houseWork != null) {
-      result.add(HouseWorkFrequency(houseWork: houseWork, count: entry.value));
-    }
-  }
-
-  // 頻度の高い順にソート
-  result.sort((a, b) => b.count.compareTo(a.count));
-
-  return result;
-});
-
-// 各家事の実行頻度を取得するプロバイダー（期間フィルタリング付き）
-final filteredHouseWorkFrequencyProvider =
-    FutureProvider<List<HouseWorkFrequency>>((ref) async {
-      // フィルタリングされた家事ログのデータを待機
-      final workLogs = await ref.watch(workLogsFilteredByPeriodProvider.future);
-      final houseWorkRepository = ref.watch(houseWorkRepositoryProvider);
-
-      // 家事IDごとにグループ化して頻度をカウント
-      final frequencyMap = <String, int>{};
-      for (final workLog in workLogs) {
-        frequencyMap[workLog.houseWorkId] =
-            (frequencyMap[workLog.houseWorkId] ?? 0) + 1;
-      }
-
-      // HouseWorkFrequencyのリストを作成
-      final result = <HouseWorkFrequency>[];
-      for (final entry in frequencyMap.entries) {
-        final houseWork = await houseWorkRepository.getByIdOnce(entry.key);
-
-        if (houseWork != null) {
-          result.add(
-            HouseWorkFrequency(houseWork: houseWork, count: entry.value),
-          );
-        }
-      }
-
-      // 頻度の高い順にソート
-      result.sort((a, b) => b.count.compareTo(a.count));
-
-      return result;
-    });
+import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 /// 分析画面
 ///
@@ -336,25 +208,59 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final analysisPeriod = ref.watch(currentAnalysisPeriodProvider);
-
-    final dropdownButton = DropdownButton<int>(
-      value: _getPeriodValue(analysisPeriod),
-      items: const [
-        DropdownMenuItem(value: 0, child: Text('今日')),
-        DropdownMenuItem(value: 1, child: Text('昨日')),
-        DropdownMenuItem(value: 2, child: Text('今週')),
-        DropdownMenuItem(value: 3, child: Text('今月')),
-        DropdownMenuItem(value: 4, child: Text('過去1週間')),
-        DropdownMenuItem(value: 5, child: Text('過去2週間')),
-        DropdownMenuItem(value: 6, child: Text('過去1ヶ月')),
-      ],
-      onChanged: (value) {
-        if (value == null) {
-          return;
+    final dropdownButton = FutureBuilder(
+      future: ref.watch(analysisPeriodSelectItemsProvider.future),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return DropdownButton(
+            items: const [
+              DropdownMenuItem<int>(
+                value: 0,
+                child: Text('                '),
+              ),
+            ],
+            onChanged: null,
+          );
         }
 
-        final period = _getPeriod(value);
-        ref.read(currentAnalysisPeriodProvider.notifier).setPeriod(period);
+        final selectItems = snapshot.data;
+
+        if (selectItems == null) {
+          return Skeletonizer(
+            child: DropdownButton<int>(
+              items: const [
+                DropdownMenuItem<int>(
+                  value: 0,
+                  child: Text('Dummy Period'),
+                ),
+              ],
+              onChanged: null,
+            ),
+          );
+        }
+
+        return DropdownButton<AnalysisPeriodIdentifier>(
+          value: analysisPeriod.toAnalysisPeriodIdentifier(),
+          items: _buildDropdownItemsSync(selectItems, context),
+          onChanged: (value) async {
+            if (value == null) {
+              return;
+            }
+
+            final selectedItem = selectItems.firstWhere(
+              (item) => item.identifier == value,
+            );
+
+            if (selectedItem.unavailableBecauseProFeature) {
+              await _showProUpgradeDialog(context);
+              return;
+            }
+
+            ref
+                .read(currentAnalysisPeriodProvider.notifier)
+                .setPeriod(identifier: value);
+          },
+        );
       },
     );
 
@@ -367,53 +273,74 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
     return Row(
       spacing: 8,
       children: [
-        const Text('分析期間: ', style: TextStyle(fontWeight: FontWeight.bold)),
         dropdownButton,
         periodText,
       ],
     );
   }
 
-  int _getPeriodValue(AnalysisPeriod analysisPeriod) {
-    switch (analysisPeriod) {
-      case AnalysisPeriodToday _:
-        return 0;
-      case AnalysisPeriodYesterday _:
-        return 1;
-      case AnalysisPeriodCurrentWeek _:
-        return 2;
-      case AnalysisPeriodCurrentMonth _:
-        return 3;
-      case AnalysisPeriodPastWeek _:
-        return 4;
-      case AnalysisPeriodPastTwoWeeks _:
-        return 5;
-      case AnalysisPeriodPastMonth _:
-        return 6;
+  List<DropdownMenuItem<AnalysisPeriodIdentifier>> _buildDropdownItemsSync(
+    List<AnalysisPeriodSelectItem> dropdownItems,
+    BuildContext context,
+  ) {
+    return dropdownItems.map((item) {
+      final shouldShowProMark = item.unavailableBecauseProFeature;
+      final label = _getLabelForValue(item.identifier);
+
+      return DropdownMenuItem<AnalysisPeriodIdentifier>(
+        value: item.identifier,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 4,
+          children: [
+            Text(label),
+            if (shouldShowProMark) const _ProMark(),
+          ],
+        ),
+      );
+    }).toList();
+  }
+
+  String _getLabelForValue(AnalysisPeriodIdentifier identifier) {
+    switch (identifier) {
+      case AnalysisPeriodIdentifier.today:
+        return '今日';
+      case AnalysisPeriodIdentifier.yesterday:
+        return '昨日';
+      case AnalysisPeriodIdentifier.currentWeek:
+        return '今週';
+      case AnalysisPeriodIdentifier.pastWeek:
+        return '過去1週間';
+      case AnalysisPeriodIdentifier.pastTwoWeeks:
+        return '過去2週間';
+      case AnalysisPeriodIdentifier.currentMonth:
+        return '今月';
+      case AnalysisPeriodIdentifier.pastMonth:
+        return '過去1ヶ月';
     }
   }
 
-  AnalysisPeriod _getPeriod(int value) {
-    final current = DateTime.now();
-
-    switch (value) {
-      case 0:
-        return AnalysisPeriodTodayGenerator.fromCurrentDate(current);
-      case 1:
-        return AnalysisPeriodYesterdayGenerator.fromCurrentDate(current);
-      case 2:
-        return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(current);
-      case 3:
-        return AnalysisPeriodCurrentMonthGenerator.fromCurrentDate(current);
-      case 4:
-        return AnalysisPeriodPastWeekGenerator.fromCurrentDate(current);
-      case 5:
-        return AnalysisPeriodPastTwoWeeksGenerator.fromCurrentDate(current);
-      case 6:
-        return AnalysisPeriodPastMonthGenerator.fromCurrentDate(current);
-      default:
-        throw ArgumentError('Invalid value: $value');
-    }
+  Future<void> _showProUpgradeDialog(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pro版限定機能'),
+        content: const Text('1週間を超える期間の分析はPro版でのみ利用できます。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('キャンセル'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(UpgradeToProScreen.route());
+            },
+            child: const Text('Pro版にアップグレード'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -722,9 +649,11 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
         final barChart = BarChart(
           BarChartData(
             alignment: BarChartAlignment.spaceAround,
-            maxY: timeSlotFrequencies
-                .map((e) => e.totalCount.toDouble())
-                .reduce((a, b) => a > b ? a : b),
+            maxY: timeSlotFrequencies.isNotEmpty
+                ? timeSlotFrequencies
+                      .map((e) => e.totalCount.toDouble())
+                      .reduce((a, b) => a > b ? a : b)
+                : 0,
             titlesData: FlTitlesData(
               leftTitles: const AxisTitles(
                 sideTitles: SideTitles(showTitles: true, reservedSize: 30),
@@ -946,6 +875,20 @@ class _Legends extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Pro版限定機能を示すアイコン
+class _ProMark extends StatelessWidget {
+  const _ProMark();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(
+      Icons.workspace_premium,
+      size: 16,
+      color: Colors.amber,
     );
   }
 }

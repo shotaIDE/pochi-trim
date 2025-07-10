@@ -2,8 +2,28 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'analysis_period.freezed.dart';
 
+enum AnalysisPeriodIdentifier {
+  today,
+  yesterday,
+  currentWeek,
+  pastWeek,
+  pastTwoWeeks,
+  currentMonth,
+  pastMonth,
+}
+
+@freezed
+class AnalysisPeriodSelectItem with _$AnalysisPeriodSelectItem {
+  const factory AnalysisPeriodSelectItem({
+    required AnalysisPeriodIdentifier identifier,
+    required bool unavailableBecauseProFeature,
+  }) = _AnalysisPeriodSelectItem;
+}
+
 @freezed
 sealed class AnalysisPeriod with _$AnalysisPeriod {
+  const AnalysisPeriod._();
+
   factory AnalysisPeriod.today({required DateTime from, required DateTime to}) =
       AnalysisPeriodToday;
   factory AnalysisPeriod.yesterday({
@@ -30,6 +50,49 @@ sealed class AnalysisPeriod with _$AnalysisPeriod {
     required DateTime from,
     required DateTime to,
   }) = AnalysisPeriodPastMonth;
+
+  AnalysisPeriodIdentifier toAnalysisPeriodIdentifier() {
+    switch (this) {
+      case AnalysisPeriodToday _:
+        return AnalysisPeriodIdentifier.today;
+      case AnalysisPeriodYesterday _:
+        return AnalysisPeriodIdentifier.yesterday;
+      case AnalysisPeriodCurrentWeek _:
+        return AnalysisPeriodIdentifier.currentWeek;
+      case AnalysisPeriodPastWeek _:
+        return AnalysisPeriodIdentifier.pastWeek;
+      case AnalysisPeriodPastTwoWeeks _:
+        return AnalysisPeriodIdentifier.pastTwoWeeks;
+      case AnalysisPeriodCurrentMonth _:
+        return AnalysisPeriodIdentifier.currentMonth;
+      case AnalysisPeriodPastMonth _:
+        return AnalysisPeriodIdentifier.pastMonth;
+    }
+  }
+}
+
+extension AnalysisPeriodGenerator on AnalysisPeriod {
+  static AnalysisPeriod fromCurrentDate({
+    required AnalysisPeriodIdentifier identifier,
+    required DateTime current,
+  }) {
+    switch (identifier) {
+      case AnalysisPeriodIdentifier.today:
+        return AnalysisPeriodTodayGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.yesterday:
+        return AnalysisPeriodYesterdayGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.currentWeek:
+        return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.pastWeek:
+        return AnalysisPeriodPastWeekGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.pastTwoWeeks:
+        return AnalysisPeriodPastTwoWeeksGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.currentMonth:
+        return AnalysisPeriodCurrentMonthGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.pastMonth:
+        return AnalysisPeriodPastMonthGenerator.fromCurrentDate(current);
+    }
+  }
 }
 
 extension AnalysisPeriodTodayGenerator on AnalysisPeriodToday {
@@ -119,10 +182,9 @@ extension AnalysisPeriodPastTwoWeeksGenerator on AnalysisPeriodPastTwoWeeks {
 extension AnalysisPeriodCurrentMonthGenerator on AnalysisPeriodCurrentMonth {
   static AnalysisPeriod fromCurrentDate(DateTime current) {
     final startOfCurrentMonth = DateTime(current.year, current.month);
-    final startOfNextMonth =
-        (current.month < 12)
-            ? DateTime(current.year, current.month + 1)
-            : DateTime(current.year + 1);
+    final startOfNextMonth = (current.month < 12)
+        ? DateTime(current.year, current.month + 1)
+        : DateTime(current.year + 1);
     final endOfCurrentMonth = startOfNextMonth.subtract(
       const Duration(microseconds: 1),
     );
