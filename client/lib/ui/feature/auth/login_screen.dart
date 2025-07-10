@@ -31,11 +31,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isLoading = loginStatus != LoginStatus.none;
 
     final termsOfServiceButton = TextButton(
-      onPressed: isLoading ? null : _openTermsOfService,
+      onPressed: isLoading ? null : () => launchUrl(termsOfServiceUri),
       child: const Text('利用規約'),
     );
     final privacyPolicyButton = TextButton(
-      onPressed: isLoading ? null : _openPrivacyPolicy,
+      onPressed: isLoading ? null : () => launchUrl(privacyPolicyUrl),
       child: const Text('プライバシーポリシー'),
     );
     final openUrlsPanel = Row(
@@ -167,28 +167,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     await ref.read(currentLoginStatusProvider.notifier).startWithoutAccount();
 
     // ホーム画面への遷移は RootApp で自動で行われる
-  }
-
-  Future<void> _openTermsOfService() async {
-    final url = Uri.parse(termsOfServiceUrl);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
-    }
-  }
-
-  Future<void> _openPrivacyPolicy() async {
-    final url = Uri.parse(privacyPolicyUrl);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
-    }
   }
 }
 
