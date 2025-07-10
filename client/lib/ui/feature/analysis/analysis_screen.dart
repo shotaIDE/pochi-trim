@@ -7,6 +7,7 @@ import 'package:pochi_trim/ui/feature/analysis/analysis_presenter.dart';
 import 'package:pochi_trim/ui/feature/analysis/bar_chart_touched_position.dart';
 import 'package:pochi_trim/ui/feature/analysis/statistics.dart';
 import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 /// 分析画面
 ///
@@ -210,14 +211,30 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
     final dropdownButton = FutureBuilder(
       future: ref.watch(analysisPeriodSelectItemsProvider.future),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const SizedBox(
-            width: 150,
-            child: Center(child: CircularProgressIndicator()),
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              'エラーが発生しました。画面を再読み込みしてください。',
+              textAlign: TextAlign.center,
+            ),
           );
         }
 
-        final selectItems = snapshot.data!;
+        final selectItems = snapshot.data;
+
+        if (selectItems == null) {
+          return Skeletonizer(
+            child: DropdownButton<int>(
+              items: const [
+                DropdownMenuItem<int>(
+                  value: 0,
+                  child: Text('Dummy Period'),
+                ),
+              ],
+              onChanged: null,
+            ),
+          );
+        }
 
         return DropdownButton<AnalysisPeriodIdentifier>(
           value: analysisPeriod.toAnalysisPeriodIdentifier(),
