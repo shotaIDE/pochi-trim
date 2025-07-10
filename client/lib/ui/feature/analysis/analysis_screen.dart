@@ -220,7 +220,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
         final selectItems = snapshot.data!;
 
         return DropdownButton<AnalysisPeriodIdentifier>(
-          value: _getPeriodValue(analysisPeriod),
+          value: analysisPeriod.toAnalysisPeriodIdentifier(),
           items: _buildDropdownItemsSync(selectItems, context),
           onChanged: (value) async {
             if (value == null) {
@@ -256,25 +256,6 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
         periodText,
       ],
     );
-  }
-
-  AnalysisPeriodIdentifier _getPeriodValue(AnalysisPeriod analysisPeriod) {
-    switch (analysisPeriod) {
-      case AnalysisPeriodToday _:
-        return AnalysisPeriodIdentifier.today;
-      case AnalysisPeriodYesterday _:
-        return AnalysisPeriodIdentifier.yesterday;
-      case AnalysisPeriodCurrentWeek _:
-        return AnalysisPeriodIdentifier.currentWeek;
-      case AnalysisPeriodPastWeek _:
-        return AnalysisPeriodIdentifier.pastWeek;
-      case AnalysisPeriodPastTwoWeeks _:
-        return AnalysisPeriodIdentifier.pastTwoWeeks;
-      case AnalysisPeriodCurrentMonth _:
-        return AnalysisPeriodIdentifier.currentMonth;
-      case AnalysisPeriodPastMonth _:
-        return AnalysisPeriodIdentifier.pastMonth;
-    }
   }
 
   AnalysisPeriod _getPeriod(AnalysisPeriodIdentifier identifier) {

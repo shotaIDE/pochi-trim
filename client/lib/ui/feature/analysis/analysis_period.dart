@@ -48,6 +48,25 @@ sealed class AnalysisPeriod with _$AnalysisPeriod {
     required DateTime from,
     required DateTime to,
   }) = AnalysisPeriodPastMonth;
+
+  AnalysisPeriodIdentifier toAnalysisPeriodIdentifier() {
+    switch (this) {
+      case AnalysisPeriodToday _:
+        return AnalysisPeriodIdentifier.today;
+      case AnalysisPeriodYesterday _:
+        return AnalysisPeriodIdentifier.yesterday;
+      case AnalysisPeriodCurrentWeek _:
+        return AnalysisPeriodIdentifier.currentWeek;
+      case AnalysisPeriodPastWeek _:
+        return AnalysisPeriodIdentifier.pastWeek;
+      case AnalysisPeriodPastTwoWeeks _:
+        return AnalysisPeriodIdentifier.pastTwoWeeks;
+      case AnalysisPeriodCurrentMonth _:
+        return AnalysisPeriodIdentifier.currentMonth;
+      case AnalysisPeriodPastMonth _:
+        return AnalysisPeriodIdentifier.pastMonth;
+    }
+  }
 }
 
 extension AnalysisPeriodTodayGenerator on AnalysisPeriodToday {
