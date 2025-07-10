@@ -1,11 +1,11 @@
 PODS:
   - Flutter (1.0.0)
-  - purchases_flutter (8.10.5):
+  - purchases_flutter (8.10.6):
     - Flutter
-    - PurchasesHybridCommon (= 14.0.2)
-  - PurchasesHybridCommon (14.0.2):
-    - RevenueCat (= 5.30.0)
-  - RevenueCat (5.30.0)
+    - PurchasesHybridCommon (= 14.2.0)
+  - PurchasesHybridCommon (14.2.0):
+    - RevenueCat (= 5.32.0)
+  - RevenueCat (5.32.0)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -24,9 +24,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  purchases_flutter: cdbf8b0a0fcb110437c46be4b64515005452bd31
-  PurchasesHybridCommon: e1dbc7e7105c0845444cf82cf9d7c85eb9dbf918
-  RevenueCat: 16058ecaa0b868e04cc7cf53a5de3fe0b96ca7d1
+  purchases_flutter: 7f2f923fde8ab75125c3e85522a43f6ed1253580
+  PurchasesHybridCommon: f1650b33e9a1dd04d5e8a40dfe757f39e63f935c
+  RevenueCat: 7e1d0768fb287c9983173c9b28e39ccbeeb828a9
 
 PODFILE CHECKSUM: 588e359dba5a61bfd2337b44fb0ff9f76afddf6a
 
