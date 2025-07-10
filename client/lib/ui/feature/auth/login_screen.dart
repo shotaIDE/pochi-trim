@@ -31,11 +31,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isLoading = loginStatus != LoginStatus.none;
 
     final termsOfServiceButton = TextButton(
-      onPressed: _openTermsOfService,
+      onPressed: isLoading ? null : _openTermsOfService,
       child: const Text('利用規約'),
     );
     final privacyPolicyButton = TextButton(
-      onPressed: _openPrivacyPolicy,
+      onPressed: isLoading ? null : _openPrivacyPolicy,
       child: const Text('プライバシーポリシー'),
     );
     final openUrlsPanel = Row(
