@@ -44,16 +44,16 @@ Future<List<AnalysisPeriodSelectItem>> analysisPeriodSelectItems(
       identifier: AnalysisPeriodIdentifier.currentWeek,
       unavailableBecauseProFeature: false,
     ),
-    AnalysisPeriodSelectItem(
-      identifier: AnalysisPeriodIdentifier.currentMonth,
-      unavailableBecauseProFeature: !isPro,
-    ),
     const AnalysisPeriodSelectItem(
       identifier: AnalysisPeriodIdentifier.pastWeek,
       unavailableBecauseProFeature: false,
     ),
     AnalysisPeriodSelectItem(
       identifier: AnalysisPeriodIdentifier.pastTwoWeeks,
+      unavailableBecauseProFeature: !isPro,
+    ),
+    AnalysisPeriodSelectItem(
+      identifier: AnalysisPeriodIdentifier.currentMonth,
       unavailableBecauseProFeature: !isPro,
     ),
     AnalysisPeriodSelectItem(

@@ -269,12 +269,12 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
         return AnalysisPeriodIdentifier.yesterday;
       case AnalysisPeriodCurrentWeek _:
         return AnalysisPeriodIdentifier.currentWeek;
-      case AnalysisPeriodCurrentMonth _:
-        return AnalysisPeriodIdentifier.currentMonth;
       case AnalysisPeriodPastWeek _:
         return AnalysisPeriodIdentifier.pastWeek;
       case AnalysisPeriodPastTwoWeeks _:
         return AnalysisPeriodIdentifier.pastTwoWeeks;
+      case AnalysisPeriodCurrentMonth _:
+        return AnalysisPeriodIdentifier.currentMonth;
       case AnalysisPeriodPastMonth _:
         return AnalysisPeriodIdentifier.pastMonth;
     }
@@ -290,12 +290,12 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
         return AnalysisPeriodYesterdayGenerator.fromCurrentDate(current);
       case AnalysisPeriodIdentifier.currentWeek:
         return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(current);
-      case AnalysisPeriodIdentifier.currentMonth:
-        return AnalysisPeriodCurrentMonthGenerator.fromCurrentDate(current);
       case AnalysisPeriodIdentifier.pastWeek:
         return AnalysisPeriodPastWeekGenerator.fromCurrentDate(current);
       case AnalysisPeriodIdentifier.pastTwoWeeks:
         return AnalysisPeriodPastTwoWeeksGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.currentMonth:
+        return AnalysisPeriodCurrentMonthGenerator.fromCurrentDate(current);
       case AnalysisPeriodIdentifier.pastMonth:
         return AnalysisPeriodPastMonthGenerator.fromCurrentDate(current);
     }
@@ -333,12 +333,12 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
         return '昨日';
       case AnalysisPeriodIdentifier.currentWeek:
         return '今週';
-      case AnalysisPeriodIdentifier.currentMonth:
-        return '今月';
       case AnalysisPeriodIdentifier.pastWeek:
         return '過去1週間';
       case AnalysisPeriodIdentifier.pastTwoWeeks:
         return '過去2週間';
+      case AnalysisPeriodIdentifier.currentMonth:
+        return '今月';
       case AnalysisPeriodIdentifier.pastMonth:
         return '過去1ヶ月';
     }

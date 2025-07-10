@@ -6,9 +6,9 @@ enum AnalysisPeriodIdentifier {
   today,
   yesterday,
   currentWeek,
-  currentMonth,
   pastWeek,
   pastTwoWeeks,
+  currentMonth,
   pastMonth,
 }
 
