@@ -41,6 +41,11 @@ If you can add unit tests, be sure to add them.
 When you make code modifications, consider whether there is room to refactor.
 If you can refactor, be sure to refactor.
 
+### Delete unnecessary code
+
+If you have modified the code, check to see if any unnecessary code remains.
+If any unnecessary code remains, delete it immediately.
+
 ### Appropriate use of SDK functions, etc.
 
 When using new SDK functions that have not been used in the code base until now, check the following.
@@ -197,6 +202,7 @@ Future<String> currentUser(Ref ref) async {
 - **Screen layer**: Responsible for UI display logic, user interaction, and UI-specific data formatting
 
 When implementing dropdown lists or similar UI components:
+
 - Define business logic (like Pro feature restrictions) in the presenter using providers
 - Define UI display strings (labels) in the screen layer
 - Use enums instead of primitive types (int, string) for type safety
@@ -344,6 +350,7 @@ Add tooltips to areas where users can operate, and consider accessibility.
 The strings to display in the UI are defined during the widget construction process.
 
 When implementing conditional UI behavior (like Pro feature restrictions):
+
 - Use the data provided by the presenter directly in the screen
 - Avoid creating additional intermediate provider calls for simple conditional logic
 - Keep the decision logic close to where it's used
@@ -356,12 +363,12 @@ onChanged: (value) async {
   final selectedItem = dropdownItems.firstWhere(
     (item) => item.value == value,
   );
-  
+
   if (selectedItem.unavailableBecauseProFeature) {
     await _showProUpgradeDialog(context);
     return;
   }
-  
+
   // Continue with normal logic
 }
 

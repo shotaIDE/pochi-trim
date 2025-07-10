@@ -39,6 +39,11 @@ dart fix --apply
 コード修正を行った場合は、リファクタリングの余地がないかを検討する。
 もし、リファクタリングできる場合は、必ずリファクタリングを行う。
 
+### 不要コードの削除
+
+コード修正を行った場合は、不要なコードが残っていないかを確認する。
+もし、不要なコードが残っている場合は、即時削除する。
+
 ### SDK の関数などの妥当な利用
 
 今までコードベースに利用されていなかった新しい SDK の関数などを新しく利用する場合は、以下を確認する。
@@ -195,15 +200,16 @@ Future<String> currentUser(Ref ref) async {
 }
 ```
 
-#### Presenter層とScreen層の責務分離
+#### Presenter 層と Screen 層の責務分離
 
-- **Presenter層**: ビジネスロジック、状態管理、データ変換を担当
-- **Screen層**: UI表示ロジック、ユーザーインタラクション、UI固有のデータフォーマットを担当
+- **Presenter 層**: ビジネスロジック、状態管理、データ変換を担当
+- **Screen 層**: UI 表示ロジック、ユーザーインタラクション、UI 固有のデータフォーマットを担当
 
-ドロップダウンリストなどのUIコンポーネントを実装する際は:
-- ビジネスロジック（Pro機能制限など）はプロバイダーを使用してPresenter層で定義
-- UI表示文字列（ラベル）はScreen層で定義
-- 型安全性のためにプリミティブ型（int、string）ではなくenumを使用
+ドロップダウンリストなどの UI コンポーネントを実装する際は:
+
+- ビジネスロジック（Pro 機能制限など）はプロバイダーを使用して Presenter 層で定義
+- UI 表示文字列（ラベル）は Screen 層で定義
+- 型安全性のためにプリミティブ型（int、string）ではなく enum を使用
 
 適切な分離の例:
 
@@ -347,7 +353,8 @@ Widget build(BuildContext context) {
 
 UI に表示する文字列は、ドメインモデルに含めず、ウィジェット構築の処理で定義する。
 
-条件付きUI動作（Pro機能制限など）を実装する際は:
+条件付き UI 動作（Pro 機能制限など）を実装する際は:
+
 - プレゼンターから提供されたデータを画面で直接使用する
 - 単純な条件ロジックのための中間プロバイダー作成を避ける
 - 決定ロジックを使用場所の近くに配置する
@@ -360,12 +367,12 @@ onChanged: (value) async {
   final selectedItem = dropdownItems.firstWhere(
     (item) => item.value == value,
   );
-  
+
   if (selectedItem.unavailableBecauseProFeature) {
     await _showProUpgradeDialog(context);
     return;
   }
-  
+
   // 通常のロジックを続行
 }
 
