@@ -212,11 +212,11 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
       future: ref.watch(analysisPeriodSelectItemsProvider.future),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return DropdownButton<int>(
+          return DropdownButton(
             items: const [
               DropdownMenuItem<int>(
                 value: 0,
-                child: Text(''),
+                child: Text('                '),
               ),
             ],
             onChanged: null,
