@@ -200,58 +200,6 @@ Future<String> currentUser(Ref ref) async {
 }
 ```
 
-#### Presenter 層と Screen 層の責務分離
-
-- **Presenter 層**: ビジネスロジック、状態管理、データ変換を担当
-- **Screen 層**: UI 表示ロジック、ユーザーインタラクション、UI 固有のデータフォーマットを担当
-
-ドロップダウンリストなどの UI コンポーネントを実装する際は:
-
-- ビジネスロジック（Pro 機能制限など）はプロバイダーを使用して Presenter 層で定義
-- UI 表示文字列（ラベル）は Screen 層で定義
-- 型安全性のためにプリミティブ型（int、string）ではなく enum を使用
-
-適切な分離の例:
-
-```dart
-// Presenter: ビジネスロジックとデータ構造
-enum AnalysisPeriodDropdownValue {
-  today, yesterday, currentWeek, currentMonth, pastWeek, pastTwoWeeks, pastMonth,
-}
-
-class AnalysisPeriodDropdownItem {
-  const AnalysisPeriodDropdownItem({
-    required this.value,
-    required this.unavailableBecauseProFeature,
-  });
-  final AnalysisPeriodDropdownValue value;
-  final bool unavailableBecauseProFeature;
-}
-
-@riverpod
-Future<List<AnalysisPeriodDropdownItem>> analysisPeriodDropdownItems(Ref ref) async {
-  final isPro = await ref.watch(isProUserProvider.future);
-  return [
-    AnalysisPeriodDropdownItem(
-      value: AnalysisPeriodDropdownValue.currentMonth,
-      unavailableBecauseProFeature: !isPro,
-    ),
-    // ...
-  ];
-}
-
-// Screen: UI表示ロジック
-String _getLabelForValue(AnalysisPeriodDropdownValue value) {
-  switch (value) {
-    case AnalysisPeriodDropdownValue.today:
-      return '今日';
-    case AnalysisPeriodDropdownValue.currentMonth:
-      return '今月';
-    // ...
-  }
-}
-```
-
 ### エラーハンドリングを適切に行う
 
 非同期処理のエラーは適切にキャッチし、ユーザーに通知する。
@@ -352,34 +300,6 @@ Widget build(BuildContext context) {
 ユーザーが操作できる箇所にはツールチップを追加し、アクセシビリティを考慮する。
 
 UI に表示する文字列は、ドメインモデルに含めず、ウィジェット構築の処理で定義する。
-
-条件付き UI 動作（Pro 機能制限など）を実装する際は:
-
-- プレゼンターから提供されたデータを画面で直接使用する
-- 単純な条件ロジックのための中間プロバイダー作成を避ける
-- 決定ロジックを使用場所の近くに配置する
-
-例:
-
-```dart
-// 良い例: プレゼンターのデータを画面で直接使用
-onChanged: (value) async {
-  final selectedItem = dropdownItems.firstWhere(
-    (item) => item.value == value,
-  );
-
-  if (selectedItem.unavailableBecauseProFeature) {
-    await _showProUpgradeDialog(context);
-    return;
-  }
-
-  // 通常のロジックを続行
-}
-
-// 避けるべき例: 中間プロバイダーを不必要に作成
-// 既存のデータ構造で利用可能なブール値フラグを
-// チェックするためだけに追加のプロバイダーを作成しない
-```
 
 ### 画面ナビゲーション
 
