@@ -2,6 +2,16 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'analysis_period.freezed.dart';
 
+enum AnalysisPeriodIdentifier {
+  today,
+  yesterday,
+  currentWeek,
+  currentMonth,
+  pastWeek,
+  pastTwoWeeks,
+  pastMonth,
+}
+
 @freezed
 sealed class AnalysisPeriod with _$AnalysisPeriod {
   factory AnalysisPeriod.today({required DateTime from, required DateTime to}) =

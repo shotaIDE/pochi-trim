@@ -15,16 +15,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analysis_presenter.g.dart';
 
-enum AnalysisPeriodIdentifier {
-  today,
-  yesterday,
-  currentWeek,
-  currentMonth,
-  pastWeek,
-  pastTwoWeeks,
-  pastMonth,
-}
-
 class AnalysisPeriodSelectItem {
   const AnalysisPeriodSelectItem({
     required this.value,
