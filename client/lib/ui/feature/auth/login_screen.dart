@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:pochi_trim/data/model/sign_in_result.dart';
 import 'package:pochi_trim/ui/component/color.dart';
 import 'package:pochi_trim/ui/feature/auth/login_presenter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -28,7 +30,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final loginStatus = ref.watch(currentLoginStatusProvider);
     final isLoading = loginStatus != LoginStatus.none;
 
-    const continueWithoutAccountText = Text('アカウントを利用せず続ける');
+    final termsOfServiceButton = TextButton(
+      onPressed: isLoading ? null : () => launchUrl(termsOfServiceUri),
+      child: const Text('利用規約'),
+    );
+    final privacyPolicyButton = TextButton(
+      onPressed: isLoading ? null : () => launchUrl(privacyPolicyUrl),
+      child: const Text('プライバシーポリシー'),
+    );
+    final openUrlsPanel = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      spacing: 16,
+      children: [
+        termsOfServiceButton,
+
+        privacyPolicyButton,
+      ],
+    );
 
     final startWithGoogleButton = ElevatedButton.icon(
       onPressed: isLoading ? null : _startWithGoogle,
@@ -58,6 +76,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       label: const Text('Appleで続ける'),
     );
 
+    const continueWithoutAccountText = Text('アカウントを利用せず続ける');
     final continueWithoutAccountButton = TextButton(
       onPressed: isLoading ? null : _startWithoutAccount,
       style: TextButton.styleFrom(
@@ -85,16 +104,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         style: Theme.of(context).textTheme.bodyLarge,
         textAlign: TextAlign.center,
       ),
-      const SizedBox(height: 60),
+      const SizedBox(height: 32),
+      openUrlsPanel,
+      const SizedBox(height: 16),
       startWithGoogleButton,
       const SizedBox(height: 16),
+      if (Platform.isIOS) ...[startWithAppleButton, const SizedBox(height: 16)],
+      continueWithoutAccountButton,
     ];
-
-    if (Platform.isIOS) {
-      children.addAll([startWithAppleButton, const SizedBox(height: 16)]);
-    }
-
-    children.add(continueWithoutAccountButton);
 
     return Scaffold(
       body: Center(
