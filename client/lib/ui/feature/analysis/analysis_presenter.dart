@@ -31,36 +31,21 @@ Future<List<AnalysisPeriodSelectItem>> analysisPeriodSelectItems(
 ) async {
   final isPro = await ref.watch(isProUserProvider.future);
 
-  return [
-    const AnalysisPeriodSelectItem(
-      identifier: AnalysisPeriodIdentifier.today,
-      unavailableBecauseProFeature: false,
-    ),
-    const AnalysisPeriodSelectItem(
-      identifier: AnalysisPeriodIdentifier.yesterday,
-      unavailableBecauseProFeature: false,
-    ),
-    const AnalysisPeriodSelectItem(
-      identifier: AnalysisPeriodIdentifier.currentWeek,
-      unavailableBecauseProFeature: false,
-    ),
-    const AnalysisPeriodSelectItem(
-      identifier: AnalysisPeriodIdentifier.pastWeek,
-      unavailableBecauseProFeature: false,
-    ),
-    AnalysisPeriodSelectItem(
-      identifier: AnalysisPeriodIdentifier.pastTwoWeeks,
-      unavailableBecauseProFeature: !isPro,
-    ),
-    AnalysisPeriodSelectItem(
-      identifier: AnalysisPeriodIdentifier.currentMonth,
-      unavailableBecauseProFeature: !isPro,
-    ),
-    AnalysisPeriodSelectItem(
-      identifier: AnalysisPeriodIdentifier.pastMonth,
-      unavailableBecauseProFeature: !isPro,
-    ),
-  ];
+  // Pro限定の期間を定義
+  const proOnlyPeriods = {
+    AnalysisPeriodIdentifier.pastTwoWeeks,
+    AnalysisPeriodIdentifier.currentMonth,
+    AnalysisPeriodIdentifier.pastMonth,
+  };
+
+  return AnalysisPeriodIdentifier.values.map((identifier) {
+    final isProOnly = proOnlyPeriods.contains(identifier);
+
+    return AnalysisPeriodSelectItem(
+      identifier: identifier,
+      unavailableBecauseProFeature: isProOnly && !isPro,
+    );
+  }).toList();
 }
 
 @riverpod
