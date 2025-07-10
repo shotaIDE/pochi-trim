@@ -191,6 +191,57 @@ Future<String> currentUser(Ref ref) async {
 }
 ```
 
+#### Responsibility separation between Presenter and Screen layers
+
+- **Presenter layer**: Responsible for business logic, state management, and data transformation
+- **Screen layer**: Responsible for UI display logic, user interaction, and UI-specific data formatting
+
+When implementing dropdown lists or similar UI components:
+- Define business logic (like Pro feature restrictions) in the presenter using providers
+- Define UI display strings (labels) in the screen layer
+- Use enums instead of primitive types (int, string) for type safety
+
+Example of proper separation:
+
+```dart
+// Presenter: Business logic and data structure
+enum AnalysisPeriodDropdownValue {
+  today, yesterday, currentWeek, currentMonth, pastWeek, pastTwoWeeks, pastMonth,
+}
+
+class AnalysisPeriodDropdownItem {
+  const AnalysisPeriodDropdownItem({
+    required this.value,
+    required this.unavailableBecauseProFeature,
+  });
+  final AnalysisPeriodDropdownValue value;
+  final bool unavailableBecauseProFeature;
+}
+
+@riverpod
+Future<List<AnalysisPeriodDropdownItem>> analysisPeriodDropdownItems(Ref ref) async {
+  final isPro = await ref.watch(isProUserProvider.future);
+  return [
+    AnalysisPeriodDropdownItem(
+      value: AnalysisPeriodDropdownValue.currentMonth,
+      unavailableBecauseProFeature: !isPro,
+    ),
+    // ...
+  ];
+}
+
+// Screen: UI display logic
+String _getLabelForValue(AnalysisPeriodDropdownValue value) {
+  switch (value) {
+    case AnalysisPeriodDropdownValue.today:
+      return '今日';
+    case AnalysisPeriodDropdownValue.currentMonth:
+      return '今月';
+    // ...
+  }
+}
+```
+
 ### Handle errors properly
 
 Catch asynchronous processing errors properly and notify the user.
@@ -291,6 +342,33 @@ Use the text style defined in the text theme.
 Add tooltips to areas where users can operate, and consider accessibility.
 
 The strings to display in the UI are defined during the widget construction process.
+
+When implementing conditional UI behavior (like Pro feature restrictions):
+- Use the data provided by the presenter directly in the screen
+- Avoid creating additional intermediate provider calls for simple conditional logic
+- Keep the decision logic close to where it's used
+
+Example:
+
+```dart
+// Good: Direct usage of presenter data in screen
+onChanged: (value) async {
+  final selectedItem = dropdownItems.firstWhere(
+    (item) => item.value == value,
+  );
+  
+  if (selectedItem.unavailableBecauseProFeature) {
+    await _showProUpgradeDialog(context);
+    return;
+  }
+  
+  // Continue with normal logic
+}
+
+// Avoid: Creating unnecessary intermediate providers
+// Don't create additional providers just to check a boolean flag
+// that's already available in the existing data structure
+```
 
 ### Screen navigation
 
