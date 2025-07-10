@@ -5,7 +5,6 @@ import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 part 'settings_presenter.g.dart';
 
@@ -84,26 +83,6 @@ class SettingsPresenter {
         title: '家事の可視化と削減アプリ「ぽちそぎ」',
       ),
     );
-  }
-
-  /// 利用規約を開く
-  Future<bool> openTermsOfService() async {
-    final url = Uri.parse(termsOfServiceUrl);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-      return true;
-    }
-    return false;
-  }
-
-  /// プライバシーポリシーを開く
-  Future<bool> openPrivacyPolicy() async {
-    final url = Uri.parse(privacyPolicyUrl);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-      return true;
-    }
-    return false;
   }
 
   /// ライセンス画面を表示する

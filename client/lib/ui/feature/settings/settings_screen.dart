@@ -20,6 +20,7 @@ import 'package:pochi_trim/ui/feature/settings/section_header.dart';
 import 'package:pochi_trim/ui/feature/settings/settings_presenter.dart';
 import 'package:pochi_trim/ui/feature/settings/submit_feedback_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -144,16 +145,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       leading: const Icon(Icons.description),
       title: const Text('利用規約'),
       trailing: const _OpenTrailingIcon(),
-      onTap: () async {
-        final success = await ref
-            .read(settingsPresenterProvider)
-            .openTermsOfService();
-        if (!success && context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
-        }
-      },
+      onTap: () => launchUrl(termsOfServiceUri),
     );
   }
 
@@ -162,16 +154,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       leading: const Icon(Icons.privacy_tip),
       title: const Text('プライバシーポリシー'),
       trailing: const _OpenTrailingIcon(),
-      onTap: () async {
-        final success = await ref
-            .read(settingsPresenterProvider)
-            .openPrivacyPolicy();
-        if (!success && context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
-        }
-      },
+      onTap: () => launchUrl(privacyPolicyUrl),
     );
   }
 

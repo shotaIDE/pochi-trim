@@ -13,10 +13,12 @@ const revenueCatProEntitlementId = 'pro';
 const appLandingPageUrl =
     'https://tricolor-fright-c89.notion.site/22835dfd37af8025a7eee5e8122a72a7';
 
-const termsOfServiceUrl =
-    'https://tricolor-fright-c89.notion.site/21735dfd37af80518ad0e7c394015588';
-const privacyPolicyUrl =
-    'https://tricolor-fright-c89.notion.site/1c635dfd37af8052b28be78ba38c9a70';
+final Uri termsOfServiceUri = Uri.parse(
+  'https://tricolor-fright-c89.notion.site/21735dfd37af80518ad0e7c394015588',
+);
+final Uri privacyPolicyUrl = Uri.parse(
+  'https://tricolor-fright-c89.notion.site/1c635dfd37af8052b28be78ba38c9a70',
+);
 
 class GoogleForm {
   static const postUrl =
