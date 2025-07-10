@@ -15,8 +15,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analysis_presenter.g.dart';
 
-// 分析期間の選択肢を表すenum
-enum AnalysisPeriodDropdownValue {
+enum AnalysisPeriodIdentifier {
   today,
   yesterday,
   currentWeek,
@@ -26,50 +25,49 @@ enum AnalysisPeriodDropdownValue {
   pastMonth,
 }
 
-// 分析期間のドロップダウンアイテム
-class AnalysisPeriodDropdownItem {
-  const AnalysisPeriodDropdownItem({
+class AnalysisPeriodSelectItem {
+  const AnalysisPeriodSelectItem({
     required this.value,
     required this.unavailableBecauseProFeature,
   });
 
-  final AnalysisPeriodDropdownValue value;
+  final AnalysisPeriodIdentifier value;
   final bool unavailableBecauseProFeature;
 }
 
 @riverpod
-Future<List<AnalysisPeriodDropdownItem>> analysisPeriodDropdownItems(
+Future<List<AnalysisPeriodSelectItem>> analysisPeriodDropdownItems(
   Ref ref,
 ) async {
   final isPro = await ref.watch(isProUserProvider.future);
 
   return [
-    const AnalysisPeriodDropdownItem(
-      value: AnalysisPeriodDropdownValue.today,
+    const AnalysisPeriodSelectItem(
+      value: AnalysisPeriodIdentifier.today,
       unavailableBecauseProFeature: false,
     ),
-    const AnalysisPeriodDropdownItem(
-      value: AnalysisPeriodDropdownValue.yesterday,
+    const AnalysisPeriodSelectItem(
+      value: AnalysisPeriodIdentifier.yesterday,
       unavailableBecauseProFeature: false,
     ),
-    const AnalysisPeriodDropdownItem(
-      value: AnalysisPeriodDropdownValue.currentWeek,
+    const AnalysisPeriodSelectItem(
+      value: AnalysisPeriodIdentifier.currentWeek,
       unavailableBecauseProFeature: false,
     ),
-    AnalysisPeriodDropdownItem(
-      value: AnalysisPeriodDropdownValue.currentMonth,
+    AnalysisPeriodSelectItem(
+      value: AnalysisPeriodIdentifier.currentMonth,
       unavailableBecauseProFeature: !isPro,
     ),
-    const AnalysisPeriodDropdownItem(
-      value: AnalysisPeriodDropdownValue.pastWeek,
+    const AnalysisPeriodSelectItem(
+      value: AnalysisPeriodIdentifier.pastWeek,
       unavailableBecauseProFeature: false,
     ),
-    AnalysisPeriodDropdownItem(
-      value: AnalysisPeriodDropdownValue.pastTwoWeeks,
+    AnalysisPeriodSelectItem(
+      value: AnalysisPeriodIdentifier.pastTwoWeeks,
       unavailableBecauseProFeature: !isPro,
     ),
-    AnalysisPeriodDropdownItem(
-      value: AnalysisPeriodDropdownValue.pastMonth,
+    AnalysisPeriodSelectItem(
+      value: AnalysisPeriodIdentifier.pastMonth,
       unavailableBecauseProFeature: !isPro,
     ),
   ];

@@ -222,7 +222,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
 
         final dropdownItems = snapshot.data!;
 
-        return DropdownButton<AnalysisPeriodDropdownValue>(
+        return DropdownButton<AnalysisPeriodIdentifier>(
           value: _getPeriodValue(analysisPeriod),
           items: _buildDropdownItemsSync(dropdownItems, context),
           onChanged: (value) async {
@@ -261,55 +261,55 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
     );
   }
 
-  AnalysisPeriodDropdownValue _getPeriodValue(AnalysisPeriod analysisPeriod) {
+  AnalysisPeriodIdentifier _getPeriodValue(AnalysisPeriod analysisPeriod) {
     switch (analysisPeriod) {
       case AnalysisPeriodToday _:
-        return AnalysisPeriodDropdownValue.today;
+        return AnalysisPeriodIdentifier.today;
       case AnalysisPeriodYesterday _:
-        return AnalysisPeriodDropdownValue.yesterday;
+        return AnalysisPeriodIdentifier.yesterday;
       case AnalysisPeriodCurrentWeek _:
-        return AnalysisPeriodDropdownValue.currentWeek;
+        return AnalysisPeriodIdentifier.currentWeek;
       case AnalysisPeriodCurrentMonth _:
-        return AnalysisPeriodDropdownValue.currentMonth;
+        return AnalysisPeriodIdentifier.currentMonth;
       case AnalysisPeriodPastWeek _:
-        return AnalysisPeriodDropdownValue.pastWeek;
+        return AnalysisPeriodIdentifier.pastWeek;
       case AnalysisPeriodPastTwoWeeks _:
-        return AnalysisPeriodDropdownValue.pastTwoWeeks;
+        return AnalysisPeriodIdentifier.pastTwoWeeks;
       case AnalysisPeriodPastMonth _:
-        return AnalysisPeriodDropdownValue.pastMonth;
+        return AnalysisPeriodIdentifier.pastMonth;
     }
   }
 
-  AnalysisPeriod _getPeriod(AnalysisPeriodDropdownValue value) {
+  AnalysisPeriod _getPeriod(AnalysisPeriodIdentifier value) {
     final current = DateTime.now();
 
     switch (value) {
-      case AnalysisPeriodDropdownValue.today:
+      case AnalysisPeriodIdentifier.today:
         return AnalysisPeriodTodayGenerator.fromCurrentDate(current);
-      case AnalysisPeriodDropdownValue.yesterday:
+      case AnalysisPeriodIdentifier.yesterday:
         return AnalysisPeriodYesterdayGenerator.fromCurrentDate(current);
-      case AnalysisPeriodDropdownValue.currentWeek:
+      case AnalysisPeriodIdentifier.currentWeek:
         return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(current);
-      case AnalysisPeriodDropdownValue.currentMonth:
+      case AnalysisPeriodIdentifier.currentMonth:
         return AnalysisPeriodCurrentMonthGenerator.fromCurrentDate(current);
-      case AnalysisPeriodDropdownValue.pastWeek:
+      case AnalysisPeriodIdentifier.pastWeek:
         return AnalysisPeriodPastWeekGenerator.fromCurrentDate(current);
-      case AnalysisPeriodDropdownValue.pastTwoWeeks:
+      case AnalysisPeriodIdentifier.pastTwoWeeks:
         return AnalysisPeriodPastTwoWeeksGenerator.fromCurrentDate(current);
-      case AnalysisPeriodDropdownValue.pastMonth:
+      case AnalysisPeriodIdentifier.pastMonth:
         return AnalysisPeriodPastMonthGenerator.fromCurrentDate(current);
     }
   }
 
-  List<DropdownMenuItem<AnalysisPeriodDropdownValue>> _buildDropdownItemsSync(
-    List<AnalysisPeriodDropdownItem> dropdownItems,
+  List<DropdownMenuItem<AnalysisPeriodIdentifier>> _buildDropdownItemsSync(
+    List<AnalysisPeriodSelectItem> dropdownItems,
     BuildContext context,
   ) {
     return dropdownItems.map((item) {
       final shouldShowProMark = item.unavailableBecauseProFeature;
       final label = _getLabelForValue(item.value);
 
-      return DropdownMenuItem<AnalysisPeriodDropdownValue>(
+      return DropdownMenuItem<AnalysisPeriodIdentifier>(
         value: item.value,
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -325,21 +325,21 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
     }).toList();
   }
 
-  String _getLabelForValue(AnalysisPeriodDropdownValue value) {
+  String _getLabelForValue(AnalysisPeriodIdentifier value) {
     switch (value) {
-      case AnalysisPeriodDropdownValue.today:
+      case AnalysisPeriodIdentifier.today:
         return '今日';
-      case AnalysisPeriodDropdownValue.yesterday:
+      case AnalysisPeriodIdentifier.yesterday:
         return '昨日';
-      case AnalysisPeriodDropdownValue.currentWeek:
+      case AnalysisPeriodIdentifier.currentWeek:
         return '今週';
-      case AnalysisPeriodDropdownValue.currentMonth:
+      case AnalysisPeriodIdentifier.currentMonth:
         return '今月';
-      case AnalysisPeriodDropdownValue.pastWeek:
+      case AnalysisPeriodIdentifier.pastWeek:
         return '過去1週間';
-      case AnalysisPeriodDropdownValue.pastTwoWeeks:
+      case AnalysisPeriodIdentifier.pastTwoWeeks:
         return '過去2週間';
-      case AnalysisPeriodDropdownValue.pastMonth:
+      case AnalysisPeriodIdentifier.pastMonth:
         return '過去1ヶ月';
     }
   }
