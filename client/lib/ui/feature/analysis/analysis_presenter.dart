@@ -6,6 +6,7 @@ import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/house_work_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
+import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_period.dart';
 import 'package:pochi_trim/ui/feature/analysis/frequency.dart';
 import 'package:pochi_trim/ui/feature/analysis/statistics.dart';
@@ -45,8 +46,15 @@ class CurrentAnalysisPeriod extends _$CurrentAnalysisPeriod {
     return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(DateTime.now());
   }
 
-  // ignore: use_setters_to_change_properties
-  void setPeriod(AnalysisPeriod period) {
+  void setPeriod({required AnalysisPeriodIdentifier identifier}) {
+    final systemService = ref.read(systemServiceProvider);
+    final current = systemService.getCurrentDateTime();
+
+    final period = AnalysisPeriodGenerator.fromCurrentDate(
+      identifier: identifier,
+      current: current,
+    );
+
     state = period;
   }
 }

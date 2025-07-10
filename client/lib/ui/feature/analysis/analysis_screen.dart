@@ -236,8 +236,9 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
               return;
             }
 
-            final period = _getPeriod(value);
-            ref.read(currentAnalysisPeriodProvider.notifier).setPeriod(period);
+            ref
+                .read(currentAnalysisPeriodProvider.notifier)
+                .setPeriod(identifier: value);
           },
         );
       },
@@ -256,27 +257,6 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
         periodText,
       ],
     );
-  }
-
-  AnalysisPeriod _getPeriod(AnalysisPeriodIdentifier identifier) {
-    final current = DateTime.now();
-
-    switch (identifier) {
-      case AnalysisPeriodIdentifier.today:
-        return AnalysisPeriodTodayGenerator.fromCurrentDate(current);
-      case AnalysisPeriodIdentifier.yesterday:
-        return AnalysisPeriodYesterdayGenerator.fromCurrentDate(current);
-      case AnalysisPeriodIdentifier.currentWeek:
-        return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(current);
-      case AnalysisPeriodIdentifier.pastWeek:
-        return AnalysisPeriodPastWeekGenerator.fromCurrentDate(current);
-      case AnalysisPeriodIdentifier.pastTwoWeeks:
-        return AnalysisPeriodPastTwoWeeksGenerator.fromCurrentDate(current);
-      case AnalysisPeriodIdentifier.currentMonth:
-        return AnalysisPeriodCurrentMonthGenerator.fromCurrentDate(current);
-      case AnalysisPeriodIdentifier.pastMonth:
-        return AnalysisPeriodPastMonthGenerator.fromCurrentDate(current);
-    }
   }
 
   List<DropdownMenuItem<AnalysisPeriodIdentifier>> _buildDropdownItemsSync(

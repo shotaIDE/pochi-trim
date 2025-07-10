@@ -69,6 +69,30 @@ sealed class AnalysisPeriod with _$AnalysisPeriod {
   }
 }
 
+extension AnalysisPeriodGenerator on AnalysisPeriod {
+  static AnalysisPeriod fromCurrentDate({
+    required AnalysisPeriodIdentifier identifier,
+    required DateTime current,
+  }) {
+    switch (identifier) {
+      case AnalysisPeriodIdentifier.today:
+        return AnalysisPeriodTodayGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.yesterday:
+        return AnalysisPeriodYesterdayGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.currentWeek:
+        return AnalysisPeriodCurrentWeekGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.pastWeek:
+        return AnalysisPeriodPastWeekGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.pastTwoWeeks:
+        return AnalysisPeriodPastTwoWeeksGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.currentMonth:
+        return AnalysisPeriodCurrentMonthGenerator.fromCurrentDate(current);
+      case AnalysisPeriodIdentifier.pastMonth:
+        return AnalysisPeriodPastMonthGenerator.fromCurrentDate(current);
+    }
+  }
+}
+
 extension AnalysisPeriodTodayGenerator on AnalysisPeriodToday {
   static AnalysisPeriod fromCurrentDate(DateTime current) {
     final startOfToday = DateTime(current.year, current.month, current.day);
