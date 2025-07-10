@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pochi_trim/data/model/sign_in_result.dart';
 import 'package:pochi_trim/data/definition/app_definition.dart';
+import 'package:pochi_trim/data/model/sign_in_result.dart';
 import 'package:pochi_trim/ui/component/color.dart';
 import 'package:pochi_trim/ui/feature/auth/login_presenter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -96,24 +96,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       children.addAll([startWithAppleButton, const SizedBox(height: 16)]);
     }
 
-    children.add(continueWithoutAccountButton);
-    children.add(const SizedBox(height: 24));
-    children.add(
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextButton(
-            onPressed: _openTermsOfService,
-            child: const Text('利用規約'),
-          ),
-          const SizedBox(width: 16),
-          TextButton(
-            onPressed: _openPrivacyPolicy,
-            child: const Text('プライバシーポリシー'),
-          ),
-        ],
-      ),
-    );
+    children
+      ..add(continueWithoutAccountButton)
+      ..add(const SizedBox(height: 24))
+      ..add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+              onPressed: _openTermsOfService,
+              child: const Text('利用規約'),
+            ),
+            const SizedBox(width: 16),
+            TextButton(
+              onPressed: _openPrivacyPolicy,
+              child: const Text('プライバシーポリシー'),
+            ),
+          ],
+        ),
+      );
 
     return Scaffold(
       body: Center(
@@ -176,8 +177,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else if (mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
     }
   }
 
@@ -186,8 +188,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else if (mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('URLを開けませんでした')));
     }
   }
 }
