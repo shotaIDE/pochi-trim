@@ -20,44 +20,44 @@ part 'analysis_presenter.g.dart';
 @freezed
 class AnalysisPeriodSelectItem with _$AnalysisPeriodSelectItem {
   const factory AnalysisPeriodSelectItem({
-    required AnalysisPeriodIdentifier value,
+    required AnalysisPeriodIdentifier identifier,
     required bool unavailableBecauseProFeature,
   }) = _AnalysisPeriodSelectItem;
 }
 
 @riverpod
-Future<List<AnalysisPeriodSelectItem>> analysisPeriodDropdownItems(
+Future<List<AnalysisPeriodSelectItem>> analysisPeriodSelectItems(
   Ref ref,
 ) async {
   final isPro = await ref.watch(isProUserProvider.future);
 
   return [
     const AnalysisPeriodSelectItem(
-      value: AnalysisPeriodIdentifier.today,
+      identifier: AnalysisPeriodIdentifier.today,
       unavailableBecauseProFeature: false,
     ),
     const AnalysisPeriodSelectItem(
-      value: AnalysisPeriodIdentifier.yesterday,
+      identifier: AnalysisPeriodIdentifier.yesterday,
       unavailableBecauseProFeature: false,
     ),
     const AnalysisPeriodSelectItem(
-      value: AnalysisPeriodIdentifier.currentWeek,
+      identifier: AnalysisPeriodIdentifier.currentWeek,
       unavailableBecauseProFeature: false,
     ),
     AnalysisPeriodSelectItem(
-      value: AnalysisPeriodIdentifier.currentMonth,
+      identifier: AnalysisPeriodIdentifier.currentMonth,
       unavailableBecauseProFeature: !isPro,
     ),
     const AnalysisPeriodSelectItem(
-      value: AnalysisPeriodIdentifier.pastWeek,
+      identifier: AnalysisPeriodIdentifier.pastWeek,
       unavailableBecauseProFeature: false,
     ),
     AnalysisPeriodSelectItem(
-      value: AnalysisPeriodIdentifier.pastTwoWeeks,
+      identifier: AnalysisPeriodIdentifier.pastTwoWeeks,
       unavailableBecauseProFeature: !isPro,
     ),
     AnalysisPeriodSelectItem(
-      value: AnalysisPeriodIdentifier.pastMonth,
+      identifier: AnalysisPeriodIdentifier.pastMonth,
       unavailableBecauseProFeature: !isPro,
     ),
   ];

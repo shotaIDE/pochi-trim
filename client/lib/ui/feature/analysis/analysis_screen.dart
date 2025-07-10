@@ -211,7 +211,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final analysisPeriod = ref.watch(currentAnalysisPeriodProvider);
     final dropdownButton = FutureBuilder(
-      future: ref.watch(analysisPeriodDropdownItemsProvider.future),
+      future: ref.watch(analysisPeriodSelectItemsProvider.future),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const SizedBox(
@@ -220,18 +220,18 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
           );
         }
 
-        final dropdownItems = snapshot.data!;
+        final selectItems = snapshot.data!;
 
         return DropdownButton<AnalysisPeriodIdentifier>(
           value: _getPeriodValue(analysisPeriod),
-          items: _buildDropdownItemsSync(dropdownItems, context),
+          items: _buildDropdownItemsSync(selectItems, context),
           onChanged: (value) async {
             if (value == null) {
               return;
             }
 
-            final selectedItem = dropdownItems.firstWhere(
-              (item) => item.value == value,
+            final selectedItem = selectItems.firstWhere(
+              (item) => item.identifier == value,
             );
 
             if (selectedItem.unavailableBecauseProFeature) {
@@ -280,10 +280,10 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
     }
   }
 
-  AnalysisPeriod _getPeriod(AnalysisPeriodIdentifier value) {
+  AnalysisPeriod _getPeriod(AnalysisPeriodIdentifier identifier) {
     final current = DateTime.now();
 
-    switch (value) {
+    switch (identifier) {
       case AnalysisPeriodIdentifier.today:
         return AnalysisPeriodTodayGenerator.fromCurrentDate(current);
       case AnalysisPeriodIdentifier.yesterday:
@@ -307,10 +307,10 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
   ) {
     return dropdownItems.map((item) {
       final shouldShowProMark = item.unavailableBecauseProFeature;
-      final label = _getLabelForValue(item.value);
+      final label = _getLabelForValue(item.identifier);
 
       return DropdownMenuItem<AnalysisPeriodIdentifier>(
-        value: item.value,
+        value: item.identifier,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -325,8 +325,8 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
     }).toList();
   }
 
-  String _getLabelForValue(AnalysisPeriodIdentifier value) {
-    switch (value) {
+  String _getLabelForValue(AnalysisPeriodIdentifier identifier) {
+    switch (identifier) {
       case AnalysisPeriodIdentifier.today:
         return '今日';
       case AnalysisPeriodIdentifier.yesterday:
