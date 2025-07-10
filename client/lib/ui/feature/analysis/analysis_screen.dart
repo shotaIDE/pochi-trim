@@ -204,9 +204,6 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
 
   final void Function(int period) onPeriodChangedLegacy;
 
-  // Proマークのスタイル定数
-  static const _proMarkSpacing = 4.0;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final analysisPeriod = ref.watch(currentAnalysisPeriodProvider);
@@ -313,12 +310,10 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
         value: item.identifier,
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          spacing: 4,
           children: [
             Text(label),
-            if (shouldShowProMark) ...[
-              const SizedBox(width: _proMarkSpacing),
-              const _ProMark(),
-            ],
+            if (shouldShowProMark) const _ProMark(),
           ],
         ),
       );
