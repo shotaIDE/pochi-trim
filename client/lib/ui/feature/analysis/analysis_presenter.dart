@@ -390,26 +390,6 @@ Future<List<WorkLog>> _workLogsFilteredByPeriodFilePrivate(Ref ref) async {
       .toList();
 }
 
-@riverpod
-String getPeriodDisplayText(Ref ref, AnalysisPeriod period) {
-  switch (period) {
-    case AnalysisPeriodToday _:
-      return '今日';
-    case AnalysisPeriodYesterday _:
-      return '昨日';
-    case AnalysisPeriodCurrentWeek _:
-      return '今週';
-    case AnalysisPeriodCurrentMonth _:
-      return '今月';
-    case AnalysisPeriodPastWeek _:
-      return '過去1週間';
-    case AnalysisPeriodPastTwoWeeks _:
-      return '過去2週間';
-    case AnalysisPeriodPastMonth _:
-      return '過去1ヶ月';
-  }
-}
-
 // 各家事の実行頻度を取得するプロバイダー
 @riverpod
 Future<List<HouseWorkFrequency>> houseWorkFrequency(Ref ref) async {
