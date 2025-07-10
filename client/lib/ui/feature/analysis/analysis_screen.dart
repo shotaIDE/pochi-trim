@@ -212,11 +212,9 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
       future: ref.watch(analysisPeriodSelectItemsProvider.future),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Center(
-            child: Text(
-              'エラーが発生しました。画面を再読み込みしてください。',
-              textAlign: TextAlign.center,
-            ),
+          return DropdownButton(
+            items: const [],
+            onChanged: null,
           );
         }
 
