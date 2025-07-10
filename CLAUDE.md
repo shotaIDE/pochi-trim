@@ -41,6 +41,11 @@ If you can add unit tests, be sure to add them.
 When you make code modifications, consider whether there is room to refactor.
 If you can refactor, be sure to refactor.
 
+### Delete unnecessary code
+
+If you have modified the code, check to see if any unnecessary code remains.
+If any unnecessary code remains, delete it immediately.
+
 ### Appropriate use of SDK functions, etc.
 
 When using new SDK functions that have not been used in the code base until now, check the following.
