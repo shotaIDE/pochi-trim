@@ -22,6 +22,8 @@ dependencies:
   fl_chart: 1.0.0
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_riverpod: 2.6.1
   flutter_slidable: 4.0.0
   font_awesome_flutter: 10.8.0
