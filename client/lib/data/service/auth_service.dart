@@ -230,11 +230,22 @@ class AuthService {
   }
 
   Future<firebase_auth.AuthCredential> _loginGoogle() async {
-    final account = await GoogleSignIn.instance.authenticate(
-      scopeHint: [
-        'https://www.googleapis.com/auth/userinfo.profile',
-      ],
-    );
+    final GoogleSignInAccount account;
+    try {
+      account = await GoogleSignIn.instance.authenticate(
+        scopeHint: [
+          'https://www.googleapis.com/auth/userinfo.profile',
+        ],
+      );
+    } on GoogleSignInException catch (e, stack) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        throw const SignInGoogleException.cancelled();
+      }
+
+      unawaited(_errorReportService.recordError(e, stack));
+
+      throw const SignInGoogleException.uncategorized();
+    }
 
     final authentication = account.authentication;
     final idToken = authentication.idToken;
@@ -255,7 +266,6 @@ class AuthService {
   }
 
   firebase_auth.AppleAuthProvider _getAppleAuthProvider() {
-    return firebase_auth.AppleAuthProvider()
-      ..addScope('name');
+    return firebase_auth.AppleAuthProvider()..addScope('name');
   }
 }
