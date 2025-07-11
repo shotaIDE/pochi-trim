@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/definition/app_feature.dart';
 import 'package:pochi_trim/data/definition/flavor.dart';
@@ -73,17 +74,25 @@ class _RootAppState extends ConsumerState<RootApp> {
     ];
 
     return MaterialApp(
-      title: 'ぽちそぎ',
-      theme: getLightTheme(),
-      darkTheme: getDarkTheme(),
-      debugShowCheckedModeBanner: showAppDebugBanner,
+      routes: {'/': (_) => const HomeScreen()},
       // `initialRoute` and `routes` are ineffective settings
       // that are set to avoid assertion errors.
       initialRoute: '/',
-      routes: {'/': (_) => const HomeScreen()},
       onGenerateInitialRoutes: (_) => initialRoutes,
       navigatorObservers: navigatorObservers,
+      title: 'ぽちそぎ',
       builder: (_, child) => _wrapByAppBanner(child),
+      theme: getLightTheme(),
+      darkTheme: getDarkTheme(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ja', 'JP'),
+      ],
+      debugShowCheckedModeBanner: showAppDebugBanner,
     );
   }
 
