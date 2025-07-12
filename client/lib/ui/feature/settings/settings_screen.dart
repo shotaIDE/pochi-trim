@@ -560,7 +560,7 @@ class _FeedbackTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.feedback),
-      title: const Text('フィードバック'),
+      title: const Text('ご意見•ご要望'),
       trailing: const _MoveScreenTrailingIcon(),
       onTap: () => Navigator.of(context).push(SubmitFeedbackScreen.route()),
     );

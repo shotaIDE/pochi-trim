@@ -46,7 +46,7 @@ class _SubmitFeedbackScreenState extends ConsumerState<SubmitFeedbackScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('フィードバック'),
+        title: const Text('ご意見•ご要望'),
         actions: [
           TextButton(
             onPressed: isAvailable ? _submitFeedback : null,
@@ -136,7 +136,7 @@ class _SubmitFeedbackScreenState extends ConsumerState<SubmitFeedbackScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('フィードバックを送信しました。開発者がすぐに内容を確認させていただきます。'),
+        content: Text('ご意見•ご要望を送信しました。開発者がすぐに内容を確認させていただきます。'),
       ),
     );
 

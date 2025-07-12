@@ -10,10 +10,10 @@ class IsSubmissionAvailable extends _$IsSubmissionAvailable {
   @override
   bool build() => true;
 
-  /// フィードバックを送信する
+  /// ご意見•ご要望を送信する
   ///
   /// Throws:
-  /// - [SendFeedbackException]: フィードバック送信に失敗した場合
+  /// - [SendFeedbackException]: ご意見•ご要望送信に失敗した場合
   Future<void> submitFeedback(FeedbackRequest request) async {
     state = false;
 
