@@ -10,7 +10,7 @@ class IsSubmissionAvailable extends _$IsSubmissionAvailable {
   @override
   bool build() => true;
 
-  /// フィードバック(ご意見•ご要望)を送信する
+  /// フィードバック(ご意見・ご要望)を送信する
   ///
   /// Throws:
   /// - [SendFeedbackException]: フィードバック送信に失敗した場合
