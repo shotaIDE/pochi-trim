@@ -54,15 +54,15 @@ class _UpgradeToProScreenState extends ConsumerState<UpgradeToProScreen> {
             SizedBox(height: 32),
             _FeatureItem(
               icon: Icons.check_circle,
-              title: '家事の登録件数が無制限に',
-              description: 'フリー版では最大10件までの家事しか登録できませんが、Pro版では無制限に登録できます。',
+              title: '家事の種類が無制限に',
+              description: 'フリー版では最大10種類までの家事しか登録できませんが、Pro版では無制限に登録できます。',
             ),
             SizedBox(height: 16),
             _FeatureItem(
-              icon: Icons.lock_clock,
-              title: '今後追加される機能も使い放題',
-              description: '今後追加される有料機能もすべて使えるようになります。',
-              isComingSoon: true,
+              icon: Icons.check_circle,
+              title: '分析期間が最大1ヶ月に',
+              description:
+                  'フリー版では2週間までの期間しか選択できませんが、Pro版では1ヶ月までの期間で家事の実行状況を分析できます。',
             ),
             SizedBox(height: 32),
             _PurchasablesPanel(),
@@ -79,13 +79,11 @@ class _FeatureItem extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.description,
-    this.isComingSoon = false,
   });
 
   final IconData icon;
   final String title;
   final String description;
-  final bool isComingSoon;
 
   @override
   Widget build(BuildContext context) {
@@ -95,9 +93,7 @@ class _FeatureItem extends StatelessWidget {
         Icon(
           icon,
           size: 24,
-          color: isComingSoon
-              ? Theme.of(context).colorScheme.onSurface.withAlpha(100)
-              : Colors.green,
+          color: Colors.green,
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -112,36 +108,10 @@ class _FeatureItem extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: isComingSoon
-                            ? Theme.of(
-                                context,
-                              ).colorScheme.onSurface.withAlpha(100)
-                            : Theme.of(context).colorScheme.onSurface,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
-                  if (isComingSoon) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        '近日公開',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withAlpha(100),
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
               const SizedBox(height: 4),
@@ -149,9 +119,7 @@ class _FeatureItem extends StatelessWidget {
                 description,
                 style: TextStyle(
                   fontSize: 14,
-                  color: isComingSoon
-                      ? Theme.of(context).colorScheme.onSurface.withAlpha(100)
-                      : Theme.of(context).colorScheme.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],

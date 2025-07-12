@@ -214,10 +214,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
         if (snapshot.hasError) {
           return DropdownButton(
             items: const [
-              DropdownMenuItem<int>(
-                value: 0,
-                child: Text('                '),
-              ),
+              DropdownMenuItem<int>(value: 0, child: Text('                ')),
             ],
             onChanged: null,
           );
@@ -229,10 +226,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
           return Skeletonizer(
             child: DropdownButton<int>(
               items: const [
-                DropdownMenuItem<int>(
-                  value: 0,
-                  child: Text('Dummy Period'),
-                ),
+                DropdownMenuItem<int>(value: 0, child: Text('Dummy Period')),
               ],
               onChanged: null,
             ),
@@ -270,13 +264,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
       '- ${dateTimeFormat.format(analysisPeriod.to)}',
     );
 
-    return Row(
-      spacing: 8,
-      children: [
-        dropdownButton,
-        periodText,
-      ],
-    );
+    return Row(spacing: 8, children: [dropdownButton, periodText]);
   }
 
   List<DropdownMenuItem<AnalysisPeriodIdentifier>> _buildDropdownItemsSync(
@@ -292,10 +280,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           spacing: 4,
-          children: [
-            Text(label),
-            if (shouldShowProMark) const _ProMark(),
-          ],
+          children: [Text(label), if (shouldShowProMark) const _ProMark()],
         ),
       );
     }).toList();
@@ -885,11 +870,7 @@ class _ProMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Icon(
-      Icons.workspace_premium,
-      size: 16,
-      color: Colors.amber,
-    );
+    return const Icon(Icons.workspace_premium, size: 16, color: Colors.amber);
   }
 }
 
