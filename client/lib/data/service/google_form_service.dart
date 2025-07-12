@@ -33,7 +33,7 @@ class GoogleFormService {
 
   final _logger = Logger('GoogleFormService');
 
-  /// フィードバックをGoogle Formに送信する
+  /// フィードバック(ご意見•ご要望)をGoogle Formに送信する
   ///
   /// Throws:
   /// - [SendFeedbackException]: リクエストに失敗した場合
