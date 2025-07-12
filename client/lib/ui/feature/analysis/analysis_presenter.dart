@@ -24,7 +24,6 @@ Future<List<AnalysisPeriodSelectItem>> analysisPeriodSelectItems(
 
   // Pro限定の期間を定義
   const proOnlyPeriods = {
-    AnalysisPeriodIdentifier.pastTwoWeeks,
     AnalysisPeriodIdentifier.currentMonth,
     AnalysisPeriodIdentifier.pastMonth,
   };
