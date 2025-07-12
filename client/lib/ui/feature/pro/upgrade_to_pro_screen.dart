@@ -59,6 +59,13 @@ class _UpgradeToProScreenState extends ConsumerState<UpgradeToProScreen> {
             ),
             SizedBox(height: 16),
             _FeatureItem(
+              icon: Icons.analytics,
+              title: '分析期間が最大1ヶ月に',
+              description:
+                  'フリー版では2週間までの期間しか選択できませんが、Pro版では1ヶ月までの期間で家事の実行状況を分析できます。',
+            ),
+            SizedBox(height: 16),
+            _FeatureItem(
               icon: Icons.lock_clock,
               title: '今後追加される機能も使い放題',
               description: '今後追加される有料機能もすべて使えるようになります。',
