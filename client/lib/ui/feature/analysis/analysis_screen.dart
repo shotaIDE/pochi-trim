@@ -325,7 +325,7 @@ class _AnalysisPeriodSwitcher extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Pro版限定機能'),
-        content: const Text('1週間を超える期間の分析はPro版でのみ利用できます。'),
+        content: const Text('2週間を超える期間の分析はPro版でのみ利用できます。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
