@@ -7,6 +7,7 @@ import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:pochi_trim/data/model/sign_in_result.dart';
 import 'package:pochi_trim/ui/component/color.dart';
 import 'package:pochi_trim/ui/feature/auth/login_presenter.dart';
+import 'package:pochi_trim/ui/feature/home/home_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -140,7 +141,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     }
 
-    // ホーム画面への遷移は RootApp で自動で行われる
+    if (!mounted) {
+      return;
+    }
+
+    await Navigator.of(context).pushReplacement(HomeScreen.route());
   }
 
   Future<void> _startWithApple() async {
@@ -160,7 +165,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     }
 
-    // ホーム画面への遷移は RootApp で自動で行われる
+    if (!mounted) {
+      return;
+    }
+
+    await Navigator.of(context).pushReplacement(HomeScreen.route());
   }
 
   Future<void> _startWithoutAccount() async {
@@ -174,7 +183,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
     }
 
-    // ホーム画面への遷移は RootApp で自動で行われる
+    if (!mounted) {
+      return;
+    }
+
+    await Navigator.of(context).pushReplacement(HomeScreen.route());
   }
 }
 

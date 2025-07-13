@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/model/user_profile.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
+import 'package:pochi_trim/data/repository/house_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/error_report_service.dart';
@@ -13,7 +13,6 @@ import 'package:pochi_trim/data/service/in_app_review_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/data/service/work_log_service.dart';
-import 'package:pochi_trim/ui/root_presenter.dart';
 
 class MockWorkLogRepository extends Mock implements WorkLogRepository {}
 
@@ -42,7 +41,7 @@ void main() {
       displayName: 'Test User',
       photoUrl: 'https://example.com/photo.jpg',
     );
-    final testAppSession = AppSession.signedIn(currentHouseId: 'house-1');
+    const testCurrentHouseId = 'house-1';
 
     setUpAll(() {
       registerFallbackValue(
@@ -111,8 +110,8 @@ void main() {
       ).thenAnswer((_) async => 'test-id');
       final container = ProviderContainer(
         overrides: [
-          unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => testAppSession,
+          unwrappedCurrentHouseIdProvider.overrideWith(
+            (_) => testCurrentHouseId,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
@@ -154,8 +153,8 @@ void main() {
       ).thenAnswer((_) async => 'test-id');
       final container = ProviderContainer(
         overrides: [
-          unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => testAppSession,
+          unwrappedCurrentHouseIdProvider.overrideWith(
+            (_) => testCurrentHouseId,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
@@ -204,8 +203,8 @@ void main() {
       ).thenAnswer((_) async => 'test-id');
       final container = ProviderContainer(
         overrides: [
-          unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => testAppSession,
+          unwrappedCurrentHouseIdProvider.overrideWith(
+            (_) => testCurrentHouseId,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
@@ -254,8 +253,8 @@ void main() {
       ).thenAnswer((_) async => 'test-id');
       final container = ProviderContainer(
         overrides: [
-          unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => testAppSession,
+          unwrappedCurrentHouseIdProvider.overrideWith(
+            (_) => testCurrentHouseId,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
@@ -297,8 +296,8 @@ void main() {
       when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
       final container = ProviderContainer(
         overrides: [
-          unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => testAppSession,
+          unwrappedCurrentHouseIdProvider.overrideWith(
+            (_) => testCurrentHouseId,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
@@ -335,8 +334,8 @@ void main() {
       ).thenThrow(Exception('DB Error'));
       final container = ProviderContainer(
         overrides: [
-          unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => testAppSession,
+          unwrappedCurrentHouseIdProvider.overrideWith(
+            (_) => testCurrentHouseId,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),
@@ -379,8 +378,8 @@ void main() {
       ).thenAnswer((_) async => 'test-id');
       final container = ProviderContainer(
         overrides: [
-          unwrappedCurrentAppSessionProvider.overrideWith(
-            (_) => testAppSession,
+          unwrappedCurrentHouseIdProvider.overrideWith(
+            (_) => testCurrentHouseId,
           ),
           workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
           authServiceProvider.overrideWith((_) => mockAuthService),

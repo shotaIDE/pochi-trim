@@ -2,6 +2,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
+import 'package:pochi_trim/ui/feature/auth/login_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/debug_presenter.dart';
 import 'package:pochi_trim/ui/feature/settings/section_header.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -79,6 +80,13 @@ class _LogoutTile extends ConsumerWidget {
       title: const Text('ログアウト'),
       onTap: () async {
         await ref.read(logoutProvider.future);
+
+        if (!context.mounted) {
+          return;
+        }
+
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        await Navigator.of(context).pushReplacement(LoginScreen.route());
       },
     );
   }

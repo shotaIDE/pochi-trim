@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/definition/app_definition.dart';
+import 'package:pochi_trim/data/repository/house_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
-import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -33,7 +33,7 @@ class CurrentSettingsStatus extends _$CurrentSettingsStatus {
     try {
       await ref.read(authServiceProvider).signOut();
 
-      await ref.read(currentAppSessionProvider.notifier).signOut();
+      await ref.read(currentHouseIdProvider.notifier).removeId();
     } finally {
       state = ClearAccountStatus.none;
     }
@@ -47,8 +47,7 @@ class CurrentSettingsStatus extends _$CurrentSettingsStatus {
       // アカウントの削除
       await ref.read(authServiceProvider).deleteAccount();
 
-      // アプリセッションのクリア
-      await ref.read(currentAppSessionProvider.notifier).signOut();
+      await ref.read(currentHouseIdProvider.notifier).removeId();
     } finally {
       state = ClearAccountStatus.none;
     }
