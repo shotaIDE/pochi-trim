@@ -111,10 +111,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return ListTile(
       leading: leading,
       title: Text(titleText),
-      subtitle: Text(
-        'ユーザーID: ${userProfile.id}',
-        style: const TextStyle(fontSize: 12, color: Colors.grey),
-      ),
+      subtitle: Text(userProfile.id),
       onTap: onTap,
       onLongPress: () => _copyUserIdToClipboard(userProfile.id),
     );
