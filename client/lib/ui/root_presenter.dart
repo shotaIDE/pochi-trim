@@ -1,11 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pochi_trim/data/model/app_session.dart';
-import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/repository/house_repository.dart';
 import 'package:pochi_trim/data/service/app_info_service.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/error_report_service.dart';
-import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/remote_config_service.dart';
 import 'package:pochi_trim/ui/app_initial_route.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -72,36 +69,4 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
   }
 
   return AppInitialRoute.home;
-}
-
-@Deprecated('Don\'t use this provider.')
-@riverpod
-class CurrentAppSession extends _$CurrentAppSession {
-  @override
-  Future<AppSession> build() async {
-    final isSignedIn = await ref.watch(isSignedInProvider.future);
-    if (!isSignedIn) {
-      return AppSession.notSignedIn();
-    }
-
-    final preferenceService = ref.read(preferenceServiceProvider);
-
-    final houseId = await preferenceService.getString(
-      PreferenceKey.currentHouseId,
-    );
-    if (houseId == null) {
-      // 現在の家が設定されていない場合は、サインアウト状態にする
-      return AppSession.notSignedIn();
-    }
-
-    return AppSession.signedIn(currentHouseId: houseId);
-  }
-
-  Future<void> signIn({required String userId, required String houseId}) async {
-    state = AsyncValue.data(AppSession.signedIn(currentHouseId: houseId));
-  }
-
-  Future<void> signOut() async {
-    state = AsyncValue.data(AppSession.notSignedIn());
-  }
 }

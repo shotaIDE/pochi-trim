@@ -40,4 +40,9 @@ class PreferenceService {
     final preferences = SharedPreferencesAsync();
     await preferences.setString(key.name, value);
   }
+
+  Future<void> remove(PreferenceKey key) async {
+    final preferences = SharedPreferencesAsync();
+    await preferences.remove(key.name);
+  }
 }

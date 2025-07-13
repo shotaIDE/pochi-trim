@@ -28,6 +28,14 @@ class HouseId extends _$HouseId {
 
     state = AsyncValue.data(houseId);
   }
+
+  Future<void> removeCurrent() async {
+    final preferenceService = ref.read(preferenceServiceProvider);
+
+    await preferenceService.remove(PreferenceKey.currentHouseId);
+
+    state = const AsyncValue.data(null);
+  }
 }
 
 @riverpod

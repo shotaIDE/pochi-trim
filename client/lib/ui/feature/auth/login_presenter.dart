@@ -6,7 +6,6 @@ import 'package:pochi_trim/data/repository/house_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/functions_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
-import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'login_presenter.g.dart';
@@ -127,8 +126,6 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
       );
     }
 
-    await ref
-        .read(currentAppSessionProvider.notifier)
-        .signIn(userId: userId, houseId: result.houseId);
+    await ref.read(houseIdProvider.notifier).setCurrent(result.houseId);
   }
 }
