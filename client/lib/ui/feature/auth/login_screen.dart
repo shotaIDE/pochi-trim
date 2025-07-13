@@ -181,6 +181,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
+      return;
     }
 
     if (!mounted) {
