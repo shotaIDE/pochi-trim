@@ -18,7 +18,7 @@ class CurrentHouseId extends _$CurrentHouseId {
     return houseId;
   }
 
-  Future<void> setCurrent(String houseId) async {
+  Future<void> setId(String houseId) async {
     final preferenceService = ref.read(preferenceServiceProvider);
 
     await preferenceService.setString(
@@ -29,7 +29,7 @@ class CurrentHouseId extends _$CurrentHouseId {
     state = AsyncValue.data(houseId);
   }
 
-  Future<void> removeCurrent() async {
+  Future<void> removeId() async {
     final preferenceService = ref.read(preferenceServiceProvider);
 
     await preferenceService.remove(PreferenceKey.currentHouseId);

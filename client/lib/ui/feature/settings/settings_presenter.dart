@@ -33,7 +33,7 @@ class CurrentSettingsStatus extends _$CurrentSettingsStatus {
     try {
       await ref.read(authServiceProvider).signOut();
 
-      await ref.read(currentHouseIdProvider.notifier).removeCurrent();
+      await ref.read(currentHouseIdProvider.notifier).removeId();
     } finally {
       state = ClearAccountStatus.none;
     }
@@ -47,7 +47,7 @@ class CurrentSettingsStatus extends _$CurrentSettingsStatus {
       // アカウントの削除
       await ref.read(authServiceProvider).deleteAccount();
 
-      await ref.read(currentHouseIdProvider.notifier).removeCurrent();
+      await ref.read(currentHouseIdProvider.notifier).removeId();
     } finally {
       state = ClearAccountStatus.none;
     }
