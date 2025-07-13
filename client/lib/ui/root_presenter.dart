@@ -93,7 +93,7 @@ class CurrentAppSession extends _$CurrentAppSession {
       PreferenceKey.currentHouseId,
     );
     if (houseId == null) {
-      // 現在のハウスIDが設定されていない場合は、サインアウト状態にする
+      // 現在の家が設定されていない場合は、サインアウト状態にする
       return AppSession.notSignedIn();
     }
 
