@@ -64,7 +64,10 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
 
   final houseId = await ref.read(currentHouseIdProvider.future);
   if (houseId == null) {
-    // 現在のハウスIDが設定されていない場合は、サインアウト状態にする
+    // 現在の家が設定されていない場合は、サインアウト状態にする。
+    // ログイン状態でアプリをアンインストール、再インストールした際に、Firebase Authの
+    // データはキーチェーン経由で残るが、家IDはSharedPreferenceで残らないため、このルートに
+    // 到達する
     return AppInitialRoute.login;
   }
 
