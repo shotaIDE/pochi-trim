@@ -160,3 +160,25 @@ class _ResetReviewStatusTileState extends State<_ResetReviewStatusTile> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
+
+class _LogoutTile extends ConsumerWidget {
+  const _LogoutTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      title: const Text('ログアウト'),
+      onTap: () async {
+        await ref.read(logoutProvider.future);
+
+        if (!context.mounted) {
+          return;
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ログアウトしました')),
+        );
+      },
+    );
+  }
+}

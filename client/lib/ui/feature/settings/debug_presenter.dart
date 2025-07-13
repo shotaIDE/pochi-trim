@@ -1,9 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/preference_key.dart';
+import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
+import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'debug_presenter.g.dart';
+
+@riverpod
+Future<void> logout(Ref ref) async {
+  await ref.read(authServiceProvider).signOut();
+  await ref.read(currentAppSessionProvider.notifier).signOut();
+}
 
 @riverpod
 Future<void> resetHowToRegisterWorkLogsTutorialStatus(Ref ref) async {
