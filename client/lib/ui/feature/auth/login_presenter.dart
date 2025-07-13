@@ -125,7 +125,5 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
         value: result.isNewHouse,
       );
     }
-
-    await ref.read(currentHouseIdProvider.notifier).setId(result.houseId);
   }
 }
