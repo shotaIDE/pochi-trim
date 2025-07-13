@@ -390,6 +390,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (!mounted) {
       return;
     }
+
     Navigator.of(context).popUntil((route) => route.isFirst);
     await Navigator.of(context).pushReplacement(LoginScreen.route());
   }
