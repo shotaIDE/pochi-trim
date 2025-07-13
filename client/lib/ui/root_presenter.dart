@@ -39,9 +39,14 @@ Future<String?> updatedUserId(Ref ref) async {
   );
 }
 
+/// アプリの初期ルート
+///
+/// アプリの起動時に表示される画面を決定するものであるため、
+/// 依存関係の変更に伴った再計算はしない。
+/// そのため、`watch` ではなく `read` を使用している。
 @riverpod
 Future<AppInitialRoute> appInitialRoute(Ref ref) async {
-  final minimumBuildNumber = ref.watch(minimumBuildNumberProvider);
+  final minimumBuildNumber = ref.read(minimumBuildNumberProvider);
   final appSessionFuture = ref.watch(currentAppSessionProvider.future);
 
   // Remote Config ですでにフェッチされた値を有効化する
@@ -50,7 +55,7 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
       .ensureActivateFetchedRemoteConfigs();
 
   if (minimumBuildNumber != null) {
-    final currentAppVersion = await ref.watch(currentAppVersionProvider.future);
+    final currentAppVersion = await ref.read(currentAppVersionProvider.future);
     final currentBuildNumber = currentAppVersion.buildNumber;
     if (currentBuildNumber < minimumBuildNumber) {
       return AppInitialRoute.updateApp;
