@@ -522,11 +522,13 @@ class _PlanInfoTile extends StatelessWidget {
           ),
         )
         ..add(
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
               'Pro版では家事の種類が無制限に登録でき、分析期間を最大1ヶ月まで選択できるようになります',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
