@@ -525,7 +525,7 @@ class _PlanInfoTile extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Pro版では家事の登録件数が無制限になります',
+              'Pro版では家事の登録件数が無制限になり、分析期間を最大1ヶ月まで選択できるようになります',
               style: TextStyle(color: Colors.grey, fontSize: 14),
               textAlign: TextAlign.center,
             ),
