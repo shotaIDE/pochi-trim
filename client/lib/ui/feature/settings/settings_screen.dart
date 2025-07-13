@@ -14,6 +14,7 @@ import 'package:pochi_trim/data/service/app_info_service.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/ui/component/color.dart';
+import 'package:pochi_trim/ui/feature/auth/login_screen.dart';
 import 'package:pochi_trim/ui/feature/pro/upgrade_to_pro_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/debug_screen.dart';
 import 'package:pochi_trim/ui/feature/settings/section_header.dart';
@@ -194,7 +195,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         style: const TextStyle(color: Colors.red),
       ),
       onTap: settingsStatus == ClearAccountStatus.none
-          ? () => _showLogoutConfirmDialog(context)
+          ? _showLogoutConfirmDialog
           : null,
     );
   }
@@ -348,36 +349,49 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ).showSnackBar(const SnackBar(content: Text('アカウントを連携しました')));
   }
 
-  // ログアウト確認ダイアログ
-  void _showLogoutConfirmDialog(BuildContext context) {
-    showDialog<void>(
+  Future<void> _showLogoutConfirmDialog() async {
+    final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('ログアウト'),
         content: const Text('本当にログアウトしますか？'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).pop(false),
             child: const Text('キャンセル'),
           ),
           TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              try {
-                await ref.read(currentSettingsStatusProvider.notifier).logout();
-              } on Exception catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('ログアウトに失敗しました: $e')));
-                }
-              }
-            },
+            onPressed: () => Navigator.of(context).pop(true),
             child: const Text('ログアウト'),
           ),
         ],
       ),
     );
+
+    if (shouldLogout != true) {
+      return;
+    }
+
+    try {
+      await ref.read(currentSettingsStatusProvider.notifier).logout();
+    } on Exception {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(
+        const SnackBar(content: Text('ログアウトに失敗しました。しばらくしてから再度お試しください。')),
+      );
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    await Navigator.of(context).pushReplacement(LoginScreen.route());
   }
 
   // アカウント削除確認ダイアログ
@@ -435,6 +449,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('アカウントを削除しました')));
+
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    await Navigator.of(context).pushReplacement(LoginScreen.route());
   }
 }
 
