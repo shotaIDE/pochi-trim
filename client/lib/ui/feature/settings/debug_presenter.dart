@@ -10,6 +10,7 @@ part 'debug_presenter.g.dart';
 @riverpod
 Future<void> logout(Ref ref) async {
   await ref.read(authServiceProvider).signOut();
+
   await ref.read(currentAppSessionProvider.notifier).signOut();
 }
 
