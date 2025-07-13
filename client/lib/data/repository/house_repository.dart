@@ -7,7 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'house_repository.g.dart';
 
 @riverpod
-class HouseId extends _$HouseId {
+class CurrentHouseId extends _$CurrentHouseId {
   @override
   Future<String?> build() async {
     final preferenceService = ref.read(preferenceServiceProvider);
@@ -40,7 +40,7 @@ class HouseId extends _$HouseId {
 
 @riverpod
 String unwrappedCurrentHouseId(Ref ref) {
-  final houseIdAsync = ref.watch(houseIdProvider);
+  final houseIdAsync = ref.watch(currentHouseIdProvider);
   final houseId = houseIdAsync.whenOrNull(
     data: (data) => data,
   );

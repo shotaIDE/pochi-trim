@@ -62,7 +62,7 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
     return AppInitialRoute.login;
   }
 
-  final houseId = await ref.read(houseIdProvider.future);
+  final houseId = await ref.read(currentHouseIdProvider.future);
   if (houseId == null) {
     // 現在のハウスIDが設定されていない場合は、サインアウト状態にする
     return AppInitialRoute.login;

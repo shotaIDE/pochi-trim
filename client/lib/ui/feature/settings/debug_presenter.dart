@@ -12,7 +12,7 @@ Future<void> logout(Ref ref) async {
   // TODO(ide): settings_presenter のものと共通化したい
   await ref.read(authServiceProvider).signOut();
 
-  await ref.read(houseIdProvider.notifier).removeCurrent();
+  await ref.read(currentHouseIdProvider.notifier).removeCurrent();
 }
 
 @riverpod

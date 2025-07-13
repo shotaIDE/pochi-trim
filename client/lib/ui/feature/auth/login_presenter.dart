@@ -99,7 +99,7 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
   Future<void> _completeSignIn({required String userId}) async {
     final result = await ref.read(generateMyHouseProvider.future);
 
-    await ref.read(houseIdProvider.notifier).setCurrent(result.houseId);
+    await ref.read(currentHouseIdProvider.notifier).setCurrent(result.houseId);
 
     // チュートリアルの表示有無が一度も設定されていない場合、設定する
     // 新しい家が作成された場合のみ、チュートリアルを表示する
@@ -126,6 +126,6 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
       );
     }
 
-    await ref.read(houseIdProvider.notifier).setCurrent(result.houseId);
+    await ref.read(currentHouseIdProvider.notifier).setCurrent(result.houseId);
   }
 }
