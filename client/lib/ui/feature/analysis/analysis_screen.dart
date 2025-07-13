@@ -581,11 +581,20 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
   }
 }
 
-class _TimeSlotAnalysisPanel extends ConsumerWidget {
+class _TimeSlotAnalysisPanel extends ConsumerStatefulWidget {
   const _TimeSlotAnalysisPanel();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_TimeSlotAnalysisPanel> createState() =>
+      _TimeSlotAnalysisPanelState();
+}
+
+class _TimeSlotAnalysisPanelState
+    extends ConsumerState<_TimeSlotAnalysisPanel> {
+  BarChartTouchedPosition? _touchedPosition;
+
+  @override
+  Widget build(BuildContext context) {
     final statisticsFuture = ref.watch(
       currentTimeSlotStatisticsProvider.future,
     );
@@ -657,6 +666,70 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                 ),
               ),
             ),
+            barTouchData: BarTouchData(
+              touchTooltipData: BarTouchTooltipData(
+                tooltipMargin: -40,
+                getTooltipColor: (_) =>
+                    Theme.of(context).colorScheme.surfaceContainerHigh,
+                getTooltipItem:
+                    (
+                      BarChartGroupData group,
+                      int groupIndex,
+                      BarChartRodData rod,
+                      int rodIndex,
+                    ) {
+                      final touchedPosition = _touchedPosition;
+                      if (touchedPosition == null) {
+                        return null;
+                      }
+
+                      final touchedFrequency =
+                          timeSlotFrequencies[touchedPosition.groupIndex];
+                      final totalCount = touchedFrequency.totalCount;
+                      final touchedHouseWorkFrequency = touchedFrequency
+                          .houseWorkFrequencies[touchedPosition.stackItemIndex];
+                      final touchedHouseWorkName =
+                          touchedHouseWorkFrequency.houseWork.title;
+                      final touchedHouseWorkCount =
+                          touchedHouseWorkFrequency.count;
+
+                      return BarTooltipItem(
+                        '$touchedHouseWorkCount / $totalCount\n'
+                        '$touchedHouseWorkName / 合計',
+                        Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      );
+                    },
+              ),
+              handleBuiltInTouches: true,
+              touchCallback: (FlTouchEvent event, barTouchResponse) {
+                if (event is! FlTapDownEvent) {
+                  return;
+                }
+
+                final spot = barTouchResponse?.spot;
+                if (spot == null) {
+                  setState(() {
+                    _touchedPosition = null;
+                  });
+
+                  return;
+                }
+
+                final touchedBarGroupIndex = spot.touchedBarGroupIndex;
+                final touchedRodDataIndex = spot.touchedRodDataIndex;
+                final touchedStackItemIndex = spot.touchedStackItemIndex;
+
+                setState(() {
+                  _touchedPosition = BarChartTouchedPosition(
+                    groupIndex: touchedBarGroupIndex,
+                    rodDataIndex: touchedRodDataIndex,
+                    stackItemIndex: touchedStackItemIndex,
+                  );
+                });
+              },
+            ),
             gridData: const FlGridData(
               horizontalInterval: 4,
               drawVerticalLine: false,
@@ -685,6 +758,15 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                 fromY = toY;
               }
 
+              final List<int> showingTooltipIndicators;
+              final touchedPosition = _touchedPosition;
+              if (touchedPosition != null &&
+                  touchedPosition.groupIndex == index) {
+                showingTooltipIndicators = [touchedPosition.rodDataIndex];
+              } else {
+                showingTooltipIndicators = [];
+              }
+
               return BarChartGroupData(
                 x: index,
                 barRods: [
@@ -696,6 +778,7 @@ class _TimeSlotAnalysisPanel extends ConsumerWidget {
                     borderRadius: BorderRadius.zero,
                   ),
                 ],
+                showingTooltipIndicators: showingTooltipIndicators,
               );
             }).toList(),
             rotationQuarterTurns: 1,
