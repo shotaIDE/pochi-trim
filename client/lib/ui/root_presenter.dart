@@ -46,14 +46,12 @@ Future<String?> updatedUserId(Ref ref) async {
 /// そのため、`watch` ではなく `read` を使用している。
 @riverpod
 Future<AppInitialRoute> appInitialRoute(Ref ref) async {
-  final minimumBuildNumber = ref.read(minimumBuildNumberProvider);
-  final appSessionFuture = ref.watch(currentAppSessionProvider.future);
-
   // Remote Config ですでにフェッチされた値を有効化する
   await ref
       .read(updatedRemoteConfigKeysProvider.notifier)
       .ensureActivateFetchedRemoteConfigs();
 
+  final minimumBuildNumber = ref.read(minimumBuildNumberProvider);
   if (minimumBuildNumber != null) {
     final currentAppVersion = await ref.read(currentAppVersionProvider.future);
     final currentBuildNumber = currentAppVersion.buildNumber;
@@ -62,13 +60,22 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
     }
   }
 
-  final appSession = await appSessionFuture;
-  switch (appSession) {
-    case AppSessionSignedIn():
-      return AppInitialRoute.home;
-    case AppSessionNotSignedIn():
-      return AppInitialRoute.login;
+  final isSignedIn = await ref.read(isSignedInProvider.future);
+  if (!isSignedIn) {
+    return AppInitialRoute.login;
   }
+
+  final preferenceService = ref.read(preferenceServiceProvider);
+
+  final houseId = await preferenceService.getString(
+    PreferenceKey.currentHouseId,
+  );
+  if (houseId == null) {
+    // 現在のハウスIDが設定されていない場合は、サインアウト状態にする
+    return AppInitialRoute.login;
+  }
+
+  return AppInitialRoute.home;
 }
 
 @riverpod
