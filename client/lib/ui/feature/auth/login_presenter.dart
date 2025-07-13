@@ -2,6 +2,7 @@ import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/model/generate_my_house_exception.dart';
 import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/model/sign_in_result.dart';
+import 'package:pochi_trim/data/repository/house_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/functions_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
@@ -99,15 +100,11 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
   Future<void> _completeSignIn({required String userId}) async {
     final result = await ref.read(generateMyHouseProvider.future);
 
-    // 家IDを永続化する
-    final preferenceService = ref.read(preferenceServiceProvider);
-    await preferenceService.setString(
-      PreferenceKey.currentHouseId,
-      value: result.houseId,
-    );
+    await ref.read(houseIdProvider.notifier).setCurrent(result.houseId);
 
     // チュートリアルの表示有無が一度も設定されていない場合、設定する
     // 新しい家が作成された場合のみ、チュートリアルを表示する
+    final preferenceService = ref.read(preferenceServiceProvider);
     final shouldShowHowToRegisterWorkLogsTutorial = await preferenceService
         .getBool(
           PreferenceKey.shouldShowHowToRegisterWorkLogsTutorial,

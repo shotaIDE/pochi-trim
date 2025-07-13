@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/model/root_app_not_initialized.dart';
+import 'package:pochi_trim/data/repository/house_repository.dart';
 import 'package:pochi_trim/data/service/app_info_service.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/error_report_service.dart';
@@ -65,11 +66,7 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
     return AppInitialRoute.login;
   }
 
-  final preferenceService = ref.read(preferenceServiceProvider);
-
-  final houseId = await preferenceService.getString(
-    PreferenceKey.currentHouseId,
-  );
+  final houseId = await ref.read(houseIdProvider.future);
   if (houseId == null) {
     // 現在のハウスIDが設定されていない場合は、サインアウト状態にする
     return AppInitialRoute.login;
@@ -78,6 +75,7 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
   return AppInitialRoute.home;
 }
 
+@Deprecated('Don\'t use this provider.')
 @riverpod
 class CurrentAppSession extends _$CurrentAppSession {
   @override
