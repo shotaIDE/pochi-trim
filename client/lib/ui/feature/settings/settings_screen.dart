@@ -70,7 +70,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const _AppVersionTile(),
               const Divider(),
               const SectionHeader(title: 'アカウント管理'),
-              _buildLogoutTile(context),
+              if (userProfile is! UserProfileAnonymous)
+                _buildLogoutTile(context),
               _buildDeleteAccountTile(),
             ],
           );
