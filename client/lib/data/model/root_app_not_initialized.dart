@@ -1,1 +1,0 @@
-class RootAppNotInitializedError extends Error {}

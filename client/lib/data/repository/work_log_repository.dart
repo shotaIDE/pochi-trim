@@ -4,14 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/model/add_work_log_exception.dart';
-import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
-import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
+import 'package:pochi_trim/data/repository/house_repository.dart';
 import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
-import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'work_log_repository.g.dart';
@@ -20,20 +18,15 @@ final _logger = Logger('WorkLogRepository');
 
 @riverpod
 WorkLogRepository workLogRepository(Ref ref) {
-  final appSession = ref.watch(unwrappedCurrentAppSessionProvider);
+  final currentHouseId = ref.watch(unwrappedCurrentHouseIdProvider);
   final systemService = ref.watch(systemServiceProvider);
   final errorReportService = ref.watch(errorReportServiceProvider);
 
-  switch (appSession) {
-    case AppSessionSignedIn(currentHouseId: final currentHouseId):
-      return WorkLogRepository(
-        houseId: currentHouseId,
-        systemService: systemService,
-        errorReportService: errorReportService,
-      );
-    case AppSessionNotSignedIn():
-      throw NoHouseIdError();
-  }
+  return WorkLogRepository(
+    houseId: currentHouseId,
+    systemService: systemService,
+    errorReportService: errorReportService,
+  );
 }
 
 class WorkLogRepository {

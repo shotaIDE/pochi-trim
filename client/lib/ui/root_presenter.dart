@@ -1,11 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pochi_trim/data/model/app_session.dart';
-import 'package:pochi_trim/data/model/preference_key.dart';
-import 'package:pochi_trim/data/model/root_app_not_initialized.dart';
+import 'package:pochi_trim/data/repository/house_repository.dart';
 import 'package:pochi_trim/data/service/app_info_service.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/error_report_service.dart';
-import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/remote_config_service.dart';
 import 'package:pochi_trim/ui/app_initial_route.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -39,73 +36,40 @@ Future<String?> updatedUserId(Ref ref) async {
   );
 }
 
+/// アプリの初期ルート
+///
+/// アプリの起動時に表示される画面を決定するものであるため、
+/// 依存関係の変更に伴った再計算はしない。
+/// そのため、`watch` ではなく `read` を使用している。
 @riverpod
 Future<AppInitialRoute> appInitialRoute(Ref ref) async {
-  final minimumBuildNumber = ref.watch(minimumBuildNumberProvider);
-  final appSessionFuture = ref.watch(currentAppSessionProvider.future);
-
   // Remote Config ですでにフェッチされた値を有効化する
   await ref
       .read(updatedRemoteConfigKeysProvider.notifier)
       .ensureActivateFetchedRemoteConfigs();
 
+  final minimumBuildNumber = ref.read(minimumBuildNumberProvider);
   if (minimumBuildNumber != null) {
-    final currentAppVersion = await ref.watch(currentAppVersionProvider.future);
+    final currentAppVersion = await ref.read(currentAppVersionProvider.future);
     final currentBuildNumber = currentAppVersion.buildNumber;
     if (currentBuildNumber < minimumBuildNumber) {
       return AppInitialRoute.updateApp;
     }
   }
 
-  final appSession = await appSessionFuture;
-  switch (appSession) {
-    case AppSessionSignedIn():
-      return AppInitialRoute.home;
-    case AppSessionNotSignedIn():
-      return AppInitialRoute.login;
-  }
-}
-
-@riverpod
-class CurrentAppSession extends _$CurrentAppSession {
-  @override
-  Future<AppSession> build() async {
-    final isSignedIn = await ref.watch(isSignedInProvider.future);
-    if (!isSignedIn) {
-      return AppSession.notSignedIn();
-    }
-
-    final preferenceService = ref.read(preferenceServiceProvider);
-
-    final houseId = await preferenceService.getString(
-      PreferenceKey.currentHouseId,
-    );
-    if (houseId == null) {
-      // 現在のハウスIDが設定されていない場合は、サインアウト状態にする
-      return AppSession.notSignedIn();
-    }
-
-    return AppSession.signedIn(currentHouseId: houseId);
+  final isSignedIn = await ref.read(isSignedInProvider.future);
+  if (!isSignedIn) {
+    return AppInitialRoute.login;
   }
 
-  Future<void> signIn({required String userId, required String houseId}) async {
-    state = AsyncValue.data(AppSession.signedIn(currentHouseId: houseId));
+  final houseId = await ref.read(currentHouseIdProvider.future);
+  if (houseId == null) {
+    // 現在の家が設定されていない場合は、サインアウト状態にする。
+    // ログイン状態でアプリをアンインストール、再インストールした際に、Firebase Authの
+    // データはキーチェーン経由で残るが、家IDはSharedPreferenceで残らないため、このルートに
+    // 到達する
+    return AppInitialRoute.login;
   }
 
-  Future<void> signOut() async {
-    state = AsyncValue.data(AppSession.notSignedIn());
-  }
-}
-
-@riverpod
-AppSession unwrappedCurrentAppSession(Ref ref) {
-  final appSessionAsync = ref.watch(currentAppSessionProvider);
-  final appSession = appSessionAsync.whenOrNull(
-    data: (appSession) => appSession,
-  );
-  if (appSession == null) {
-    throw RootAppNotInitializedError();
-  }
-
-  return appSession;
+  return AppInitialRoute.home;
 }
