@@ -88,7 +88,7 @@ class IsHouseWorkDeleting extends _$IsHouseWorkDeleting {
   ///
   /// 削除に失敗した場合は[DeleteHouseWorkException]をスローします。
   Future<void> deleteHouseWork(HouseWork houseWork) async {
-    final currentHouseId = ref.watch(unwrappedCurrentHouseIdProvider);
+    final currentHouseId = ref.read(unwrappedCurrentHouseIdProvider);
 
     state = true;
 
