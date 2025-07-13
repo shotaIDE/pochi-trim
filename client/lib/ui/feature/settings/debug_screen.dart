@@ -23,6 +23,8 @@ class DebugScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('デバッグ')),
       body: ListView(
         children: [
+          const SectionHeader(title: 'アカウント'),
+          const _LogoutTile(),
           const SectionHeader(title: 'RevenueCat'),
           const _ToggleIsProTile(),
           const SectionHeader(title: 'チュートリアル'),
