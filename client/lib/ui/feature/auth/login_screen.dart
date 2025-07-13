@@ -164,7 +164,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _startWithoutAccount() async {
-    await ref.read(currentLoginStatusProvider.notifier).startWithoutAccount();
+    try {
+      await ref.read(currentLoginStatusProvider.notifier).startWithoutAccount();
+    } on Exception {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
+    }
 
     // ホーム画面への遷移は RootApp で自動で行われる
   }
