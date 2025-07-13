@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
-import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/model/preference_key.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
+import 'package:pochi_trim/data/repository/house_repository.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
 import 'package:pochi_trim/data/service/error_report_service.dart';
@@ -13,7 +12,6 @@ import 'package:pochi_trim/data/service/in_app_review_service.dart';
 import 'package:pochi_trim/data/service/preference_service.dart';
 import 'package:pochi_trim/data/service/riverpod_extension.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
-import 'package:pochi_trim/ui/root_presenter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'work_log_service.g.dart';
@@ -56,27 +54,22 @@ class DebounceManager extends _$DebounceManager {
 
 @riverpod
 WorkLogService workLogService(Ref ref) {
-  final appSession = ref.watch(unwrappedCurrentAppSessionProvider);
+  final currentHouseId = ref.watch(unwrappedCurrentHouseIdProvider);
   final workLogRepository = ref.watch(workLogRepositoryProvider);
   final authService = ref.watch(authServiceProvider);
   final systemService = ref.watch(systemServiceProvider);
   final inAppReviewService = ref.watch(inAppReviewServiceProvider);
   final errorReportService = ref.watch(errorReportServiceProvider);
 
-  switch (appSession) {
-    case AppSessionSignedIn(currentHouseId: final currentHouseId):
-      return WorkLogService(
-        workLogRepository: workLogRepository,
-        authService: authService,
-        currentHouseId: currentHouseId,
-        systemService: systemService,
-        inAppReviewService: inAppReviewService,
-        errorReportService: errorReportService,
-        ref: ref,
-      );
-    case AppSessionNotSignedIn():
-      throw NoHouseIdError();
-  }
+  return WorkLogService(
+    workLogRepository: workLogRepository,
+    authService: authService,
+    currentHouseId: currentHouseId,
+    systemService: systemService,
+    inAppReviewService: inAppReviewService,
+    errorReportService: errorReportService,
+    ref: ref,
+  );
 }
 
 /// 家事ログに関する共通操作を提供するサービスクラス

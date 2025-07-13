@@ -1,24 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pochi_trim/data/model/app_session.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
-import 'package:pochi_trim/data/model/no_house_id_error.dart';
 import 'package:pochi_trim/data/repository/dao/add_house_work_args.dart';
-import 'package:pochi_trim/ui/root_presenter.dart';
+import 'package:pochi_trim/data/repository/house_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'house_work_repository.g.dart';
 
 @riverpod
 HouseWorkRepository houseWorkRepository(Ref ref) {
-  final appSession = ref.watch(unwrappedCurrentAppSessionProvider);
+  final currentHouseId = ref.watch(unwrappedCurrentHouseIdProvider);
 
-  switch (appSession) {
-    case AppSessionSignedIn(currentHouseId: final currentHouseId):
-      return HouseWorkRepository(houseId: currentHouseId);
-    case AppSessionNotSignedIn():
-      throw NoHouseIdError();
-  }
+  return HouseWorkRepository(houseId: currentHouseId);
 }
 
 /// 家事リポジトリ
