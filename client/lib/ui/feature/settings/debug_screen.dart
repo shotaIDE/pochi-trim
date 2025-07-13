@@ -70,6 +70,20 @@ class DebugScreen extends ConsumerWidget {
   }
 }
 
+class _LogoutTile extends ConsumerWidget {
+  const _LogoutTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      title: const Text('ログアウト'),
+      onTap: () async {
+        await ref.read(logoutProvider.future);
+      },
+    );
+  }
+}
+
 class _ForceCrashTile extends StatelessWidget {
   const _ForceCrashTile();
 
@@ -160,27 +174,5 @@ class _ResetReviewStatusTileState extends State<_ResetReviewStatusTile> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
-  }
-}
-
-class _LogoutTile extends ConsumerWidget {
-  const _LogoutTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
-      title: const Text('ログアウト'),
-      onTap: () async {
-        await ref.read(logoutProvider.future);
-
-        if (!context.mounted) {
-          return;
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ログアウトしました')),
-        );
-      },
-    );
   }
 }
