@@ -9,6 +9,7 @@ part 'debug_presenter.g.dart';
 
 @riverpod
 Future<void> logout(Ref ref) async {
+  // TODO(ide): settings_presenter のものと共通化したい
   await ref.read(authServiceProvider).signOut();
 
   await ref.read(currentAppSessionProvider.notifier).signOut();
