@@ -140,6 +140,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
           return;
       }
+    } on GenerateMyHouseException {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
+      return;
     }
 
     if (!mounted) {
@@ -164,6 +171,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
           return;
       }
+    } on GenerateMyHouseException {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
+      return;
     }
 
     if (!mounted) {
@@ -176,14 +190,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _startWithoutAccount() async {
     try {
       await ref.read(currentLoginStatusProvider.notifier).startWithoutAccount();
-    } on GenerateMyHouseException {
+    } on SignInAnonymouslyException {
       if (!mounted) {
         return;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(_failedLoginSnackBar);
       return;
-    } on SignInAnonymouslyException {
+    } on GenerateMyHouseException {
       if (!mounted) {
         return;
       }
