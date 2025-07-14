@@ -408,6 +408,7 @@ class _WeekdayAnalysisPanelState extends ConsumerState<_WeekdayAnalysisPanel> {
                 ),
               ),
             ),
+            // TODO(ide): `TimeSlotAnalysisPanelState` のものと共通化する
             barTouchData: BarTouchData(
               touchTooltipData: BarTouchTooltipData(
                 tooltipMargin: -40,
@@ -666,6 +667,7 @@ class _TimeSlotAnalysisPanelState
                 ),
               ),
             ),
+            // TODO(ide): `WeekdayAnalysisPanelState` のものと共通化する
             barTouchData: BarTouchData(
               touchTooltipData: BarTouchTooltipData(
                 tooltipMargin: -40,
