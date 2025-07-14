@@ -102,7 +102,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       Text('ぽちそぎ', style: Theme.of(context).textTheme.headlineLarge),
       const SizedBox(height: 20),
       Text(
-        '過剰な家事を削減し\nやりたいことに集中しよう',
+        '過剰な家事を削減し\nやりたいことに集中してみよう',
         style: Theme.of(context).textTheme.bodyLarge,
         textAlign: TextAlign.center,
       ),
