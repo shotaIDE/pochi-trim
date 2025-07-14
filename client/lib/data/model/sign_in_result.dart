@@ -59,3 +59,7 @@ sealed class LinkWithAppleException
   const factory LinkWithAppleException.uncategorized() =
       LinkWithAppleExceptionUncategorized;
 }
+
+class SignInAnonymouslyException implements Exception {
+  const SignInAnonymouslyException();
+}

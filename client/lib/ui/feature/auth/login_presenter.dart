@@ -82,6 +82,7 @@ class CurrentLoginStatus extends _$CurrentLoginStatus {
   /// 匿名アカウントでサインインする
   ///
   /// Throws:
+  /// - [SignInAnonymouslyException]: 匿名アカウントでのサインインに失敗した場合
   /// - [GenerateMyHouseException]: 家ID生成APIでエラーが発生した場合
   Future<void> startWithoutAccount() async {
     state = LoginStatus.signingInAnonymously;
