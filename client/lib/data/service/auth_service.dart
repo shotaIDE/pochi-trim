@@ -182,11 +182,34 @@ class AuthService {
     }
   }
 
+  /// 匿名アカウントでサインインする
+  ///
+  /// Throws:
+  /// - [SignInAnonymouslyException]: サインインに失敗した場合
   Future<String> signInAnonymously() async {
-    final userCredential = await firebase_auth.FirebaseAuth.instance
-        .signInAnonymously();
+    final firebase_auth.UserCredential userCredential;
 
-    final user = userCredential.user!;
+    try {
+      userCredential = await firebase_auth.FirebaseAuth.instance
+          .signInAnonymously();
+    } on firebase_auth.FirebaseAuthException catch (e, stack) {
+      unawaited(_errorReportService.recordError(e, stack));
+
+      throw const SignInAnonymouslyException();
+    }
+
+    final user = userCredential.user;
+    if (user == null) {
+      const exception = SignInAnonymouslyException();
+      unawaited(
+        _errorReportService.recordError(
+          exception,
+          StackTrace.current,
+        ),
+      );
+
+      throw exception;
+    }
 
     _logger.info('匿名でサインインしました。ユーザーID = ${user.uid}');
 
