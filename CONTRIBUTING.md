@@ -114,7 +114,37 @@ flutterfire config \
 
 ### GitHub Actions の Secrets の設定
 
-GitHub Actions で必要な Secrets を設定します。
+GitHub Actions CI のワークフローを元に、GitHub Actions の Secrets を設定します。
+
+### App Store Connect の設定
+
+Apple Developer Console で Bundle Identifier とプロビジョニングプロファイルを登録しておきます。
+一旦 fastlane で Dev アプリのビルドを行うことで、各種 Capability が付与された Bundle Identifier が自動で登録されるので、それを利用すると少し楽です。
+
+Dev 環境のプロビジョニングプロファイルを手動で登録します。
+
+Xcode で「Download Manual Profiles」を実行し、マシンに作成したプロビジョニングプロファイルをダウンロードします。
+
+Xcode の TARGET で「Signing & Capabilities」タブを開き、以下の項目を設定します。
+
+- Provisioning Profile: 手動で登録したプロビジョニングプロファイルを選択
+
+[client/ios/ExportOptions_dev.plist](client/ios/ExportOptions_dev.plist) における以下の項目を手動で修正します。
+
+- Bundle Identifier
+- プロビジョニングプロファイルの名前
+
+App Store Connect にアプリを登録します。
+
+内部テスターと外部テスターのグループを作成します。
+
+Test Flight で外部テストを利用するために、外部テスト用の情報を登録します。
+
+[client/ios/fastlane/.env.example](client/ios/fastlane/.env.example) を参考に、`client/ios/fastlane/.env` ファイルを作成し、中身を設定します。
+
+Dev 環境のデプロイレーンで動作確認します。
+
+GitHub Actions CD のワークフローを元に、GitHub Actions の Secrets を設定します。
 
 ## 開発環境の追加セットアップ
 
