@@ -1,4 +1,6 @@
 locals {
+  # ID は全体合わせて 6 文字以上 30 文字以下で設定する必要があります
+  # https://cloud.google.com/resource-manager/docs/creating-managing-projects?hl=ja#before_you_begin
   google_project_id_suffix           = "-house-worker-dev-tf1"
   google_project_display_name_suffix = "-Dev-Terraform1"
   application_id_suffix              = ".HouseWorker.dev"

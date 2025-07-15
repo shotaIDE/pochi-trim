@@ -1,33 +1,34 @@
 # 開発貢献ガイド
 
-このドキュメントでは、House Worker プロジェクトの開発に貢献するための手順を説明します。
+このドキュメントでは、プロジェクトの開発に貢献するための手順を説明します。
 
-## 開発環境のセットアップ
+## 開発環境を有効化するためのクイックスタートガイド
 
-### 必要条件
+### Google Cloud と Firebase のプロジェクト新規作成
 
-- Flutter SDK
-- Firebase CLI
-- Android Studio / Xcode（モバイル開発用）
+[infra/README.md](infra/README.md) を参照して、Firebase と Google Cloud のプロジェクトやリソースを構築します。
 
-## 初期プロジェクト設定
+### Firebase プロジェクトの手動設定
 
-以下の設定は、プロジェクトの初期構築時に実施した手順です。通常の開発作業では参照する必要はありません。
+Terraform で作成した Firebase プロジェクトに、Firebase Console から手動で以下の設定を行います。
 
-### Flavor の設定
+- Authentication におけるログインプロバイダを設定し、FlutterFire CLI による Firebase プロジェクト構成の再構成を行う
+  - 再構成が必要なタイミングは公式ドキュメントを参照
+    - https://firebase.google.com/docs/flutter/setup?platform=ios&hl=ja#configure-firebase
 
-Flavor を追加する場合は、以下の公式ドキュメントに従ってセットアップしてください。
-Xcode 上でスキームの設定を行ってください。また、独自のビルド設定を追加する手順も必要です。
-
-https://docs.flutter.dev/deployment/flavors-ios
-
-### ツールのバージョン固定
-
-Xcode のバージョンを強制するには、以下の手順を実行してください。
-
-https://qiita.com/manicmaniac/items/5294dd16cd6f835ab2d9
+:::message
+Google アカウントのログインプロバイダを設定する場合、SHA-1 フィンガープリントを登録する必要がある。Firebase Emulator 環境においても同様に登録が必要。
+https://developers.google.com/android/guides/client-auth?hl=ja#using_keytool_on_the_certificate
+:::
 
 ### Flutter アプリへの Firebase プロジェクト構成の追加
+
+Flutter アプリに Firebase プロジェクトの構成を追加するために、以下の手順を実行します。
+
+[client/firebase.json](client/firebase.json) ファイルにおける `buildConfigurations` の設定項目を充足するため、以下のパターン数実行する必要があります。
+
+- Emulator/Dev x Debug/Profile/Release の 6 パターン
+  - Prod 環境は後から実施する想定
 
 #### 事前準備
 
@@ -111,20 +112,41 @@ flutterfire config \
   --android-out="android/app/src/${DIRECTORY_NAME_FOR_ANDROID}/google-services.json"
 ```
 
-### Firebase プロジェクトの手動設定
+### GitHub Actions の Secrets の設定
 
-Terraform で作成した Firebase プロジェクトに、Firebase Console から手動で以下の設定を行います。
+GitHub Actions で必要な Secrets を設定します。
+
+## 開発環境の追加セットアップ
+
+### Firebase プロジェクトの手動設定
 
 - Google アナリティクスの有効化
 - Remote Config でパラメータを設定
-- Authentication におけるログインプロバイダを設定し、FlutterFire CLI による Firebase プロジェクト構成の再構成を行う
-  - 再構成が必要なタイミングは公式ドキュメントを参照
-    - https://firebase.google.com/docs/flutter/setup?platform=ios&hl=ja#configure-firebase
-  - Google アカウントのログインプロバイダを設定する場合、SHA-1 フィンガープリントを登録する必要がある。Firebase Emulator 環境においても同様に登録が必要。
-    - https://developers.google.com/android/guides/client-auth?hl=ja#using_keytool_on_the_certificate
-  - Apple アカウントのログインプロバイダを設定する場合、Xcode 上で Release 構成は Manual Signing に設定しておく必要がある。
-    - Xcode 上では Automatic Signing 状態で、コマンドにより Manual Signing に付け替えて App Store 向けのビルドを行うと、Apple でサインイン機能が原因不明のエラーで失敗する。そのため、付け替えでなく最初から Manual Signing に設定しておく必要がある。
-    - https://zenn.dev/colomney/scraps/c6a503fad4da72
+
+## 開発環境のセットアップ
+
+### 必要条件
+
+- Flutter SDK
+- Firebase CLI
+- Android Studio / Xcode（モバイル開発用）
+
+## 初期プロジェクト設定
+
+以下の設定は、プロジェクトの初期構築時に実施した手順です。通常の開発作業では参照する必要はありません。
+
+### Flavor の設定
+
+Flavor を追加する場合は、以下の公式ドキュメントに従ってセットアップしてください。
+Xcode 上でスキームの設定を行ってください。また、独自のビルド設定を追加する手順も必要です。
+
+https://docs.flutter.dev/deployment/flavors-ios
+
+### ツールのバージョン固定
+
+Xcode のバージョンを強制するには、以下の手順を実行してください。
+
+https://qiita.com/manicmaniac/items/5294dd16cd6f835ab2d9
 
 ### アイコンの設定
 
