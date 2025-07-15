@@ -108,7 +108,7 @@ platform :ios do
     export_options_plist_path = options[:export_options_plist_path]
 
     # Info.plist の Bundle name (CFBundleName) と一致させる
-    bundle_name = 'flutter_firebase_base'
+    bundle_name = 'pochi_trim'
 
     dart_defines_command_part = if dart_defines_path.nil?
                                   ''
