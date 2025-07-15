@@ -107,6 +107,9 @@ platform :ios do
     dart_defines_path = options[:dart_defines_path]
     export_options_plist_path = options[:export_options_plist_path]
 
+    # Info.plist の Bundle name (CFBundleName) と一致させる
+    bundle_name = 'pochi_trim'
+
     dart_defines_command_part = if dart_defines_path.nil?
                                   ''
                                 else
@@ -123,6 +126,6 @@ platform :ios do
     end
 
     lane_context[SharedValues::IPA_OUTPUT_PATH] =\
-      '../build/ios/ipa/pochi_trim.ipa'
+      "../build/ios/ipa/#{bundle_name}.ipa"
   end
 end
