@@ -92,7 +92,9 @@ class _RootAppState extends ConsumerState<RootApp> {
       supportedLocales: const [
         Locale('ja', 'JP'),
       ],
-      debugShowCheckedModeBanner: showAppDebugBanner,
+      // `_wrapByAppBanner` でオリジナルのバナーを表示するため、
+      // デフォルトのデバッグバナーは無効化する
+      debugShowCheckedModeBanner: false,
     );
   }
 

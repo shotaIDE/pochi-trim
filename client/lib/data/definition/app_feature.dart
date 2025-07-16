@@ -3,10 +3,11 @@ import 'package:pochi_trim/data/definition/flavor.dart';
 
 final bool showDebugFeatures = !(flavor == Flavor.prod && kReleaseMode);
 
+/// 右上肩にバナーを表示するか否か
+///
+/// 一般公開アプリ以外は常に表示する
 final bool showCustomAppBanner =
     (flavor == Flavor.prod && !kReleaseMode) || flavor != Flavor.prod;
-
-final bool showAppDebugBanner = !showCustomAppBanner && showDebugFeatures;
 
 final useFirebaseEmulator = flavor == Flavor.emulator;
 
