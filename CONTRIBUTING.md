@@ -146,6 +146,24 @@ Dev 環境のデプロイレーンで動作確認します。
 
 GitHub Actions CD のワークフローを元に、GitHub Actions の Secrets を設定します。
 
+### Google Play Console の設定
+
+Google Play Console でアプリを登録します。
+
+アプリ情報を登録することで、クローズドテストが可能な状態にします。
+
+参照者のロールを持つサービスアカウントを作成し、JSON キーファイルを [client/android/fastlane/google-play-service-account-key.json](client/android/fastlane/google-play-service-account-key.json) ダウンロードします。
+
+サービスアカウントを Google Play Console でアプリに対して必要な権限を与えます。
+
+1 回アプリをクローズドテストトラックに手動でアップロードします。
+これにより、アプリに Application ID が紐づけられることにより、fastlane からアプリのアップロードが可能になります。
+
+クローズドテストの公開を審査に提出します。
+審査が通ることにより、内部テストに対して fastlane からアップロードし公開までを行うことが可能になります。
+
+Dev 環境のデプロイレーンで動作確認します。
+
 ## 開発環境の追加セットアップ
 
 ### Firebase プロジェクトの手動設定
