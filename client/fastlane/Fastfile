@@ -5,6 +5,10 @@
 
 CLIENT_BETA_TAG_GROUP = 'client/beta'
 CLIENT_BETA_TAG_PATTERN = "#{CLIENT_BETA_TAG_GROUP}/*"
+# RC は Release Candidate の略で、商用リリースの候補を示す。
+# 審査が通り次第、そのまま商用リリースされる。
+CLIENT_RC_TAG_GROUP = 'client/rc'
+CLIENT_RC_TAG_PATTERN = "#{CLIENT_RC_TAG_GROUP}/*"
 
 desc 'Flutterの依存関係をインストールします。'
 lane :install_flutter_dependencies do
@@ -22,9 +26,52 @@ lane :generate do
   end
 end
 
-desc '前回のバージョンからのGit履歴に基づきバージョン名をインクリメントします。'
-lane :bump_version do
-  latest_tag_name = latest_beta_tag
+desc '前回のベータバージョンからのGit履歴に基づきバージョン名をインクリメントします。'
+lane :bump_beta_version do
+  bump_version(
+    tag_pattern: CLIENT_BETA_TAG_PATTERN
+  )
+end
+
+desc '前回のRCバージョンからのGit履歴に基づきバージョン名をインクリメントします。'
+lane :bump_rc_version do
+  bump_version(
+    tag_pattern: CLIENT_RC_TAG_PATTERN
+  )
+end
+
+desc 'ベータバージョンのタグを追加します。'
+lane :add_beta_tag do
+  add_tag(
+    tag_group: CLIENT_BETA_TAG_GROUP
+  )
+end
+
+desc 'RCバージョンのタグを追加します。'
+lane :add_rc_tag do
+  add_tag(
+    tag_group: CLIENT_RC_TAG_GROUP
+  )
+end
+
+desc '最新のベータタグに一致するようにバージョン名を変更します。'
+lane :set_full_version_name_from_latest_beta_tag do
+  set_full_version_name_from_latest_tag(
+    tag_pattern: CLIENT_BETA_TAG_PATTERN
+  )
+end
+
+desc '最新のRCタグに一致するようにバージョン名を変更します。'
+lane :set_full_version_name_from_latest_rc_tag do
+  set_full_version_name_from_latest_tag(
+    tag_pattern: CLIENT_RC_TAG_PATTERN
+  )
+end
+
+private_lane :bump_version do |options|
+  tag_pattern = options[:tag_pattern]
+
+  latest_tag_name = latest_tag(tag_pattern)
 
   full_version_name = extract_version_name_from_tag(latest_tag_name)
 
@@ -34,15 +81,15 @@ lane :bump_version do
   UI.success "Found latest version: #{full_version_name}"
   UI.success "The Build number is #{build_number}"
 
-  is_releasable = analyze_commits_for_semantic_release(CLIENT_BETA_TAG_PATTERN)
+  is_releasable = analyze_commits_for_semantic_release(tag_pattern)
   if is_releasable
-    UI.success "Releasable. Because there are valid differences from the previous release."
+    UI.success 'Releasable. Because there are valid differences from the previous release.'
   else
-    raise "No release is necessary. Because there are no valid differences from the previous release."
+    raise 'No release is necessary. Because there are no valid differences from the previous release.'
   end
 
   new_version_name = lane_context[SharedValues::RELEASE_NEXT_VERSION]
-  
+
   Dir.chdir('../../') do
     sh("dart run cider version \"#{new_version_name}+#{build_number}\"")
     sh('dart run cider bump build')
@@ -51,22 +98,22 @@ lane :bump_version do
   UI.success "Bumped version to #{new_version_name}+#{build_number}"
 end
 
-desc 'ベータバージョンのタグを追加します。'
-lane :add_beta_tag do
+private_lane :add_tag do |options|
+  tag_group = options[:tag_group]
+
   full_version_name = get_full_version_name
 
   add_git_tag(
-    grouping: CLIENT_BETA_TAG_GROUP,
+    grouping: tag_group,
     includes_lane: false,
     build_number: full_version_name
   )
 end
 
-desc '最新のタグに一致するようにバージョン名を変更します。'
-lane :set_full_version_name_from_latest_tag do
-  latest_tag_name = Dir.chdir('../../') do
-    sh("git describe --tags --abbrev=0 --match='#{CLIENT_BETA_TAG_PATTERN}'")
-  end
+private_lane :set_full_version_name_from_latest_tag do |options|
+  tag_pattern = options[:tag_pattern]
+
+  latest_tag_name = latest_tag(tag_pattern)
 
   full_version_name = extract_version_name_from_tag(latest_tag_name)
 
@@ -79,6 +126,15 @@ private_lane :get_full_version_name do
   Dir.chdir('../../') do
     sh('dart run cider version').chomp
   end
+end
+
+private_lane :get_version_code do
+  full_version_name = get_full_version_name
+
+  matched = /^\d+\.\d+\.\d+\+(\d+)$/.match(full_version_name)
+
+  version_code = matched[1].to_i
+  version_code
 end
 
 private_lane :generate_release_notes do
@@ -113,9 +169,9 @@ private_lane :generate_release_notes do
   )
 end
 
-def latest_beta_tag
+def latest_tag(tag_pattern)
   Dir.chdir('../../') do
-    sh("git describe --tags --abbrev=0 --match='#{CLIENT_BETA_TAG_PATTERN}'")
+    sh("git describe --tags --abbrev=0 --match='#{tag_pattern}'")
   end
 end
 

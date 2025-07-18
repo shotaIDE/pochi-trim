@@ -29,13 +29,21 @@ Flutterの依存関係をインストールします。
 
 自動コードを生成します。
 
-### bump_version
+### bump_beta_version
 
 ```sh
-[bundle exec] fastlane bump_version
+[bundle exec] fastlane bump_beta_version
 ```
 
-前回のバージョンからのGit履歴に基づきバージョン名をインクリメントします。
+前回のベータバージョンからのGit履歴に基づきバージョン名をインクリメントします。
+
+### bump_rc_version
+
+```sh
+[bundle exec] fastlane bump_rc_version
+```
+
+前回のRCバージョンからのGit履歴に基づきバージョン名をインクリメントします。
 
 ### add_beta_tag
 
@@ -45,13 +53,29 @@ Flutterの依存関係をインストールします。
 
 ベータバージョンのタグを追加します。
 
-### set_full_version_name_from_latest_tag
+### add_rc_tag
 
 ```sh
-[bundle exec] fastlane set_full_version_name_from_latest_tag
+[bundle exec] fastlane add_rc_tag
 ```
 
-最新のタグに一致するようにバージョン名を変更します。
+RCバージョンのタグを追加します。
+
+### set_full_version_name_from_latest_beta_tag
+
+```sh
+[bundle exec] fastlane set_full_version_name_from_latest_beta_tag
+```
+
+最新のベータタグに一致するようにバージョン名を変更します。
+
+### set_full_version_name_from_latest_rc_tag
+
+```sh
+[bundle exec] fastlane set_full_version_name_from_latest_rc_tag
+```
+
+最新のRCタグに一致するようにバージョン名を変更します。
 
 ----
 

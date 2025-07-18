@@ -2,7 +2,7 @@ name: pochi_trim
 description: "A new Flutter project."
 publish_to: "none"
 
-version: 1.0.0+17
+version: 1.0.1+20
 
 environment:
   sdk: 3.8.1

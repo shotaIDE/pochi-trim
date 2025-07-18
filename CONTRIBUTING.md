@@ -171,6 +171,48 @@ Dev 環境のデプロイレーンで動作確認します。
 - Google アナリティクスの有効化
 - Remote Config でパラメータを設定
 
+## 商用リリース後のセットアップ
+
+商用リリース後は、以下の手順を実施してプロジェクトを更新します。
+
+### App Store Connect の設定
+
+App Store Connect からリリース済みのアプリのスクリーンショットやメタデータをダウンロードします。
+
+https://docs.fastlane.tools/actions/upload_to_app_store/
+
+以下のコマンドを実行します。
+
+```shell
+bundle exec fastlane deliver download_screenshots
+```
+
+```shell
+bundle exec fastlane deliver download_metadata
+```
+
+Prod 環境のデプロイレーンで動作確認します。
+
+:::message
+手動で登録したものと自動で登録されたものでスクリーンショットが重複することがあるため、その場合は手動で削除します。
+:::
+
+### Google Play Console の設定
+
+サービスアカウントを Google Play Console でアプリに対して必要な権限を与えます。
+
+Google Play Console からリリース済みのアプリのスクリーンショットやメタデータをダウンロードします。
+
+https://docs.fastlane.tools/actions/upload_to_play_store/
+
+以下のコマンドを実行します。
+
+```shell
+bundle exec fastlane supply init
+```
+
+Prod 環境のデプロイレーンで動作確認します。
+
 ## 開発環境のセットアップ
 
 ### 必要条件

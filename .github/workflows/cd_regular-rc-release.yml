@@ -1,8 +1,8 @@
-name: CD / Regular beta release
+name: CD / Regular RC release
 
 on:
   schedule:
-    - cron: "0 19 * * *" # 毎日04:00(JST)
+    - cron: "0 19 * * 1" # 毎週月曜日の04:00(JST)
   workflow_dispatch:
 
 concurrency:
@@ -14,8 +14,8 @@ defaults:
     working-directory: ./client
 
 jobs:
-  trigger-cd-dev:
-    name: Trigger CD dev
+  trigger-cd-prod:
+    name: Trigger CD prod
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -40,12 +40,12 @@ jobs:
         run: bundle exec fastlane install_flutter_dependencies
         working-directory: ./client/ios
       - name: Set full version name from tag
-        run: bundle exec fastlane set_full_version_name_from_latest_beta_tag
+        run: bundle exec fastlane set_full_version_name_from_latest_rc_tag
         working-directory: ./client/ios
       - name: Bump version
         id: bump-version
         run: |
-          if bundle exec fastlane bump_beta_version; then
+          if bundle exec fastlane bump_rc_version; then
             echo "VERSION_BUMPED=true" >> $GITHUB_OUTPUT
           else
             echo "VERSION_BUMPED=false" >> $GITHUB_OUTPUT
@@ -53,7 +53,7 @@ jobs:
         working-directory: ./client/ios
       - name: Add tag
         if: steps.bump-version.outputs.VERSION_BUMPED == 'true'
-        run: bundle exec fastlane add_beta_tag
+        run: bundle exec fastlane add_rc_tag
         working-directory: ./client/ios
       - name: Push back tag
         if: steps.bump-version.outputs.VERSION_BUMPED == 'true'
@@ -61,13 +61,13 @@ jobs:
           latest_tag_name="$(git describe --tags --abbrev=0)"
           git push origin "${latest_tag_name}"
 
-  deploy-ios-dev-app:
+  deploy-ios-prod-app:
     name: Deploy iOS app
     permissions:
       contents: read
     needs:
-      - trigger-cd-dev
-    if: needs.trigger-cd-dev.outputs.new-tag-generated == 'true'
+      - trigger-cd-prod
+    if: needs.trigger-cd-prod.outputs.new-tag-generated == 'true'
     runs-on: macos-15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -100,11 +100,9 @@ jobs:
           firebase-options-dart-base64-prod: ${{ secrets.FIREBASE_OPTIONS_DART_BASE64_PROD }}
           working-parent-directory: ./client
           working-child-directory: ios
-      - name: Generate uncommitted iOS files for dev
-        uses: ./.github/actions/generate-uncommitted-ios-files-dev
-        with:
-          google-service-plist-base64-dev: ${{ secrets.GOOGLE_SERVICE_PLIST_BASE64_DEV }}
-          working-directory: ./client
+      - name: Generate uncommitted iOS files for prod
+        run: echo "${{ secrets.GOOGLE_SERVICE_PLIST_BASE64_PROD }}" | base64 -d > ios/Runner/Firebase/Prod/GoogleService-Info.plist
+        working-directory: ./client
       - name: Import Code-Signing Certificates
         uses: Apple-Actions/import-codesign-certs@65cfbc37e1464d733524cb555b724878f278b8c3 # v5
         with:
@@ -113,7 +111,7 @@ jobs:
       - name: Import Provisioning Profile
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "${{ secrets.PROVISIONING_PROFILE_APP_STORE_BASE64_DEV }}" | base64 -d > ~/Library/MobileDevice/Provisioning\ Profiles/dev_app-store.mobileprovision
+          echo "${{ secrets.PROVISIONING_PROFILE_APP_STORE_BASE64_PROD }}" | base64 -d > ~/Library/MobileDevice/Provisioning\ Profiles/prod_app-store.mobileprovision
       - name: Generate env file
         uses: ./.github/actions/generate-env-file
         with:
@@ -123,19 +121,19 @@ jobs:
         run: echo "${{ secrets.APP_STORE_CONNECT_API_KEY_P8_BASE64 }}" | base64 -d > fastlane/app-store-connect-api-key.p8
         working-directory: ./client/ios
       - name: Set full version name from latest tag
-        run: bundle exec fastlane set_full_version_name_from_latest_beta_tag
+        run: bundle exec fastlane set_full_version_name_from_latest_rc_tag
         working-directory: ./client/ios
-      - name: Deploy iOS dev app to Test Flight
-        run: bundle exec fastlane ios deploy_dev
+      - name: Deploy iOS prod app to Test Flight
+        run: bundle exec fastlane ios deploy_prod
         working-directory: ./client/ios
 
-  deploy-android-dev-app:
+  deploy-android-prod-app:
     name: Deploy Android app
     permissions:
       contents: read
     needs:
-      - trigger-cd-dev
-    if: needs.trigger-cd-dev.outputs.new-tag-generated == 'true'
+      - trigger-cd-prod
+    if: needs.trigger-cd-prod.outputs.new-tag-generated == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -160,11 +158,9 @@ jobs:
           firebase-options-dart-base64-prod: ${{ secrets.FIREBASE_OPTIONS_DART_BASE64_PROD }}
           working-parent-directory: ./client
           working-child-directory: android
-      - name: Generate uncommitted Android files for dev
-        uses: ./.github/actions/generate-uncommitted-android-files-dev
-        with:
-          google-service-json-base64-dev: ${{ secrets.GOOGLE_SERVICE_JSON_BASE64_DEV }}
-          working-directory: ./client
+      - name: Generate uncommitted Android files for prod
+        run: echo "${{ secrets.GOOGLE_SERVICE_JSON_BASE64_PROD }}" | base64 -d > android/app/src/prod/google-services.json
+        working-directory: ./client
       - name: Generate key store
         uses: ./.github/actions/generate-key-store
         with:
@@ -177,8 +173,8 @@ jobs:
         run: echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY_JSON_BASE64 }}" | base64 -d > fastlane/google-play-service-account-key.json
         working-directory: ./client/android
       - name: Set full version name from latest tag
-        run: bundle exec fastlane set_full_version_name_from_latest_beta_tag
+        run: bundle exec fastlane set_full_version_name_from_latest_rc_tag
         working-directory: ./client/android
-      - name: Deploy Android dev app to Google Play
-        run: bundle exec fastlane android deploy_dev
+      - name: Deploy Android prod app to Google Play
+        run: bundle exec fastlane android deploy_prod
         working-directory: ./client/android
