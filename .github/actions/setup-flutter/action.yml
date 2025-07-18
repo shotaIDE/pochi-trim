@@ -40,6 +40,4 @@ runs:
       shell: bash
     - name: Install FlutterFire CLI
       shell: bash
-      # 最新版の v1.1.0 だとdSYMがアップロードできないため、ワークアラウンド
-      # https://github.com/invertase/flutterfire_cli/issues/366
-      run: dart pub global activate flutterfire_cli 1.0.1
+      run: dart pub global activate flutterfire_cli
