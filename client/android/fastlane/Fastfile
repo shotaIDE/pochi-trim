@@ -78,7 +78,20 @@ platform :android do
       release_status: 'completed',
       track: 'internal',
       json_key: google_play_json_key_path,
-      skip_upload_changelogs: false
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+
+    version_code = get_version_code
+    upload_to_play_store(
+      package_name:,
+      version_code:,
+      skip_upload_aab: true,
+      track: 'internal',
+      json_key: google_play_json_key_path,
+      track_promote_to: 'production',
+      track_promote_release_status: 'completed'
     )
   end
 
