@@ -1,0 +1,14 @@
+inputs:
+  revenue-cat-config-json-base64:
+    required: true
+  working-directory:
+    required: false
+    default: ./
+
+runs:
+  using: "composite"
+  steps:
+    - name: Generate Revenue Cat config json file
+      run: echo '${{ inputs.revenue-cat-config-json-base64 }}' | base64 -d > revenue-cat-config.json
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
