@@ -78,6 +78,8 @@ platform :android do
       release_status: 'completed',
       track: 'internal',
       json_key: google_play_json_key_path,
+      # 後続の「製品版」(production)へのプロモート時にメディアファイルをアップロードするため、
+      # 重複を避けるためにメディアファイルのアップロードはスキップする
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true
