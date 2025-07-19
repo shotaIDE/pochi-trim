@@ -6,6 +6,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'edit_work_log_presenter.g.dart';
 
+/// 家事ログの完了時刻を更新する
+///
+/// Throws:
+///   - [UpdateWorkLogException]
 @riverpod
 Future<void> updateCompletedAtOfWorkLog(
   Ref ref,
