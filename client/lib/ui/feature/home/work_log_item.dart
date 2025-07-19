@@ -92,10 +92,16 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
     );
 
     final body = IntrinsicHeight(
+      // 以下の理由で `GestureDetector` ではなく `InkWell` を使用している
+      // - ロングタップが検知された時に Haptic フィードバックが発生するため、UXが良い
+      // - 反応精度が高い
       child: InkWell(
         onLongPress: widget.onLongPress != null
             ? () => widget.onLongPress!(widget.workLogIncludedHouseWork)
             : null,
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        hoverColor: Colors.transparent,
         child: Row(
           children: [
             Expanded(
