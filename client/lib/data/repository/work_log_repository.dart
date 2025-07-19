@@ -112,10 +112,13 @@ class WorkLogRepository {
   /// Throws:
   ///   - [UpdateWorkLogException.uncategorized] - Firebaseエラー、ネットワークエラー、
   ///     権限エラーなどで更新に失敗した場合
-  Future<void> updateDateTime(String id, DateTime newDateTime) async {
+  Future<void> updateCompletedAt(
+    String id, {
+    required DateTime completedAt,
+  }) async {
     try {
       await _getWorkLogsCollection().doc(id).update({
-        'completedAt': newDateTime,
+        'completedAt': completedAt,
       });
     } on FirebaseException catch (e, stack) {
       _logger.warning('Failed to update work log', e);

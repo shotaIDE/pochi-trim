@@ -150,7 +150,7 @@ class _EditWorkLogDialogState extends ConsumerState<EditWorkLogDialog> {
   Future<void> _saveWorkLog() async {
     try {
       await ref.read(
-        updateWorkLogDateTimeProvider(
+        updateCompletedAtOfWorkLogProvider(
           widget.workLogIncludedHouseWork.id,
           _selectedDateTime,
         ).future,

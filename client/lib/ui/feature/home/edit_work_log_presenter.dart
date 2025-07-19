@@ -7,17 +7,20 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'edit_work_log_presenter.g.dart';
 
 @riverpod
-Future<void> updateWorkLogDateTime(
+Future<void> updateCompletedAtOfWorkLog(
   Ref ref,
   String workLogId,
-  DateTime newDateTime,
+  DateTime completedAt,
 ) async {
   final systemService = ref.read(systemServiceProvider);
   final now = systemService.getCurrentDateTime();
-  if (newDateTime.isAfter(now)) {
+  if (completedAt.isAfter(now)) {
     throw const UpdateWorkLogException.futureDateTime();
   }
 
   final workLogRepository = ref.read(workLogRepositoryProvider);
-  await workLogRepository.updateDateTime(workLogId, newDateTime);
+  await workLogRepository.updateCompletedAt(
+    workLogId,
+    completedAt: completedAt,
+  );
 }
