@@ -54,11 +54,11 @@ class AuthService {
     } on SignInGoogleException catch (e, stack) {
       switch (e) {
         case SignInGoogleExceptionCancelled():
-          _logger.warning('Googleサインインがキャンセルされました。');
+          _logger.warning('Google sign-in cancelled.');
 
           throw const SignInWithGoogleException.cancelled();
         case SignInGoogleExceptionUncategorized():
-          _logger.warning('Googleサインインに失敗しました。');
+          _logger.warning('Google sign-in failed.');
 
           unawaited(_errorReportService.recordError(e, stack));
 
@@ -78,7 +78,7 @@ class AuthService {
 
     final user = userCredential.user!;
 
-    _logger.info('Googleでサインインしました。');
+    _logger.info('Signed in with Google.');
 
     return SignInResult(
       userId: user.uid,
@@ -95,11 +95,11 @@ class AuthService {
     } on SignInGoogleException catch (e, stack) {
       switch (e) {
         case SignInGoogleExceptionCancelled():
-          _logger.warning('Googleサインインがキャンセルされました。');
+          _logger.warning('Google sign-in cancelled.');
 
           throw const LinkWithGoogleException.cancelled();
         case SignInGoogleExceptionUncategorized():
-          _logger.warning('Googleサインインに失敗しました。');
+          _logger.warning('Google sign-in failed.');
 
           unawaited(_errorReportService.recordError(e, stack));
 
@@ -111,7 +111,7 @@ class AuthService {
       await user.linkWithCredential(authCredential);
     } on firebase_auth.FirebaseAuthException catch (e, stack) {
       if (e.code == 'credential-already-in-use') {
-        _logger.warning('このGoogleアカウントは既に使用されています。');
+        _logger.warning('This Google account is already in use.');
 
         throw const LinkWithGoogleException.alreadyInUse();
       }
@@ -121,7 +121,7 @@ class AuthService {
       throw const LinkWithGoogleException.uncategorized();
     }
 
-    _logger.info('Googleアカウントと連携しました。');
+    _logger.info('Linked with Google account.');
   }
 
   Future<SignInResult> signInWithApple() async {
@@ -144,12 +144,7 @@ class AuthService {
     final user = userCredential.user;
     if (user == null) {
       const exception = SignInWithAppleException.uncategorized();
-      unawaited(
-        _errorReportService.recordError(
-          exception,
-          StackTrace.current,
-        ),
-      );
+      unawaited(_errorReportService.recordError(exception, StackTrace.current));
 
       throw exception;
     }
@@ -201,17 +196,12 @@ class AuthService {
     final user = userCredential.user;
     if (user == null) {
       const exception = SignInAnonymouslyException();
-      unawaited(
-        _errorReportService.recordError(
-          exception,
-          StackTrace.current,
-        ),
-      );
+      unawaited(_errorReportService.recordError(exception, StackTrace.current));
 
       throw exception;
     }
 
-    _logger.info('匿名でサインインしました。ユーザーID = ${user.uid}');
+    _logger.info('Signed in anonymously. user ID = ${user.uid}');
 
     return user.uid;
   }
@@ -240,16 +230,6 @@ class AuthService {
     }
 
     _logger.info('ユーザーアカウントを正常に削除しました。');
-  }
-
-  /// 現在のユーザー情報をチェックし、ログインしている場合はUIDをログ出力します
-  void checkCurrentUser() {
-    final user = firebase_auth.FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      return;
-    }
-
-    _logger.info('既存ユーザーがログイン中です。UID: ${user.uid}');
   }
 
   Future<firebase_auth.AuthCredential> _loginGoogle() async {
