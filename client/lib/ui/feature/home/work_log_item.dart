@@ -97,9 +97,9 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
       // - 反応精度が高い
       child: InkWell(
         onLongPress: () => widget.onLongPress(widget.workLogIncludedHouseWork),
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
         hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
         child: Row(
           children: [
             Expanded(
