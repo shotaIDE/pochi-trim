@@ -311,13 +311,8 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
 
     switch (action) {
       case _WorkLogAction.edit:
-        final updated = await _showEditWorkLogDialog(
-          workLogIncludedHouseWork,
-        );
-        if (updated == true) {
-          // 更新されたため、リストを更新する
-          ref.invalidate(workLogsIncludedHouseWorkProvider);
-        }
+        await _editWorkLog(workLogIncludedHouseWork);
+
       case _WorkLogAction.delete:
         await _onDelete(workLogIncludedHouseWork);
     }
@@ -350,8 +345,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     ).showSnackBar(const SnackBar(content: Text('家事ログを元に戻しました。')));
   }
 
-  /// 家事ログ編集ダイアログを表示
-  Future<bool?> _showEditWorkLogDialog(
+  Future<bool?> _editWorkLog(
     WorkLogIncludedHouseWork workLogIncludedHouseWork,
   ) {
     return showDialog<bool>(
@@ -380,6 +374,7 @@ class _EditWorkLogDialogState extends ConsumerState<_EditWorkLogDialog> {
   @override
   void initState() {
     super.initState();
+
     _selectedDateTime = widget.workLogIncludedHouseWork.completedAt;
   }
 
