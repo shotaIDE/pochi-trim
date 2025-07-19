@@ -9,13 +9,13 @@ class WorkLogItem extends ConsumerStatefulWidget {
     required this.workLogIncludedHouseWork,
     required this.onDuplicate,
     required this.onDelete,
-    this.onLongPress,
+    required this.onLongPress,
   });
 
   final WorkLogIncludedHouseWork workLogIncludedHouseWork;
   final void Function(WorkLogIncludedHouseWork) onDuplicate;
   final void Function(WorkLogIncludedHouseWork) onDelete;
-  final void Function(WorkLogIncludedHouseWork)? onLongPress;
+  final void Function(WorkLogIncludedHouseWork) onLongPress;
 
   @override
   ConsumerState<WorkLogItem> createState() => _WorkLogItemState();
@@ -96,9 +96,7 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
       // - ロングタップが検知された時に Haptic フィードバックが発生するため、UXが良い
       // - 反応精度が高い
       child: InkWell(
-        onLongPress: widget.onLongPress != null
-            ? () => widget.onLongPress!(widget.workLogIncludedHouseWork)
-            : null,
+        onLongPress: () => widget.onLongPress(widget.workLogIncludedHouseWork),
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
         hoverColor: Colors.transparent,

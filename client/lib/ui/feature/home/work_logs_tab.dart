@@ -74,6 +74,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
             ),
             onDuplicate: (_) {},
             onDelete: (_) {},
+            onLongPress: (_) {},
           );
 
           return Skeletonizer(
