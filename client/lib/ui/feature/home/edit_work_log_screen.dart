@@ -45,6 +45,7 @@ class _EditWorkLogDialogState extends ConsumerState<EditWorkLogDialog> {
 
     return AlertDialog(
       title: Row(
+        spacing: 12,
         children: [
           Container(
             alignment: Alignment.center,
@@ -59,7 +60,6 @@ class _EditWorkLogDialogState extends ConsumerState<EditWorkLogDialog> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
-          const SizedBox(width: 12),
           Expanded(
             child: Text(
               houseWork.title,
