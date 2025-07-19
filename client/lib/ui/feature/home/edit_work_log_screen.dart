@@ -44,7 +44,30 @@ class _EditWorkLogDialogState extends ConsumerState<EditWorkLogDialog> {
     final houseWork = widget.workLogIncludedHouseWork.houseWork;
 
     return AlertDialog(
-      title: Text('${houseWork.icon} ${houseWork.title}'),
+      title: Row(
+        children: [
+          Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            width: 32,
+            height: 32,
+            child: Text(
+              houseWork.icon,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              houseWork.title,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+        ],
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
