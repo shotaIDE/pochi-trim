@@ -256,9 +256,7 @@ class AuthService {
     final GoogleSignInAccount account;
     try {
       account = await GoogleSignIn.instance.authenticate(
-        scopeHint: [
-          'https://www.googleapis.com/auth/userinfo.profile',
-        ],
+        scopeHint: ['https://www.googleapis.com/auth/userinfo.profile'],
       );
     } on GoogleSignInException catch (e, stack) {
       if (e.code == GoogleSignInExceptionCode.canceled) {
