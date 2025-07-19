@@ -308,8 +308,9 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
 
     switch (action) {
       case _WorkLogAction.edit:
-        final updated = await Navigator.of(context).push(
-          EditWorkLogScreen.route(workLogIncludedHouseWork),
+        final updated = await EditWorkLogDialog.show(
+          context,
+          workLogIncludedHouseWork,
         );
         if (updated == true) {
           // 更新されたため、リストを更新する
