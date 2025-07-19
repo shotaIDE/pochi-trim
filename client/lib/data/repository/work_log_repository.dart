@@ -118,7 +118,7 @@ class WorkLogRepository {
         'completedAt': newDateTime,
       });
     } on FirebaseException catch (e, stack) {
-      _logger.warning('家事ログ更新エラー', e);
+      _logger.warning('Failed to update work log', e);
 
       unawaited(_errorReportService.recordError(e, stack));
 
