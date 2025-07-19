@@ -17,9 +17,9 @@ class ErrorReportService {
   Future<void> setUserId(String userId) async {
     try {
       await FirebaseCrashlytics.instance.setUserIdentifier(userId);
-      _logger.info('CrashlyticsにユーザーID設定完了: $userId');
+      _logger.info('Set user ID in Crashlytics: $userId');
     } on Exception catch (e, stack) {
-      _logger.warning('CrashlyticsのユーザーID設定に失敗しました', e);
+      _logger.warning('Failed to set user ID in Crashlytics', e);
 
       await FirebaseCrashlytics.instance.recordError(e, stack);
     }
@@ -29,9 +29,9 @@ class ErrorReportService {
   Future<void> clearUserId() async {
     try {
       await FirebaseCrashlytics.instance.setUserIdentifier('');
-      _logger.info('CrashlyticsのユーザーIDをクリアしました');
+      _logger.info('Cleared user ID in Crashlytics');
     } on Exception catch (e, stack) {
-      _logger.warning('CrashlyticsのユーザーIDクリアに失敗しました', e);
+      _logger.warning('Failed to clear user ID in Crashlytics', e);
 
       await FirebaseCrashlytics.instance.recordError(e, stack);
     }
@@ -49,11 +49,9 @@ class ErrorReportService {
         stackTrace,
         fatal: fatal,
       );
-      _logger.info('Crashlyticsにエラーを記録しました: $exception');
-    } on Exception catch (e, stack) {
-      _logger.warning('Crashlyticsへのエラー記録に失敗しました', e);
-
-      await FirebaseCrashlytics.instance.recordError(e, stack);
+      _logger.info('Recorded error in Crashlytics: $exception');
+    } on Exception catch (e) {
+      _logger.warning('Failed to record error in Crashlytics', e);
     }
   }
 }
