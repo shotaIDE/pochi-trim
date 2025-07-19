@@ -148,14 +148,6 @@ class _EditWorkLogDialogState extends ConsumerState<EditWorkLogDialog> {
   }
 
   Future<void> _saveWorkLog() async {
-    // 未来の日時をチェック
-    if (_selectedDateTime.isAfter(DateTime.now())) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('未来の日時は設定できません')),
-      );
-      return;
-    }
-
     try {
       await ref.read(
         updateWorkLogDateTimeProvider(
@@ -163,23 +155,31 @@ class _EditWorkLogDialogState extends ConsumerState<EditWorkLogDialog> {
           _selectedDateTime,
         ).future,
       );
-
+    } on UpdateWorkLogException catch (e) {
       if (!mounted) {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事ログの日時を更新しました')),
-      );
-      Navigator.of(context).pop(true);
-    } on UpdateWorkLogException {
-      if (!mounted) {
-        return;
-      }
+      final message = switch (e) {
+        UpdateWorkLogExceptionFutureDateTime() => '未来の日時は設定できません',
+        UpdateWorkLogExceptionUncategorized() =>
+          '家事ログの更新に失敗しました。しばらくしてから再度お試しください',
+      };
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('家事ログの更新に失敗しました。しばらくしてから再度お試しください')),
+        SnackBar(content: Text(message)),
       );
+      return;
     }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('家事ログの日時を更新しました')),
+    );
+
+    Navigator.of(context).pop(true);
   }
 }

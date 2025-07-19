@@ -110,7 +110,7 @@ class WorkLogRepository {
   /// 家事ログの完了時刻を更新する
   ///
   /// Throws:
-  ///   - [UpdateWorkLogException] - Firebaseエラー、ネットワークエラー、
+  ///   - [UpdateWorkLogException.uncategorized] - Firebaseエラー、ネットワークエラー、
   ///     権限エラーなどで更新に失敗した場合
   Future<void> updateDateTime(String id, DateTime newDateTime) async {
     try {
@@ -122,7 +122,7 @@ class WorkLogRepository {
 
       unawaited(_errorReportService.recordError(e, stack));
 
-      throw const UpdateWorkLogException();
+      throw const UpdateWorkLogException.uncategorized();
     }
   }
 
