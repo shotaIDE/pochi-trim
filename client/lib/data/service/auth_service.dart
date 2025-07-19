@@ -277,15 +277,13 @@ class AuthService {
     }
 
     _logger.info(
-      'Googleアカウントでサインインしました: '
-      'ユーザーID = ${account.id}, '
-      '表示名 = ${account.displayName}, '
-      '写真URL = ${account.photoUrl}',
+      'Signed in Google account: '
+      'user ID = ${account.id}, '
+      'display name = ${account.displayName}, '
+      'photo URL = ${account.photoUrl}',
     );
 
-    return firebase_auth.GoogleAuthProvider.credential(
-      idToken: idToken,
-    );
+    return firebase_auth.GoogleAuthProvider.credential(idToken: idToken);
   }
 
   firebase_auth.AppleAuthProvider _getAppleAuthProvider() {
