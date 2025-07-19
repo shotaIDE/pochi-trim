@@ -111,17 +111,19 @@ class _EditWorkLogDialogState extends ConsumerState<EditWorkLogDialog> {
       locale: const Locale('ja', 'JP'),
     );
 
-    if (picked != null) {
-      setState(() {
-        _selectedDateTime = DateTime(
-          picked.year,
-          picked.month,
-          picked.day,
-          _selectedDateTime.hour,
-          _selectedDateTime.minute,
-        );
-      });
+    if (picked == null) {
+      return;
     }
+
+    setState(() {
+      _selectedDateTime = DateTime(
+        picked.year,
+        picked.month,
+        picked.day,
+        _selectedDateTime.hour,
+        _selectedDateTime.minute,
+      );
+    });
   }
 
   Future<void> _selectTime() async {
@@ -130,17 +132,19 @@ class _EditWorkLogDialogState extends ConsumerState<EditWorkLogDialog> {
       initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
     );
 
-    if (picked != null) {
-      setState(() {
-        _selectedDateTime = DateTime(
-          _selectedDateTime.year,
-          _selectedDateTime.month,
-          _selectedDateTime.day,
-          picked.hour,
-          picked.minute,
-        );
-      });
+    if (picked == null) {
+      return;
     }
+
+    setState(() {
+      _selectedDateTime = DateTime(
+        _selectedDateTime.year,
+        _selectedDateTime.month,
+        _selectedDateTime.day,
+        picked.hour,
+        picked.minute,
+      );
+    });
   }
 
   Future<void> _saveWorkLog() async {
