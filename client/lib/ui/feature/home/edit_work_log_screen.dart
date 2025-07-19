@@ -48,7 +48,6 @@ class _EditWorkLogDialogState extends ConsumerState<EditWorkLogDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 日付選択
           ListTile(
             leading: const Icon(Icons.calendar_today),
             title: const Text('日付'),
@@ -56,9 +55,7 @@ class _EditWorkLogDialogState extends ConsumerState<EditWorkLogDialog> {
               DateFormat('yyyy/MM/dd (E)', 'ja').format(_selectedDateTime),
             ),
             onTap: _selectDate,
-            contentPadding: EdgeInsets.zero,
           ),
-          // 時刻選択
           ListTile(
             leading: const Icon(Icons.access_time),
             title: const Text('時刻'),
@@ -66,7 +63,6 @@ class _EditWorkLogDialogState extends ConsumerState<EditWorkLogDialog> {
               DateFormat('HH:mm').format(_selectedDateTime),
             ),
             onTap: _selectTime,
-            contentPadding: EdgeInsets.zero,
           ),
         ],
       ),
