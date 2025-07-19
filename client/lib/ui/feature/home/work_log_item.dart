@@ -9,11 +9,13 @@ class WorkLogItem extends ConsumerStatefulWidget {
     required this.workLogIncludedHouseWork,
     required this.onDuplicate,
     required this.onDelete,
+    this.onLongPress,
   });
 
   final WorkLogIncludedHouseWork workLogIncludedHouseWork;
   final void Function(WorkLogIncludedHouseWork) onDuplicate;
   final void Function(WorkLogIncludedHouseWork) onDelete;
+  final void Function(WorkLogIncludedHouseWork)? onLongPress;
 
   @override
   ConsumerState<WorkLogItem> createState() => _WorkLogItemState();
@@ -90,20 +92,25 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
     );
 
     final body = IntrinsicHeight(
-      child: Row(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: completedContentPart,
+      child: InkWell(
+        onLongPress: widget.onLongPress != null
+            ? () => widget.onLongPress!(widget.workLogIncludedHouseWork)
+            : null,
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: completedContentPart,
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: verticalDivider,
-          ),
-          duplicatePart,
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: verticalDivider,
+            ),
+            duplicatePart,
+          ],
+        ),
       ),
     );
 

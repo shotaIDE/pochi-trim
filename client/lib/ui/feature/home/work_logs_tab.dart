@@ -6,10 +6,13 @@ import 'package:pochi_trim/data/model/house_work.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
+import 'package:pochi_trim/ui/feature/home/edit_work_log_screen.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_item.dart';
 import 'package:pochi_trim/ui/feature/home/work_logs_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+
+enum _WorkLogAction { edit, delete }
 
 // 完了した家事ログ一覧のタブ
 class WorkLogsTab extends ConsumerStatefulWidget {
@@ -135,6 +138,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
             workLogIncludedHouseWork: workLogIncludedHouseWork,
             onDuplicate: widget.onDuplicateButtonTap,
             onDelete: _onDelete,
+            onLongPress: _onLongPress,
           ),
         ),
       ),
@@ -265,6 +269,55 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
         ),
       ),
     );
+  }
+
+  Future<void> _onLongPress(
+    WorkLogIncludedHouseWork workLogIncludedHouseWork,
+  ) async {
+    final action = await showModalBottomSheet<_WorkLogAction>(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('編集する'),
+                onTap: () => Navigator.of(context).pop(_WorkLogAction.edit),
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('削除する'),
+                onTap: () => Navigator.of(context).pop(_WorkLogAction.delete),
+              ),
+            ],
+          ),
+        );
+      },
+      clipBehavior: Clip.antiAlias,
+    );
+
+    if (action == null) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    switch (action) {
+      case _WorkLogAction.edit:
+        final updated = await Navigator.of(context).push(
+          EditWorkLogScreen.route(workLogIncludedHouseWork),
+        );
+        if (updated == true) {
+          // 更新されたため、リストを更新する
+          ref.invalidate(workLogsIncludedHouseWorkProvider);
+        }
+      case _WorkLogAction.delete:
+        await _onDelete(workLogIncludedHouseWork);
+    }
   }
 
   Future<void> _undoDelete(WorkLog workLog) async {
