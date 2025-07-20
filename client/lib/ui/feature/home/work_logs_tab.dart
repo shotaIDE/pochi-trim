@@ -11,10 +11,9 @@ import 'package:pochi_trim/data/repository/work_log_repository.dart';
 import 'package:pochi_trim/ui/feature/home/edit_work_log_presenter.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_item.dart';
+import 'package:pochi_trim/ui/feature/home/work_log_modal_bottom_sheet.dart';
 import 'package:pochi_trim/ui/feature/home/work_logs_presenter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-
-enum _WorkLogAction { edit, delete }
 
 // 完了した家事ログ一覧のタブ
 class WorkLogsTab extends ConsumerStatefulWidget {
@@ -277,30 +276,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
   Future<void> _onLongPress(
     WorkLogIncludedHouseWork workLogIncludedHouseWork,
   ) async {
-    final action = await showModalBottomSheet<_WorkLogAction>(
-      context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text('編集する'),
-                onTap: () => Navigator.of(context).pop(_WorkLogAction.edit),
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete),
-                title: const Text('削除する'),
-                onTap: () => Navigator.of(context).pop(_WorkLogAction.delete),
-              ),
-            ],
-          ),
-        );
-      },
-      clipBehavior: Clip.antiAlias,
-    );
-
+    final action = await showWorkLogActionModalBottomSheet(context);
     if (action == null) {
       return;
     }
@@ -310,9 +286,9 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     }
 
     switch (action) {
-      case _WorkLogAction.edit:
+      case WorkLogAction.edit:
         await _editWorkLog(workLogIncludedHouseWork);
-      case _WorkLogAction.delete:
+      case WorkLogAction.delete:
         await _onDelete(workLogIncludedHouseWork);
     }
   }
