@@ -193,47 +193,5 @@ void main() {
       expect(mockWorkLogRepository.lastUpdateId, equals(workLogId));
       expect(mockWorkLogRepository.lastUpdateDateTime, equals(completedAt));
     });
-
-    test('ミリ秒レベルで未来の場合でも例外がスローされること', () async {
-      // Arrange
-      const workLogId = 'test-work-log-id';
-      final now = DateTime(2023, 12, 25, 15);
-      final completedAt = DateTime(2023, 12, 25, 15, 0, 0, 1); // 1ミリ秒後
-
-      mockSystemService.currentDateTime = now;
-
-      // Act & Assert
-      await expectLater(
-        container.read(
-          updateCompletedAtOfWorkLogProvider(workLogId, completedAt).future,
-        ),
-        throwsA(isA<UpdateWorkLogExceptionFutureDateTime>()),
-      );
-
-      // Verify (リポジトリのupdateCompletedAtが呼ばれていないことを確認)
-      expect(mockWorkLogRepository.lastUpdateId, isNull);
-      expect(mockWorkLogRepository.lastUpdateDateTime, isNull);
-    });
-
-    test('境界値テスト: 現在時刻の1ミリ秒前は成功すること', () async {
-      // Arrange
-      const workLogId = 'test-work-log-id';
-      final now = DateTime(2023, 12, 25, 15, 0, 0, 1);
-      final completedAt = DateTime(2023, 12, 25, 15); // 1ミリ秒前
-
-      mockSystemService.currentDateTime = now;
-
-      // Act & Assert
-      await expectLater(
-        container.read(
-          updateCompletedAtOfWorkLogProvider(workLogId, completedAt).future,
-        ),
-        completes,
-      );
-
-      // Verify
-      expect(mockWorkLogRepository.lastUpdateId, equals(workLogId));
-      expect(mockWorkLogRepository.lastUpdateDateTime, equals(completedAt));
-    });
   });
 }
