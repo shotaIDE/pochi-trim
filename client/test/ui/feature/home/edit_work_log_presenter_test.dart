@@ -67,7 +67,7 @@ class MockErrorReportService extends ErrorReportService {
 }
 
 void main() {
-  group('updateCompletedAtOfWorkLog', () {
+  group('家事ログの完了日時を更新する', () {
     late ProviderContainer container;
     late MockWorkLogRepository mockWorkLogRepository;
     late MockSystemService mockSystemService;
@@ -89,7 +89,7 @@ void main() {
       mockWorkLogRepository.resetMock();
     });
 
-    test('現在時刻より過去の日時で更新が成功すること', () async {
+    test('現在時刻より過去の日時で更新できること', () async {
       // Arrange
       const workLogId = 'test-work-log-id';
       final now = DateTime(2023, 12, 25, 15);
@@ -110,7 +110,7 @@ void main() {
       expect(mockWorkLogRepository.lastUpdateDateTime, equals(completedAt));
     });
 
-    test('現在時刻と同じ日時で更新が成功すること', () async {
+    test('現在時刻と同じ日時で更新できること', () async {
       // Arrange
       const workLogId = 'test-work-log-id';
       final now = DateTime(2023, 12, 25, 15);
@@ -131,7 +131,7 @@ void main() {
       expect(mockWorkLogRepository.lastUpdateDateTime, equals(completedAt));
     });
 
-    test('未来の日時が指定された場合にfutureDateTimeException例外がスローされること', () async {
+    test('現在時刻より未来の日時では更新できないこと', () async {
       // Arrange
       const workLogId = 'test-work-log-id';
       final now = DateTime(2023, 12, 25, 15);
@@ -152,7 +152,7 @@ void main() {
       expect(mockWorkLogRepository.lastUpdateDateTime, isNull);
     });
 
-    test('リポジトリでuncategorized例外がスローされた場合にそのまま伝播されること', () async {
+    test('データストアに対する更新が失敗した場合、更新できないこと', () async {
       // Arrange
       const workLogId = 'test-work-log-id';
       final now = DateTime(2023, 12, 25, 15);
