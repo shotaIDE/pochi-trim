@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/model/add_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
+import 'package:pochi_trim/data/model/update_work_log_exception.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/house_repository.dart';
@@ -103,6 +104,28 @@ class WorkLogRepository {
       unawaited(_errorReportService.recordError(e, stack));
 
       throw const DeleteWorkLogException();
+    }
+  }
+
+  /// 家事ログの完了時刻を更新する
+  ///
+  /// Throws:
+  ///   - [UpdateWorkLogException.uncategorized] - Firebaseエラー、ネットワークエラー、
+  ///     権限エラーなどで更新に失敗した場合
+  Future<void> updateCompletedAt(
+    String id, {
+    required DateTime completedAt,
+  }) async {
+    try {
+      await _getWorkLogsCollection().doc(id).update({
+        'completedAt': completedAt,
+      });
+    } on FirebaseException catch (e, stack) {
+      _logger.warning('Failed to update work log', e);
+
+      unawaited(_errorReportService.recordError(e, stack));
+
+      throw const UpdateWorkLogException.uncategorized();
     }
   }
 

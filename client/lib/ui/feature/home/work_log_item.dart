@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:pochi_trim/ui/component/house_work_icon.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 
 class WorkLogItem extends ConsumerStatefulWidget {
@@ -9,11 +10,13 @@ class WorkLogItem extends ConsumerStatefulWidget {
     required this.workLogIncludedHouseWork,
     required this.onDuplicate,
     required this.onDelete,
+    required this.onLongPress,
   });
 
   final WorkLogIncludedHouseWork workLogIncludedHouseWork;
   final void Function(WorkLogIncludedHouseWork) onDuplicate;
   final void Function(WorkLogIncludedHouseWork) onDelete;
+  final void Function(WorkLogIncludedHouseWork) onLongPress;
 
   @override
   ConsumerState<WorkLogItem> createState() => _WorkLogItemState();
@@ -24,19 +27,7 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
   Widget build(BuildContext context) {
     final houseWork = widget.workLogIncludedHouseWork.houseWork;
 
-    final houseWorkIcon = Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      width: 40,
-      height: 40,
-      child: Text(
-        houseWork.icon,
-        style: Theme.of(context).textTheme.headlineSmall,
-      ),
-    );
+    final houseWorkIcon = HouseWorkIcon(icon: houseWork.icon);
     final houseWorkTitleText = Text(
       houseWork.title,
       style: Theme.of(context).textTheme.titleMedium,
@@ -90,20 +81,29 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
     );
 
     final body = IntrinsicHeight(
-      child: Row(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: completedContentPart,
+      // 以下の理由で `GestureDetector` ではなく `InkWell` を使用している
+      // - ロングタップが検知された時に Haptic フィードバックが発生するため、UXが良い
+      // - 反応精度が高い
+      child: InkWell(
+        onLongPress: () => widget.onLongPress(widget.workLogIncludedHouseWork),
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: completedContentPart,
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: verticalDivider,
-          ),
-          duplicatePart,
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: verticalDivider,
+            ),
+            duplicatePart,
+          ],
+        ),
       ),
     );
 

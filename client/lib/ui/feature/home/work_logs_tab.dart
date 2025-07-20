@@ -3,9 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/model/add_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/data/model/update_work_log_exception.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
+import 'package:pochi_trim/ui/feature/home/edit_work_log_dialog.dart';
+import 'package:pochi_trim/ui/feature/home/edit_work_log_presenter.dart';
+import 'package:pochi_trim/ui/feature/home/work_log_action_modal_bottom_sheet.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_item.dart';
 import 'package:pochi_trim/ui/feature/home/work_logs_presenter.dart';
@@ -69,6 +73,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
             ),
             onDuplicate: (_) {},
             onDelete: (_) {},
+            onLongPress: (_) {},
           );
 
           return Skeletonizer(
@@ -135,6 +140,7 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
             workLogIncludedHouseWork: workLogIncludedHouseWork,
             onDuplicate: widget.onDuplicateButtonTap,
             onDelete: _onDelete,
+            onLongPress: _onLongPress,
           ),
         ),
       ),
@@ -267,6 +273,26 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     );
   }
 
+  Future<void> _onLongPress(
+    WorkLogIncludedHouseWork workLogIncludedHouseWork,
+  ) async {
+    final action = await showWorkLogActionModalBottomSheet(context);
+    if (action == null) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    switch (action) {
+      case WorkLogAction.edit:
+        await _editWorkLog(workLogIncludedHouseWork);
+      case WorkLogAction.delete:
+        await _onDelete(workLogIncludedHouseWork);
+    }
+  }
+
   Future<void> _undoDelete(WorkLog workLog) async {
     final workLogRepository = ref.read(workLogRepositoryProvider);
 
@@ -292,5 +318,49 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('家事ログを元に戻しました。')));
+  }
+
+  Future<void> _editWorkLog(
+    WorkLogIncludedHouseWork workLogIncludedHouseWork,
+  ) async {
+    final newCompletedAt = await showEditWorkLogDialog(
+      context,
+      workLogIncludedHouseWork: workLogIncludedHouseWork,
+    );
+    if (newCompletedAt == null) {
+      return;
+    }
+
+    try {
+      await ref.read(
+        updateCompletedAtOfWorkLogProvider(
+          workLogIncludedHouseWork.id,
+          newCompletedAt,
+        ).future,
+      );
+    } on UpdateWorkLogException catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      final message = switch (e) {
+        UpdateWorkLogExceptionFutureDateTime() => '未来の日時は設定できません',
+        UpdateWorkLogExceptionUncategorized() =>
+          '家事ログの更新に失敗しました。しばらくしてから再度お試しください',
+      };
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('家事ログの日時を更新しました')),
+    );
   }
 }
