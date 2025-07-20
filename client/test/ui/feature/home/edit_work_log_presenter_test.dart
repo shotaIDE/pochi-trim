@@ -141,7 +141,7 @@ void main() {
       ).called(1);
     });
 
-    test('データストアに対する更新が正く行われること', () async {
+    test('データストアに対する更新が正しく行われること', () async {
       const workLogId = 'specific-work-log-id';
       final now = DateTime(2025, 7, 20, 15);
       final completedAt = DateTime(2025, 7, 20, 10, 15, 30); // 具体的な時刻
