@@ -53,7 +53,12 @@ platform :android do
         release_status: 'completed',
         track: 'internal',
         json_key: google_play_json_key_path,
-        skip_upload_changelogs: false
+        # Prod用のメタデータやスクリーンショットがリポジトリにはコミットされているため、
+        # Dev向けにはアップロードしないようにする。
+        skip_upload_metadata: true,
+        skip_upload_changelogs: false,
+        skip_upload_images: true,
+        skip_upload_screenshots: true
       )
     ensure
       # 処理が終了したら、バックアップがある場合は元に戻す
