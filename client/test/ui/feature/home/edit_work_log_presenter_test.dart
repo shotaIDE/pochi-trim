@@ -125,7 +125,6 @@ void main() {
         ),
       ).thenThrow(const UpdateWorkLogException.uncategorized());
 
-      // Act & Assert
       await expectLater(
         container.read(
           updateCompletedAtOfWorkLogProvider(workLogId, completedAt).future,
@@ -143,7 +142,6 @@ void main() {
     });
 
     test('正しい引数でリポジトリのupdateCompletedAtメソッドが呼ばれること', () async {
-      // Arrange
       const workLogId = 'specific-work-log-id';
       final now = DateTime(2023, 12, 25, 15);
       final completedAt = DateTime(2023, 12, 25, 10, 15, 30); // 具体的な時刻
