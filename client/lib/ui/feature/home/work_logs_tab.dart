@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:pochi_trim/data/model/add_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
@@ -8,6 +7,7 @@ import 'package:pochi_trim/data/model/update_work_log_exception.dart';
 import 'package:pochi_trim/data/model/work_log.dart';
 import 'package:pochi_trim/data/repository/dao/add_work_log_args.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
+import 'package:pochi_trim/ui/feature/home/edit_work_log_dialog.dart';
 import 'package:pochi_trim/ui/feature/home/edit_work_log_presenter.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_item.dart';
@@ -323,13 +323,10 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
   Future<void> _editWorkLog(
     WorkLogIncludedHouseWork workLogIncludedHouseWork,
   ) async {
-    final newCompletedAt = await showDialog<DateTime>(
-      context: context,
-      builder: (context) => _EditWorkLogDialog(
-        workLogIncludedHouseWork: workLogIncludedHouseWork,
-      ),
+    final newCompletedAt = await showEditWorkLogDialog(
+      context,
+      workLogIncludedHouseWork: workLogIncludedHouseWork,
     );
-
     if (newCompletedAt == null) {
       return;
     }
@@ -365,135 +362,5 @@ class _WorkLogsTabState extends ConsumerState<WorkLogsTab> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('家事ログの日時を更新しました')),
     );
-  }
-}
-
-class _EditWorkLogDialog extends ConsumerStatefulWidget {
-  const _EditWorkLogDialog({
-    required this.workLogIncludedHouseWork,
-  });
-
-  final WorkLogIncludedHouseWork workLogIncludedHouseWork;
-
-  @override
-  ConsumerState<_EditWorkLogDialog> createState() => _EditWorkLogDialogState();
-}
-
-class _EditWorkLogDialogState extends ConsumerState<_EditWorkLogDialog> {
-  late DateTime _selectedDateTime;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _selectedDateTime = widget.workLogIncludedHouseWork.completedAt;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final houseWork = widget.workLogIncludedHouseWork.houseWork;
-
-    return AlertDialog(
-      title: Row(
-        spacing: 12,
-        children: [
-          Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            width: 32,
-            height: 32,
-            child: Text(
-              houseWork.icon,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              houseWork.title,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.calendar_today),
-            title: const Text('日付'),
-            subtitle: Text(
-              DateFormat('yyyy/MM/dd (E)', 'ja').format(_selectedDateTime),
-            ),
-            onTap: _selectDate,
-          ),
-          ListTile(
-            leading: const Icon(Icons.access_time),
-            title: const Text('時刻'),
-            subtitle: Text(
-              DateFormat('HH:mm').format(_selectedDateTime),
-            ),
-            onTap: _selectTime,
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('キャンセル'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(_selectedDateTime),
-          child: const Text('保存'),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _selectDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDateTime,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-      locale: const Locale('ja', 'JP'),
-    );
-
-    if (picked == null) {
-      return;
-    }
-
-    setState(() {
-      _selectedDateTime = DateTime(
-        picked.year,
-        picked.month,
-        picked.day,
-        _selectedDateTime.hour,
-        _selectedDateTime.minute,
-      );
-    });
-  }
-
-  Future<void> _selectTime() async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
-    );
-
-    if (picked == null) {
-      return;
-    }
-
-    setState(() {
-      _selectedDateTime = DateTime(
-        _selectedDateTime.year,
-        _selectedDateTime.month,
-        _selectedDateTime.day,
-        picked.hour,
-        picked.minute,
-      );
-    });
   }
 }
