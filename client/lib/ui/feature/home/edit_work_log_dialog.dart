@@ -74,7 +74,7 @@ class _EditWorkLogDialogState extends ConsumerState<_EditWorkLogDialog> {
             leading: const Icon(Icons.calendar_today),
             title: const Text('日付'),
             subtitle: Text(
-              DateFormat('yyyy/MM/dd (E)', 'ja').format(_selectedDateTime),
+              DateFormat('yyyy/MM/dd (E)').format(_selectedDateTime),
             ),
             onTap: _selectDate,
           ),
