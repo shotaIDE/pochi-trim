@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 
@@ -17,7 +16,7 @@ Future<DateTime?> showEditWorkLogDialog(
   );
 }
 
-class _EditWorkLogDialog extends ConsumerStatefulWidget {
+class _EditWorkLogDialog extends StatefulWidget {
   const _EditWorkLogDialog({
     required this.workLogIncludedHouseWork,
   });
@@ -25,10 +24,10 @@ class _EditWorkLogDialog extends ConsumerStatefulWidget {
   final WorkLogIncludedHouseWork workLogIncludedHouseWork;
 
   @override
-  ConsumerState<_EditWorkLogDialog> createState() => _EditWorkLogDialogState();
+  State<_EditWorkLogDialog> createState() => _EditWorkLogDialogState();
 }
 
-class _EditWorkLogDialogState extends ConsumerState<_EditWorkLogDialog> {
+class _EditWorkLogDialogState extends State<_EditWorkLogDialog> {
   late DateTime _selectedDateTime;
 
   @override
