@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 enum HouseWorkIconSize {
   small(32),
-  medium(40),
-  large(64);
+  medium(40);
 
   const HouseWorkIconSize(this.value);
   final double value;
