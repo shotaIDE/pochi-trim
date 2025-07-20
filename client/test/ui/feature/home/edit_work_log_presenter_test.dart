@@ -14,7 +14,7 @@ class MockWorkLogRepository extends WorkLogRepository {
         errorReportService: MockErrorReportService(),
       );
 
-  bool _shouldThrowException = false;
+  var _shouldThrowException = false;
   UpdateWorkLogException? _exceptionToThrow;
   String? _lastUpdateId;
   DateTime? _lastUpdateDateTime;
@@ -49,14 +49,10 @@ class MockWorkLogRepository extends WorkLogRepository {
 }
 
 class MockSystemService extends SystemService {
-  DateTime _currentDateTime = DateTime(2023, 12, 25, 15, 0, 0);
-
-  void setCurrentDateTime(DateTime dateTime) {
-    _currentDateTime = dateTime;
-  }
+  var currentDateTime = DateTime(2023, 12, 25, 15);
 
   @override
-  DateTime getCurrentDateTime() => _currentDateTime;
+  DateTime getCurrentDateTime() => currentDateTime;
 }
 
 class MockErrorReportService extends ErrorReportService {
@@ -96,10 +92,10 @@ void main() {
     test('現在時刻より過去の日時で更新が成功すること', () async {
       // Arrange
       const workLogId = 'test-work-log-id';
-      final now = DateTime(2023, 12, 25, 15, 0, 0);
-      final completedAt = DateTime(2023, 12, 25, 14, 30, 0); // 30分前
+      final now = DateTime(2023, 12, 25, 15);
+      final completedAt = DateTime(2023, 12, 25, 14, 30); // 30分前
 
-      mockSystemService.setCurrentDateTime(now);
+      mockSystemService.currentDateTime = now;
 
       // Act & Assert (例外がスローされないことを確認)
       await expectLater(
@@ -117,10 +113,10 @@ void main() {
     test('現在時刻と同じ日時で更新が成功すること', () async {
       // Arrange
       const workLogId = 'test-work-log-id';
-      final now = DateTime(2023, 12, 25, 15, 0, 0);
+      final now = DateTime(2023, 12, 25, 15);
       final completedAt = now; // 現在時刻と同じ
 
-      mockSystemService.setCurrentDateTime(now);
+      mockSystemService.currentDateTime = now;
 
       // Act & Assert (例外がスローされないことを確認)
       await expectLater(
@@ -138,10 +134,10 @@ void main() {
     test('未来の日時が指定された場合にfutureDateTimeException例外がスローされること', () async {
       // Arrange
       const workLogId = 'test-work-log-id';
-      final now = DateTime(2023, 12, 25, 15, 0, 0);
-      final completedAt = DateTime(2023, 12, 25, 16, 0, 0); // 1時間後
+      final now = DateTime(2023, 12, 25, 15);
+      final completedAt = DateTime(2023, 12, 25, 16); // 1時間後
 
-      mockSystemService.setCurrentDateTime(now);
+      mockSystemService.currentDateTime = now;
 
       // Act & Assert
       await expectLater(
@@ -159,10 +155,10 @@ void main() {
     test('リポジトリでuncategorized例外がスローされた場合にそのまま伝播されること', () async {
       // Arrange
       const workLogId = 'test-work-log-id';
-      final now = DateTime(2023, 12, 25, 15, 0, 0);
-      final completedAt = DateTime(2023, 12, 25, 14, 30, 0); // 30分前
+      final now = DateTime(2023, 12, 25, 15);
+      final completedAt = DateTime(2023, 12, 25, 14, 30); // 30分前
 
-      mockSystemService.setCurrentDateTime(now);
+      mockSystemService.currentDateTime = now;
       mockWorkLogRepository.setThrowException(
         const UpdateWorkLogException.uncategorized(),
       );
@@ -183,10 +179,10 @@ void main() {
     test('正しい引数でリポジトリのupdateCompletedAtメソッドが呼ばれること', () async {
       // Arrange
       const workLogId = 'specific-work-log-id';
-      final now = DateTime(2023, 12, 25, 15, 0, 0);
+      final now = DateTime(2023, 12, 25, 15);
       final completedAt = DateTime(2023, 12, 25, 10, 15, 30); // 具体的な時刻
 
-      mockSystemService.setCurrentDateTime(now);
+      mockSystemService.currentDateTime = now;
 
       // Act
       await container.read(
@@ -201,10 +197,10 @@ void main() {
     test('ミリ秒レベルで未来の場合でも例外がスローされること', () async {
       // Arrange
       const workLogId = 'test-work-log-id';
-      final now = DateTime(2023, 12, 25, 15, 0, 0, 0);
+      final now = DateTime(2023, 12, 25, 15);
       final completedAt = DateTime(2023, 12, 25, 15, 0, 0, 1); // 1ミリ秒後
 
-      mockSystemService.setCurrentDateTime(now);
+      mockSystemService.currentDateTime = now;
 
       // Act & Assert
       await expectLater(
@@ -223,9 +219,9 @@ void main() {
       // Arrange
       const workLogId = 'test-work-log-id';
       final now = DateTime(2023, 12, 25, 15, 0, 0, 1);
-      final completedAt = DateTime(2023, 12, 25, 15, 0, 0, 0); // 1ミリ秒前
+      final completedAt = DateTime(2023, 12, 25, 15); // 1ミリ秒前
 
-      mockSystemService.setCurrentDateTime(now);
+      mockSystemService.currentDateTime = now;
 
       // Act & Assert
       await expectLater(
