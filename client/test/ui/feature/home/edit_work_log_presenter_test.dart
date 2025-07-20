@@ -1,92 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:pochi_trim/data/model/update_work_log_exception.dart';
 import 'package:pochi_trim/data/repository/work_log_repository.dart';
-import 'package:pochi_trim/data/service/error_report_service.dart';
 import 'package:pochi_trim/data/service/system_service.dart';
 import 'package:pochi_trim/ui/feature/home/edit_work_log_presenter.dart';
 
-class MockWorkLogRepository extends WorkLogRepository {
-  MockWorkLogRepository()
-    : super(
-        houseId: 'test-house-id',
-        systemService: MockSystemService(),
-        errorReportService: MockErrorReportService(),
-      );
+class MockWorkLogRepository extends Mock implements WorkLogRepository {}
 
-  var _shouldThrowException = false;
-  UpdateWorkLogException? _exceptionToThrow;
-  String? _lastUpdateId;
-  DateTime? _lastUpdateDateTime;
-
-  void setThrowException(UpdateWorkLogException exception) {
-    _shouldThrowException = true;
-    _exceptionToThrow = exception;
-  }
-
-  void resetMock() {
-    _shouldThrowException = false;
-    _exceptionToThrow = null;
-    _lastUpdateId = null;
-    _lastUpdateDateTime = null;
-  }
-
-  @override
-  Future<void> updateCompletedAt(
-    String id, {
-    required DateTime completedAt,
-  }) async {
-    _lastUpdateId = id;
-    _lastUpdateDateTime = completedAt;
-
-    if (_shouldThrowException && _exceptionToThrow != null) {
-      throw _exceptionToThrow!;
-    }
-  }
-
-  String? get lastUpdateId => _lastUpdateId;
-  DateTime? get lastUpdateDateTime => _lastUpdateDateTime;
-}
-
-class MockSystemService extends SystemService {
-  var currentDateTime = DateTime(2023, 12, 25, 15);
-
-  @override
-  DateTime getCurrentDateTime() => currentDateTime;
-}
-
-class MockErrorReportService extends ErrorReportService {
-  @override
-  Future<void> recordError(
-    dynamic error,
-    StackTrace stackTrace, {
-    bool fatal = false,
-  }) async {
-    // テスト用の空実装
-  }
-}
+class MockSystemService extends Mock implements SystemService {}
 
 void main() {
   group('家事ログの完了日時を更新する', () {
-    late ProviderContainer container;
     late MockWorkLogRepository mockWorkLogRepository;
     late MockSystemService mockSystemService;
+
+    setUpAll(() {
+      registerFallbackValue(DateTime.now());
+    });
 
     setUp(() {
       mockWorkLogRepository = MockWorkLogRepository();
       mockSystemService = MockSystemService();
-
-      container = ProviderContainer(
-        overrides: [
-          workLogRepositoryProvider.overrideWithValue(mockWorkLogRepository),
-          systemServiceProvider.overrideWithValue(mockSystemService),
-        ],
-      );
-      addTearDown(container.dispose);
-    });
-
-    tearDown(() {
-      mockWorkLogRepository.resetMock();
     });
 
     test('現在時刻より過去の日時で更新できること', () async {
@@ -95,7 +30,20 @@ void main() {
       final now = DateTime(2023, 12, 25, 15);
       final completedAt = DateTime(2023, 12, 25, 14, 30); // 30分前
 
-      mockSystemService.currentDateTime = now;
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
+      when(
+        () => mockWorkLogRepository.updateCompletedAt(
+          workLogId,
+          completedAt: completedAt,
+        ),
+      ).thenAnswer((_) async {});
+
+      final container = ProviderContainer(
+        overrides: [
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+        ],
+      );
 
       // Act & Assert (例外がスローされないことを確認)
       await expectLater(
@@ -106,8 +54,15 @@ void main() {
       );
 
       // Verify
-      expect(mockWorkLogRepository.lastUpdateId, equals(workLogId));
-      expect(mockWorkLogRepository.lastUpdateDateTime, equals(completedAt));
+      verify(
+        () => mockWorkLogRepository.updateCompletedAt(
+          workLogId,
+          completedAt: completedAt,
+        ),
+      ).called(1);
+      verify(() => mockSystemService.getCurrentDateTime()).called(1);
+
+      container.dispose();
     });
 
     test('現在時刻と同じ日時で更新できること', () async {
@@ -116,7 +71,20 @@ void main() {
       final now = DateTime(2023, 12, 25, 15);
       final completedAt = now; // 現在時刻と同じ
 
-      mockSystemService.currentDateTime = now;
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
+      when(
+        () => mockWorkLogRepository.updateCompletedAt(
+          workLogId,
+          completedAt: completedAt,
+        ),
+      ).thenAnswer((_) async {});
+
+      final container = ProviderContainer(
+        overrides: [
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+        ],
+      );
 
       // Act & Assert (例外がスローされないことを確認)
       await expectLater(
@@ -127,8 +95,15 @@ void main() {
       );
 
       // Verify
-      expect(mockWorkLogRepository.lastUpdateId, equals(workLogId));
-      expect(mockWorkLogRepository.lastUpdateDateTime, equals(completedAt));
+      verify(
+        () => mockWorkLogRepository.updateCompletedAt(
+          workLogId,
+          completedAt: completedAt,
+        ),
+      ).called(1);
+      verify(() => mockSystemService.getCurrentDateTime()).called(1);
+
+      container.dispose();
     });
 
     test('現在時刻より未来の日時では更新できないこと', () async {
@@ -137,7 +112,14 @@ void main() {
       final now = DateTime(2023, 12, 25, 15);
       final completedAt = DateTime(2023, 12, 25, 16); // 1時間後
 
-      mockSystemService.currentDateTime = now;
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
+
+      final container = ProviderContainer(
+        overrides: [
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+        ],
+      );
 
       // Act & Assert
       await expectLater(
@@ -148,8 +130,15 @@ void main() {
       );
 
       // Verify (リポジトリのupdateCompletedAtが呼ばれていないことを確認)
-      expect(mockWorkLogRepository.lastUpdateId, isNull);
-      expect(mockWorkLogRepository.lastUpdateDateTime, isNull);
+      verifyNever(
+        () => mockWorkLogRepository.updateCompletedAt(
+          any(),
+          completedAt: any(named: 'completedAt'),
+        ),
+      );
+      verify(() => mockSystemService.getCurrentDateTime()).called(1);
+
+      container.dispose();
     });
 
     test('データストアに対する更新が失敗した場合、更新できないこと', () async {
@@ -158,9 +147,19 @@ void main() {
       final now = DateTime(2023, 12, 25, 15);
       final completedAt = DateTime(2023, 12, 25, 14, 30); // 30分前
 
-      mockSystemService.currentDateTime = now;
-      mockWorkLogRepository.setThrowException(
-        const UpdateWorkLogException.uncategorized(),
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
+      when(
+        () => mockWorkLogRepository.updateCompletedAt(
+          workLogId,
+          completedAt: completedAt,
+        ),
+      ).thenThrow(const UpdateWorkLogException.uncategorized());
+
+      final container = ProviderContainer(
+        overrides: [
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+        ],
       );
 
       // Act & Assert
@@ -172,8 +171,15 @@ void main() {
       );
 
       // Verify
-      expect(mockWorkLogRepository.lastUpdateId, equals(workLogId));
-      expect(mockWorkLogRepository.lastUpdateDateTime, equals(completedAt));
+      verify(
+        () => mockWorkLogRepository.updateCompletedAt(
+          workLogId,
+          completedAt: completedAt,
+        ),
+      ).called(1);
+      verify(() => mockSystemService.getCurrentDateTime()).called(1);
+
+      container.dispose();
     });
 
     test('正しい引数でリポジトリのupdateCompletedAtメソッドが呼ばれること', () async {
@@ -182,7 +188,20 @@ void main() {
       final now = DateTime(2023, 12, 25, 15);
       final completedAt = DateTime(2023, 12, 25, 10, 15, 30); // 具体的な時刻
 
-      mockSystemService.currentDateTime = now;
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
+      when(
+        () => mockWorkLogRepository.updateCompletedAt(
+          workLogId,
+          completedAt: completedAt,
+        ),
+      ).thenAnswer((_) async {});
+
+      final container = ProviderContainer(
+        overrides: [
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+        ],
+      );
 
       // Act
       await container.read(
@@ -190,8 +209,91 @@ void main() {
       );
 
       // Assert
-      expect(mockWorkLogRepository.lastUpdateId, equals(workLogId));
-      expect(mockWorkLogRepository.lastUpdateDateTime, equals(completedAt));
+      verify(
+        () => mockWorkLogRepository.updateCompletedAt(
+          workLogId,
+          completedAt: completedAt,
+        ),
+      ).called(1);
+      verify(() => mockSystemService.getCurrentDateTime()).called(1);
+
+      container.dispose();
+    });
+
+    test('ミリ秒レベルで未来の場合でも例外がスローされること', () async {
+      // Arrange
+      const workLogId = 'test-work-log-id';
+      final now = DateTime(2023, 12, 25, 15);
+      final completedAt = DateTime(2023, 12, 25, 15, 0, 0, 1); // 1ミリ秒後
+
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
+
+      final container = ProviderContainer(
+        overrides: [
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+        ],
+      );
+
+      // Act & Assert
+      await expectLater(
+        container.read(
+          updateCompletedAtOfWorkLogProvider(workLogId, completedAt).future,
+        ),
+        throwsA(isA<UpdateWorkLogExceptionFutureDateTime>()),
+      );
+
+      // Verify (リポジトリのupdateCompletedAtが呼ばれていないことを確認)
+      verifyNever(
+        () => mockWorkLogRepository.updateCompletedAt(
+          any(),
+          completedAt: any(named: 'completedAt'),
+        ),
+      );
+      verify(() => mockSystemService.getCurrentDateTime()).called(1);
+
+      container.dispose();
+    });
+
+    test('境界値テスト: 現在時刻の1ミリ秒前は成功すること', () async {
+      // Arrange
+      const workLogId = 'test-work-log-id';
+      final now = DateTime(2023, 12, 25, 15, 0, 0, 1);
+      final completedAt = DateTime(2023, 12, 25, 15); // 1ミリ秒前
+
+      when(() => mockSystemService.getCurrentDateTime()).thenReturn(now);
+      when(
+        () => mockWorkLogRepository.updateCompletedAt(
+          workLogId,
+          completedAt: completedAt,
+        ),
+      ).thenAnswer((_) async {});
+
+      final container = ProviderContainer(
+        overrides: [
+          workLogRepositoryProvider.overrideWith((_) => mockWorkLogRepository),
+          systemServiceProvider.overrideWith((_) => mockSystemService),
+        ],
+      );
+
+      // Act & Assert
+      await expectLater(
+        container.read(
+          updateCompletedAtOfWorkLogProvider(workLogId, completedAt).future,
+        ),
+        completes,
+      );
+
+      // Verify
+      verify(
+        () => mockWorkLogRepository.updateCompletedAt(
+          workLogId,
+          completedAt: completedAt,
+        ),
+      ).called(1);
+      verify(() => mockSystemService.getCurrentDateTime()).called(1);
+
+      container.dispose();
     });
   });
 }
