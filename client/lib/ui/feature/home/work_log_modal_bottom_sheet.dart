@@ -4,7 +4,7 @@ enum WorkLogAction { edit, delete }
 
 Future<WorkLogAction?> showWorkLogActionModalBottomSheet(
   BuildContext context,
-) async {
+) {
   return showModalBottomSheet<WorkLogAction>(
     context: context,
     builder: (BuildContext context) {
