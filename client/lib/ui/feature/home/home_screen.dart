@@ -6,6 +6,7 @@ import 'package:pochi_trim/data/model/debounce_work_log_exception.dart';
 import 'package:pochi_trim/data/model/delete_house_work_exception.dart';
 import 'package:pochi_trim/data/model/delete_work_log_exception.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/ui/component/house_work_icon.dart';
 import 'package:pochi_trim/ui/feature/analysis/analysis_screen.dart';
 import 'package:pochi_trim/ui/feature/home/add_house_work_screen.dart';
 import 'package:pochi_trim/ui/feature/home/home_presenter.dart';
@@ -786,19 +787,9 @@ class _QuickRegisterButton extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: 4,
             children: [
-              Container(
-                alignment: Alignment.center,
-                // TODO(ide): 共通化できる
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                width: 32,
-                height: 32,
-                child: Text(
-                  houseWork.icon,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
+              HouseWorkIcon(
+                icon: houseWork.icon,
+                size: HouseWorkIconSize.small,
               ),
               Text(
                 houseWork.title,

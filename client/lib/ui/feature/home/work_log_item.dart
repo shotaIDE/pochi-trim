@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:pochi_trim/ui/component/house_work_icon.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 
 class WorkLogItem extends ConsumerStatefulWidget {
@@ -26,19 +27,7 @@ class _WorkLogItemState extends ConsumerState<WorkLogItem> {
   Widget build(BuildContext context) {
     final houseWork = widget.workLogIncludedHouseWork.houseWork;
 
-    final houseWorkIcon = Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      width: 40,
-      height: 40,
-      child: Text(
-        houseWork.icon,
-        style: Theme.of(context).textTheme.headlineSmall,
-      ),
-    );
+    final houseWorkIcon = HouseWorkIcon(icon: houseWork.icon);
     final houseWorkTitleText = Text(
       houseWork.title,
       style: Theme.of(context).textTheme.titleMedium,

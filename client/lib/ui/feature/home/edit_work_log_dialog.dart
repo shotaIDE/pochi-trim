@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pochi_trim/ui/component/house_work_icon.dart';
 import 'package:pochi_trim/ui/feature/home/work_log_included_house_work.dart';
 
 Future<DateTime?> showEditWorkLogDialog(
@@ -45,19 +46,7 @@ class _EditWorkLogDialogState extends State<_EditWorkLogDialog> {
       title: Row(
         spacing: 12,
         children: [
-          Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            width: 32,
-            height: 32,
-            child: Text(
-              houseWork.icon,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
+          HouseWorkIcon(icon: houseWork.icon, size: HouseWorkIconSize.small),
           Expanded(
             child: Text(
               houseWork.title,

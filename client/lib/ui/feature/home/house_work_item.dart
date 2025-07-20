@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pochi_trim/data/model/house_work.dart';
+import 'package:pochi_trim/ui/component/house_work_icon.dart';
 
 class HouseWorkItem extends StatefulWidget {
   const HouseWorkItem({
@@ -39,19 +40,7 @@ class _HouseWorkItemState extends State<HouseWorkItem> {
               color: Theme.of(context).colorScheme.onSurface,
             ),
     );
-    final houseWorkIcon = Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      width: 40,
-      height: 40,
-      child: Text(
-        widget.houseWork.icon,
-        style: Theme.of(context).textTheme.headlineSmall,
-      ),
-    );
+    final houseWorkIcon = HouseWorkIcon(icon: widget.houseWork.icon);
     final houseWorkTitleText = Text(
       widget.houseWork.title,
       style: Theme.of(context).textTheme.titleMedium,
