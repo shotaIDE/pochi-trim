@@ -9,6 +9,10 @@ Future<WorkLogAction?> showWorkLogActionModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
       return SafeArea(
+        // ボトムシート全体は左右のセーフエリア内に収まるため、ボトムシート内のコンテンツは
+        // セーフエリアの左右の余白を無視して表示する
+        left: false,
+        right: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
