@@ -361,22 +361,6 @@ class _PriceTile extends StatelessWidget {
       price,
       style: Theme.of(context).textTheme.titleLarge,
     );
-    final lifetimeChip = Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 2,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        '買い切り',
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: Theme.of(context).colorScheme.onPrimaryContainer,
-        ),
-      ),
-    );
     final descriptionText = Text(
       description,
       style: Theme.of(context).textTheme.bodyMedium,
@@ -398,11 +382,36 @@ class _PriceTile extends StatelessWidget {
             spacing: 12,
             children: [
               priceText,
-              if (effectivePeriod == EffectivePeriod.lifetime) lifetimeChip,
+              if (effectivePeriod == EffectivePeriod.lifetime)
+                const _LifetimeChip(),
             ],
           ),
           descriptionText,
         ],
+      ),
+    );
+  }
+}
+
+class _LifetimeChip extends StatelessWidget {
+  const _LifetimeChip();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        '買い切り',
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
+        ),
       ),
     );
   }
