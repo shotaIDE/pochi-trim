@@ -362,16 +362,19 @@ class _PriceTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 8,
         children: [
+          Text(
+            title,
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
           Row(
             spacing: 16,
             children: [
               Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                price,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-              Text(price, style: Theme.of(context).textTheme.titleLarge),
               if (effectivePeriod == EffectivePeriod.lifetime)
                 Container(
                   padding: const EdgeInsets.symmetric(
