@@ -351,6 +351,21 @@ class _PriceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final titleText = Text(
+      title,
+      style: Theme.of(
+        context,
+      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+    );
+    final priceText = Text(
+      price,
+      style: Theme.of(context).textTheme.titleLarge,
+    );
+    final descriptionText = Text(
+      description,
+      style: Theme.of(context).textTheme.bodyMedium,
+    );
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -362,37 +377,41 @@ class _PriceTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 8,
         children: [
+          titleText,
           Row(
-            spacing: 16,
+            spacing: 12,
             children: [
-              Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              Text(price, style: Theme.of(context).textTheme.titleLarge),
+              priceText,
               if (effectivePeriod == EffectivePeriod.lifetime)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '買い切り',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ),
+                const _LifetimeChip(),
             ],
           ),
-          Text(description, style: Theme.of(context).textTheme.bodyMedium),
+          descriptionText,
         ],
+      ),
+    );
+  }
+}
+
+class _LifetimeChip extends StatelessWidget {
+  const _LifetimeChip();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        '買い切り',
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
+        ),
       ),
     );
   }
