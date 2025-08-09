@@ -6,7 +6,7 @@ part 'purchasable.freezed.dart';
 enum EffectivePeriod { lifetime, others }
 
 @freezed
-class Purchasable with _$Purchasable {
+abstract class Purchasable with _$Purchasable {
   const factory Purchasable({
     required String productId,
     required String title,
@@ -19,10 +19,9 @@ class Purchasable with _$Purchasable {
 
 extension PurchasableGenerator on Purchasable {
   static Purchasable fromPackage(Package package) {
-    final effectivePeriod =
-        package.packageType == PackageType.lifetime
-            ? EffectivePeriod.lifetime
-            : EffectivePeriod.others;
+    final effectivePeriod = package.packageType == PackageType.lifetime
+        ? EffectivePeriod.lifetime
+        : EffectivePeriod.others;
 
     return Purchasable(
       productId: package.storeProduct.identifier,
