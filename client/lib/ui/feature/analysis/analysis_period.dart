@@ -13,7 +13,7 @@ enum AnalysisPeriodIdentifier {
 }
 
 @freezed
-class AnalysisPeriodSelectItem with _$AnalysisPeriodSelectItem {
+abstract class AnalysisPeriodSelectItem with _$AnalysisPeriodSelectItem {
   const factory AnalysisPeriodSelectItem({
     required AnalysisPeriodIdentifier identifier,
     required bool unavailableBecauseProFeature,
