@@ -21,7 +21,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - name: Install reviewdog
         uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # v1
         with:
@@ -43,7 +43,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - name: Install reviewdog
         uses: reviewdog/action-setup@e04ffabe3898a0af8d0fb1af00c188831c4b5893 # v1
         with:
@@ -86,7 +86,7 @@ jobs:
       pull-requests: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
         with:
@@ -122,7 +122,7 @@ jobs:
     outputs:
       has-changed-related-files: ${{ steps.check-related-files.outputs.any_changed == 'true' }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           fetch-depth: 0
       - name: Check related files
@@ -141,7 +141,7 @@ jobs:
     if: needs.check-impact-ios.outputs.has-changed-related-files == 'true'
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
         with:
@@ -185,7 +185,7 @@ jobs:
     outputs:
       has-changed-related-files: ${{ steps.check-related-files.outputs.any_changed == 'true' }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           fetch-depth: 0
       - name: Check related files
@@ -204,7 +204,7 @@ jobs:
     if: needs.check-impact-android.outputs.has-changed-related-files == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
         with:
