@@ -5,7 +5,7 @@ publish_to: "none"
 version: 1.0.1+20
 
 environment:
-  sdk: 3.8.1
+  sdk: 3.9.0
 
 dependencies:
   cloud_firestore: 6.0.0
@@ -54,7 +54,7 @@ dev_dependencies:
   json_serializable: 6.9.5
   mockito:
   mocktail: 1.0.4
-  pedantic_mono: 1.32.0
+  pedantic_mono: 1.33.0
   riverpod_generator: 2.6.5
   riverpod_lint: 2.6.5
 
