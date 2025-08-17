@@ -32,6 +32,8 @@ jobs:
           files: "infra/functions/**"
   build-functions:
     name: Build functions
+    permissions:
+      contents: read
     needs: check-impact-functions
     if: needs.check-impact-functions.outputs.has-changed-related-files == 'true'
     runs-on: ubuntu-latest
