@@ -4,6 +4,8 @@
 
 家事にかかった時間をログに記録し、所要時間の分析を行う機能を実装する。これにより、ユーザーは家事の効率性を把握し、時間管理の改善に役立てることができる。
 
+**注意**: 本機能はフィーチャートグルの Ops トグルで ON/OFF できるように実装する。
+
 ## 現状の実装
 
 現在のシステムでは以下の機能が実装されている：
@@ -29,6 +31,12 @@
 ## 機能要件
 
 ### 1. 家事所要時間記録機能
+
+#### 1.0 フィーチャートグル制御
+
+- 本機能全体は Remote Config の`enableDurationAnalysis`パラメータで制御する
+- 機能が無効の場合、所要時間関連の UI 要素は表示されない
+- 機能が無効の場合、所要時間の記録・編集・分析は行われない
 
 #### 1.1 家事のデフォルト所要時間設定
 
@@ -179,6 +187,7 @@ houses/{houseId}/houseWorks/{houseWorkId}/workLogs/{workLogId}
 - 所要時間記録の有効/無効切り替え
 - 所要時間の単位設定（分/時間）
 - 所要時間の表示精度設定
+- フィーチャートグルの状態表示（有効/無効）
 
 ## 技術要件
 
@@ -230,7 +239,16 @@ Future<List<DurationTrend>> durationTrends(Ref ref) async {
 
 ### 2. サービス層
 
-#### 2.1 所要時間設定サービス
+#### 2.1 フィーチャートグルサービス
+
+```dart
+@riverpod
+bool isDurationAnalysisEnabled(Ref ref) {
+  return FirebaseRemoteConfig.instance.getBool('enableDurationAnalysis');
+}
+```
+
+#### 2.2 所要時間設定サービス
 
 ```dart
 class DurationSettingsService {
@@ -285,6 +303,7 @@ class WorkLogRepository {
 
    - `client/lib/data/service/duration_settings_service.dart`
    - `client/lib/data/service/duration_analysis_service.dart`
+   - `client/lib/data/service/remote_config_service.dart` - フィーチャートグル機能の追加
 
 3. **UI**
 
@@ -329,17 +348,20 @@ class WorkLogRepository {
 
 - デフォルト所要時間の設定値の妥当性を保つ必要がある
 - 家事ログの所要時間編集時の整合性を保つ必要がある
+- フィーチャートグルが無効の場合、既存の所要時間データは保持される
 
 ### 2. パフォーマンス
 
 - 大量のログデータに対する分析処理の最適化
 - リアルタイム更新の負荷軽減
+- フィーチャートグルが無効の場合、所要時間関連の処理をスキップしてパフォーマンスを向上
 
 ### 3. ユーザビリティ
 
 - デフォルト所要時間の設定手間を最小限に抑える
 - プリセット選択と手動入力の両方を提供し、柔軟性を確保する
 - 家事ログ編集時の所要時間変更を直感的に行える
+- フィーチャートグルが無効の場合、ユーザーに機能が利用できないことを適切に通知する
 
 ### 4. データ精度
 
