@@ -116,8 +116,8 @@ houses/{houseId}/houseWorks/{houseWorkId}/workLogs/{workLogId}
 
 #### 3.2 インデックス要件
 
-- `houseWorkId` + `completedAt` の複合インデックス
-- 既存のインデックスで十分対応可能
+- 現在の実装では追加のインデックスは不要
+- 全データを取得してクライアント側でフィルタリングしているため
 
 ## UI 要件
 
