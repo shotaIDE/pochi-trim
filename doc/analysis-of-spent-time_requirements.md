@@ -117,7 +117,7 @@ houses/{houseId}/houseWorks/{houseWorkId}/workLogs/{workLogId}
 #### 3.2 インデックス要件
 
 - `houseWorkId` + `completedAt` の複合インデックス
-- `defaultDurationMinutes` の単一インデックス（新規追加）
+- 既存のインデックスで十分対応可能
 
 ## UI 要件
 
