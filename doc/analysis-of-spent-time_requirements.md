@@ -34,7 +34,7 @@
 
 #### 1.0 フィーチャートグル制御
 
-- 本機能全体は Remote Config の`enableDurationAnalysis`パラメータで制御する
+- 本機能全体は Remote Config の`enableSpentDurationAnalysis`パラメータで制御する
 - 機能が無効の場合、所要時間関連の UI 要素は表示されない
 - 機能が無効の場合、所要時間の記録・編集・分析は行われない
 
@@ -243,8 +243,8 @@ Future<List<DurationTrend>> durationTrends(Ref ref) async {
 
 ```dart
 @riverpod
-bool isDurationAnalysisEnabled(Ref ref) {
-  return FirebaseRemoteConfig.instance.getBool('enableDurationAnalysis');
+bool isSpentDurationAnalysisEnabled(Ref ref) {
+  return FirebaseRemoteConfig.instance.getBool('enableSpentDurationAnalysis');
 }
 ```
 
