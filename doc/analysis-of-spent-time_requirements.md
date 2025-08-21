@@ -35,6 +35,7 @@
 #### 1.0 フィーチャートグル制御
 
 - 本機能全体は Remote Config の`enableSpentDurationAnalysis`パラメータで制御する
+- デフォルト値は`false`（無効）に設定し、段階的に有効化する
 - 機能が無効の場合、以前と同じ状態を保つ（所要時間関連の機能は追加されない）
 - 機能が有効の場合のみ、所要時間関連の UI 要素が表示され、記録・編集・分析が可能になる
 
@@ -246,6 +247,10 @@ Future<List<DurationTrend>> durationTrends(Ref ref) async {
 bool isSpentDurationAnalysisEnabled(Ref ref) {
   return FirebaseRemoteConfig.instance.getBool('enableSpentDurationAnalysis');
 }
+
+// Remote Configのデフォルト値設定
+// Firebase Consoleで以下のデフォルト値を設定する必要がある：
+// - enableSpentDurationAnalysis: false (デフォルトでは無効)
 ```
 
 #### 2.2 所要時間設定サービス
@@ -305,13 +310,19 @@ class WorkLogRepository {
    - `client/lib/data/service/duration_analysis_service.dart`
    - `client/lib/data/service/remote_config_service.dart` - フィーチャートグル機能の追加
 
-3. **UI**
+3. **Remote Config 設定**
+
+   - Firebase Console で`enableSpentDurationAnalysis`パラメータを追加
+   - デフォルト値を`false`に設定
+   - 段階的ロールアウト用の条件設定
+
+4. **UI**
 
    - `client/lib/ui/feature/analysis/duration_analysis_screen.dart`
    - `client/lib/ui/feature/analysis/duration_analysis_presenter.dart`
    - `client/lib/ui/feature/analysis/duration_chart_widget.dart`
 
-4. **テスト**
+5. **テスト**
    - `client/test/services/duration_settings_service_test.dart`
    - `client/test/services/duration_analysis_service_test.dart`
    - `client/test/ui/feature/analysis/duration_analysis_presenter_test.dart`
@@ -349,12 +360,14 @@ class WorkLogRepository {
 - デフォルト所要時間の設定値の妥当性を保つ必要がある
 - 家事ログの所要時間編集時の整合性を保つ必要がある
 - フィーチャートグルが無効の場合、既存の機能は影響を受けない
+- Remote Config のデフォルト値（false）により、初期状態では機能が無効
 
 ### 2. パフォーマンス
 
 - 大量のログデータに対する分析処理の最適化
 - リアルタイム更新の負荷軽減
 - フィーチャートグルが無効の場合、既存の処理に影響を与えない
+- Remote Config のデフォルト値により、初期リリース時は新機能の処理負荷が発生しない
 
 ### 3. ユーザビリティ
 
@@ -362,11 +375,27 @@ class WorkLogRepository {
 - プリセット選択と手動入力の両方を提供し、柔軟性を確保する
 - 家事ログ編集時の所要時間変更を直感的に行える
 - フィーチャートグルが無効の場合、既存の機能は通常通り動作する
+- Remote Config のデフォルト値により、初期リリース時は既存のユーザー体験を維持
 
 ### 4. データ精度
 
 - 所要時間の精度は分単位とする
 - 所要時間の入力値の妥当性を保つ（1 分以上、最大 1440 分まで）
+
+## リリース戦略
+
+### 1. 段階的ロールアウト
+
+- **Phase 1**: デフォルト値`false`でリリース（機能無効）
+- **Phase 2**: 内部テスト用に一部ユーザーに有効化
+- **Phase 3**: 段階的にユーザー数を増加
+- **Phase 4**: 全ユーザーに有効化
+
+### 2. リスク管理
+
+- 問題発生時は即座に Remote Config で無効化可能
+- 既存機能への影響は最小限に抑制
+- ユーザーフィードバックに基づく調整
 
 ## 将来の拡張可能性
 
