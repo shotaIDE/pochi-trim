@@ -61,7 +61,13 @@
 
 ### 2. 所要時間分析機能
 
-#### 2.1 所要時間の傾向分析
+#### 2.1 既存分析画面の拡張
+
+- フィーチャートグルが有効の場合、既存の分析画面の「回数」を「合計所用時間」に置き換えて表示
+- 家事の頻度分析、曜日ごとの頻度分析、時間帯ごとの頻度分析の全てに適用
+- 所要時間の単位は分で表示（例：「30 分」「2 時間 15 分」）
+
+#### 2.2 所要時間の傾向分析
 
 - **期間別平均所要時間**: 週別、月別の平均所要時間の推移
 - **曜日別平均所要時間**: 曜日ごとの平均所要時間
@@ -165,21 +171,22 @@ houses/{houseId}/houseWorks/{houseWorkId}/workLogs/{workLogId}
 
 ### 4. 分析画面の拡張
 
-#### 4.1 所要時間分析タブの追加
+#### 4.1 既存分析画面の表示切り替え
 
-- 既存の分析画面に「所要時間」タブを追加
-- 所要時間の基本統計情報を表示
+- フィーチャートグルが有効の場合、既存の分析画面の表示を「回数」から「合計所用時間」に切り替え
+- 家事の頻度分析、曜日ごとの頻度分析、時間帯ごとの頻度分析の全てに適用
+- 所要時間の表示形式は「分」または「時間分」で統一
 
-#### 4.2 所要時間の詳細分析画面
+#### 4.2 所要時間の詳細分析
 
-- 各家事の所要時間詳細を表示
-- グラフやチャートで可視化
-- 期間フィルタリング機能
+- 各家事の所要時間詳細を既存の分析画面で表示
+- グラフやチャートで所要時間を可視化
+- 既存の期間フィルタリング機能を活用
 
-#### 4.3 所要時間の比較画面
+#### 4.3 所要時間の比較機能
 
-- 複数の家事の所要時間を比較表示
-- 期間比較機能
+- 複数の家事の所要時間を既存の分析画面で比較表示
+- 既存の期間比較機能を活用
 
 ### 5. 設定画面の拡張
 
@@ -269,8 +276,17 @@ class DurationSettingsService {
 
 ```dart
 class DurationAnalysisService {
-  Future<List<DurationAnalysis>> analyzeDurations(String houseWorkId, DateTime from, DateTime to);
-  Future<List<DurationTrend>> analyzeTrends(String houseWorkId, AnalysisPeriod period);
+  // 家事ごとの合計所要時間を計算
+  Future<Map<String, int>> calculateTotalDurations(String houseWorkId, DateTime from, DateTime to);
+
+  // 曜日ごとの合計所要時間を計算
+  Future<Map<Weekday, int>> calculateWeekdayDurations(String houseWorkId, DateTime from, DateTime to);
+
+  // 時間帯ごとの合計所要時間を計算
+  Future<Map<TimeSlot, int>> calculateTimeSlotDurations(String houseWorkId, DateTime from, DateTime to);
+
+  // 所要時間を分単位の文字列に変換（例：「30分」「2時間15分」）
+  String formatDuration(int totalSeconds);
 }
 ```
 
@@ -318,14 +334,13 @@ class WorkLogRepository {
 
 4. **UI**
 
-   - `client/lib/ui/feature/analysis/duration_analysis_screen.dart`
-   - `client/lib/ui/feature/analysis/duration_analysis_presenter.dart`
-   - `client/lib/ui/feature/analysis/duration_chart_widget.dart`
+   - `client/lib/ui/feature/analysis/analysis_screen.dart` - 表示切り替え機能の追加
+   - `client/lib/ui/feature/analysis/analysis_presenter.dart` - 所要時間計算機能の追加
 
 5. **テスト**
    - `client/test/services/duration_settings_service_test.dart`
    - `client/test/services/duration_analysis_service_test.dart`
-   - `client/test/ui/feature/analysis/duration_analysis_presenter_test.dart`
+   - `client/test/ui/feature/analysis/analysis_presenter_test.dart` - 所要時間計算機能のテスト追加
 
 ### 2. 修正が必要なファイル
 
@@ -347,7 +362,8 @@ class WorkLogRepository {
 
    - `client/lib/ui/feature/home/home_screen.dart` - デフォルト所要時間の表示
    - `client/lib/ui/feature/home/home_presenter.dart` - デフォルト所要時間での記録機能
-   - `client/lib/ui/feature/analysis/analysis_screen.dart` - 所要時間タブの追加
+   - `client/lib/ui/feature/analysis/analysis_screen.dart` - 表示切り替え機能の追加
+   - `client/lib/ui/feature/analysis/analysis_presenter.dart` - 所要時間計算機能の追加
    - `client/lib/ui/feature/home/edit_work_log_dialog.dart` - 所要時間編集機能の追加
 
 5. **インフラ**
