@@ -29,7 +29,7 @@ dependencies:
   font_awesome_flutter: 10.10.0
   freezed_annotation: 3.1.0
   google_sign_in: 7.1.1
-  in_app_review: 2.0.10
+  in_app_review: 2.0.11
   # FlutterのSDKによりピン留めされているため、バージョンを指定しない
   # https://github.com/dart-lang/sdk/blob/main/docs/Flutter-Pinned-Packages.md
   intl: any
