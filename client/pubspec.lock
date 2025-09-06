@@ -1001,10 +1001,10 @@ packages:
     dependency: "direct main"
     description:
       name: purchases_flutter
-      sha256: "239aae77964d4e6da88f1b870259df7c1325dcad7187d257a024b885d85534eb"
+      sha256: "4a29ed10813e4c9f6e31e2f8a8f2580a65dfbf41effbe40655dcf00d4c55dc2d"
       url: "https://pub.dev"
     source: hosted
-    version: "9.2.1"
+    version: "9.5.0"
   rfc_6901:
     dependency: transitive
     description:
@@ -1435,5 +1435,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: "3.9.0"
+  dart: "3.9.2"
   flutter: ">=3.31.0-0.0.pre"
