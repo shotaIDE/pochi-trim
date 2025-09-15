@@ -36,6 +36,13 @@ Firebase CLI のインストールとログイン、FlutterFire CLI のインス
 
 https://firebase.google.com/docs/flutter/setup?hl=ja&platform=ios#install-cli-tools
 
+#### プロジェクト固有の識別子設定
+
+本ファイル内の以下の識別子を、プロジェクトに合わせて修正してください。
+
+- Google Cloud のプロジェクト ID のベース部分: `flu-fire-base`
+- Bundle ID / アプリ ID のベース部分: `FlutterFirebaseBase`
+
 #### 環境別の設定更新手順
 
 以下の共通変数を設定します：
@@ -112,39 +119,63 @@ flutterfire config \
   --android-out="android/app/src/${DIRECTORY_NAME_FOR_ANDROID}/google-services.json"
 ```
 
-### GitHub Actions の Secrets の設定
+### アプリにおけるプロジェクト固有の識別子設定
 
-GitHub Actions CI のワークフローを元に、GitHub Actions の Secrets を設定します。
+[client/](client/) 配下における識別子を、プロジェクトに合わせて修正してください。
+
+- Bundle ID / アプリ ID のベース部分: `FlutterFirebaseBase`
+- Bundle 名 / パッケージ名のベース部分: `flutter_firebase_base`
+
+Android において、パッケージ名のベース部分を変更した場合、ディレクトリ名も変更してください。
+
+### バージョン番号を設定
+
+[client/pubspec.yaml](client/pubspec.yaml) の `version` フィールドを適切に設定します。
 
 ### App Store Connect の設定
 
 Apple Developer Console で Bundle Identifier とプロビジョニングプロファイルを登録しておきます。
-一旦 fastlane で Dev アプリのビルドを行うことで、各種 Capability が付与された Bundle Identifier が自動で登録されるので、それを利用すると少し楽です。
+一旦 Xcode でワークスペースファイルを開くことで、各種 Capability が付与された Bundle Identifier が自動で登録されるので、それを利用すると少し楽です。
 
 Dev 環境のプロビジョニングプロファイルを手動で登録します。
 
 Xcode で「Download Manual Profiles」を実行し、マシンに作成したプロビジョニングプロファイルをダウンロードします。
 
-Xcode の TARGET で「Signing & Capabilities」タブを開き、以下の項目を設定します。
+Xcode の TARGET で「Build Settings」タブを開き、以下の項目を設定します。
 
 - Provisioning Profile: 手動で登録したプロビジョニングプロファイルを選択
 
 [client/ios/ExportOptions_dev.plist](client/ios/ExportOptions_dev.plist) における以下の項目を手動で修正します。
 
-- Bundle Identifier
+- Bundle Identifier（まだ修正していない場合）
 - プロビジョニングプロファイルの名前
 
 App Store Connect にアプリを登録します。
 
+[client/ios/fastlane/.env.example](client/ios/fastlane/.env.example) を参考に、`client/ios/fastlane/.env` ファイルを作成し、中身を設定します。
+
+[client/ios/fastlane/app-store-connect-api-key.p8](client/ios/fastlane/app-store-connect-api-key.p8) に App Store Connect API キーを配置します。
+
+Dev 環境のデプロイレーンでアップロードします。
+ここでは、外部テストへの必要情報が未登録のため、レーンとしては失敗しますが、ビルドのアップロードまでは成功します。
+
 内部テスターと外部テスターのグループを作成します。
 
 Test Flight で外部テストを利用するために、外部テスト用の情報を登録します。
+フォーム上必須と表示される情報以外にも、以下の情報が外部テスト審査に必須となっているため、登録しておきます。
 
-[client/ios/fastlane/.env.example](client/ios/fastlane/.env.example) を参考に、`client/ios/fastlane/.env` ファイルを作成し、中身を設定します。
+- ベータ版アプリの説明
+- フィードバックメールアドレス
 
-Dev 環境のデプロイレーンで動作確認します。
+ビルド番号をインクリメントし、再度、Dev 環境のデプロイレーンでアップロードします。
 
 GitHub Actions CD のワークフローを元に、GitHub Actions の Secrets を設定します。
+
+### Android のリリースビルドの設定
+
+以下を参考に設定します。
+
+https://docs.flutter.dev/deployment/android#sign-the-app
 
 ### Google Play Console の設定
 
@@ -154,7 +185,13 @@ Google Play Console でアプリを登録します。
 
 参照者のロールを持つサービスアカウントを作成し、JSON キーファイルを [client/android/fastlane/google-play-service-account-key.json](client/android/fastlane/google-play-service-account-key.json) ダウンロードします。
 
-サービスアカウントを Google Play Console でアプリに対して必要な権限を与えます。
+サービスアカウントに対し、Google Play Console で作成したアプリに関する以下の権限を与えます。
+
+- アプリ情報の閲覧（読み取り専用）
+- 未公開のアプリの編集、削除
+- 製品版としてのリリース、デバイスの除外、Play App Signing の使用
+- テスト版トラックとしてのアプリのリリース
+- ストアでの表示の管理
 
 1 回アプリをクローズドテストトラックに手動でアップロードします。
 これにより、アプリに Application ID が紐づけられることにより、fastlane からアプリのアップロードが可能になります。
@@ -163,6 +200,10 @@ Google Play Console でアプリを登録します。
 審査が通ることにより、内部テストに対して fastlane からアップロードし公開までを行うことが可能になります。
 
 Dev 環境のデプロイレーンで動作確認します。
+
+### GitHub Actions の Secrets の設定
+
+GitHub Actions CI のワークフローを元に、GitHub Actions の Secrets を設定します。
 
 ## 開発環境の追加セットアップ
 
@@ -257,12 +298,6 @@ https://pub.dev/packages/flutter_launcher_icons#2-run-the-package
 以下を参考に、fastlane を設定します。
 
 https://docs.flutter.dev/deployment/cd#fastlane
-
-### Android のリリースビルドの設定
-
-以下を参考に設定します。
-
-https://docs.flutter.dev/deployment/android#sign-the-app
 
 ### RevenueCat の設定
 
