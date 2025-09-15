@@ -201,6 +201,14 @@ Google Play Console でアプリを登録します。
 
 Dev 環境のデプロイレーンで動作確認します。
 
+### Renovate の設定
+
+GitHub 上で Renovate App をインストールし、リポジトリに対して有効化します。
+
+[renovate.json](renovate.json) に関して、以下のように設定を変更します。
+
+- `rangeStrategy`: `pin`
+
 ### GitHub Actions の Secrets の設定
 
 GitHub Actions CI のワークフローを元に、GitHub Actions の Secrets を設定します。
