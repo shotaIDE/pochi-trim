@@ -43,11 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final openUrlsPanel = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       spacing: 16,
-      children: [
-        termsOfServiceButton,
-
-        privacyPolicyButton,
-      ],
+      children: [termsOfServiceButton, privacyPolicyButton],
     );
 
     final startWithGoogleButton = ElevatedButton.icon(

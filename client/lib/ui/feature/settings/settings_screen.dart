@@ -376,9 +376,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('ログアウトに失敗しました。しばらくしてから再度お試しください。')),
       );
       return;
