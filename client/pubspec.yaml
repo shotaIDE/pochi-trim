@@ -56,7 +56,7 @@ dev_dependencies:
   mocktail: 1.0.4
   pedantic_mono: 1.33.0
   riverpod_generator: 2.6.5
-  riverpod_lint: 2.6.5
+  riverpod_lint: 3.0.1
 
 flutter:
   uses-material-design: true
