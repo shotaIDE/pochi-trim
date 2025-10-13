@@ -94,7 +94,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         photoUrl: final photoUrl,
       ):
         leading = photoUrl != null
-            ? CircleAvatar(backgroundImage: NetworkImage(photoUrl), radius: 20)
+            ? CircleAvatar(
+                backgroundImage: NetworkImage(photoUrl),
+                radius: 20,
+              )
             : const Icon(Icons.person);
         titleText = displayName ?? '名前未設定';
         onTap = null;

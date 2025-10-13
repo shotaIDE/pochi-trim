@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/repository/house_repository.dart';
 import 'package:pochi_trim/data/service/app_info_service.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';
