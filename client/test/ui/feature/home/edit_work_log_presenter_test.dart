@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -29,6 +31,10 @@ void main() {
           systemServiceProvider.overrideWith((_) => mockSystemService),
         ],
       );
+    });
+
+    tearDown(() {
+      container.dispose();
     });
 
     test('現在時刻より過去の日時で更新できること', () async {
@@ -96,13 +102,27 @@ void main() {
 
       when(mockSystemService.getCurrentDateTime).thenReturn(now);
 
-      await expectLater(
-        container.read(
-          updateCompletedAtOfWorkLogProvider(workLogId, completedAt).future,
-        ),
-        throwsA(isA<UpdateWorkLogExceptionFutureDateTime>()),
+      final completer = Completer<void>();
+      final provider = updateCompletedAtOfWorkLogProvider(
+        workLogId,
+        completedAt,
+      );
+      final subscription = container.listen(
+        provider,
+        (_, next) {
+          completer.complete();
+        },
       );
 
+      await completer.future;
+      final result = subscription.read();
+
+      subscription.close();
+
+      expect(
+        result.error,
+        isA<UpdateWorkLogExceptionFutureDateTime>(),
+      );
       verify(mockSystemService.getCurrentDateTime).called(1);
       verifyNever(
         () => mockWorkLogRepository.updateCompletedAt(
@@ -125,13 +145,27 @@ void main() {
         ),
       ).thenThrow(const UpdateWorkLogException.uncategorized());
 
-      await expectLater(
-        container.read(
-          updateCompletedAtOfWorkLogProvider(workLogId, completedAt).future,
-        ),
-        throwsA(isA<UpdateWorkLogExceptionUncategorized>()),
+      final completer = Completer<void>();
+      final provider = updateCompletedAtOfWorkLogProvider(
+        workLogId,
+        completedAt,
+      );
+      final subscription = container.listen(
+        provider,
+        (_, next) {
+          completer.complete();
+        },
       );
 
+      await completer.future;
+      final result = subscription.read();
+
+      subscription.close();
+
+      expect(
+        result.error,
+        isA<UpdateWorkLogExceptionUncategorized>(),
+      );
       verify(mockSystemService.getCurrentDateTime).called(1);
       verify(
         () => mockWorkLogRepository.updateCompletedAt(
