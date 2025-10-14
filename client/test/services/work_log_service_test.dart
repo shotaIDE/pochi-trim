@@ -123,8 +123,8 @@ void main() {
             (_) => mockInAppReviewService,
           ),
           preferenceServiceProvider.overrideWith((_) => mockPreferenceService),
-          currentUserProfileProvider.overrideWith(
-            (_) => Stream.value(testUserProfile),
+          currentUserProfileProvider.overrideWithValue(
+            const AsyncValue.data(testUserProfile),
           ),
         ],
       );
@@ -166,8 +166,8 @@ void main() {
             (_) => mockInAppReviewService,
           ),
           preferenceServiceProvider.overrideWith((_) => mockPreferenceService),
-          currentUserProfileProvider.overrideWith(
-            (_) => Stream.value(testUserProfile),
+          currentUserProfileProvider.overrideWithValue(
+            const AsyncValue.data(testUserProfile),
           ),
         ],
       );
@@ -216,8 +216,8 @@ void main() {
             (_) => mockInAppReviewService,
           ),
           preferenceServiceProvider.overrideWith((_) => mockPreferenceService),
-          currentUserProfileProvider.overrideWith(
-            (_) => Stream.value(testUserProfile),
+          currentUserProfileProvider.overrideWithValue(
+            const AsyncValue.data(testUserProfile),
           ),
         ],
       );
@@ -266,8 +266,8 @@ void main() {
             (_) => mockInAppReviewService,
           ),
           preferenceServiceProvider.overrideWith((_) => mockPreferenceService),
-          currentUserProfileProvider.overrideWith(
-            (_) => Stream.value(testUserProfile),
+          currentUserProfileProvider.overrideWithValue(
+            const AsyncValue.data(testUserProfile),
           ),
         ],
       );
@@ -305,8 +305,8 @@ void main() {
           inAppReviewServiceProvider.overrideWith(
             (_) => mockInAppReviewService,
           ),
-          currentUserProfileProvider.overrideWith(
-            (_) => Stream.value(null), // ユーザープロファイルがnull
+          currentUserProfileProvider.overrideWithValue(
+            const AsyncValue.data(null), // ユーザープロファイルがnull
           ),
         ],
       );
@@ -347,8 +347,8 @@ void main() {
             (_) => mockInAppReviewService,
           ),
           preferenceServiceProvider.overrideWith((_) => mockPreferenceService),
-          currentUserProfileProvider.overrideWith(
-            (_) => Stream.value(testUserProfile),
+          currentUserProfileProvider.overrideWithValue(
+            const AsyncValue.data(testUserProfile),
           ),
         ],
       );
@@ -391,8 +391,8 @@ void main() {
             (_) => mockInAppReviewService,
           ),
           preferenceServiceProvider.overrideWith((_) => mockPreferenceService),
-          currentUserProfileProvider.overrideWith(
-            (_) => Stream.value(testUserProfile),
+          currentUserProfileProvider.overrideWithValue(
+            const AsyncValue.data(testUserProfile),
           ),
         ],
       );
