@@ -62,6 +62,7 @@
 		78A136752DDA1A1100F8B74D /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		78AEEB562DCF56A40025E0A8 /* prod.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = prod.xcconfig; path = Flutter/prod.xcconfig; sourceTree = "<group>"; };
 		78AEEB572DD3836F0025E0A8 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
+		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		78F85B562DDC6472008E77ED /* Debug-dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Debug-dev.xcconfig"; path = "Flutter/Debug-dev.xcconfig"; sourceTree = "<group>"; };
 		78F85B572DDC6554008E77ED /* Release-dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Release-dev.xcconfig"; path = "Flutter/Release-dev.xcconfig"; sourceTree = "<group>"; };
 		78F85B582DDC65F0008E77ED /* Debug-emulator.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Debug-emulator.xcconfig"; path = "Flutter/Debug-emulator.xcconfig"; sourceTree = "<group>"; };
@@ -135,6 +136,7 @@
 		9740EEB11CF90186004384FC /* Flutter */ = {
 			isa = PBXGroup;
 			children = (
+				78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */,
 				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,
 				78F85B582DDC65F0008E77ED /* Debug-emulator.xcconfig */,
 				78F85B5A2DDC65F0008E77ED /* Release-emulator.xcconfig */,
@@ -250,7 +252,6 @@
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				EA2023457AB24AC4E8D8E68E /* FlutterFire: "flutterfire bundle-service-file" */,
 				668C9C5B85E98D975ECE2699 /* FlutterFire: "flutterfire upload-crashlytics-symbols" */,
-				84474C91798742C91737D541 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -422,23 +423,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [[ $FLAVOR == \"emulator\" ]]; then\n  cp \"$SRCROOT/Runner/Firebase/Emulator/GoogleService-Info.plist\" \"$SRCROOT/Runner/GoogleService-Info.plist\"\nelif [[ $FLAVOR == \"dev\" ]]; then\n  cp \"$SRCROOT/Runner/Firebase/Dev/GoogleService-Info.plist\" \"$SRCROOT/Runner/GoogleService-Info.plist\"\nelif [[ $FLAVOR == \"prod\" ]]; then\n  cp \"$SRCROOT/Runner/Firebase/Prod/GoogleService-Info.plist\" \"$SRCROOT/Runner/GoogleService-Info.plist\"\nelse\n  echo \"error: \\\"$FLAVOR\\\" didn't match any flavors.\"\n  exit 1\nfi\n";
-		};
-		84474C91798742C91737D541 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
 		};
 		9740EEB61CF901F6004384FC /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
