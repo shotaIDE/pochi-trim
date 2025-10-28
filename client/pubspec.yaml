@@ -36,7 +36,7 @@ dependencies:
   logging: 1.3.0
   package_info_plus: 9.0.0
   purchases_flutter: 9.5.0
-  riverpod_annotation: 3.0.0
+  riverpod_annotation: 3.0.3
   share_plus: 11.1.0
   shared_preferences: 2.5.3
   skeletonizer: 2.1.0
