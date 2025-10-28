@@ -94,7 +94,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         photoUrl: final photoUrl,
       ):
         leading = photoUrl != null
-            ? CircleAvatar(backgroundImage: NetworkImage(photoUrl), radius: 20)
+            ? CircleAvatar(
+                backgroundImage: NetworkImage(photoUrl),
+                radius: 20,
+              )
             : const Icon(Icons.person);
         titleText = displayName ?? '名前未設定';
         onTap = null;
@@ -376,7 +379,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(
         const SnackBar(content: Text('ログアウトに失敗しました。しばらくしてから再度お試しください。')),
       );
       return;

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:pochi_trim/data/model/feedback_request.dart';

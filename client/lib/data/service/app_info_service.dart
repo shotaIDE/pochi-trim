@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pochi_trim/data/model/app_version.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

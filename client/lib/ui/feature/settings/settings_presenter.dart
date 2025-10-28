@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pochi_trim/data/definition/app_definition.dart';
 import 'package:pochi_trim/data/repository/house_repository.dart';
 import 'package:pochi_trim/data/service/auth_service.dart';

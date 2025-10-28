@@ -19,6 +19,7 @@ import 'package:pochi_trim/data/service/in_app_purchase_service.dart';
 import 'package:pochi_trim/data/service/in_app_purchase_service_mock.dart';
 import 'package:pochi_trim/ui/root_app.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'firebase_options_dev.dart' as dev;
 import 'firebase_options_emulator.dart' as emulator;
