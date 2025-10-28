@@ -19,7 +19,7 @@ dependencies:
   firebase_core: 4.1.0
   firebase_crashlytics: 5.0.1
   firebase_remote_config: 6.0.1
-  fl_chart: 1.1.0
+  fl_chart: 1.1.1
   flutter:
     sdk: flutter
   flutter_localizations:
