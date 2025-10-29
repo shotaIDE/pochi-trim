@@ -54,7 +54,7 @@ dev_dependencies:
   json_serializable: 6.11.1
   mockito:
   mocktail: 1.0.4
-  pedantic_mono: 1.33.0
+  pedantic_mono: 1.34.0
   riverpod_generator: 3.0.0
   riverpod_lint: 3.0.0
 
