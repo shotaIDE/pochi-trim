@@ -56,7 +56,7 @@ Future<AppInitialRoute> appInitialRoute(Ref ref) async {
     }
   }
 
-  final isSignedIn = await ref.read(isSignedInProvider.future);
+  final isSignedIn = ref.read(isSignedInProvider);
   if (!isSignedIn) {
     return AppInitialRoute.login;
   }

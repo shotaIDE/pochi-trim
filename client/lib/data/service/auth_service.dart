@@ -18,14 +18,13 @@ AuthService authService(Ref ref) {
 }
 
 @riverpod
-Stream<bool> isSignedIn(Ref ref) {
-  return firebase_auth.FirebaseAuth.instance.authStateChanges().map((user) {
-    if (user == null) {
-      return false;
-    }
+bool isSignedIn(Ref ref) {
+  final user = firebase_auth.FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    return false;
+  }
 
-    return true;
-  });
+  return true;
 }
 
 @riverpod
