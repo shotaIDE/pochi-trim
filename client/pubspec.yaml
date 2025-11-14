@@ -46,7 +46,7 @@ dependencies:
 dev_dependencies:
   build_runner: 2.7.1
   cider: 0.2.8
-  custom_lint: 0.8.0
+  custom_lint: 0.8.1
   flutter_launcher_icons: 0.14.4
   flutter_test:
     sdk: flutter
