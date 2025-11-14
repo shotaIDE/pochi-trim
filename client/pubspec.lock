@@ -969,10 +969,10 @@ packages:
     dependency: "direct dev"
     description:
       name: pedantic_mono
-      sha256: "73ff69165315d67c1d758687bbb8596bb6647ed84f9909c5d379fff90a2c3a5b"
+      sha256: "4c556c136b11c27737896db0d3c9b53f1ba68448e7ab4bdb0e3b089b36354365"
       url: "https://pub.dev"
     source: hosted
-    version: "1.34.0"
+    version: "1.35.0"
   petitparser:
     dependency: transitive
     description:
