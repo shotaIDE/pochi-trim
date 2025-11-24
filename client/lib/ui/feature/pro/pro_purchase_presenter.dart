@@ -33,7 +33,8 @@ class CurrentPurchaseStatus extends _$CurrentPurchaseStatus {
 
     final CustomerInfo customerInfo;
     try {
-      final purchaseResult = await Purchases.purchasePackage(product.package);
+      final purchaseParams = PurchaseParams.package(product.package);
+      final purchaseResult = await Purchases.purchase(purchaseParams);
       customerInfo = purchaseResult.customerInfo;
     } on PlatformException catch (e) {
       state = PurchaseStatus.none;
