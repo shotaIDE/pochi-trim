@@ -5,7 +5,7 @@ publish_to: "none"
 version: 0.0.1+4
 
 environment:
-  sdk: 3.10.1
+  sdk: 3.10.3
 
 dependencies:
   cloud_firestore: ^6.0.0
