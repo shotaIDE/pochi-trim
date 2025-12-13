@@ -103,7 +103,7 @@ jobs:
       - name: Generate uncommitted Flutter files for prod
         uses: ./.github/actions/generate-uncommitted-flutter-files-prod
         with:
-          revenue-cat-config-json-base64: ${{ secrets.REVENUE_CAT_CONFIG_JSON_BASE64_PROD }}
+          dart-define-json-base64: ${{ secrets.DART_DEFINE_JSON_BASE64_PROD }}
           working-directory: ./client
       - name: Generate uncommitted iOS files for prod
         run: echo "${{ secrets.GOOGLE_SERVICE_PLIST_BASE64_PROD }}" | base64 -d > ios/Runner/Firebase/Prod/GoogleService-Info.plist
@@ -166,7 +166,7 @@ jobs:
       - name: Generate uncommitted Flutter files for prod
         uses: ./.github/actions/generate-uncommitted-flutter-files-prod
         with:
-          revenue-cat-config-json-base64: ${{ secrets.REVENUE_CAT_CONFIG_JSON_BASE64_PROD }}
+          dart-define-json-base64: ${{ secrets.DART_DEFINE_JSON_BASE64_PROD }}
           working-directory: ./client
       - name: Generate uncommitted Android files for prod
         run: echo "${{ secrets.GOOGLE_SERVICE_JSON_BASE64_PROD }}" | base64 -d > android/app/src/prod/google-services.json

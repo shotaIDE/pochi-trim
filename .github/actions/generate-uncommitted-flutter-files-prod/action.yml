@@ -1,5 +1,5 @@
 inputs:
-  revenue-cat-config-json-base64:
+  dart-define-json-base64:
     required: true
   working-directory:
     required: false
@@ -8,7 +8,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Generate Revenue Cat config json file
-      run: echo '${{ inputs.revenue-cat-config-json-base64 }}' | base64 -d > revenue-cat-config.json
+    - name: Generate Dart define json file
+      run: echo '${{ inputs.dart-define-json-base64 }}' | base64 -d > dart-define_prod.json
       working-directory: ${{ inputs.working-directory }}
       shell: bash
