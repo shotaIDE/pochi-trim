@@ -21,18 +21,18 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       shell: bash
     - name: Cache Flutter on Linux
-      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
       if: startsWith(runner.os, 'Linux')
       with:
         path: /opt/hostedtoolcache/flutter
         key: ${{ runner.OS }}-flutter-${{ steps.get-flutter-version.outputs.flutter-version }}
     - name: Cache Flutter on macOS
-      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
       if: startsWith(runner.os, 'macOS')
       with:
         path: /Users/runner/hostedtoolcache/flutter
         key: ${{ runner.OS }}-flutter-${{ steps.get-flutter-version.outputs.flutter-version }}
-    - uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e # v2
+    - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
       with:
         flutter-version: ${{ steps.get-flutter-version.outputs.flutter-version }}
     - name: Enable Swift Package Manager on Flutter
