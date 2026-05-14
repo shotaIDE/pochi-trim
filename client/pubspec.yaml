@@ -53,7 +53,7 @@ dev_dependencies:
   freezed: 3.2.3
   json_serializable: 6.11.1
   mockito:
-  mocktail: 1.0.4
+  mocktail: 1.0.5
   pedantic_mono: 1.35.0
   riverpod_generator: 3.0.3
   riverpod_lint: 3.0.3
