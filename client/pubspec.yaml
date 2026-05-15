@@ -12,7 +12,7 @@ dependencies:
   cloud_functions: 6.0.6
   collection: 1.19.1
   cupertino_icons: 1.0.9
-  dio: 5.9.1
+  dio: 5.9.2
   email_validator: 3.0.0
   firebase_analytics: 12.1.2
   firebase_auth: 6.1.4
